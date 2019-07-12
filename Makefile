@@ -20,7 +20,7 @@ clean-deps:
 ###########
 ## Build ##
 ###########
-BAZEL_FLAGS := --features=pure --features=race --cpu=k8
+BAZEL_FLAGS := --cpu=k8 --features=pure --features=race --workspace_status_command=scripts/bazel-workspace-status.sh
 
 .PHONY: gazelle
 gazelle: deps
