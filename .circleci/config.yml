@@ -14,8 +14,8 @@ jobs:
     steps:
     - checkout
     - run:
-        name: Say hello
-        command: echo 'Hello, world!'
+        name: Run Gazelle
+        command: make gazelle
 
 workflows:
   version: 2
