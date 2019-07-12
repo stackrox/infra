@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option go_package = "v1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+package v1;
+
+message Version {
+    google.protobuf.Timestamp BuildDate         = 1;
+    string GitCommit     = 2;
+    string GoVersion     = 3;
+    string Platform      = 4;
+    string Version       = 5;
+    string Workflow      = 6;
+}
+
+service VersionService {
+
+    rpc GetVersion (google.protobuf.Empty) returns (Version) {
+        option (google.api.http) = {
+            get: "/v1/version"
+        };
+    }
+
+}

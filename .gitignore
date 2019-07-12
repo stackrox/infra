@@ -2,4 +2,5 @@ bazel-*
 BUILD.bazel
 !/BUILD.bazel
 deps
+generated/
 vendor/
