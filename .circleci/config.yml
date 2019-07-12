@@ -15,7 +15,9 @@ jobs:
     - checkout
     - run:
         name: Build infra server binary
-        command: make server
+        command: |
+          make server
+          bazel-bin/cmd/infra/linux_amd64_pure_stripped/infra
 
   build-infractl:
     <<: *defaults
@@ -23,7 +25,9 @@ jobs:
       - checkout
       - run:
           name: Build infractl client binary
-          command: make cli
+          command: |
+            make cli
+            bazel-bin/cmd/infractl/linux_amd64_pure_stripped/infractl
 
 workflows:
   version: 2
