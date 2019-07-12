@@ -9,17 +9,27 @@ defaults: &defaults
   working_directory: /go/src/github.com/stackrox/infra
 
 jobs:
-  build:
+  build-infra:
     <<: *defaults
     steps:
     - checkout
     - run:
-        name: Run Gazelle
-        command: make gazelle
+        name: Build infra server binary
+        command: make server
+
+  build-infractl:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: Build infractl client binary
+          command: make cli
 
 workflows:
   version: 2
   build:
     jobs:
-    - build:
+    - build-infra:
+        context: docker-io-pull
+    - build-infractl:
         context: docker-io-pull
