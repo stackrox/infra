@@ -17,14 +17,14 @@ var (
 	CircleciWorkflowURL string
 
 	// gitShortSha is the injected Git short SHA.
-	gitShortSha         string
+	gitShortSha string
 	// GitShortSha is the Git short SHA for the current commit, or "local" if built locally.
-	GitShortSha         string
+	GitShortSha string
 
 	// gitVersion is the injected Git describe version.
-	gitVersion          string
+	gitVersion string
 	// GitVersion is the Git describe version for the current commit, or "local" if built locally.
-	GitVersion          string
+	GitVersion string
 )
 
 func init() {
