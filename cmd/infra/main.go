@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -21,6 +23,17 @@ func main() {
 // mainCmd composes all the components together and can return an error for
 // convenience.
 func mainCmd() error {
+	var (
+		flagVersion = flag.Bool("version", false, fmt.Sprintf("print the version %s and exit", buildinfo.Version()))
+	)
+	flag.Parse()
+
+	// If the -version flag was given, print the version and exit.
+	if *flagVersion {
+		fmt.Println(buildinfo.Version())
+		return nil
+	}
+
 	log.Printf("Starting infra server version %s", buildinfo.All().Version)
 	services := []service.APIService{
 		service.NewVersionService(),

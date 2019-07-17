@@ -20,3 +20,8 @@ func All() v1.Version {
 		Workflow:  internal.CircleciWorkflowURL,
 	}
 }
+
+// Version returns only the Git version.
+func Version() string {
+	return internal.GitVersion
+}
