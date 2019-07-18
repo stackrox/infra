@@ -8,7 +8,8 @@ import (
 )
 
 type Config struct {
-	Server ServerConfig `toml:"server"`
+	Server  ServerConfig  `toml:"server"`
+	Storage StorageConfig `toml:"storage"`
 }
 
 type ServerConfig struct {
@@ -18,6 +19,11 @@ type ServerConfig struct {
 	Domain   string `toml:"domain"`
 	CertFile string `toml:"cert"`
 	KeyFile  string `toml:"key"`
+}
+
+type StorageConfig struct {
+	CertDir   string `toml:"certs"`
+	StaticDir string `toml:"static"`
 }
 
 func Load(filename string) (*Config, error) {

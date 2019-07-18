@@ -68,6 +68,7 @@ func RunHTTPServer(apiServices []service.APIService, cfg *config.Config) (func()
 
 	mux := http.NewServeMux()
 	mux.Handle("/v1/", gwMux)
+	mux.Handle("/", http.FileServer(http.Dir(cfg.Storage.StaticDir)))
 
 	shutdown, errch := startHTTP(ctx, mux, cfg)
 	return shutdown, errch, nil
@@ -121,7 +122,7 @@ func startHTTP(ctx context.Context, handler http.Handler, cfg *config.Config) (f
 		log.Print("starting HTTP+HTTPS server in Let’s Encrypt mode")
 
 		certManager := autocert.Manager{
-			Cache:      autocert.DirCache("."),
+			Cache:      autocert.DirCache(cfg.Storage.CertDir),
 			HostPolicy: autocert.HostWhitelist(cfg.Server.Domain),
 			Prompt:     autocert.AcceptTOS,
 		}
