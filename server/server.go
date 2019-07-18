@@ -46,7 +46,7 @@ func RunGRPCServer(apiServices []service.APIService, grpcAddress string) (func()
 	return shutdown, errch, nil
 }
 
-// RunGRPCServer runs the HTTP/REST gateway
+// RunHTTPServer runs the HTTP/REST gateway
 func RunHTTPServer(apiServices []service.APIService, httpAddress string, grpcAddress string) (func(), <-chan error, error) {
 	// Register the HTTP/gRPC gateway service.
 	ctx := context.Background()
@@ -56,7 +56,6 @@ func RunHTTPServer(apiServices []service.APIService, httpAddress string, grpcAdd
 	}
 
 	mux := http.NewServeMux()
-	mux.Handle("/", http.FileServer(http.Dir("static")))
 
 	gwMux := runtime.NewServeMux()
 	for _, apiSvc := range apiServices {

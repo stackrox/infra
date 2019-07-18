@@ -12,16 +12,18 @@ import (
 
 type versionImpl struct{}
 
-var _ v1.VersionServiceServer = (*versionImpl)(nil)
 var _ APIService = (*versionImpl)(nil)
+var _ v1.VersionServiceServer = (*versionImpl)(nil)
 
-func (i *versionImpl) GetVersion(ctx context.Context, request *empty.Empty) (*v1.Version, error) {
-	info := buildinfo.All()
-	return &info, nil
-}
-
+// NewVersionService creates a new VersionService.
 func NewVersionService() APIService {
 	return &versionImpl{}
+}
+
+// GetVersion implements VersionService.GetVersion.
+func (s *versionImpl) GetVersion(ctx context.Context, request *empty.Empty) (*v1.Version, error) {
+	info := buildinfo.All()
+	return &info, nil
 }
 
 // RegisterServiceServer registers this service with the given gRPC Server.

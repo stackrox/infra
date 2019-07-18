@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"syscall"
 
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/pkg/buildinfo"
@@ -53,8 +54,8 @@ func mainCmd() error {
 	}
 	defer httpShutdown()
 
-	sigint := make(chan os.Signal)
-	signal.Notify(sigint, os.Interrupt, os.Kill)
+	sigint := make(chan os.Signal, 1)
+	signal.Notify(sigint, syscall.SIGINT, syscall.SIGTERM)
 
 	select {
 	case err := <-grpcErr:
@@ -62,6 +63,6 @@ func mainCmd() error {
 	case err := <-httpErr:
 		return errors.Wrap(err, "http error received")
 	case <-sigint:
-		return errors.New("sigint caught")
+		return errors.New("signal caught")
 	}
 }
