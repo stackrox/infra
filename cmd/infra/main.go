@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/pkg/errors"
+	"github.com/stackrox/infra/config"
 	"github.com/stackrox/infra/pkg/buildinfo"
 	"github.com/stackrox/infra/server"
 	"github.com/stackrox/infra/service"
@@ -25,6 +26,7 @@ func main() {
 // convenience.
 func mainCmd() error {
 	var (
+		flagConfig  = flag.String("config", "infra.toml", "path to configuration file")
 		flagVersion = flag.Bool("version", false, fmt.Sprintf("print the version %s and exit", buildinfo.Version()))
 	)
 	flag.Parse()
@@ -36,19 +38,25 @@ func mainCmd() error {
 	}
 
 	log.Printf("Starting infra server version %s", buildinfo.All().Version)
+
+	cfg, err := config.Load(*flagConfig)
+	if err != nil {
+		return errors.Wrapf(err, "failed to load config file %q", *flagConfig)
+	}
+
 	services := []service.APIService{
 		service.NewVersionService(),
 	}
 
 	// Start the gRPC server.
-	grpcShutdown, grpcErr, err := server.RunGRPCServer(services, "localhost:9001")
+	grpcShutdown, grpcErr, err := server.RunGRPCServer(services, cfg)
 	if err != nil {
 		log.Fatalf("Error %v.\n", err)
 	}
 	defer grpcShutdown()
 
 	// Start the HTTP/gRPC gateway server.
-	httpShutdown, httpErr, err := server.RunHTTPServer(services, "localhost:8080", "localhost:9001")
+	httpShutdown, httpErr, err := server.RunHTTPServer(services, cfg)
 	if err != nil {
 		log.Fatalf("Error %v.\n", err)
 	}
