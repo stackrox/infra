@@ -8,8 +8,22 @@ import (
 )
 
 type Config struct {
+	Auth0   Auth0Config   `toml:"auth0"`
 	Server  ServerConfig  `toml:"server"`
 	Storage StorageConfig `toml:"storage"`
+}
+
+type Auth0Config struct {
+	ClientID     string `toml:"client-id"`
+	ClientSecret string `toml:"client-secret"`
+	AuthURL      string `toml:"auth-url"`
+	TokenURL     string `toml:"token-url"`
+	CallbackURL  string `toml:"callback-url"`
+	UserinfoURL  string `toml:"userinfo-url"`
+	LogoutURL    string `toml:"logout-url"`
+	LoginURL     string `toml:"login-url"`
+	SessionKey   string `toml:"session-key"`
+	PublicKey    string `toml:"public-key"`
 }
 
 type ServerConfig struct {
@@ -22,8 +36,9 @@ type ServerConfig struct {
 }
 
 type StorageConfig struct {
-	CertDir   string `toml:"certs"`
-	StaticDir string `toml:"static"`
+	CertDir     string `toml:"certs"`
+	StaticDir   string `toml:"static"`
+	SessionsDir string `toml:"sessions"`
 }
 
 func Load(filename string) (*Config, error) {

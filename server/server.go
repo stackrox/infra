@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/config"
@@ -23,7 +24,15 @@ func RunGRPCServer(apiServices []service.APIService, cfg *config.Config) (func()
 	}
 
 	// Create the server.
-	server := grpc.NewServer()
+	server := grpc.NewServer(
+		// Wire up context interceptors.
+		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+			// Extract user from JWT token stored in HTTP cookie.
+			service.ContextInterceptor(service.UserEnricher(cfg)),
+			// Enforce authenticated user access on resources that declare it.
+			service.ContextInterceptor(service.EnforceAnonymousAccess),
+		)),
+	)
 
 	// Register the gRPC API service.
 	for _, apiSvc := range apiServices {
@@ -66,10 +75,7 @@ func RunHTTPServer(apiServices []service.APIService, cfg *config.Config) (func()
 		}
 	}
 
-	mux := http.NewServeMux()
-	mux.Handle("/v1/", gwMux)
-	mux.Handle("/", http.FileServer(http.Dir(cfg.Storage.StaticDir)))
-
+	mux := buildRoutes(gwMux, cfg)
 	shutdown, errch := startHTTP(ctx, mux, cfg)
 	return shutdown, errch, nil
 }
