@@ -9,4 +9,4 @@ infra.toml
 static/
 certs/
 sessions/
-
+image/infra-server

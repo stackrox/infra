@@ -9,15 +9,16 @@ defaults: &defaults
   working_directory: /go/src/github.com/stackrox/infra
 
 jobs:
-  build-infra:
+  build-infra-server:
     <<: *defaults
     steps:
     - checkout
+    - setup_remote_docker
     - run:
-        name: Build infra server binary
+        name: Build infra-server docker image
         command: |
-          make server
-          bazel-bin/cmd/infra/linux_amd64_pure_stripped/infra -version
+          make image
+          docker run --rm us.gcr.io/ultra-current-825/infra-server:$(make tag) -version
 
   build-infractl:
     <<: *defaults
@@ -33,7 +34,7 @@ workflows:
   version: 2
   build:
     jobs:
-    - build-infra:
+    - build-infra-server:
         context: docker-io-pull
     - build-infractl:
         context: docker-io-pull
