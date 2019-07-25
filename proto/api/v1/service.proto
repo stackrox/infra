@@ -26,3 +26,25 @@ service VersionService {
     }
 
 }
+
+message WhoamiResponse {
+    google.protobuf.Timestamp Expiry         = 1;
+    User User = 2;
+}
+
+message User {
+    string Name = 1;
+    string Email = 2;
+    string Picture = 3;
+    string Kind = 4;
+}
+
+service UserService {
+
+    rpc Whoami (google.protobuf.Empty) returns (WhoamiResponse) {
+        option (google.api.http) = {
+            get: "/v1/whoami"
+        };
+    }
+
+}

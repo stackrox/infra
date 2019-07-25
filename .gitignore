@@ -4,3 +4,9 @@ BUILD.bazel
 deps
 generated/
 vendor/
+infra
+infra.toml
+static/
+certs/
+sessions/
+

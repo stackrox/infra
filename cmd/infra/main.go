@@ -45,6 +45,7 @@ func mainCmd() error {
 	}
 
 	services := []service.APIService{
+		service.NewUserService(),
 		service.NewVersionService(),
 	}
 

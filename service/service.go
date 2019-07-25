@@ -9,6 +9,7 @@ import (
 
 // APIService is the service interface
 type APIService interface {
+	AllowAnonymous() bool
 	RegisterServiceServer(server *grpc.Server)
 	RegisterServiceHandler(context.Context, *runtime.ServeMux, *grpc.ClientConn) error
 }

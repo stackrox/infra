@@ -26,6 +26,11 @@ func (s *versionImpl) GetVersion(ctx context.Context, request *empty.Empty) (*v1
 	return &info, nil
 }
 
+// AllowAnonymous declares that the version service can be called anonymously.
+func (s *versionImpl) AllowAnonymous() bool {
+	return true
+}
+
 // RegisterServiceServer registers this service with the given gRPC Server.
 func (s *versionImpl) RegisterServiceServer(server *grpc.Server) {
 	v1.RegisterVersionServiceServer(server, s)
