@@ -35,13 +35,7 @@ gazelle: proto-generated-srcs deps cleanup
 # When run in CI, a Darwin and Linux binary is built.
 .PHONY: server
 server: gazelle
-ifdef CI
-	bazel build $(BAZEL_FLAGS) --platforms=@io_bazel_rules_go//go/toolchain:darwin_amd64 -- //cmd/infra-server
 	bazel build $(BAZEL_FLAGS) --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64  -- //cmd/infra-server
-else
-	bazel build $(BAZEL_FLAGS) --platforms=@io_bazel_rules_go//go/toolchain:darwin_amd64 -- //cmd/infra-server
-	@install bazel-bin/cmd/infra-server/darwin_amd64_pure_stripped/infra-server $(GOPATH)/bin
-endif
 
 # cli - Builds the infractl client binary
 # When run locally, a Darwin binary is built and installed into the user's GOPATH bin.
@@ -57,8 +51,7 @@ else
 endif
 
 .PHONY: image
-image: gazelle
-	bazel build $(BAZEL_FLAGS) --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64  -- //cmd/infra-server
+image: server
 	@cp -f bazel-bin/cmd/infra-server/linux_amd64_pure_stripped/infra-server image/infra-server
 	docker build -t us.gcr.io/ultra-current-825/infra-server:$(TAG) image
 
