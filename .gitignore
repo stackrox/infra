@@ -10,3 +10,5 @@ static/
 certs/
 sessions/
 image/infra-server
+chart/rendered.yaml
+
