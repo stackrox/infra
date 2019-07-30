@@ -1,1 +1,3 @@
 image: us.gcr.io/ultra-current-825/infra-server
+
+tag: latest
