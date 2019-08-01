@@ -129,3 +129,27 @@ proto-generated-srcs: protoc-tools
 		-I${GOPATH}/src/github.com/gogo/protobuf/protobuf \
 		--swagger_out=logtostderr=true:$(PROTO_OUTPUT_DIR) \
 		$(PROTO_FILES)
+
+##########
+## Kube ##
+##########
+.PHONY: push
+push: image
+	docker push us.gcr.io/ultra-current-825/infra-server:$(TAG) | cat
+
+.PHONY: render
+render:
+	@mkdir -p chart-rendered
+	helm template chart/infra-server --output-dir chart-rendered \
+		--name infra-server --namespace infra \
+		--set tag=$(TAG) \
+		--set host=test1.demo.stackrox.com \
+		--set ip=34.94.91.159
+
+.PHONY: sanity
+sanity:
+	@test -d chart/infra-server/configs || { echo "Deployment configs missing"; exit 1; }
+
+.PHONY: deploy
+deploy: sanity render push
+	kubectl apply -R -f chart-rendered

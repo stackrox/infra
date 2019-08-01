@@ -1,0 +1,7 @@
+image: us.gcr.io/ultra-current-825/infra-server
+
+tag: latest
+
+host: test1.demo.stackrox.com
+
+ip: 34.94.91.159

@@ -1,0 +1,51 @@
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Values.tag }}
+  annotations:
+    kubernetes-engine.cloud.google.com/icon: |-
+      data:image/png;base64,{{ .Files.Get "static/icon.png" | b64enc }}
+
+spec:
+  descriptor:
+    type: Infra Server
+    version: {{ .Values.tag }}
+    maintainers:
+      - name: StackRox DevOps
+        email: eng-automation-team@stackrox.com
+    owners:
+      - name: StackRox DevOps
+        email: eng-automation-team@stackrox.com
+    links:
+      - description: GitHub repo
+        url: https://github.com/stackrox/infra
+      - description: CircleCI builds
+        url: https://circleci.com/gh/stackrox/workflows/infra
+      - description: User login
+        url: https://{{ .Values.host }}/login
+      - description: Whoami API endpoint
+        url: https://{{ .Values.host }}/v1/whoami
+      - description: Version API endpoint
+        url: https://{{ .Values.host }}/v1/version
+    description: |-
+      StackRox Infra Server
+
+      ## Version
+
+      {{ .Values.tag }}
+
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Release.Name }}
+
+  componentKinds:
+    - kind: ConfigMap
+    - kind: Deployment
+    - kind: Pod
+    - kind: Secret
+    - kind: Service

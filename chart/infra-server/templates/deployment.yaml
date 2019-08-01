@@ -1,0 +1,43 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+
+metadata:
+  name: {{ .Release.Name }}-deployment
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Values.tag }}
+
+spec:
+  replicas: 1
+  template:
+    metadata:
+      namespace: {{ .Release.Namespace }}
+      labels:
+        app.kubernetes.io/name: {{ .Release.Name }}
+        app.kubernetes.io/version: {{ .Values.tag }}
+
+    spec:
+      containers:
+        - name: infra-server
+          image: {{ .Values.image }}:{{ .Values.tag }}
+          command:
+            - /infra-server
+            - -config
+            - /infra.toml
+          ports:
+            - name: http
+              containerPort: 80
+            - name: https
+              containerPort: 443
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /infra.toml
+              name: configs
+              readOnly: true
+              subPath: infra.toml
+
+      volumes:
+        - name: configs
+          configMap:
+            name: {{ .Release.Name }}-configs
