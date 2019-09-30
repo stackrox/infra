@@ -69,7 +69,6 @@ $(GOPATH)/bin/protoc-gen-swagger:
 	@echo "Installing protoc-gen-swagger to $(GOPATH)/bin/protoc-gen-swagger"
 	@cd /tmp; go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger@v1.9.0
 
-
 # This target installs all of the protoc related binaries.
 .PHONY: protoc-tools
 protoc-tools: $(GOPATH)/bin/protoc $(GOPATH)/bin/protoc-gen-go $(GOPATH)/bin/protoc-gen-grpc-gateway $(GOPATH)/bin/protoc-gen-swagger
