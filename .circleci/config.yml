@@ -2,7 +2,7 @@ version: 2.1
 
 defaults: &defaults
   docker:
-    - image: docker.io/stackrox/apollo-ci:0.1.11-31-g63504e3520
+    - image: docker.io/stackrox/apollo-ci:0.2.1
       auth:
         username: $DOCKER_IO_PULL_USERNAME
         password: $DOCKER_IO_PULL_PASSWORD
@@ -17,6 +17,7 @@ jobs:
     - run:
         name: Build infra-server docker image
         command: |
+          go get -u github.com/golang/dep/cmd/dep
           make image
           docker run --rm us.gcr.io/ultra-current-825/infra-server:$(make tag) -version
 
@@ -27,6 +28,7 @@ jobs:
       - run:
           name: Build infractl client binary
           command: |
+            go get -u github.com/golang/dep/cmd/dep
             make cli
             bazel-bin/cmd/infractl/linux_amd64_pure_stripped/infractl
 

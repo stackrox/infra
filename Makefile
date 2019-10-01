@@ -76,17 +76,17 @@ $(GOPATH)/bin/protoc:
 # This target installs the protoc-gen-go binary.
 $(GOPATH)/bin/protoc-gen-go:
 	@echo "Installing protoc-gen-go to $(GOPATH)/bin/protoc-gen-go"
-	@go get github.com/golang/protobuf/protoc-gen-go
+	@./scripts/go-get-version.sh github.com/golang/protobuf/protoc-gen-go v1.3.1
 
 # This target installs the protoc-gen-grpc-gateway binary.
 $(GOPATH)/bin/protoc-gen-grpc-gateway:
 	@echo "Installing protoc-gen-grpc-gateway to $(GOPATH)/bin/protoc-gen-grpc-gateway"
-	@go get github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
+	@./scripts/go-get-version.sh github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway/... v1.9.0
 
 # This target installs the protoc-gen-swagger binary.
 $(GOPATH)/bin/protoc-gen-swagger:
 	@echo "Installing protoc-gen-swagger to $(GOPATH)/bin/protoc-gen-swagger"
-	@go get github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
+	@./scripts/go-get-version.sh github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger/... v1.9.0
 
 # This target installs all of the protoc related binaries.
 .PHONY: protoc-tools
