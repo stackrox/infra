@@ -86,9 +86,9 @@ PROTO_OUTPUT_DIR  = generated/api/v1
 # - JSON Swagger definitions file
 .PHONY: proto-generated-srcs
 proto-generated-srcs: protoc-tools
-	go get github.com/gogo/protobuf/protobuf || true
-	go get github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis || true
-	go get github.com/protocolbuffers/protobuf || true
+	GO111MODULE=off go get github.com/gogo/protobuf/protobuf || true
+	GO111MODULE=off go get github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis || true
+	GO111MODULE=off go get github.com/protocolbuffers/protobuf || true
 	@mkdir -p $(PROTO_OUTPUT_DIR)
 	# Generate gRPC bindings
 	protoc -I$(PROTO_INPUT_DIR) \
