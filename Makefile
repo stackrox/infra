@@ -62,13 +62,11 @@ $(GOPATH)/bin/protoc-gen-go:
 # This target installs the protoc-gen-grpc-gateway binary.
 $(GOPATH)/bin/protoc-gen-grpc-gateway:
 	@echo "Installing protoc-gen-grpc-gateway to $(GOPATH)/bin/protoc-gen-grpc-gateway"
-#	@./scripts/go-get-version.sh github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway/... v1.9.0
 	@cd /tmp; go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway@v1.9.0
 
 # This target installs the protoc-gen-swagger binary.
 $(GOPATH)/bin/protoc-gen-swagger:
 	@echo "Installing protoc-gen-swagger to $(GOPATH)/bin/protoc-gen-swagger"
-#	@./scripts/go-get-version.sh github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger/... v1.9.0
 	@cd /tmp; go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger@v1.9.0
 
 
