@@ -21,38 +21,29 @@ clean-deps:
 ###########
 ## Build ##
 ###########
-BAZEL_FLAGS := --cpu=k8 --features=pure --features=race --workspace_status_command=scripts/bazel-workspace-status.sh
-
-cleanup:
-	@git status --ignored --untracked-files=all --porcelain | grep '^\(!!\|??\) ' | cut -d' ' -f 2- | grep '\(/\|^\)BUILD\.bazel$$' | xargs rm
-
-.PHONY: gazelle
-gazelle: proto-generated-srcs deps cleanup
-	bazel run //:gazelle
 
 # server - Builds the infra-server binary
 # When run locally, a Darwin binary is built and installed into the user's GOPATH bin.
 # When run in CI, a Darwin and Linux binary is built.
 .PHONY: server
-server: gazelle
-	bazel build $(BAZEL_FLAGS) --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64  -- //cmd/infra-server
+server: proto-generated-srcs deps
+	GOARCH=amd64 GOOS=linux ./scripts/go-build -o bin/infra-server-linux-amd64 ./cmd/infra-server
 
 # cli - Builds the infractl client binary
 # When run locally, a Darwin binary is built and installed into the user's GOPATH bin.
 # When run in CI, a Darwin and Linux binary is built.
 .PHONY: cli
-cli: gazelle
+cli:
 ifdef CI
-	bazel build $(BAZEL_FLAGS) --platforms=@io_bazel_rules_go//go/toolchain:darwin_amd64 -- //cmd/infractl
-	bazel build $(BAZEL_FLAGS) --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64  -- //cmd/infractl
+	GOARCH=amd64 GOOS=darwin ./scripts/go-build -o bin/infractl-darwin-amd64 ./cmd/infractl
+	GOARCH=amd64 GOOS=linux  ./scripts/go-build -o bin/infractl-linux-amd64  ./cmd/infractl
 else
-	bazel build $(BAZEL_FLAGS) --platforms=@io_bazel_rules_go//go/toolchain:darwin_amd64 -- //cmd/infractl
-	@install bazel-bin/cmd/infractl/darwin_amd64_pure_stripped/infractl $(GOPATH)/bin
+	./scripts/go-build -o $(GOPATH)/bin/infractl  ./cmd/infractl
 endif
 
 .PHONY: image
 image: server
-	@cp -f bazel-bin/cmd/infra-server/linux_amd64_pure_stripped/infra-server image/infra-server
+	@cp -f bin/infra-server-linux-amd64 image/infra-server
 	docker build -t us.gcr.io/ultra-current-825/infra-server:$(TAG) image
 
 ##############
