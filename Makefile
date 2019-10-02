@@ -1,22 +1,12 @@
+export GO111MODULE=on
+
 .PHONY: all
-all: deps gazelle
+all: image
 
 TAG=$(shell git describe --tags)
 .PHONY: tag
 tag:
 	@echo $(TAG)
-
-deps: Gopkg.toml Gopkg.lock
-ifdef CI
-	@# `dep check` exits with a nonzero code if there is a toml->lock mismatch.
-	dep check -skip-vendor
-endif
-	dep ensure
-	@touch deps
-
-.PHONY: clean-deps
-clean-deps:
-	@rm -f deps
 
 ###########
 ## Build ##
@@ -26,7 +16,7 @@ clean-deps:
 # When run locally, a Darwin binary is built and installed into the user's GOPATH bin.
 # When run in CI, a Darwin and Linux binary is built.
 .PHONY: server
-server: proto-generated-srcs deps
+server: proto-generated-srcs
 	GOARCH=amd64 GOOS=linux ./scripts/go-build -o bin/infra-server-linux-amd64 ./cmd/infra-server
 
 # cli - Builds the infractl client binary
@@ -67,17 +57,20 @@ $(GOPATH)/bin/protoc:
 # This target installs the protoc-gen-go binary.
 $(GOPATH)/bin/protoc-gen-go:
 	@echo "Installing protoc-gen-go to $(GOPATH)/bin/protoc-gen-go"
-	@./scripts/go-get-version.sh github.com/golang/protobuf/protoc-gen-go v1.3.1
+	@cd /tmp; go get -u github.com/golang/protobuf/protoc-gen-go@v1.3.1
 
 # This target installs the protoc-gen-grpc-gateway binary.
 $(GOPATH)/bin/protoc-gen-grpc-gateway:
 	@echo "Installing protoc-gen-grpc-gateway to $(GOPATH)/bin/protoc-gen-grpc-gateway"
-	@./scripts/go-get-version.sh github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway/... v1.9.0
+#	@./scripts/go-get-version.sh github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway/... v1.9.0
+	@cd /tmp; go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway@v1.9.0
 
 # This target installs the protoc-gen-swagger binary.
 $(GOPATH)/bin/protoc-gen-swagger:
 	@echo "Installing protoc-gen-swagger to $(GOPATH)/bin/protoc-gen-swagger"
-	@./scripts/go-get-version.sh github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger/... v1.9.0
+#	@./scripts/go-get-version.sh github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger/... v1.9.0
+	@cd /tmp; go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger@v1.9.0
+
 
 # This target installs all of the protoc related binaries.
 .PHONY: protoc-tools

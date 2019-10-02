@@ -14,7 +14,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
-	"gopkg.in/golang/protobuf.v1/ptypes"
 )
 
 // contextFunc represents a function that can be used for processing and
@@ -81,7 +80,7 @@ func UserEnricher(cfg *config.Config) contextFunc {
 		}
 
 		// Enrich the given context with the user and expiry.
-		ts, _ := ptypes.TimestampProto(expiry)
+		ts := &timestamp.Timestamp{Seconds: expiry.Unix()}
 		return contextWithUser(ctx, user, ts), nil
 	}
 }
