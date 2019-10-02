@@ -28,7 +28,7 @@ jobs:
           name: Build infractl client binary
           command: |
             make cli
-            $GOPATH/bin/infractl -version
+            bin/infractl-linux-amd64 -version
 
 workflows:
   version: 2

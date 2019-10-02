@@ -16,7 +16,7 @@ main() {
     # The Git describe string for the current commit.
     local STABLE_GIT_VERSION="$(make --quiet tag)"
 
-    exec go build -ldflags="-s -w \
+    CGO_ENABLED=0 exec go build -ldflags="-s -w \
         -X github.com/stackrox/infra/pkg/buildinfo/internal.buildTimestampUnixSeconds=$BUILD_TIMESTAMP \
         -X github.com/stackrox/infra/pkg/buildinfo/internal.circleciWorkflowURL=$STABLE_CIRCLECI_WORKFLOW_URL \
         -X github.com/stackrox/infra/pkg/buildinfo/internal.gitShortSha=$STABLE_GIT_SHORT_SHA \
