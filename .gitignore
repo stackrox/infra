@@ -1,6 +1,4 @@
-bazel-*
-BUILD.bazel
-!/BUILD.bazel
+bin/
 deps
 generated/
 vendor/

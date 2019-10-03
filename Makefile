@@ -1,58 +1,39 @@
+export GO111MODULE=on
+
 .PHONY: all
-all: deps gazelle
+all: image
 
 TAG=$(shell git describe --tags)
 .PHONY: tag
 tag:
 	@echo $(TAG)
 
-deps: Gopkg.toml Gopkg.lock
-ifdef CI
-	@# `dep check` exits with a nonzero code if there is a toml->lock mismatch.
-	dep check -skip-vendor
-endif
-	dep ensure
-	@touch deps
-
-.PHONY: clean-deps
-clean-deps:
-	@rm -f deps
-
 ###########
 ## Build ##
 ###########
-BAZEL_FLAGS := --cpu=k8 --features=pure --features=race --workspace_status_command=scripts/bazel-workspace-status.sh
-
-cleanup:
-	@git status --ignored --untracked-files=all --porcelain | grep '^\(!!\|??\) ' | cut -d' ' -f 2- | grep '\(/\|^\)BUILD\.bazel$$' | xargs rm
-
-.PHONY: gazelle
-gazelle: proto-generated-srcs deps cleanup
-	bazel run //:gazelle
 
 # server - Builds the infra-server binary
 # When run locally, a Darwin binary is built and installed into the user's GOPATH bin.
 # When run in CI, a Darwin and Linux binary is built.
 .PHONY: server
-server: gazelle
-	bazel build $(BAZEL_FLAGS) --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64  -- //cmd/infra-server
+server: proto-generated-srcs
+	GOARCH=amd64 GOOS=linux ./scripts/go-build -o bin/infra-server-linux-amd64 ./cmd/infra-server
 
 # cli - Builds the infractl client binary
 # When run locally, a Darwin binary is built and installed into the user's GOPATH bin.
 # When run in CI, a Darwin and Linux binary is built.
 .PHONY: cli
-cli: gazelle
+cli: proto-generated-srcs
 ifdef CI
-	bazel build $(BAZEL_FLAGS) --platforms=@io_bazel_rules_go//go/toolchain:darwin_amd64 -- //cmd/infractl
-	bazel build $(BAZEL_FLAGS) --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64  -- //cmd/infractl
+	GOARCH=amd64 GOOS=darwin ./scripts/go-build -o bin/infractl-darwin-amd64 ./cmd/infractl
+	GOARCH=amd64 GOOS=linux  ./scripts/go-build -o bin/infractl-linux-amd64  ./cmd/infractl
 else
-	bazel build $(BAZEL_FLAGS) --platforms=@io_bazel_rules_go//go/toolchain:darwin_amd64 -- //cmd/infractl
-	@install bazel-bin/cmd/infractl/darwin_amd64_pure_stripped/infractl $(GOPATH)/bin
+	./scripts/go-build -o $(GOPATH)/bin/infractl  ./cmd/infractl
 endif
 
 .PHONY: image
 image: server
-	@cp -f bazel-bin/cmd/infra-server/linux_amd64_pure_stripped/infra-server image/infra-server
+	@cp -f bin/infra-server-linux-amd64 image/infra-server
 	docker build -t us.gcr.io/ultra-current-825/infra-server:$(TAG) image
 
 ##############
@@ -76,17 +57,18 @@ $(GOPATH)/bin/protoc:
 # This target installs the protoc-gen-go binary.
 $(GOPATH)/bin/protoc-gen-go:
 	@echo "Installing protoc-gen-go to $(GOPATH)/bin/protoc-gen-go"
-	@go get github.com/golang/protobuf/protoc-gen-go
+	@cd /tmp; go get -u github.com/golang/protobuf/protoc-gen-go@v1.3.1
 
 # This target installs the protoc-gen-grpc-gateway binary.
 $(GOPATH)/bin/protoc-gen-grpc-gateway:
 	@echo "Installing protoc-gen-grpc-gateway to $(GOPATH)/bin/protoc-gen-grpc-gateway"
-	@go get github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
+	@cd /tmp; go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway@v1.9.0
 
 # This target installs the protoc-gen-swagger binary.
 $(GOPATH)/bin/protoc-gen-swagger:
 	@echo "Installing protoc-gen-swagger to $(GOPATH)/bin/protoc-gen-swagger"
-	@go get github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
+	@cd /tmp; go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger@v1.9.0
+
 
 # This target installs all of the protoc related binaries.
 .PHONY: protoc-tools
@@ -102,9 +84,9 @@ PROTO_OUTPUT_DIR  = generated/api/v1
 # - JSON Swagger definitions file
 .PHONY: proto-generated-srcs
 proto-generated-srcs: protoc-tools
-	go get github.com/gogo/protobuf/protobuf || true
-	go get github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis || true
-	go get github.com/protocolbuffers/protobuf || true
+	GO111MODULE=off go get github.com/gogo/protobuf/protobuf || true
+	GO111MODULE=off go get github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis || true
+	GO111MODULE=off go get github.com/protocolbuffers/protobuf || true
 	@mkdir -p $(PROTO_OUTPUT_DIR)
 	# Generate gRPC bindings
 	protoc -I$(PROTO_INPUT_DIR) \

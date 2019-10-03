@@ -3,9 +3,9 @@ package buildinfo
 import (
 	"runtime"
 
+	"github.com/golang/protobuf/ptypes"
 	"github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/buildinfo/internal"
-	"gopkg.in/golang/protobuf.v1/ptypes"
 )
 
 // All returns all of the various pieces of version information.
