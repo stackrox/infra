@@ -39,39 +39,51 @@ image: server
 ##############
 ## Protobuf ##
 ##############
+# Tool versions.
+protoc-version = 3.11.2
+protoc-gen-go-version = 1.3.2
+protoc-gen-grpc-gateway-version = 1.12.1
+protoc-gen-swagger-version = 1.12.1
+
+# Tool binary paths
+protoc = $(GOPATH)/bin/protoc
+protoc-gen-go = $(GOPATH)/bin/protoc-gen-go
+protoc-gen-grpc-gateway = $(GOPATH)/bin/protoc-gen-grpc-gateway
+protoc-gen-swagger = $(GOPATH)/bin/protoc-gen-swagger
+
 # The protoc zip url changes depending on if we're running in CI or not.
 ifeq ($(shell uname -s),Linux)
-PROTOC_ZIP = https://github.com/protocolbuffers/protobuf/releases/download/v3.9.0/protoc-3.9.0-linux-x86_64.zip
+PROTOC_ZIP = https://github.com/protocolbuffers/protobuf/releases/download/v$(protoc-version)/protoc-$(protoc-version)-linux-x86_64.zip
 endif
 ifeq ($(shell uname -s),Darwin)
-PROTOC_ZIP = https://github.com/protocolbuffers/protobuf/releases/download/v3.9.0/protoc-3.9.0-osx-x86_64.zip
+PROTOC_ZIP = https://github.com/protocolbuffers/protobuf/releases/download/v$(protoc-version)/protoc-$(protoc-version)-osx-x86_64.zip
 endif
 
 # This target installs the protoc binary.
-$(GOPATH)/bin/protoc:
-	@echo "Installing protoc 3.9.0 to $(GOPATH)/bin/protoc"
+$(protoc):
+	@echo "Installing protoc $(protoc-version) to $(protoc)"
 	@wget -q $(PROTOC_ZIP) -O /tmp/protoc.zip
 	@unzip -o -q -d /tmp /tmp/protoc.zip bin/protoc
-	@install /tmp/bin/protoc $(GOPATH)/bin/protoc
+	@install /tmp/bin/protoc $(protoc)
 
 # This target installs the protoc-gen-go binary.
-$(GOPATH)/bin/protoc-gen-go:
-	@echo "Installing protoc-gen-go to $(GOPATH)/bin/protoc-gen-go"
-	@cd /tmp; go get -u github.com/golang/protobuf/protoc-gen-go@v1.3.1
+$(protoc-gen-go):
+	@echo "Installing protoc-gen-go $(protoc-gen-go-version) to $(protoc-gen-go)"
+	@cd /tmp; go get -u github.com/golang/protobuf/protoc-gen-go@v$(protoc-gen-go-version)
 
 # This target installs the protoc-gen-grpc-gateway binary.
-$(GOPATH)/bin/protoc-gen-grpc-gateway:
-	@echo "Installing protoc-gen-grpc-gateway to $(GOPATH)/bin/protoc-gen-grpc-gateway"
-	@cd /tmp; go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway@v1.9.0
+$(protoc-gen-grpc-gateway):
+	@echo "Installing protoc-gen-grpc-gateway $(protoc-gen-grpc-gateway-version) to $(protoc-gen-grpc-gateway)"
+	@cd /tmp; go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway@v$(protoc-gen-grpc-gateway-version)
 
 # This target installs the protoc-gen-swagger binary.
-$(GOPATH)/bin/protoc-gen-swagger:
-	@echo "Installing protoc-gen-swagger to $(GOPATH)/bin/protoc-gen-swagger"
-	@cd /tmp; go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger@v1.9.0
+$(protoc-gen-swagger):
+	@echo "Installing protoc-gen-swagger $(protoc-gen-swagger-version) to $(protoc-gen-swagger)"
+	@cd /tmp; go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger@v$(protoc-gen-swagger-version)
 
 # This target installs all of the protoc related binaries.
 .PHONY: protoc-tools
-protoc-tools: $(GOPATH)/bin/protoc $(GOPATH)/bin/protoc-gen-go $(GOPATH)/bin/protoc-gen-grpc-gateway $(GOPATH)/bin/protoc-gen-swagger
+protoc-tools: $(protoc) $(protoc-gen-go) $(protoc-gen-grpc-gateway) $(protoc-gen-swagger)
 
 PROTO_INPUT_DIR   = proto/api/v1
 PROTO_FILES       = service.proto
@@ -88,7 +100,7 @@ proto-generated-srcs: protoc-tools
 	GO111MODULE=off go get github.com/protocolbuffers/protobuf || true
 	@mkdir -p $(PROTO_OUTPUT_DIR)
 	# Generate gRPC bindings
-	protoc -I$(PROTO_INPUT_DIR) \
+	$(protoc) -I$(PROTO_INPUT_DIR) \
 		-I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
 		-I${GOPATH}/src/github.com/protocolbuffers/protobuf/src \
 		-I${GOPATH}/src/github.com/gogo/protobuf/protobuf \
@@ -96,7 +108,7 @@ proto-generated-srcs: protoc-tools
 		$(PROTO_FILES)
 
 	# Generate gRPC-Gateway bindings
-	protoc -I$(PROTO_INPUT_DIR) \
+	$(protoc) -I$(PROTO_INPUT_DIR) \
 		-I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
 		-I${GOPATH}/src/github.com/protocolbuffers/protobuf/src \
 		-I${GOPATH}/src/github.com/gogo/protobuf/protobuf \
@@ -104,7 +116,7 @@ proto-generated-srcs: protoc-tools
 		$(PROTO_FILES)
 
 	# Generate JSON Swagger manifest
-	protoc -I$(PROTO_INPUT_DIR) \
+	$(protoc) -I$(PROTO_INPUT_DIR) \
 		-I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
 		-I${GOPATH}/src/github.com/protocolbuffers/protobuf/src \
 		-I${GOPATH}/src/github.com/gogo/protobuf/protobuf \
