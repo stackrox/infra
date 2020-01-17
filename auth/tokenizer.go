@@ -17,7 +17,7 @@ func createHumanUser(profile auth0Claims) *v1.User {
 		Name:    profile.Name,
 		Email:   profile.Email,
 		Picture: profile.PictureURL,
-		Expiry:  &timestamp.Timestamp{Seconds: time.Unix(profile.ExpiresAt, 0).Unix()},
+		Expiry:  &timestamp.Timestamp{Seconds: profile.ExpiresAt},
 	}
 }
 
@@ -189,7 +189,5 @@ func (t userTokenizer) Validate(token string) (*v1.User, error) {
 	}); err != nil {
 		return nil, err
 	}
-	user := claims.User
-	user.Expiry = &timestamp.Timestamp{Seconds: time.Unix(claims.ExpiresAt, 0).Unix()}
-	return &user, nil
+	return &claims.User, nil
 }

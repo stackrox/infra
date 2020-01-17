@@ -40,14 +40,16 @@ func EnforceAnonymousAccess(ctx context.Context, info *grpc.UnaryServerInfo) (co
 		return ctx, nil
 	}
 
-	// Service does not allow anonymous access. Check if an actual user is
-	// accessing it.
-	if _, found := UserFromContext(ctx); !found {
-		// No user found, check if a service account is accessing it.
-		if _, found := ServiceAccountFromContext(ctx); !found {
-			return nil, status.Error(codes.PermissionDenied, "access denied")
-		}
+	// Check if an authenticated user is accessing the service.
+	if _, found := UserFromContext(ctx); found {
+		return ctx, nil
 	}
 
-	return ctx, nil
+	// Check if an authenticated service account is accessing the service.
+	if _, found := ServiceAccountFromContext(ctx); found {
+		return ctx, nil
+	}
+
+	// There is no authenticated principal, deny access!
+	return nil, status.Error(codes.PermissionDenied, "access denied")
 }
