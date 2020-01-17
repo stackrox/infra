@@ -28,7 +28,7 @@ jobs:
           name: Build infractl client binary
           command: |
             make cli
-            bin/infractl-linux-amd64 -version
+            bin/infractl-linux-amd64 --version
 
   lint:
     <<: *defaults

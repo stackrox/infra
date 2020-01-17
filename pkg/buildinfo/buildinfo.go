@@ -9,9 +9,9 @@ import (
 )
 
 // All returns all of the various pieces of version information.
-func All() v1.Version {
+func All() *v1.Version {
 	ts, _ := ptypes.TimestampProto(internal.BuildTimestamp)
-	return v1.Version{
+	return &v1.Version{
 		BuildDate: ts,
 		GitCommit: internal.GitShortSha,
 		GoVersion: runtime.Version(),
