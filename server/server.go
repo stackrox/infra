@@ -11,13 +11,13 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/config"
-	"github.com/stackrox/infra/service"
+	"github.com/stackrox/infra/service/middleware"
 	"golang.org/x/crypto/acme/autocert"
 	"google.golang.org/grpc"
 )
 
 // RunGRPCServer runs the gRPC service.
-func RunGRPCServer(apiServices []service.APIService, cfg *config.Config) (func(), <-chan error, error) {
+func RunGRPCServer(apiServices []middleware.APIService, cfg *config.Config) (func(), <-chan error, error) {
 	listen, err := net.Listen("tcp", cfg.Server.GRPC)
 	if err != nil {
 		return nil, nil, err
@@ -28,9 +28,11 @@ func RunGRPCServer(apiServices []service.APIService, cfg *config.Config) (func()
 		// Wire up context interceptors.
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			// Extract user from JWT token stored in HTTP cookie.
-			service.ContextInterceptor(service.UserEnricher(cfg)),
+			middleware.ContextInterceptor(middleware.UserEnricher(cfg)),
+			// Extract service-account from token stored in Authorization header.
+			middleware.ContextInterceptor(middleware.ServiceAccountEnricher(cfg)),
 			// Enforce authenticated user access on resources that declare it.
-			service.ContextInterceptor(service.EnforceAnonymousAccess),
+			middleware.ContextInterceptor(middleware.EnforceAnonymousAccess),
 		)),
 	)
 
@@ -59,7 +61,7 @@ func RunGRPCServer(apiServices []service.APIService, cfg *config.Config) (func()
 }
 
 // RunHTTPServer runs the HTTP/REST gateway
-func RunHTTPServer(apiServices []service.APIService, cfg *config.Config) (func(), <-chan error, error) {
+func RunHTTPServer(apiServices []middleware.APIService, cfg *config.Config) (func(), <-chan error, error) {
 	// Register the HTTP/gRPC gateway service.
 	ctx := context.Background()
 	conn, err := grpc.Dial(cfg.Server.GRPC, grpc.WithInsecure())

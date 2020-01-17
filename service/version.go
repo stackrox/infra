@@ -7,21 +7,24 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/buildinfo"
+	"github.com/stackrox/infra/service/middleware"
 	"google.golang.org/grpc"
 )
 
 type versionImpl struct{}
 
-var _ APIService = (*versionImpl)(nil)
-var _ v1.VersionServiceServer = (*versionImpl)(nil)
+var (
+	_ middleware.APIService   = (*versionImpl)(nil)
+	_ v1.VersionServiceServer = (*versionImpl)(nil)
+)
 
 // NewVersionService creates a new VersionService.
-func NewVersionService() APIService {
+func NewVersionService() middleware.APIService {
 	return &versionImpl{}
 }
 
 // GetVersion implements VersionService.GetVersion.
-func (s *versionImpl) GetVersion(ctx context.Context, request *empty.Empty) (*v1.Version, error) {
+func (s *versionImpl) GetVersion(ctx context.Context, _ *empty.Empty) (*v1.Version, error) {
 	info := buildinfo.All()
 	return &info, nil
 }

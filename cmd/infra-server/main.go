@@ -13,6 +13,7 @@ import (
 	"github.com/stackrox/infra/pkg/buildinfo"
 	"github.com/stackrox/infra/server"
 	"github.com/stackrox/infra/service"
+	"github.com/stackrox/infra/service/middleware"
 )
 
 // main is the entry point of the infra server.
@@ -44,7 +45,7 @@ func mainCmd() error {
 		return errors.Wrapf(err, "failed to load config file %q", *flagConfig)
 	}
 
-	services := []service.APIService{
+	services := []middleware.APIService{
 		service.NewUserService(),
 		service.NewVersionService(),
 	}

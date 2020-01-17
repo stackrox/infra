@@ -8,9 +8,10 @@ import (
 )
 
 type Config struct {
-	Auth0   Auth0Config   `toml:"auth0"`
-	Server  ServerConfig  `toml:"server"`
-	Storage StorageConfig `toml:"storage"`
+	Auth0           Auth0Config            `toml:"auth0"`
+	Server          ServerConfig           `toml:"server"`
+	Storage         StorageConfig          `toml:"storage"`
+	ServiceAccounts []ServiceAccountConfig `toml:"service-account"`
 }
 
 type Auth0Config struct {
@@ -36,9 +37,20 @@ type ServerConfig struct {
 }
 
 type StorageConfig struct {
-	CertDir     string `toml:"certs"`
-	StaticDir   string `toml:"static"`
-	SessionsDir string `toml:"sessions"`
+	CertDir   string `toml:"certs"`
+	StaticDir string `toml:"static"`
+}
+
+type ServiceAccountConfig struct {
+	// Name is a human readable name for the service account.
+	Name string `toml:"name"`
+
+	// Description is a human readable description for the service account.
+	Description string `toml:"description"`
+
+	// Token is a pre-shared-key used for directly authenticating as this
+	// service account.
+	Token string `toml:"token"`
 }
 
 func Load(filename string) (*Config, error) {
