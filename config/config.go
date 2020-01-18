@@ -12,6 +12,7 @@ type Config struct {
 	Server          ServerConfig           `toml:"server"`
 	Storage         StorageConfig          `toml:"storage"`
 	ServiceAccounts []ServiceAccountConfig `toml:"service-account"`
+	Flavors         []FlavorConfig         `toml:"flavor"`
 }
 
 type Auth0Config struct {
@@ -51,6 +52,26 @@ type ServiceAccountConfig struct {
 	// Token is a pre-shared-key used for directly authenticating as this
 	// service account.
 	Token string `toml:"token"`
+}
+
+type FlavorConfig struct {
+	// ID is the unique, human type-able, ID for the flavor.
+	ID string `toml:"id"`
+
+	// Name is a human readable name for the flavor.
+	Name string `toml:"name"`
+
+	// Description is a human readable description for the flavor.
+	Description string `toml:"description"`
+
+	// Availability is an availability classification level. One of "alpha",
+	// "beta", "stable", or "default". Exactly 1 default flavor must be
+	// configured.
+	Availability string `toml:"availability"`
+
+	// Image is a full-qualified (repo+name+tag/sha) Docker image name
+	// representing the automation image for this flavor.
+	Image string `toml:"image"`
 }
 
 func Load(filename string) (*Config, error) {

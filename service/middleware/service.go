@@ -13,3 +13,17 @@ type APIService interface {
 	RegisterServiceServer(server *grpc.Server)
 	RegisterServiceHandler(context.Context, *runtime.ServeMux, *grpc.ClientConn) error
 }
+
+type APIServiceFunc func() (APIService, error)
+
+func Services(serviceFuncs ...APIServiceFunc) ([]APIService, error) {
+	services := make([]APIService, len(serviceFuncs))
+	for index, serviceFunc := range serviceFuncs {
+		service, err := serviceFunc()
+		if err != nil {
+			return nil, err
+		}
+		services[index] = service
+	}
+	return services, nil
+}

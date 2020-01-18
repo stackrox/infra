@@ -18,8 +18,8 @@ var (
 )
 
 // NewUserService creates a new UserService.
-func NewUserService() middleware.APIService {
-	return &userImpl{}
+func NewUserService() (middleware.APIService, error) {
+	return &userImpl{}, nil
 }
 
 // GetVersion implements UserService.Whoami.
@@ -43,7 +43,7 @@ func (s *userImpl) Whoami(ctx context.Context, _ *empty.Empty) (*v1.WhoamiRespon
 	return &v1.WhoamiResponse{}, nil
 }
 
-// AllowAnonymous declares that the user service can be called anonymously.
+// AllowAnonymous declares that this service can be called anonymously.
 func (s *userImpl) AllowAnonymous() bool {
 	return true
 }

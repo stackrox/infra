@@ -73,3 +73,54 @@ service UserService {
     }
 
 }
+
+// Flavor represents a configured cluster flavor.
+message Flavor {
+    // ID is the unique, human type-able, ID for the flavor.
+    string ID = 1;
+
+    // Name is a human readable name for the flavor.
+    string Name = 2;
+
+    // Description is a human readable description for the flavor.
+    string Description = 3;
+
+    // availability represents the availability classification levels.
+    enum availability {
+        // alpha is completely experemental, and is not expected to work in any way.
+        alpha = 0;
+
+        // beta is being tested, and is expected to work with minor issues.
+        beta = 1;
+
+        // stable is available for public consumption, and works without issue.
+        stable = 2;
+
+        // default is stable, and available for customer demo consumption.
+        // Exactly 1 flavor should be configured as default.
+        default = 3;
+    }
+
+    // Description is an availability classification for the flavor.
+    availability Availability = 4;
+}
+
+// FlavorsResponse represents details about the available cluster flavors.
+message FlavorsResponse {
+    // Default is the flavor ID of the default cluster flavor.
+    string Default = 1;
+
+    // Flavors is a list of all available cluster flavors.
+    repeated Flavor Flavors = 2;
+}
+
+// ClusterService provides cluster based functionality.
+service ClusterService {
+    // Flavors provides information about the available cluster flavors.
+    rpc Flavors (google.protobuf.Empty) returns (FlavorsResponse) {
+        option (google.api.http) = {
+            get: "/v1/cluster/flavors"
+        };
+    }
+
+}

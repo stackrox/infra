@@ -19,8 +19,8 @@ var (
 )
 
 // NewVersionService creates a new VersionService.
-func NewVersionService() middleware.APIService {
-	return &versionImpl{}
+func NewVersionService() (middleware.APIService, error) {
+	return &versionImpl{}, nil
 }
 
 // GetVersion implements VersionService.GetVersion.
@@ -28,7 +28,7 @@ func (s *versionImpl) GetVersion(ctx context.Context, _ *empty.Empty) (*v1.Versi
 	return buildinfo.All(), nil
 }
 
-// AllowAnonymous declares that the version service can be called anonymously.
+// AllowAnonymous declares that this service can be called anonymously.
 func (s *versionImpl) AllowAnonymous() bool {
 	return true
 }
