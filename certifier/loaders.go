@@ -10,14 +10,6 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-type loader interface {
-	Load(context.Context, string) ([]byte, error)
-}
-
-type saver interface {
-	Save(context.Context, string, []byte) error
-}
-
 type GCS struct {
 	bucket string
 	prefix string
@@ -27,7 +19,7 @@ type Live struct {
 	liveDir string
 }
 
-func (live *Live) Load(ctx context.Context, path string) ([]byte, error) {
+func (live *Live) Load(path string) ([]byte, error) {
 	path = filepath.Join(live.liveDir, path)
 
 	return ioutil.ReadFile(path)

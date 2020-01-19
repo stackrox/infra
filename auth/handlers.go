@@ -13,7 +13,7 @@ import (
 
 const (
 	tokenCookieNew     = "token=%s"
-	tokenCookieExpired = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
+	tokenCookieExpired = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT" // nolint:gosec
 )
 
 // oAuth facilitates an Oauth2 login flow via http handlers.
@@ -121,12 +121,12 @@ func (a oAuth) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 // The user token cookie is destroyed, and the user is redirected to Auth0 for logout.
 func (a oAuth) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	cfg := a.cfg
-	Url, _ := url.Parse(cfg.Auth0.LogoutURL)
+	URL, _ := url.Parse(cfg.Auth0.LogoutURL)
 	parameters := url.Values{}
 	parameters.Add("returnTo", cfg.Auth0.LoginURL)
 	parameters.Add("client_id", cfg.Auth0.ClientID)
-	Url.RawQuery = parameters.Encode()
+	URL.RawQuery = parameters.Encode()
 
 	w.Header().Set("set-cookie", tokenCookieExpired)
-	http.Redirect(w, r, Url.String(), http.StatusTemporaryRedirect)
+	http.Redirect(w, r, URL.String(), http.StatusTemporaryRedirect)
 }

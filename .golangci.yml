@@ -1,0 +1,21 @@
+run:
+  skip-files:
+    - pkg/buildinfo/internal/stamps.go
+
+linters:
+  enable-all: true
+  disable:
+    - funlen
+    - gomnd
+    - lll
+    - wsl
+
+issues:
+  exclude:
+    # Triggered by table tests calling t.Run. See
+    # https://github.com/kyoh86/scopelint/issues/4 for more information.
+    - Using the variable on range scope `test` in function literal
+    # Triggered by long table tests.
+    - Function 'Test\w+' is too long
+    # Triggered by exported functions returning unexported types.
+    - which can be annoying to use
