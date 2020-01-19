@@ -6,9 +6,10 @@ run:
 linters:
   enable-all: true
   disable:
+    - funlen
+    - gomnd
     - lll
     - wsl
-    - funlen
 
 issues:
   exclude:
