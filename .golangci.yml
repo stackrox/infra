@@ -1,6 +1,5 @@
 run:
   skip-files:
-#    - ".*\\.my\\.go$"
     - pkg/buildinfo/internal/stamps.go
 
 linters:
@@ -18,5 +17,5 @@ issues:
     - Using the variable on range scope `test` in function literal
     # Triggered by long table tests.
     - Function 'Test\w+' is too long
-
+    # Triggered by exported functions returning unexported types.
     - which can be annoying to use

@@ -36,6 +36,7 @@ jobs:
       - checkout
       - run:
           name: Install golangci-lint 1.22.2
+          working_directory: /tmp
           command: |
             wget -q https://github.com/golangci/golangci-lint/releases/download/v1.22.2/golangci-lint-1.22.2-linux-amd64.tar.gz
             tar -xf golangci-lint-1.22.2-linux-amd64.tar.gz
