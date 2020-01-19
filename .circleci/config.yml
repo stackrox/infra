@@ -41,6 +41,7 @@ jobs:
             tar -xf golangci-lint-1.22.2-linux-amd64.tar.gz
             sudo install golangci-lint-1.22.2-linux-amd64/golangci-lint /usr/bin/golangci-lint
             golangci-lint version
+      - checkout
       - run:
           name: Lint code
           command: golangci-lint run
