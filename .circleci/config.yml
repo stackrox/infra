@@ -43,6 +43,9 @@ jobs:
             golangci-lint version
       - checkout
       - run:
+          name: Generate code
+          command: make proto-generated-srcs
+      - run:
           name: Lint code
           command: golangci-lint run
 
