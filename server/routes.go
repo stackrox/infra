@@ -3,13 +3,11 @@ package server
 import (
 	"net/http"
 
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/stackrox/infra/auth"
 	"github.com/stackrox/infra/config"
 )
 
-func buildRoutes(gwMux *runtime.ServeMux, cfg *config.Config) *http.ServeMux {
-
+func buildRoutes(gwMux http.Handler, cfg *config.Config) *http.ServeMux {
 	a, err := auth.NewOAuth(cfg)
 	if err != nil {
 		panic(err)

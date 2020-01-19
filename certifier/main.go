@@ -165,7 +165,7 @@ func shouldRenew(certBytes []byte, days int) (bool, error) {
 
 	log.Printf("Parsed cert for %+v (expires on %v)\n", cert.Subject, cert.NotAfter)
 
-	timeRemaining := cert.NotAfter.Sub(time.Now())
+	timeRemaining := time.Until(cert.NotAfter)
 	timeGrace := time.Duration(days*24) * time.Hour
 
 	if timeRemaining <= timeGrace {

@@ -5,7 +5,7 @@ import (
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/stackrox/infra/generated/api/v1"
+	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/buildinfo"
 	"google.golang.org/grpc"
 )

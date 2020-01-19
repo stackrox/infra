@@ -30,6 +30,21 @@ jobs:
             make cli
             bin/infractl-linux-amd64 -version
 
+  lint:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: Install golangci-lint 1.22.2
+          command: |
+            wget -q https://github.com/golangci/golangci-lint/releases/download/v1.22.2/golangci-lint-1.22.2-linux-amd64.tar.gz
+            tar -xf golangci-lint-1.22.2-linux-amd64.tar.gz
+            sudo install golangci-lint-1.22.2-linux-amd64/golangci-lint /usr/bin/golangci-lint
+            golangci-lint version
+      - run:
+          name: Lint code
+          command: golangci-lint run
+
 workflows:
   version: 2
   build:
@@ -37,4 +52,6 @@ workflows:
     - build-infra-server:
         context: docker-io-pull
     - build-infractl:
+        context: docker-io-pull
+    - lint:
         context: docker-io-pull

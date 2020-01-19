@@ -4,7 +4,7 @@ import (
 	"runtime"
 
 	"github.com/golang/protobuf/ptypes"
-	"github.com/stackrox/infra/generated/api/v1"
+	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/buildinfo/internal"
 )
 

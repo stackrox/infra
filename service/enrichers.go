@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/auth"
 	"github.com/stackrox/infra/config"
-	"github.com/stackrox/infra/generated/api/v1"
+	v1 "github.com/stackrox/infra/generated/api/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -59,7 +59,6 @@ func cookieValues(meta metadata.MD) map[string]string {
 func UserEnricher(cfg *config.Config) contextFunc {
 	jwtUser := auth.NewUserTokenizer(time.Hour, cfg.Auth0.SessionKey)
 	return func(ctx context.Context, _ *grpc.UnaryServerInfo) (context.Context, error) {
-
 		// Extract request metadata (proxied http headers) from given context.
 		meta, ok := metadata.FromIncomingContext(ctx)
 		if !ok {

@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/config"
@@ -102,9 +102,9 @@ func startHTTP(ctx context.Context, handler http.Handler, cfg *config.Config) (f
 
 		shutdown := func() {
 			log.Print("shutting down HTTP server")
-			httpServer.Shutdown(ctx)
+			httpServer.Shutdown(ctx) // nolint:errcheck
 			log.Print("shutting down HTTPS server")
-			httpsServer.Shutdown(ctx)
+			httpsServer.Shutdown(ctx) // nolint:errcheck
 		}
 
 		go func() {
@@ -146,9 +146,9 @@ func startHTTP(ctx context.Context, handler http.Handler, cfg *config.Config) (f
 
 		shutdown := func() {
 			log.Print("shutting down HTTP server")
-			httpServer.Shutdown(ctx)
+			httpServer.Shutdown(ctx) // nolint:errcheck
 			log.Print("shutting down HTTPS server")
-			httpsServer.Shutdown(ctx)
+			httpsServer.Shutdown(ctx) // nolint:errcheck
 		}
 
 		go func() {
@@ -178,7 +178,7 @@ func startHTTP(ctx context.Context, handler http.Handler, cfg *config.Config) (f
 
 		shutdown := func() {
 			log.Print("shutting down HTTP server")
-			httpServer.Shutdown(ctx)
+			httpServer.Shutdown(ctx) // nolint:errcheck
 		}
 
 		go func() {
