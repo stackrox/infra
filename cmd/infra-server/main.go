@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/stackrox/infra/service/middleware"
 	"log"
 	"os"
 	"os/signal"
@@ -14,6 +13,7 @@ import (
 	"github.com/stackrox/infra/pkg/buildinfo"
 	"github.com/stackrox/infra/server"
 	"github.com/stackrox/infra/service"
+	"github.com/stackrox/infra/service/middleware"
 )
 
 // main is the entry point of the infra server.

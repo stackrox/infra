@@ -25,7 +25,7 @@ var (
 )
 
 type letsEncryptManager struct {
-	autocert.Manager
+	*autocert.Manager
 	domain string
 }
 
@@ -50,13 +50,13 @@ func (m letsEncryptManager) ServerOption() grpc.ServerOption {
 }
 
 type localCertManager struct {
-	tlsConfig tls.Config
+	tlsConfig *tls.Config
 	listener  net.Listener
 }
 
 func (m localCertManager) DialOptions() []grpc.DialOption {
 	cfg := &tls.Config{
-		InsecureSkipVerify: true,
+		InsecureSkipVerify: true, // nolint:gosec
 	}
 	return []grpc.DialOption{
 		grpc.WithTransportCredentials(credentials.NewTLS(cfg)),
@@ -76,11 +76,10 @@ func (m localCertManager) ServerOption() grpc.ServerOption {
 }
 
 func (m localCertManager) TLSConfig() *tls.Config {
-	return &m.tlsConfig
+	return m.tlsConfig
 }
 
 func NewTLSManager(serverCfg config.ServerConfig) (TLSManager, error) {
-
 	switch {
 	case serverCfg.CertFile != "" && serverCfg.KeyFile != "":
 		listener, err := net.Listen("tcp", "0.0.0.0:"+serverCfg.HTTPS)
@@ -94,7 +93,7 @@ func NewTLSManager(serverCfg config.ServerConfig) (TLSManager, error) {
 		}
 
 		return localCertManager{
-			tlsConfig: tls.Config{
+			tlsConfig: &tls.Config{
 				Certificates: []tls.Certificate{cert},
 				NextProtos:   []string{"h2"},
 			},
@@ -102,19 +101,22 @@ func NewTLSManager(serverCfg config.ServerConfig) (TLSManager, error) {
 		}, nil
 
 	case serverCfg.HTTPS == "443" && serverCfg.Domain != "":
-		manager := autocert.Manager{
-			Cache:      autocert.DirCache(serverCfg.CertDir),
-			HostPolicy: autocert.HostWhitelist(serverCfg.Domain),
-			Prompt:     autocert.AcceptTOS,
-		}
+		//manager := autocert.Manager{
+		//	Cache:      autocert.DirCache(serverCfg.CertDir),
+		//	HostPolicy: autocert.HostWhitelist(serverCfg.Domain),
+		//	Prompt:     autocert.AcceptTOS,
+		//}
 
 		return &letsEncryptManager{
-			Manager: manager,
-			domain:  serverCfg.Domain,
+			Manager: &autocert.Manager{
+				Cache:      autocert.DirCache(serverCfg.CertDir),
+				HostPolicy: autocert.HostWhitelist(serverCfg.Domain),
+				Prompt:     autocert.AcceptTOS,
+			},
+			domain: serverCfg.Domain,
 		}, nil
 
 	default:
 		return nil, errors.New("invalid server config")
-
 	}
 }
