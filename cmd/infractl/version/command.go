@@ -23,10 +23,8 @@ func Command() *cobra.Command {
 }
 
 func version(_ *cobra.Command, _ []string) {
-	var (
-		clientVersion = buildinfo.All()
-		serverVersion *v1.Version
-	)
+	clientVersion := buildinfo.All()
+	var serverVersion *v1.Version
 
 	// Attempt to get the server version if possible. If not, then continue
 	// normal operation, and ignore any errors.

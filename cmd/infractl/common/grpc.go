@@ -9,12 +9,10 @@ import (
 
 // GetGRPCConnection gets a grpc connection to the infra-server with the correct auth.
 func GetGRPCConnection() (*grpc.ClientConn, context.Context, func(), error) {
-	var (
-		ctx, cancel = Context()
-		allDialOpts = []grpc.DialOption{
-			grpc.WithPerRPCCredentials(bearerToken(token())),
-		}
-	)
+	ctx, cancel := ContextWithTimeout()
+	allDialOpts := []grpc.DialOption{
+		grpc.WithPerRPCCredentials(bearerToken(token())),
+	}
 
 	// The insecure flag (--insecure) was given.
 	if insecure() {
