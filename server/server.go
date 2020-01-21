@@ -5,213 +5,160 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"strings"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/pkg/errors"
+	"github.com/stackrox/infra/auth"
 	"github.com/stackrox/infra/config"
 	"github.com/stackrox/infra/service/middleware"
-	"golang.org/x/crypto/acme/autocert"
 	"google.golang.org/grpc"
 )
 
-// RunGRPCServer runs the gRPC service.
-func RunGRPCServer(apiServices []middleware.APIService, cfg *config.Config) (func(), <-chan error, error) {
-	listen, err := net.Listen("tcp", cfg.Server.GRPC)
+const (
+	addressAny       = "0.0.0.0"
+	addressLocalhost = "localhost"
+)
+
+type server struct {
+	services []middleware.APIService
+	//manager  autocert.Manager
+	cfg config.Config
+	//handler   http.Handler
+	//tlsConfig *tls.Config
+	manager TLSManager
+}
+
+func New(cfg config.Config, services ...middleware.APIService) (*server, error) {
+	manager, err := NewTLSManager(cfg.Server)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
+
+	return &server{
+		services: services,
+		cfg:      cfg,
+		manager:  manager,
+	}, nil
+}
+
+func shutdown(fns []func()) func() {
+	return func() {
+		for _, fn := range fns {
+			fn()
+		}
+	}
+}
+
+func (s *server) RunServer() (func(), <-chan error, error) {
+	var (
+		grpcListenAddress  = addressAny + ":" + s.cfg.Server.GRPC
+		grpcConnectAddress = addressLocalhost + ":" + s.cfg.Server.GRPC
+
+		// errch is a channel of size 1 which will receive the (only) error
+		// returned by the server.
+		errch = make(chan error, 1)
+
+		mux = http.NewServeMux()
+
+		shutdowns []func()
+	)
+
+	a, err := auth.NewOAuth(s.cfg.Auth0)
+	if err != nil {
+		panic(err)
+	}
+
+	mux.Handle("/", http.FileServer(http.Dir(s.cfg.Storage.StaticDir)))
+	mux.Handle("/callback", http.HandlerFunc(a.CallbackHandler))
+	mux.Handle("/login", http.HandlerFunc(a.LoginHandler))
+	mux.Handle("/logout", http.HandlerFunc(a.LogoutHandler))
+
+	/////////////////////////////////
+	// Step 1 - Start HTTPS server //
+	/////////////////////////////////
+
+	shutdowns = append(shutdowns, func() {
+		s.manager.Listener().Close()
+	})
+	log.Printf("starting HTTPS server in %s mode", s.manager.Name())
+	go func() {
+		if err := http.Serve(s.manager.Listener(), mux); err != nil {
+			errch <- err
+		}
+	}()
+
+	////////////////////////////////
+	// Step 2 - Start gRPC server //
+	////////////////////////////////
+
+	listen, err := net.Listen("tcp", grpcListenAddress)
+	if err != nil {
+		return shutdown(shutdowns), nil, err
+	}
+	shutdowns = append(shutdowns, func() {
+		listen.Close()
+	})
 
 	// Create the server.
 	server := grpc.NewServer(
-		// Wire up context interceptors.
+		s.manager.ServerOption(),
+
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			// Extract user from JWT token stored in HTTP cookie.
-			middleware.ContextInterceptor(middleware.UserEnricher(cfg)),
+			middleware.ContextInterceptor(middleware.UserEnricher(s.cfg)),
 			// Extract service-account from token stored in Authorization header.
-			middleware.ContextInterceptor(middleware.ServiceAccountEnricher(cfg)),
+			middleware.ContextInterceptor(middleware.ServiceAccountEnricher(s.cfg)),
 			// Enforce authenticated user access on resources that declare it.
 			middleware.ContextInterceptor(middleware.EnforceAnonymousAccess),
 		)),
 	)
 
 	// Register the gRPC API service.
-	for _, apiSvc := range apiServices {
+	for _, apiSvc := range s.services {
 		apiSvc.RegisterServiceServer(server)
 	}
 
-	// errch is a channel of size 1 which will receive the (only) error
-	// returned by the gRPC server.
-	errch := make(chan error, 1)
-
-	shutdown := func() {
-		log.Print("Shutting down gRPC.")
-		server.GracefulStop()
-	}
-
+	shutdowns = append(shutdowns, func() {
+		server.Stop()
+	})
+	log.Print("starting gRPC server")
 	go func() {
-		log.Printf("starting gRPC server on %s", cfg.Server.GRPC)
 		if err := server.Serve(listen); err != nil {
 			errch <- err
 		}
 	}()
 
-	return shutdown, errch, nil
-}
+	///////////////////////////////////////////
+	// Step 3 - Register gRPC-Gateway routes //
+	///////////////////////////////////////////
 
-// RunHTTPServer runs the HTTP/REST gateway
-func RunHTTPServer(apiServices []middleware.APIService, cfg *config.Config) (func(), <-chan error, error) {
-	// Register the HTTP/gRPC gateway service.
-	ctx := context.Background()
-	conn, err := grpc.Dial(cfg.Server.GRPC, grpc.WithInsecure())
+	log.Print("starting gRPC-Gateway client")
+	conn, err := grpc.Dial(grpcConnectAddress, s.manager.DialOptions()...)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "dialing GRPC")
+		return shutdown(shutdowns), nil, errors.Wrap(err, "dialing GRPC")
 	}
+	shutdowns = append(shutdowns, func() {
+		conn.Close()
+	})
 
 	// Register each service
 	gwMux := runtime.NewServeMux(
 		runtime.WithMarshalerOption("*", &runtime.JSONPb{Indent: "  "}),
 	)
-	for _, apiSvc := range apiServices {
+
+	ctx, ctxcancel := context.WithCancel(context.Background())
+	shutdowns = append(shutdowns, ctxcancel)
+
+	for _, apiSvc := range s.services {
 		if err := apiSvc.RegisterServiceHandler(ctx, gwMux, conn); err != nil {
-			return nil, nil, err
+			return shutdown(shutdowns), nil, err
 		}
 	}
 
-	mux := buildRoutes(gwMux, cfg)
-	shutdown, errch := startHTTP(ctx, mux, cfg)
-	return shutdown, errch, nil
-}
+	// Updates http handler routes. This included "web-only" routes, like
+	// login/logout/static, and now includes gRPC-Gateway routes.
+	mux.Handle("/v1/", gwMux)
 
-func startHTTP(ctx context.Context, handler http.Handler, cfg *config.Config) (func(), <-chan error) {
-	// errch is a channel of size 1 which will receive the (only) error
-	// returned by the HTTP server.
-	errch := make(chan error, 1)
-
-	switch {
-	case cfg.Server.CertFile != "" && cfg.Server.KeyFile != "":
-		// If a cert and key files are configured, start both the http and https servers.
-		log.Print("starting HTTP+HTTPS server in local certificate mode")
-
-		httpServer := http.Server{
-			Addr:    cfg.Server.HTTP,
-			Handler: handlerRedirectToHTTPS(cfg.Server.HTTPS),
-		}
-
-		httpsServer := http.Server{
-			Addr:    cfg.Server.HTTPS,
-			Handler: handler,
-		}
-
-		shutdown := func() {
-			log.Print("shutting down HTTP server")
-			httpServer.Shutdown(ctx) // nolint:errcheck
-			log.Print("shutting down HTTPS server")
-			httpsServer.Shutdown(ctx) // nolint:errcheck
-		}
-
-		go func() {
-			log.Printf("starting HTTP server on %s", httpServer.Addr)
-			if err := httpServer.ListenAndServe(); err != nil {
-				errch <- err
-			}
-		}()
-
-		go func() {
-			log.Printf("starting HTTPS server on %s", httpsServer.Addr)
-			if err := httpsServer.ListenAndServeTLS(cfg.Server.CertFile, cfg.Server.KeyFile); err != nil {
-				errch <- err
-			}
-		}()
-
-		return shutdown, errch
-
-	case cfg.Server.HTTPS != "" && cfg.Server.Domain != "":
-		// If https and a domain is configured, start both the http and https servers with Let’s Encrypt.
-		log.Print("starting HTTP+HTTPS server in Let’s Encrypt mode")
-
-		certManager := autocert.Manager{
-			Cache:      autocert.DirCache(cfg.Storage.CertDir),
-			HostPolicy: autocert.HostWhitelist(cfg.Server.Domain),
-			Prompt:     autocert.AcceptTOS,
-		}
-
-		httpServer := http.Server{
-			Addr:    cfg.Server.HTTP,
-			Handler: certManager.HTTPHandler(nil),
-		}
-
-		httpsServer := http.Server{
-			Addr:      cfg.Server.HTTPS,
-			Handler:   handler,
-			TLSConfig: certManager.TLSConfig(),
-		}
-
-		shutdown := func() {
-			log.Print("shutting down HTTP server")
-			httpServer.Shutdown(ctx) // nolint:errcheck
-			log.Print("shutting down HTTPS server")
-			httpsServer.Shutdown(ctx) // nolint:errcheck
-		}
-
-		go func() {
-			log.Printf("starting HTTP server on %s", httpServer.Addr)
-			if err := httpServer.ListenAndServe(); err != nil {
-				errch <- err
-			}
-		}()
-
-		go func() {
-			log.Printf("starting HTTPS server on %s (%s)", httpsServer.Addr, cfg.Server.Domain)
-			if err := httpsServer.ListenAndServeTLS("", ""); err != nil {
-				errch <- err
-			}
-		}()
-
-		return shutdown, errch
-
-	default:
-		// Otherwise, only start the http server.
-		log.Print("Starting HTTP server only")
-
-		httpServer := http.Server{
-			Addr:    cfg.Server.HTTP,
-			Handler: handler,
-		}
-
-		shutdown := func() {
-			log.Print("shutting down HTTP server")
-			httpServer.Shutdown(ctx) // nolint:errcheck
-		}
-
-		go func() {
-			log.Printf("starting HTTP server on %s", httpServer.Addr)
-			if err := httpServer.ListenAndServe(); err != nil {
-				errch <- err
-			}
-		}()
-
-		return shutdown, errch
-	}
-}
-
-// handlerRedirectToHTTPS returns a http.Handler that redirects requests to use HTTPS.
-func handlerRedirectToHTTPS(httpsEndpoint string) http.Handler {
-	httpsPort := "443"
-	chunks := strings.SplitN(httpsEndpoint, ":", 2)
-	if len(chunks) == 2 {
-		httpsPort = chunks[1]
-	}
-
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "GET" && r.Method != "HEAD" {
-			http.Error(w, "Use HTTPS", http.StatusBadRequest)
-			return
-		}
-
-		host := strings.SplitN(r.Host, ":", 2)[0]
-		target := "https://" + host + ":" + httpsPort + r.URL.RequestURI()
-		http.Redirect(w, r, target, http.StatusFound)
-	})
+	return shutdown(shutdowns), errch, nil
 }

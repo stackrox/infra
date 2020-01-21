@@ -18,7 +18,7 @@ const (
 
 // oAuth facilitates an Oauth2 login flow via http handlers.
 type oAuth struct {
-	cfg      *config.Config
+	cfg      config.Auth0Config
 	jwtState *stateTokenizer
 	jwtAuth0 *auth0Tokenizer
 	jwtUser  *userTokenizer
@@ -26,25 +26,25 @@ type oAuth struct {
 }
 
 // NewOAuth returns a new oAuth struct derived from the given config.
-func NewOAuth(cfg *config.Config) (*oAuth, error) {
-	jwtAuth0, err := NewAuth0Tokenizer(0, cfg.Auth0.PublicKey)
+func NewOAuth(cfg config.Auth0Config) (*oAuth, error) {
+	jwtAuth0, err := NewAuth0Tokenizer(0, cfg.PublicKey)
 	if err != nil {
 		return nil, err
 	}
 
 	return &oAuth{
 		cfg:      cfg,
-		jwtState: NewStateTokenizer(time.Minute, cfg.Auth0.SessionKey),
+		jwtState: NewStateTokenizer(time.Minute, cfg.SessionKey),
 		jwtAuth0: jwtAuth0,
-		jwtUser:  NewUserTokenizer(time.Hour, cfg.Auth0.SessionKey),
+		jwtUser:  NewUserTokenizer(time.Hour, cfg.SessionKey),
 		conf: &oauth2.Config{
-			ClientID:     cfg.Auth0.ClientID,
-			ClientSecret: cfg.Auth0.ClientSecret,
-			RedirectURL:  cfg.Auth0.CallbackURL,
+			ClientID:     cfg.ClientID,
+			ClientSecret: cfg.ClientSecret,
+			RedirectURL:  cfg.CallbackURL,
 			Scopes:       []string{"email", "openid", "profile"},
 			Endpoint: oauth2.Endpoint{
-				AuthURL:  cfg.Auth0.AuthURL,
-				TokenURL: cfg.Auth0.TokenURL,
+				AuthURL:  cfg.AuthURL,
+				TokenURL: cfg.TokenURL,
 			},
 		},
 	}, nil
@@ -62,7 +62,7 @@ func (a oAuth) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Redirect to Auth0 so that the user can login externally.
-	audience := oauth2.SetAuthURLParam("audience", a.cfg.Auth0.UserinfoURL)
+	audience := oauth2.SetAuthURLParam("audience", a.cfg.UserinfoURL)
 	url := a.conf.AuthCodeURL(stateToken, audience)
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
@@ -121,10 +121,10 @@ func (a oAuth) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 // The user token cookie is destroyed, and the user is redirected to Auth0 for logout.
 func (a oAuth) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	cfg := a.cfg
-	URL, _ := url.Parse(cfg.Auth0.LogoutURL)
+	URL, _ := url.Parse(cfg.LogoutURL)
 	parameters := url.Values{}
-	parameters.Add("returnTo", cfg.Auth0.LoginURL)
-	parameters.Add("client_id", cfg.Auth0.ClientID)
+	parameters.Add("returnTo", cfg.LoginURL)
+	parameters.Add("client_id", cfg.ClientID)
 	URL.RawQuery = parameters.Encode()
 
 	w.Header().Set("set-cookie", tokenCookieExpired)

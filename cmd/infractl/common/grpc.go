@@ -2,6 +2,7 @@ package common
 
 import (
 	"context"
+	"crypto/tls"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -16,7 +17,13 @@ func GetGRPCConnection() (*grpc.ClientConn, context.Context, func(), error) {
 
 	// The insecure flag (--insecure) was given.
 	if insecure() {
-		allDialOpts = append(allDialOpts, grpc.WithInsecure())
+		allDialOpts = append(allDialOpts,
+			grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
+				InsecureSkipVerify: true,
+			})),
+		)
+	} else {
+		allDialOpts = append(allDialOpts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{})))
 	}
 
 	// Dial our specified endpoint.
@@ -49,5 +56,5 @@ func (t bearerToken) GetRequestMetadata(ctx context.Context, uri ...string) (map
 }
 
 func (t bearerToken) RequireTransportSecurity() bool {
-	return false
+	return true
 }

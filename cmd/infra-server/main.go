@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/stackrox/infra/service/middleware"
 	"log"
 	"os"
 	"os/signal"
@@ -13,7 +14,6 @@ import (
 	"github.com/stackrox/infra/pkg/buildinfo"
 	"github.com/stackrox/infra/server"
 	"github.com/stackrox/infra/service"
-	"github.com/stackrox/infra/service/middleware"
 )
 
 // main is the entry point of the infra server.
@@ -57,28 +57,23 @@ func mainCmd() error {
 		return err
 	}
 
-	// Start the gRPC server.
-	grpcShutdown, grpcErr, err := server.RunGRPCServer(services, cfg)
+	svr, err := server.New(*cfg, services...)
 	if err != nil {
-		log.Fatalf("Error %v.\n", err)
+		return err
 	}
-	defer grpcShutdown()
 
-	// Start the HTTP/gRPC gateway server.
-	httpShutdown, httpErr, err := server.RunHTTPServer(services, cfg)
+	shutdown, errch, err := svr.RunServer()
+	defer shutdown()
 	if err != nil {
-		log.Fatalf("Error %v.\n", err)
+		return err
 	}
-	defer httpShutdown()
 
 	sigint := make(chan os.Signal, 1)
 	signal.Notify(sigint, syscall.SIGINT, syscall.SIGTERM)
 
 	select {
-	case err := <-grpcErr:
-		return errors.Wrap(err, "grpc error received")
-	case err := <-httpErr:
-		return errors.Wrap(err, "http error received")
+	case err := <-errch:
+		return errors.Wrap(err, "server error received")
 	case <-sigint:
 		return errors.New("signal caught")
 	}

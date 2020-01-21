@@ -19,7 +19,7 @@ type userContextKey struct{}
 // possible. If there is no user, this function does not return an error, as
 // anonymous API calls are a possibility. Authorization must be independently
 // enforced.
-func UserEnricher(cfg *config.Config) contextFunc {
+func UserEnricher(cfg config.Config) contextFunc {
 	jwtUser := auth.NewUserTokenizer(time.Hour, cfg.Auth0.SessionKey)
 	return func(ctx context.Context, _ *grpc.UnaryServerInfo) (context.Context, error) {
 		// Extract request metadata (proxied http headers) from given context.
