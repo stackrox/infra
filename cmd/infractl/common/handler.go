@@ -9,11 +9,11 @@ import (
 	"google.golang.org/grpc"
 )
 
-type Fancifier interface {
-	Fancy()
+type PrettyPrinter interface {
+	PrettyPrint()
 }
 
-type GRPCHandler func(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []string) (Fancifier, error)
+type GRPCHandler func(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []string) (PrettyPrinter, error)
 
 func WithGRPCHandler(handler GRPCHandler) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
@@ -43,7 +43,7 @@ func WithGRPCHandler(handler GRPCHandler) func(cmd *cobra.Command, args []string
 		}
 
 		// Pretty print result instead.
-		result.Fancy()
+		result.PrettyPrint()
 		return nil
 	}
 }

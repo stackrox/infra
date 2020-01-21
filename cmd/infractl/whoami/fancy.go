@@ -8,7 +8,7 @@ import (
 
 type whoamiResp v1.WhoamiResponse
 
-func (r whoamiResp) Fancy() {
+func (r whoamiResp) PrettyPrint() {
 	switch p := r.Principal.(type) {
 	case *v1.WhoamiResponse_User:
 		panic("authenticating as a user is not possible in this context")

@@ -21,7 +21,7 @@ func Command() *cobra.Command {
 	}
 }
 
-func whoami(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, _ []string) (common.Fancifier, error) {
+func whoami(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, _ []string) (common.PrettyPrinter, error) {
 	resp, err := v1.NewUserServiceClient(conn).Whoami(ctx, &empty.Empty{})
 	if err != nil {
 		return nil, err

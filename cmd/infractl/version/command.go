@@ -22,7 +22,7 @@ func Command() *cobra.Command {
 	}
 }
 
-func version(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, _ []string) (common.Fancifier, error) {
+func version(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, _ []string) (common.PrettyPrinter, error) {
 	clientVersion := buildinfo.All()
 	var serverVersion *v1.Version
 

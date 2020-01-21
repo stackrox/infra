@@ -27,8 +27,8 @@ var flags struct { // nolint:gochecknoglobals
 	token    string
 }
 
-// AddConnectionFlags adds connection-related flags to infractl.
-func AddConnectionFlags(c *cobra.Command) {
+// AddCommonFlags adds connection-related flags to infractl.
+func AddCommonFlags(c *cobra.Command) {
 	c.PersistentFlags().StringVarP(&flags.endpoint, "endpoint", "e", defaultEndpoint, "endpoint for service to contact")
 	c.PersistentFlags().BoolVarP(&flags.insecure, "insecure", "k", false, "enable insecure connection")
 	c.PersistentFlags().BoolVar(&flags.json, "json", false, "output as JSON")

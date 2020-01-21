@@ -12,7 +12,7 @@ type versionResp struct {
 	Server *v1.Version `json:"Server"`
 }
 
-func (r versionResp) Fancy() {
+func (r versionResp) PrettyPrint() {
 	printVersion("Client", r.Client)
 	printVersion("Server", r.Server)
 }
