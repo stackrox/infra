@@ -21,7 +21,7 @@ func Command() *cobra.Command {
 	}
 }
 
-func flavors(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, _ []string) (common.Fancifier, error) {
+func flavors(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, _ []string) (common.PrettyPrinter, error) {
 	resp, err := v1.NewClusterServiceClient(conn).Flavors(ctx, &empty.Empty{})
 	if err != nil {
 		return nil, err

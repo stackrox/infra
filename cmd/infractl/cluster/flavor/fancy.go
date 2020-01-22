@@ -8,7 +8,7 @@ import (
 
 type clusterFlavorsResp v1.FlavorsResponse
 
-func (r clusterFlavorsResp) Fancy() {
+func (r clusterFlavorsResp) PrettyPrint() {
 	for _, flavor := range r.Flavors {
 		fmt.Printf("%s ", flavor.GetID())
 		if flavor.GetID() == r.Default {
