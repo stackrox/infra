@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sort"
 
@@ -25,15 +26,10 @@ var (
 
 // NewClusterService creates a new ClusterService.
 func NewClusterService(clustersCfg []config.FlavorConfig) (middleware.APIService, error) {
-	var (
-		// defaultCount is the number of configured clusterFlavors with "default" availability.
-		defaultCount int
-
-		impl = clusterImpl{
-			clusterFlavors:       make(map[string]*v1.Flavor, len(clustersCfg)),
-			defaultClusterFlavor: nil,
-		}
-	)
+	impl := clusterImpl{
+		clusterFlavors:       make(map[string]*v1.Flavor, len(clustersCfg)),
+		defaultClusterFlavor: nil,
+	}
 
 	for _, clusterCfg := range clustersCfg {
 		// Sanity check and convert the configured availability.
@@ -53,14 +49,17 @@ func NewClusterService(clustersCfg []config.FlavorConfig) (middleware.APIService
 
 		// Save off the default cluster separately.
 		if cluster.Availability == v1.Flavor_default {
-			defaultCount++
+			// Ensure that more than one default flavor was not configured.
+			if impl.defaultClusterFlavor != nil {
+				return nil, fmt.Errorf("both %q and %q configured as default flavors", impl.defaultClusterFlavor.ID, cluster.ID)
+			}
 			impl.defaultClusterFlavor = cluster
 		}
 	}
 
-	// Ensure that the correct amount (exactly 1) of default clusterFlavors exist.
-	if defaultCount != 1 {
-		return nil, fmt.Errorf("exactly 1 default cluster must be configured")
+	// Ensure a default flavor was configured.
+	if impl.defaultClusterFlavor == nil {
+		return nil, errors.New("no default flavor configured")
 	}
 
 	return &impl, nil
