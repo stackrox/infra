@@ -14,8 +14,11 @@ type APIService interface {
 	RegisterServiceHandler(context.Context, *runtime.ServeMux, *grpc.ClientConn) error
 }
 
+// APIServiceFunc represents a function that is capable of making a APIService.
 type APIServiceFunc func() (APIService, error)
 
+// Services process the given APIServiceFunc list, and returns the resulting
+// APIService list. If any errors occur, that error is returned immediately.
 func Services(serviceFuncs ...APIServiceFunc) ([]APIService, error) {
 	services := make([]APIService, len(serviceFuncs))
 	for index, serviceFunc := range serviceFuncs {

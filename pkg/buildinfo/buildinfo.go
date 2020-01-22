@@ -1,3 +1,5 @@
+// Package buildinfo provides information about the built binary and the
+// environment in which it was built.
 package buildinfo
 
 import (

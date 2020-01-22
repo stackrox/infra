@@ -11,6 +11,8 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
+// TLSManager represents a type that facilitates configuring a http server with
+// TLS certificates.
 type TLSManager interface {
 	DialOptions() []grpc.DialOption
 	Listener() net.Listener
@@ -27,6 +29,17 @@ var (
 type letsEncryptManager struct {
 	*autocert.Manager
 	domain string
+}
+
+func newLetsEncryptManager(domain, certDir string) TLSManager {
+	return &letsEncryptManager{
+		Manager: &autocert.Manager{
+			Cache:      autocert.DirCache(certDir),
+			HostPolicy: autocert.HostWhitelist(domain),
+			Prompt:     autocert.AcceptTOS,
+		},
+		domain: domain,
+	}
 }
 
 func (m letsEncryptManager) DialOptions() []grpc.DialOption {
@@ -49,9 +62,29 @@ type localCertManager struct {
 	listener  net.Listener
 }
 
+func newLocalCertManager(certFile, keyFile string, httpsPort string) (TLSManager, error) {
+	listener, err := net.Listen("tcp", "0.0.0.0:"+httpsPort)
+	if err != nil {
+		return nil, err
+	}
+
+	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	if err != nil {
+		return nil, err
+	}
+
+	return localCertManager{
+		tlsConfig: &tls.Config{
+			Certificates: []tls.Certificate{cert},
+			NextProtos:   []string{"h2"},
+		},
+		listener: listener,
+	}, nil
+}
+
 func (m localCertManager) DialOptions() []grpc.DialOption {
 	cfg := &tls.Config{
-		InsecureSkipVerify: true, // nolint:gosec
+		InsecureSkipVerify: true,
 	}
 	return []grpc.DialOption{
 		grpc.WithTransportCredentials(credentials.NewTLS(cfg)),
@@ -74,38 +107,17 @@ func (m localCertManager) TLSConfig() *tls.Config {
 	return m.tlsConfig
 }
 
+// NewTLSManager creates an appropriate TLSManager based on the current server
+// configuration.
 func NewTLSManager(serverCfg config.ServerConfig) (TLSManager, error) {
 	switch {
 	case serverCfg.CertFile != "" && serverCfg.KeyFile != "":
-		listener, err := net.Listen("tcp", "0.0.0.0:"+serverCfg.HTTPS)
-		if err != nil {
-			return nil, err
-		}
-
-		cert, err := tls.LoadX509KeyPair(serverCfg.CertFile, serverCfg.KeyFile)
-		if err != nil {
-			return nil, err
-		}
-
-		return localCertManager{
-			tlsConfig: &tls.Config{
-				Certificates: []tls.Certificate{cert},
-				NextProtos:   []string{"h2"},
-			},
-			listener: listener,
-		}, nil
+		return newLocalCertManager(serverCfg.CertFile, serverCfg.KeyFile, serverCfg.HTTPS)
 
 	case serverCfg.HTTPS == "443" && serverCfg.Domain != "":
-		return &letsEncryptManager{
-			Manager: &autocert.Manager{
-				Cache:      autocert.DirCache(serverCfg.CertDir),
-				HostPolicy: autocert.HostWhitelist(serverCfg.Domain),
-				Prompt:     autocert.AcceptTOS,
-			},
-			domain: serverCfg.Domain,
-		}, nil
+		return newLetsEncryptManager(serverCfg.Domain, serverCfg.CertDir), nil
 
 	default:
-		return nil, errors.New("invalid server config")
+		return nil, errors.New("invalid server configuration")
 	}
 }

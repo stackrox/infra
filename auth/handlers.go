@@ -1,3 +1,4 @@
+// Package auth facilitates an OAuth login/logout flow.
 package auth
 
 import (
@@ -13,7 +14,7 @@ import (
 
 const (
 	tokenCookieNew     = "token=%s"
-	tokenCookieExpired = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT" // nolint:gosec
+	tokenCookieExpired = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
 )
 
 // OAuth facilitates an Oauth2 login flow via http handlers.

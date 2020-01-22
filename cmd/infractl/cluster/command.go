@@ -1,3 +1,4 @@
+// Package cluster implements the infractl cluster ... command.
 package cluster
 
 import (
