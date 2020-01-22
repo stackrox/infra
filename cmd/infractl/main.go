@@ -18,7 +18,7 @@ func main() {
 		Version:      buildinfo.Version(),
 	}
 
-	common.AddConnectionFlags(c)
+	common.AddCommonFlags(c)
 
 	c.AddCommand(
 		// $ infractl whoami

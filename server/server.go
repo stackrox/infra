@@ -70,7 +70,9 @@ func RunHTTPServer(apiServices []middleware.APIService, cfg *config.Config) (fun
 	}
 
 	// Register each service
-	gwMux := runtime.NewServeMux()
+	gwMux := runtime.NewServeMux(
+		runtime.WithMarshalerOption("*", &runtime.JSONPb{Indent: "  "}),
+	)
 	for _, apiSvc := range apiServices {
 		if err := apiSvc.RegisterServiceHandler(ctx, gwMux, conn); err != nil {
 			return nil, nil, err
