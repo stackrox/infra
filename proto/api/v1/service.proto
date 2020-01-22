@@ -27,20 +27,45 @@ service VersionService {
 
 }
 
+// WhoamiResponse represents details about the current authenticated principal.
 message WhoamiResponse {
-    google.protobuf.Timestamp Expiry         = 1;
-    User User = 2;
+    // Principal represents a possible type of authenticated principal.
+    oneof principal {
+        // User represents an authenticated human.
+        User User = 1;
+
+        // ServiceAccount represents an authenticated service account robot.
+        ServiceAccount ServiceAccount = 2;
+    }
 }
 
+// User represents an authenticated (human) principal.
 message User {
+    // Expiry is the expiration date of this user session. Used only as a hint
+    // to the user and not for enforcement.
+    google.protobuf.Timestamp Expiry         = 1;
+
+    // Name is the full name of the user.
+    string Name = 2;
+
+    // Email is the email address of the user.
+    string Email = 3;
+
+    // Picture is a URL linking to this user's profile picture, if available.
+    string Picture = 4;
+}
+
+// ServiceAccount represents an authenticated service account (robot) principal.
+message ServiceAccount {
+    // Name is a human readable name for the service account.
     string Name = 1;
-    string Email = 2;
-    string Picture = 3;
-    string Kind = 4;
+
+    // Description is a human readable description for the service account.
+    string Description = 2;
 }
 
 service UserService {
-
+    // Whoami provides information about the currently authenticated principal.
     rpc Whoami (google.protobuf.Empty) returns (WhoamiResponse) {
         option (google.api.http) = {
             get: "/v1/whoami"

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/pkg/errors"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 )
@@ -16,7 +17,7 @@ func createHumanUser(profile auth0Claims) *v1.User {
 		Name:    profile.Name,
 		Email:   profile.Email,
 		Picture: profile.PictureURL,
-		Kind:    "human",
+		Expiry:  &timestamp.Timestamp{Seconds: profile.ExpiresAt},
 	}
 }
 
@@ -180,14 +181,13 @@ func (t userTokenizer) Generate(user *v1.User) (string, error) {
 	return token.SignedString(t.secret)
 }
 
-// Validate validates a user JWT and returns the contained v1.User struct and
-// expiration date.
-func (t userTokenizer) Validate(token string) (*v1.User, time.Time, error) {
+// Validate validates a user JWT and returns the contained v1.User struct.
+func (t userTokenizer) Validate(token string) (*v1.User, error) {
 	var claims userClaims
 	if _, err := jwt.ParseWithClaims(token, &claims, func(_ *jwt.Token) (interface{}, error) {
 		return t.secret, nil
 	}); err != nil {
-		return nil, time.Time{}, err
+		return nil, err
 	}
-	return &claims.User, time.Unix(claims.ExpiresAt, 0), nil
+	return &claims.User, nil
 }
