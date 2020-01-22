@@ -25,8 +25,7 @@ func NewVersionService() middleware.APIService {
 
 // GetVersion implements VersionService.GetVersion.
 func (s *versionImpl) GetVersion(ctx context.Context, _ *empty.Empty) (*v1.Version, error) {
-	info := buildinfo.All()
-	return &info, nil
+	return buildinfo.All(), nil
 }
 
 // AllowAnonymous declares that the version service can be called anonymously.

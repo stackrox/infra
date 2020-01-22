@@ -1,11 +1,33 @@
 package main
 
 import (
-	"fmt"
+	"os"
 
+	"github.com/spf13/cobra"
+	"github.com/stackrox/infra/cmd/infractl/common"
+	"github.com/stackrox/infra/cmd/infractl/version"
+	"github.com/stackrox/infra/cmd/infractl/whoami"
 	"github.com/stackrox/infra/pkg/buildinfo"
 )
 
 func main() {
-	fmt.Printf("%+v\n", buildinfo.All())
+	// $ infractl
+	c := &cobra.Command{
+		SilenceUsage: true,
+		Use:          os.Args[0],
+		Version:      buildinfo.Version(),
+	}
+
+	common.AddConnectionFlags(c)
+
+	c.AddCommand(
+		// $ infractl whoami
+		whoami.Command(),
+		// $ infractl version
+		version.Command(),
+	)
+
+	if err := c.Execute(); err != nil {
+		os.Exit(1)
+	}
 }
