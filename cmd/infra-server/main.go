@@ -45,9 +45,16 @@ func mainCmd() error {
 		return errors.Wrapf(err, "failed to load config file %q", *flagConfig)
 	}
 
-	services := []middleware.APIService{
-		service.NewUserService(),
-		service.NewVersionService(),
+	// Construct each individual service.
+	services, err := middleware.Services(
+		func() (middleware.APIService, error) {
+			return service.NewClusterService(cfg.Flavors)
+		},
+		service.NewUserService,
+		service.NewVersionService,
+	)
+	if err != nil {
+		return err
 	}
 
 	// Start the gRPC server.
