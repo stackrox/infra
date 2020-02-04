@@ -3,6 +3,7 @@ syntax = "proto3";
 option go_package = "v1";
 
 import "google/api/annotations.proto";
+import "google/protobuf/duration.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
@@ -150,4 +151,70 @@ service FlavorService {
         };
     }
 
+}
+
+// Status represents the various cluster states.
+enum Status {
+    // Failed is the state when the cluster has failed in one way or another.
+    Failed = 0;
+
+    // Creating is the state when the cluster is being created.
+    Creating = 1;
+
+    // Ready is the state when the cluster is available and ready for use.
+    Ready = 2;
+
+    // Destroying is the state when the cluster is being destroyed.
+    Destroying = 3;
+
+    // Finished is the state when the cluster has been successfully destroyed.
+    Finished = 4;
+}
+
+// Cluster represents a single cluster.
+message Cluster {
+    // ID is the unique ID for the cluster.
+    string ID = 1;
+
+    // Status is the current status for the cluster.
+    Status Status = 2;
+
+    // Flavor is the original flavor ID that launched this cluster.
+    string Flavor = 3;
+
+    // Owner is the email address for the cluster owner.
+    string Owner = 4;
+
+    // CreatedOn is the timestamp on which the cluster started being created.
+    google.protobuf.Timestamp CreatedOn         = 5;
+
+    // DestroyedOn is the timestamp on which the cluster finished being
+    // destroyed.
+    google.protobuf.Timestamp DestroyedOn         = 6;
+
+    // Lifespan is the duration for which the cluster should be kept alive.
+    google.protobuf.Duration Lifespan = 7;
+}
+
+// ClusterListResponse represents details about all clusters.
+message ClusterListResponse {
+    // Clusters is a list of all clusters.
+    repeated Cluster Clusters = 1;
+}
+
+// FlavorService provides flavor based functionality.
+service ClusterService {
+    // Info provides information about a specific cluster.
+    rpc Info (ResourceByID) returns (Cluster) {
+        option (google.api.http) = {
+            get: "/v1/cluster/{id}"
+        };
+    }
+
+    // List provides information about the available clusters.
+    rpc List (google.protobuf.Empty) returns (ClusterListResponse) {
+        option (google.api.http) = {
+            get: "/v1/cluster"
+        };
+    }
 }
