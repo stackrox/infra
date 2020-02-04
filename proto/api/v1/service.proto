@@ -8,6 +8,11 @@ import "google/protobuf/timestamp.proto";
 
 package v1;
 
+// ResourceByID represents a generic reference to a named/unique resource.
+message ResourceByID {
+    string id = 1;
+}
+
 message Version {
     google.protobuf.Timestamp BuildDate         = 1;
     string GitCommit     = 2;
@@ -74,6 +79,18 @@ service UserService {
 
 }
 
+// Parameter represents a single parameter that is needed to launch a flavor.
+message Parameter {
+    // Name is the unique name of the parameter.
+    string Name = 1;
+
+    // Description is a human readable description for the parameter.
+    string Description = 2;
+
+    // Example is an arbitrary hint for a valid parameter value.
+    string Example = 3;
+}
+
 // Flavor represents a configured cluster flavor.
 message Flavor {
     // ID is the unique, human type-able, ID for the flavor.
@@ -103,10 +120,13 @@ message Flavor {
 
     // Description is an availability classification for the flavor.
     availability Availability = 4;
+
+    // Parameters is the list of parameters required for launching this flavor.
+    repeated Parameter Parameters = 5;
 }
 
-// FlavorsResponse represents details about the available cluster flavors.
-message FlavorsResponse {
+// FlavorListResponse represents details about the available cluster flavors.
+message FlavorListResponse {
     // Default is the flavor ID of the default cluster flavor.
     string Default = 1;
 
@@ -114,12 +134,19 @@ message FlavorsResponse {
     repeated Flavor Flavors = 2;
 }
 
-// ClusterService provides cluster based functionality.
-service ClusterService {
-    // Flavors provides information about the available cluster flavors.
-    rpc Flavors (google.protobuf.Empty) returns (FlavorsResponse) {
+// FlavorService provides flavor based functionality.
+service FlavorService {
+    // List provides information about the available flavors.
+    rpc List (google.protobuf.Empty) returns (FlavorListResponse) {
         option (google.api.http) = {
-            get: "/v1/cluster/flavors"
+            get: "/v1/flavor"
+        };
+    }
+
+    // Info provides information about a specific flavor.
+    rpc Info (ResourceByID) returns (Flavor) {
+        option (google.api.http) = {
+            get: "/v1/flavor/{id}"
         };
     }
 

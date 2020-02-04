@@ -1,4 +1,4 @@
-package flavor
+package list
 
 import (
 	"fmt"
@@ -6,9 +6,9 @@ import (
 	v1 "github.com/stackrox/infra/generated/api/v1"
 )
 
-type clusterFlavorsResp v1.FlavorsResponse
+type flavorListResponse v1.FlavorListResponse
 
-func (r clusterFlavorsResp) PrettyPrint() {
+func (r flavorListResponse) PrettyPrint() {
 	for _, flavor := range r.Flavors {
 		fmt.Printf("%s ", flavor.GetID())
 		if flavor.GetID() == r.Default {
