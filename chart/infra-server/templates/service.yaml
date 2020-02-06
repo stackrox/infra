@@ -23,6 +23,11 @@ spec:
       name: https
       protocol: TCP
       targetPort: 443
+
+    - port: 823
+      name: grpc
+      protocol: TCP
+      targetPort: 823
   selector:
     app.kubernetes.io/name: {{ .Release.Name }}
 

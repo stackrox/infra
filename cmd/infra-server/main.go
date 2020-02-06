@@ -57,29 +57,23 @@ func mainCmd() error {
 		return err
 	}
 
-	// Start the gRPC server.
-	grpcShutdown, grpcErr, err := server.RunGRPCServer(services, cfg)
+	srv, err := server.New(*cfg, services...)
 	if err != nil {
-		log.Fatalf("Error %v.\n", err)
+		return err
 	}
-	defer grpcShutdown()
 
-	// Start the HTTP/gRPC gateway server.
-	httpShutdown, httpErr, err := server.RunHTTPServer(services, cfg)
+	errCh, err := srv.RunServer()
 	if err != nil {
-		log.Fatalf("Error %v.\n", err)
+		return err
 	}
-	defer httpShutdown()
 
-	sigint := make(chan os.Signal, 1)
-	signal.Notify(sigint, syscall.SIGINT, syscall.SIGTERM)
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 
 	select {
-	case err := <-grpcErr:
-		return errors.Wrap(err, "grpc error received")
-	case err := <-httpErr:
-		return errors.Wrap(err, "http error received")
-	case <-sigint:
+	case err := <-errCh:
+		return errors.Wrap(err, "server error received")
+	case <-sigCh:
 		return errors.New("signal caught")
 	}
 }

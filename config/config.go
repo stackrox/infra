@@ -30,15 +30,14 @@ type Auth0Config struct {
 
 type ServerConfig struct {
 	GRPC     string `toml:"grpc"`
-	HTTP     string `toml:"http"`
 	HTTPS    string `toml:"https"`
 	Domain   string `toml:"domain"`
 	CertFile string `toml:"cert"`
 	KeyFile  string `toml:"key"`
+	CertDir  string `toml:"certs"`
 }
 
 type StorageConfig struct {
-	CertDir   string `toml:"certs"`
 	StaticDir string `toml:"static"`
 }
 
