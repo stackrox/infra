@@ -22,13 +22,9 @@ const (
 
 type server struct {
 	services []middleware.APIService
-	//manager  autocert.Manager
-	cfg config.Config
-	//handler   http.Handler
-	//tlsConfig *tls.Config
-	manager TLSManager
-
-	oauth *auth.OAuth
+	cfg      config.Config
+	manager  TLSManager
+	oauth    *auth.OAuth
 }
 
 func New(cfg config.Config, services ...middleware.APIService) (*server, error) {
@@ -37,71 +33,28 @@ func New(cfg config.Config, services ...middleware.APIService) (*server, error) 
 		return nil, err
 	}
 
-	oauth, err := auth.NewOAuth(s.cfg.Auth0)
+	oauth, err := auth.NewOAuth(cfg.Auth0)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	return &server{
 		services: services,
 		cfg:      cfg,
 		manager:  manager,
-		oauth: oauth,
+		oauth:    oauth,
 	}, nil
 }
 
-func shutdown(fns []func()) func() {
-	return func() {
-		for _, fn := range fns {
-			fn()
-		}
-	}
-}
-
-func (s *server) RunServer() (func(), <-chan error, error) {
-	var (
-		grpcListenAddress  = addressAny + ":" + s.cfg.Server.GRPC
-		grpcConnectAddress = addressLocalhost + ":" + s.cfg.Server.GRPC
-
-		// errch is a channel of size 1 which will receive the (only) error
-		// returned by the server.
-		errch = make(chan error, 1)
-
-		mux = http.NewServeMux()
-
-		shutdowns []func()
-	)
-
-	mux.Handle("/", http.FileServer(http.Dir(s.cfg.Storage.StaticDir)))
-	mux.Handle("/callback", http.HandlerFunc(s.oauth.CallbackHandler))
-	mux.Handle("/login", http.HandlerFunc(s.oauth.LoginHandler))
-	mux.Handle("/logout", http.HandlerFunc(s.oauth.LogoutHandler))
-
-	/////////////////////////////////
-	// Step 1 - Start HTTPS server //
-	/////////////////////////////////
-
-	shutdowns = append(shutdowns, func() {
-		s.manager.Listener().Close()
-	})
-	log.Printf("starting HTTPS server in %s mode", s.manager.Name())
-	go func() {
-		if err := http.Serve(s.manager.Listener(), mux); err != nil {
-			errch <- err
-		}
-	}()
+func (s *server) RunServer() (<-chan error, error) {
+	grpcListenAddress := addressAny + ":" + s.cfg.Server.GRPC
+	grpcConnectAddress := addressLocalhost + ":" + s.cfg.Server.GRPC
+	mux := http.NewServeMux()
+	errCh := make(chan error, 1)
 
 	////////////////////////////////
-	// Step 2 - Start gRPC server //
+	// Step 1 - Start gRPC server //
 	////////////////////////////////
-
-	listen, err := net.Listen("tcp", grpcListenAddress)
-	if err != nil {
-		return shutdown(shutdowns), nil, err
-	}
-	shutdowns = append(shutdowns, func() {
-		listen.Close()
-	})
 
 	// Create the server.
 	server := grpc.NewServer(
@@ -122,13 +75,31 @@ func (s *server) RunServer() (func(), <-chan error, error) {
 		apiSvc.RegisterServiceServer(server)
 	}
 
-	shutdowns = append(shutdowns, func() {
-		server.Stop()
-	})
+	listen, err := net.Listen("tcp", grpcListenAddress)
+	if err != nil {
+		return nil, err
+	}
+
 	log.Print("starting gRPC server")
 	go func() {
+		defer listen.Close()
+		defer server.Stop()
+
 		if err := server.Serve(listen); err != nil {
-			errch <- err
+			errCh <- err
+		}
+	}()
+
+	/////////////////////////////////
+	// Step 2 - Start HTTPS server //
+	/////////////////////////////////
+
+	log.Printf("starting HTTPS server in %s mode", s.manager.Name())
+	go func() {
+		defer s.manager.Listener().Close()
+
+		if err := http.Serve(s.manager.Listener(), mux); err != nil {
+			errCh <- err
 		}
 	}()
 
@@ -139,29 +110,27 @@ func (s *server) RunServer() (func(), <-chan error, error) {
 	log.Print("starting gRPC-Gateway client")
 	conn, err := grpc.Dial(grpcConnectAddress, s.manager.DialOptions()...)
 	if err != nil {
-		return shutdown(shutdowns), nil, errors.Wrap(err, "dialing GRPC")
+		return nil, errors.Wrap(err, "dialing GRPC")
 	}
-	shutdowns = append(shutdowns, func() {
-		conn.Close()
-	})
 
 	// Register each service
 	gwMux := runtime.NewServeMux(
 		runtime.WithMarshalerOption("*", &runtime.JSONPb{Indent: "  "}),
 	)
 
-	ctx, ctxcancel := context.WithCancel(context.Background())
-	shutdowns = append(shutdowns, ctxcancel)
-
 	for _, apiSvc := range s.services {
-		if err := apiSvc.RegisterServiceHandler(ctx, gwMux, conn); err != nil {
-			return shutdown(shutdowns), nil, err
+		if err := apiSvc.RegisterServiceHandler(context.Background(), gwMux, conn); err != nil {
+			return nil, err
 		}
 	}
 
 	// Updates http handler routes. This included "web-only" routes, like
-	// login/logout/static, and now includes gRPC-Gateway routes.
+	// login/logout/static, and also gRPC-Gateway routes.
+	mux.Handle("/", http.FileServer(http.Dir(s.cfg.Storage.StaticDir)))
+	mux.Handle("/callback", http.HandlerFunc(s.oauth.CallbackHandler))
+	mux.Handle("/login", http.HandlerFunc(s.oauth.LoginHandler))
+	mux.Handle("/logout", http.HandlerFunc(s.oauth.LogoutHandler))
 	mux.Handle("/v1/", gwMux)
 
-	return shutdown(shutdowns), errch, nil
+	return errCh, nil
 }

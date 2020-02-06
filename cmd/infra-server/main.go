@@ -62,19 +62,18 @@ func mainCmd() error {
 		return err
 	}
 
-	shutdown, errCh, err := srv.RunServer()
-	defer shutdown()
+	errCh, err := srv.RunServer()
 	if err != nil {
 		return err
 	}
 
-	sigint := make(chan os.Signal, 1)
-	signal.Notify(sigint, syscall.SIGINT, syscall.SIGTERM)
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 
 	select {
 	case err := <-errCh:
 		return errors.Wrap(err, "server error received")
-	case <-sigint:
+	case <-sigCh:
 		return errors.New("signal caught")
 	}
 }
