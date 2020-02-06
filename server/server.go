@@ -27,6 +27,8 @@ type server struct {
 	//handler   http.Handler
 	//tlsConfig *tls.Config
 	manager TLSManager
+
+	oauth *auth.OAuth
 }
 
 func New(cfg config.Config, services ...middleware.APIService) (*server, error) {
@@ -35,10 +37,16 @@ func New(cfg config.Config, services ...middleware.APIService) (*server, error) 
 		return nil, err
 	}
 
+	oauth, err := auth.NewOAuth(s.cfg.Auth0)
+	if err != nil {
+		panic(err)
+	}
+
 	return &server{
 		services: services,
 		cfg:      cfg,
 		manager:  manager,
+		oauth: oauth,
 	}, nil
 }
 
@@ -64,15 +72,10 @@ func (s *server) RunServer() (func(), <-chan error, error) {
 		shutdowns []func()
 	)
 
-	a, err := auth.NewOAuth(s.cfg.Auth0)
-	if err != nil {
-		panic(err)
-	}
-
 	mux.Handle("/", http.FileServer(http.Dir(s.cfg.Storage.StaticDir)))
-	mux.Handle("/callback", http.HandlerFunc(a.CallbackHandler))
-	mux.Handle("/login", http.HandlerFunc(a.LoginHandler))
-	mux.Handle("/logout", http.HandlerFunc(a.LogoutHandler))
+	mux.Handle("/callback", http.HandlerFunc(s.oauth.CallbackHandler))
+	mux.Handle("/login", http.HandlerFunc(s.oauth.LoginHandler))
+	mux.Handle("/logout", http.HandlerFunc(s.oauth.LogoutHandler))
 
 	/////////////////////////////////
 	// Step 1 - Start HTTPS server //
