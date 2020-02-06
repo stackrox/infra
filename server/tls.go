@@ -30,15 +30,10 @@ type letsEncryptManager struct {
 }
 
 func (m letsEncryptManager) DialOptions() []grpc.DialOption {
-	//return grpc.WithInsecure()
 	return []grpc.DialOption{
 		grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{})),
 		grpc.WithTransportCredentials(credentials.NewClientTLSFromCert(nil, m.domain)),
 	}
-	//cfg := &tls.Config{
-	//	InsecureSkipVerify: true,
-	//}
-	//return grpc.WithTransportCredentials(credentials.NewTLS(cfg))
 }
 
 func (m letsEncryptManager) Name() string {
@@ -101,12 +96,6 @@ func NewTLSManager(serverCfg config.ServerConfig) (TLSManager, error) {
 		}, nil
 
 	case serverCfg.HTTPS == "443" && serverCfg.Domain != "":
-		//manager := autocert.Manager{
-		//	Cache:      autocert.DirCache(serverCfg.CertDir),
-		//	HostPolicy: autocert.HostWhitelist(serverCfg.Domain),
-		//	Prompt:     autocert.AcceptTOS,
-		//}
-
 		return &letsEncryptManager{
 			Manager: &autocert.Manager{
 				Cache:      autocert.DirCache(serverCfg.CertDir),

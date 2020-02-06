@@ -16,8 +16,8 @@ const (
 	tokenCookieExpired = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT" // nolint:gosec
 )
 
-// oAuth facilitates an Oauth2 login flow via http handlers.
-type oAuth struct {
+// OAuth facilitates an Oauth2 login flow via http handlers.
+type OAuth struct {
 	cfg      config.Auth0Config
 	jwtState *stateTokenizer
 	jwtAuth0 *auth0Tokenizer
@@ -25,14 +25,14 @@ type oAuth struct {
 	conf     *oauth2.Config
 }
 
-// NewOAuth returns a new oAuth struct derived from the given config.
-func NewOAuth(cfg config.Auth0Config) (*oAuth, error) {
+// NewOAuth returns a new OAuth struct derived from the given config.
+func NewOAuth(cfg config.Auth0Config) (*OAuth, error) {
 	jwtAuth0, err := NewAuth0Tokenizer(0, cfg.PublicKey)
 	if err != nil {
 		return nil, err
 	}
 
-	return &oAuth{
+	return &OAuth{
 		cfg:      cfg,
 		jwtState: NewStateTokenizer(time.Minute, cfg.SessionKey),
 		jwtAuth0: jwtAuth0,
@@ -53,7 +53,7 @@ func NewOAuth(cfg config.Auth0Config) (*oAuth, error) {
 // LoginHandler handles the login part of an Oauth2 flow.
 //
 // A state token is generated and sent along with the redirect to Auth0.
-func (a oAuth) LoginHandler(w http.ResponseWriter, r *http.Request) {
+func (a OAuth) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Generate a new state token.
 	stateToken, err := a.jwtState.Generate()
 	if err != nil {
@@ -72,7 +72,7 @@ func (a oAuth) LoginHandler(w http.ResponseWriter, r *http.Request) {
 // After returning from Auth0, the state token is verified. A user profile is
 // then obtained from Auth0 that includes details about the newly logged-in
 // user. This user information is then stored in a cookie.
-func (a oAuth) CallbackHandler(w http.ResponseWriter, r *http.Request) {
+func (a OAuth) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the value of the "state" HTTP GET param, and validate that it is
 	// legitimate.
 	stateToken := r.URL.Query().Get("state")
@@ -119,7 +119,7 @@ func (a oAuth) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 // LogoutHandler handles the logout part of an Oauth2 flow.
 //
 // The user token cookie is destroyed, and the user is redirected to Auth0 for logout.
-func (a oAuth) LogoutHandler(w http.ResponseWriter, r *http.Request) {
+func (a OAuth) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	cfg := a.cfg
 	URL, _ := url.Parse(cfg.LogoutURL)
 	parameters := url.Values{}

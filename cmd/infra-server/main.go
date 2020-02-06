@@ -57,12 +57,12 @@ func mainCmd() error {
 		return err
 	}
 
-	svr, err := server.New(*cfg, services...)
+	srv, err := server.New(*cfg, services...)
 	if err != nil {
 		return err
 	}
 
-	shutdown, errch, err := svr.RunServer()
+	shutdown, errCh, err := srv.RunServer()
 	defer shutdown()
 	if err != nil {
 		return err
@@ -72,7 +72,7 @@ func mainCmd() error {
 	signal.Notify(sigint, syscall.SIGINT, syscall.SIGTERM)
 
 	select {
-	case err := <-errch:
+	case err := <-errCh:
 		return errors.Wrap(err, "server error received")
 	case <-sigint:
 		return errors.New("signal caught")
