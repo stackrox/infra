@@ -10,6 +10,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/config"
+	"github.com/stackrox/infra/flavor"
 	"github.com/stackrox/infra/pkg/buildinfo"
 	"github.com/stackrox/infra/server"
 	"github.com/stackrox/infra/service"
@@ -28,8 +29,9 @@ func main() {
 // convenience.
 func mainCmd() error {
 	var (
-		flagConfig  = flag.String("config", "infra.toml", "path to configuration file")
-		flagVersion = flag.Bool("version", false, fmt.Sprintf("print the version %s and exit", buildinfo.Version()))
+		flagConfig       = flag.String("config", "infra.toml", "path to configuration file")
+		flagFlavorConfig = flag.String("flavor-config", "flavors.yaml", "path to flavor configuration file")
+		flagVersion      = flag.Bool("version", false, fmt.Sprintf("print the version %s and exit", buildinfo.Version()))
 	)
 	flag.Parse()
 
@@ -46,14 +48,21 @@ func mainCmd() error {
 		return errors.Wrapf(err, "failed to load config file %q", *flagConfig)
 	}
 
+	registry, err := flavor.NewFromConfig(*flagFlavorConfig)
+	if err != nil {
+		return err
+	}
+
 	// Construct each individual service.
 	services, err := middleware.Services(
 		func() (middleware.APIService, error) {
-			return service.NewFlavorService(cfg.Flavors)
+			return service.NewFlavorService(registry)
 		},
 		service.NewUserService,
 		service.NewVersionService,
-		cluster.NewClusterService,
+		func() (middleware.APIService, error) {
+			return cluster.NewClusterService(registry)
+		},
 	)
 	if err != nil {
 		return err

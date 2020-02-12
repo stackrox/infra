@@ -21,9 +21,6 @@ type Config struct {
 
 	// ServiceAccounts is a list of service accounts.
 	ServiceAccounts []ServiceAccountConfig `toml:"service-account"`
-
-	// Flavors is a list of automation flavors.
-	Flavors []FlavorConfig `toml:"flavor"`
 }
 
 // Auth0Config represents the configuration used for authentication,
@@ -69,29 +66,27 @@ type ServiceAccountConfig struct {
 // FlavorConfig represents the configuration for a single automation flavor.
 type FlavorConfig struct {
 	// ID is the unique, human type-able, ID for the flavor.
-	ID string `toml:"id"`
+	ID string `json:"id"`
 
 	// Name is a human readable name for the flavor.
-	Name string `toml:"name"`
+	Name string `json:"name"`
 
 	// Description is a human readable description for the flavor.
-	Description string `toml:"description"`
+	Description string `json:"description"`
 
 	// Availability is an availability classification level. One of "alpha",
 	// "beta", "stable", or "default". Exactly 1 default flavor must be
 	// configured.
-	Availability string `toml:"availability"`
-
-	// Image is a full-qualified (repo+name+tag/sha) Docker image name
-	// representing the automation image for this flavor.
-	Image string `toml:"image"`
+	Availability string `json:"availability"`
 
 	// Parameters is the list of parameters required for launching this flavor.
-	Parameters []Parameter `toml:"parameter"`
+	Parameters []parameter `json:"parameters"`
+
+	WorkflowFile string `json:"workflow"`
 }
 
-// Parameter represents a single parameter that is needed to launch a flavor.
-type Parameter struct {
+// parameter represents a single parameter that is needed to launch a flavor.
+type parameter struct {
 	// Name is the unique name of the parameter.
 	Name string `toml:"name"`
 

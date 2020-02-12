@@ -20,11 +20,8 @@ func (r flavor) PrettyPrint() {
 	}
 
 	fmt.Println("Parameters:")
-	for index, parameter := range r.Parameters {
-		if index != 0 {
-			fmt.Println()
-		}
-		fmt.Printf("  %s:\n", parameter.GetName())
+	for name, parameter := range r.Parameters {
+		fmt.Printf("  %s:\n", name)
 		fmt.Printf("    Description: %s\n", parameter.GetDescription())
 		fmt.Printf("    Example:     %q\n", parameter.GetExample())
 	}

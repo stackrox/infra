@@ -4,26 +4,31 @@ package cluster
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
 	workflowv1 "github.com/argoproj/argo/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
+	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/duration"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-
-	// "github.com/stackrox/infra/argo"
+	"github.com/stackrox/infra/flavor"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/service/middleware"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
 
 type clusterImpl struct {
-	argo workflowv1.WorkflowInterface
+	argo     workflowv1.WorkflowInterface
+	registry *flavor.Registry
 }
 
 var (
@@ -32,14 +37,15 @@ var (
 )
 
 // NewClusterService creates a new ClusterService.
-func NewClusterService() (middleware.APIService, error) {
+func NewClusterService(registry *flavor.Registry) (middleware.APIService, error) {
 	client, err := argoClient()
 	if err != nil {
 		return nil, err
 	}
 
 	return &clusterImpl{
-		argo: client,
+		argo:     client,
+		registry: registry,
 	}, nil
 }
 
@@ -120,6 +126,7 @@ func formatAnnotationPatch(annotationKey string, annotationValue string) ([]byte
 // Lifespan implements ClusterService.Lifespan.
 func (s *clusterImpl) Lifespan(_ context.Context, req *v1.LifespanRequest) (*duration.Duration, error) {
 	lifespan, _ := ptypes.Duration(req.Lifespan)
+
 	// Sanity check that our lifespan doesn't go negative.
 	if lifespan <= 0 {
 		lifespan = 0
@@ -138,6 +145,56 @@ func (s *clusterImpl) Lifespan(_ context.Context, req *v1.LifespanRequest) (*dur
 	}
 
 	return GetLifespan(workflow), nil
+}
+
+// Create implements ClusterService.Create.
+func (s *clusterImpl) Create(ctx context.Context, req *v1.CreateClusterRequest) (*v1.ResourceByID, error) {
+	flav, workflow, found := s.registry.Get(req.ID)
+	if !found {
+		return nil, status.Errorf(codes.NotFound, "flavor %q not found", req.ID)
+	}
+
+	if err := flavor.CheckParametersEquivalence(flav, req.Parameters); err != nil {
+		return nil, err
+	}
+
+	var owner string
+	if user, found := middleware.UserFromContext(ctx); found {
+		owner = user.GetEmail()
+	} else if svcacct, found := middleware.ServiceAccountFromContext(ctx); found {
+		owner = svcacct.GetName()
+	} else {
+		return nil, errors.New("could not determine owner")
+	}
+
+	lifespan, _ := ptypes.Duration(req.Lifespan)
+	if lifespan <= 0 {
+		lifespan = 3 * time.Hour
+	}
+	if lifespan > 12*time.Hour {
+		lifespan = 12 * time.Hour
+	}
+
+	workflow.SetAnnotations(map[string]string{
+		annotationFlavorKey:   flav.ID,
+		annotationLifespanKey: fmt.Sprint(lifespan),
+		annotationOwnerKey:    owner,
+	})
+
+	workflow.Spec.Arguments.Parameters = make([]v1alpha1.Parameter, 0, len(req.Parameters))
+	for paramName, paramValue := range req.Parameters {
+		workflow.Spec.Arguments.Parameters = append(workflow.Spec.Arguments.Parameters, v1alpha1.Parameter{
+			Name:  paramName,
+			Value: proto.String(paramValue),
+		})
+	}
+
+	created, err := s.argo.Create(&workflow)
+	if err != nil {
+		return nil, err
+	}
+
+	return &v1.ResourceByID{Id: created.Name}, nil
 }
 
 // AllowAnonymous declares that this service can be called anonymously.
