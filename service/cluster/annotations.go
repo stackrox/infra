@@ -44,5 +44,9 @@ func GetLifespan(a Annotated) *duration.Duration {
 		lifespan = 3 * time.Hour
 	}
 
+	if lifespan <= 0 {
+		// Ensure that the lifespan isn't negative.
+		lifespan = 0
+	}
 	return ptypes.DurationProto(lifespan)
 }
