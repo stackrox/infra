@@ -1,3 +1,4 @@
+// Package server facilitates running a HTTPS and gRPC server.
 package server
 
 import (
@@ -27,6 +28,7 @@ type server struct {
 	oauth    *auth.OAuth
 }
 
+// New creates a new server that is ready to be launched.
 func New(cfg config.Config, services ...middleware.APIService) (*server, error) {
 	manager, err := NewTLSManager(cfg.Server)
 	if err != nil {
@@ -82,7 +84,7 @@ func (s *server) RunServer() (<-chan error, error) {
 
 	log.Print("starting gRPC server")
 	go func() {
-		defer listen.Close()
+		defer listen.Close() // nolint:errcheck
 		defer server.Stop()
 
 		if err := server.Serve(listen); err != nil {
@@ -96,7 +98,7 @@ func (s *server) RunServer() (<-chan error, error) {
 
 	log.Printf("starting HTTPS server in %s mode", s.manager.Name())
 	go func() {
-		defer s.manager.Listener().Close()
+		defer s.manager.Listener().Close() // nolint:errcheck
 
 		if err := http.Serve(s.manager.Listener(), mux); err != nil {
 			errCh <- err
@@ -126,7 +128,7 @@ func (s *server) RunServer() (<-chan error, error) {
 
 	// Updates http handler routes. This included "web-only" routes, like
 	// login/logout/static, and also gRPC-Gateway routes.
-	mux.Handle("/", http.FileServer(http.Dir(s.cfg.Storage.StaticDir)))
+	mux.Handle("/", http.FileServer(http.Dir(s.cfg.StaticDir)))
 	mux.Handle("/callback", http.HandlerFunc(s.oauth.CallbackHandler))
 	mux.Handle("/login", http.HandlerFunc(s.oauth.LoginHandler))
 	mux.Handle("/logout", http.HandlerFunc(s.oauth.LogoutHandler))

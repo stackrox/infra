@@ -61,19 +61,19 @@ func mainCmd() error {
 		filepath.Join(cfg.CertName, "privkey.pem"),
 	}
 
-	gcs := GCS{
+	gcs := gcs{
 		bucket: cfg.GCSBucket,
 		prefix: cfg.GCSPrefix,
 	}
 
-	live := Live{
+	live := live{
 		liveDir: liveDir,
 	}
 
 	// Find existing certificate (if any) and determine if it needs to be renewed.
 	renew := func() bool {
 		certPath := filepath.Join(cfg.CertName, "cert.pem")
-		body, err := gcs.Load(context.Background(), certPath)
+		body, err := gcs.load(context.Background(), certPath)
 		if err != nil {
 			log.Printf("Failed to load certificate from GCS")
 			return true
@@ -103,7 +103,7 @@ func mainCmd() error {
 	// Copy all generated files to GCS
 	for _, file := range files {
 		log.Printf("Loading %q from disk", file)
-		data, err := live.Load(file)
+		data, err := live.load(file)
 		if err != nil {
 			return err
 		}
@@ -114,7 +114,7 @@ func mainCmd() error {
 		}
 
 		log.Printf("Saving %q to GCS", file)
-		if err := gcs.Save(context.Background(), file, data); err != nil {
+		if err := gcs.save(context.Background(), file, data); err != nil {
 			return err
 		}
 		log.Printf("Saved %q to GCS", file)

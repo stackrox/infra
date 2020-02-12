@@ -1,3 +1,5 @@
+// Package middleware provides functionality for instrumenting and enriching
+// grpc connections.
 package middleware
 
 import (

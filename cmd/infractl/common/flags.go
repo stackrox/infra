@@ -1,3 +1,5 @@
+// Package common provides some helper functionality for building command line
+// handlers.
 package common
 
 import (
@@ -11,7 +13,7 @@ import (
 const (
 	// tokenEnvVarName is the environment variable name used to pass a service
 	// account token.
-	tokenEnvVarName = "INFRACTL_TOKEN" // nolint:gosec
+	tokenEnvVarName = "INFRACTL_TOKEN"
 
 	// defaultEndpoint is the default infra-server address to connect to.
 	defaultEndpoint = "localhost:8823"

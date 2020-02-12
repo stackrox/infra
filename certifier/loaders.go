@@ -10,22 +10,22 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-type GCS struct {
+type gcs struct {
 	bucket string
 	prefix string
 }
 
-type Live struct {
+type live struct {
 	liveDir string
 }
 
-func (live *Live) Load(path string) ([]byte, error) {
+func (live *live) load(path string) ([]byte, error) {
 	path = filepath.Join(live.liveDir, path)
 
 	return ioutil.ReadFile(path)
 }
 
-func (gcs *GCS) Load(ctx context.Context, path string) ([]byte, error) {
+func (gcs *gcs) load(ctx context.Context, path string) ([]byte, error) {
 	path = filepath.Join(gcs.prefix, path)
 
 	client, err := storage.NewClient(ctx)
@@ -41,12 +41,12 @@ func (gcs *GCS) Load(ctx context.Context, path string) ([]byte, error) {
 		return nil, err
 	}
 
-	defer reader.Close()
+	defer reader.Close() // nolint:errcheck
 
 	return ioutil.ReadAll(reader)
 }
 
-func (gcs *GCS) Save(ctx context.Context, path string, data []byte) error {
+func (gcs *gcs) save(ctx context.Context, path string, data []byte) error {
 	path = filepath.Join(gcs.prefix, path)
 
 	client, err := storage.NewClient(ctx)
@@ -58,7 +58,7 @@ func (gcs *GCS) Save(ctx context.Context, path string, data []byte) error {
 
 	obj := bh.Object(path)
 	w := obj.NewWriter(ctx)
-	defer w.Close()
+	defer w.Close() // nolint:errcheck
 	r := bytes.NewBuffer(data)
 
 	_, err = io.Copy(w, r)

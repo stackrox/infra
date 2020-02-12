@@ -19,7 +19,7 @@ func GetGRPCConnection() (*grpc.ClientConn, context.Context, func(), error) {
 	if insecure() {
 		allDialOpts = append(allDialOpts,
 			grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
-				InsecureSkipVerify: true, // nolint:gosec
+				InsecureSkipVerify: true,
 			})),
 		)
 	} else {

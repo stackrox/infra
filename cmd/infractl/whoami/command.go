@@ -1,3 +1,4 @@
+// Package whoami implements the infractl whoami command.
 package whoami
 
 import (

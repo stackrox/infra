@@ -1,3 +1,4 @@
+// Package version implements the infractl version command.
 package version
 
 import (

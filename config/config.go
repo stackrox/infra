@@ -1,3 +1,4 @@
+// Package config provides configurability for the entire application.
 package config
 
 import (
@@ -7,14 +8,26 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Config represents the top-level configuration for infra-server.
 type Config struct {
-	Auth0           Auth0Config            `toml:"auth0"`
-	Server          ServerConfig           `toml:"server"`
-	Storage         StorageConfig          `toml:"storage"`
+	// Auth0 is the authentication, encryption, and Auth0 configuration.
+	Auth0 Auth0Config `toml:"auth0"`
+
+	// Server is the server and TLS configuration.
+	Server ServerConfig `toml:"server"`
+
+	// StaticDir is the directory to server static assets from.
+	StaticDir string `toml:"static"`
+
+	// ServiceAccounts is a list of service accounts.
 	ServiceAccounts []ServiceAccountConfig `toml:"service-account"`
-	Flavors         []FlavorConfig         `toml:"flavor"`
+
+	// Flavors is a list of automation flavors.
+	Flavors []FlavorConfig `toml:"flavor"`
 }
 
+// Auth0Config represents the configuration used for authentication,
+// encryption, and interacting with Auth0.
 type Auth0Config struct {
 	ClientID     string `toml:"client-id"`
 	ClientSecret string `toml:"client-secret"`
@@ -28,6 +41,8 @@ type Auth0Config struct {
 	PublicKey    string `toml:"public-key"`
 }
 
+// ServerConfig represents the configuration used for running the HTTP & GRPC
+// servers, and providing TLS.
 type ServerConfig struct {
 	GRPC     string `toml:"grpc"`
 	HTTPS    string `toml:"https"`
@@ -37,10 +52,8 @@ type ServerConfig struct {
 	CertDir  string `toml:"certs"`
 }
 
-type StorageConfig struct {
-	StaticDir string `toml:"static"`
-}
-
+// ServiceAccountConfig represents the configuration for a single service
+// account.
 type ServiceAccountConfig struct {
 	// Name is a human readable name for the service account.
 	Name string `toml:"name"`
@@ -53,6 +66,7 @@ type ServiceAccountConfig struct {
 	Token string `toml:"token"`
 }
 
+// FlavorConfig represents the configuration for a single automation flavor.
 type FlavorConfig struct {
 	// ID is the unique, human type-able, ID for the flavor.
 	ID string `toml:"id"`
@@ -73,6 +87,7 @@ type FlavorConfig struct {
 	Image string `toml:"image"`
 }
 
+// Load reads and parses the given configuration file.
 func Load(filename string) (*Config, error) {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {

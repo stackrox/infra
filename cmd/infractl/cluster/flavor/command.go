@@ -1,3 +1,4 @@
+// Package flavor implements the infractl cluster flavor command.
 package flavor
 
 import (
