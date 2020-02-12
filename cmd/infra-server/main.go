@@ -48,7 +48,7 @@ func mainCmd() error {
 	// Construct each individual service.
 	services, err := middleware.Services(
 		func() (middleware.APIService, error) {
-			return service.NewClusterService(cfg.Flavors)
+			return service.NewFlavorService(cfg.Flavors)
 		},
 		service.NewUserService,
 		service.NewVersionService,

@@ -85,6 +85,21 @@ type FlavorConfig struct {
 	// Image is a full-qualified (repo+name+tag/sha) Docker image name
 	// representing the automation image for this flavor.
 	Image string `toml:"image"`
+
+	// Parameters is the list of parameters required for launching this flavor.
+	Parameters []Parameter `toml:"parameter"`
+}
+
+// Parameter represents a single parameter that is needed to launch a flavor.
+type Parameter struct {
+	// Name is the unique name of the parameter.
+	Name string `toml:"name"`
+
+	// Description is a human readable description for the parameter.
+	Description string `toml:"description"`
+
+	// Example is an arbitrary hint for a valid parameter value.
+	Example string `toml:"example"`
 }
 
 // Load reads and parses the given configuration file.
