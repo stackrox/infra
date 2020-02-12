@@ -34,6 +34,10 @@ func NewFlavorService(flavorsCfg []config.FlavorConfig) (middleware.APIService, 
 	}
 
 	for _, flavorCfg := range flavorsCfg {
+		if _, found := impl.flavors[flavorCfg.ID]; found {
+			return nil, fmt.Errorf("duplicate flavor id %q", flavorCfg.ID)
+		}
+
 		// Sanity check and convert the configured availability.
 		availability, found := v1.FlavorAvailability_value[flavorCfg.Availability]
 		if !found {
