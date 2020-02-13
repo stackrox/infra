@@ -15,10 +15,11 @@ import (
 func Command() *cobra.Command {
 	// $ infractl cluster info
 	return &cobra.Command{
-		Use:   "info",
-		Short: "Info on a specific cluster",
-		Long:  "Info displays info on a specific cluster",
-		RunE:  common.WithGRPCHandler(info),
+		Use:     "info <cluster id>",
+		Short:   "Info on a specific cluster",
+		Long:    "Info displays info on a specific cluster",
+		Example: "  $ infractl cluster info example-s3maj",
+		RunE:    common.WithGRPCHandler(info),
 	}
 }
 
