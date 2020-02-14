@@ -3,10 +3,14 @@ package cluster
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"strings"
 
 	"github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
 	workflowv1 "github.com/argoproj/argo/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/duration"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 
@@ -15,6 +19,7 @@ import (
 	"github.com/stackrox/infra/service/middleware"
 	"google.golang.org/grpc"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 type clusterImpl struct {
@@ -82,6 +87,57 @@ func (s *clusterImpl) List(ctx context.Context, clusterID *empty.Empty) (*v1.Clu
 	}
 
 	return resp, nil
+}
+
+// formatAnnotationPatch generates a raw patch for updating the given annotation.
+func formatAnnotationPatch(annotationKey string, annotationValue string) ([]byte, error) {
+	// The annotation key needs to be escaped, since it may contain '/'
+	// characters, which already have meaning in the path spec. See
+	// https://tools.ietf.org/html/rfc6901#section-3 for more details.
+	//
+	// Because the characters '~' (%x7E) and '/' (%x2F) have special
+	// meanings in JSON Pointer, '~' needs to be encoded as '~0' and '/'
+	// needs to be encoded as '~1' when these characters appear in a
+	// reference token.
+	annotationKey = strings.ReplaceAll(annotationKey, "~", "~0")
+	annotationKey = strings.ReplaceAll(annotationKey, "/", "~1")
+	path := "/metadata/annotations/" + annotationKey
+
+	//  patch specifies a patch operation for a string.
+	payload := []struct {
+		Op    string `json:"op"`
+		Path  string `json:"path"`
+		Value string `json:"value"`
+	}{{
+		Op:    "replace",
+		Path:  path,
+		Value: annotationValue,
+	}}
+
+	return json.Marshal(payload)
+}
+
+// Lifespan implements ClusterService.Lifespan.
+func (s *clusterImpl) Lifespan(_ context.Context, req *v1.LifespanRequest) (*duration.Duration, error) {
+	lifespan, _ := ptypes.Duration(req.Lifespan)
+	// Sanity check that our lifespan doesn't go negative.
+	if lifespan <= 0 {
+		lifespan = 0
+	}
+
+	// Construct our replacement patch
+	payloadBytes, err := formatAnnotationPatch(annotationLifespanKey, fmt.Sprint(lifespan))
+	if err != nil {
+		return nil, err
+	}
+
+	// Submit the patch.
+	workflow, err := s.argo.Patch(req.Id, types.JSONPatchType, payloadBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	return GetLifespan(workflow), nil
 }
 
 // AllowAnonymous declares that this service can be called anonymously.

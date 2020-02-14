@@ -4,6 +4,7 @@ package cluster
 import (
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/cluster/info"
+	"github.com/stackrox/infra/cmd/infractl/cluster/lifespan"
 	"github.com/stackrox/infra/cmd/infractl/cluster/list"
 )
 
@@ -22,6 +23,9 @@ func Command() *cobra.Command {
 
 		// $ infractl cluster list
 		list.Command(),
+
+		// $ infractl cluster lifespan
+		lifespan.Command(),
 	)
 
 	return cmd

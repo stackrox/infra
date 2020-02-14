@@ -202,6 +202,14 @@ message ClusterListResponse {
     repeated Cluster Clusters = 1;
 }
 
+message LifespanRequest {
+    // ID is the unique ID for the cluster.
+    string id = 1;
+
+    // Lifespan is the new lifespan.
+    google.protobuf.Duration Lifespan = 2;
+}
+
 // FlavorService provides flavor based functionality.
 service ClusterService {
     // Info provides information about a specific cluster.
@@ -215,6 +223,14 @@ service ClusterService {
     rpc List (google.protobuf.Empty) returns (ClusterListResponse) {
         option (google.api.http) = {
             get: "/v1/cluster"
+        };
+    }
+
+    // Lifespan updates the lifespan for a specific cluster.
+    rpc Lifespan (LifespanRequest) returns (google.protobuf.Duration) {
+        option (google.api.http) = {
+            post: "/v1/cluster/{id}/lifespan"
+            body: "*"
         };
     }
 }
