@@ -6,9 +6,11 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 
 	"github.com/pkg/errors"
+	"github.com/stackrox/infra/auth"
 	"github.com/stackrox/infra/config"
 	"github.com/stackrox/infra/flavor"
 	"github.com/stackrox/infra/pkg/buildinfo"
@@ -29,9 +31,8 @@ func main() {
 // convenience.
 func mainCmd() error {
 	var (
-		flagConfig       = flag.String("config", "infra.toml", "path to configuration file")
-		flagFlavorConfig = flag.String("flavor-config", "flavors.yaml", "path to flavor configuration file")
-		flagVersion      = flag.Bool("version", false, fmt.Sprintf("print the version %s and exit", buildinfo.Version()))
+		flagConfigDir = flag.String("config-dir", "configuration", "path to configuration dir")
+		flagVersion   = flag.Bool("version", false, fmt.Sprintf("print the version %s and exit", buildinfo.Version()))
 	)
 	flag.Parse()
 
@@ -43,14 +44,23 @@ func mainCmd() error {
 
 	log.Printf("Starting infra server version %s", buildinfo.All().Version)
 
-	cfg, err := config.Load(*flagConfig)
+	serverConfigFile := filepath.Join(*flagConfigDir, "infra.yaml")
+	cfg, err := config.Load(serverConfigFile)
 	if err != nil {
-		return errors.Wrapf(err, "failed to load config file %q", *flagConfig)
+		return errors.Wrapf(err, "failed to load server config file %q", serverConfigFile)
 	}
 
-	registry, err := flavor.NewFromConfig(*flagFlavorConfig)
+	flavorConfigFile := filepath.Join(*flagConfigDir, "flavors.yaml")
+	registry, err := flavor.NewFromConfig(flavorConfigFile)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "failed to load flavor config file %q", flavorConfigFile)
+	}
+
+	auth0ConfigFile := filepath.Join(*flagConfigDir, "auth0.yaml")
+	auth0PublicKeyPEMFile := filepath.Join(*flagConfigDir, "auth0.pem")
+	auth0, err := auth.NewFromConfig(auth0ConfigFile, auth0PublicKeyPEMFile)
+	if err != nil {
+		return errors.Wrapf(err, "failed to load auth0 config file %q", auth0ConfigFile)
 	}
 
 	// Construct each individual service.
@@ -68,7 +78,7 @@ func mainCmd() error {
 		return err
 	}
 
-	srv, err := server.New(*cfg, services...)
+	srv, err := server.New(*cfg, *auth0, services...)
 	if err != nil {
 		return err
 	}

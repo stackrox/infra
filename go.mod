@@ -4,7 +4,6 @@ go 1.13
 
 require (
 	cloud.google.com/go v0.38.0
-	github.com/BurntSushi/toml v0.3.1
 	github.com/argoproj/argo v2.4.3+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/ghodss/yaml v1.0.0

@@ -83,16 +83,11 @@ type auth0Tokenizer struct {
 
 // NewAuth0Tokenizer creates a new auth0Tokenizer that can verify Auth0
 // generated tokens signed with the given public key.
-func NewAuth0Tokenizer(lifetime time.Duration, publicKeyPEM string) (*auth0Tokenizer, error) {
-	key, err := jwt.ParseRSAPublicKeyFromPEM([]byte(publicKeyPEM))
-	if err != nil {
-		return nil, err
-	}
-
+func NewAuth0Tokenizer(lifetime time.Duration, publicKey *rsa.PublicKey) *auth0Tokenizer {
 	return &auth0Tokenizer{
 		lifetime: lifetime,
-		key:      key,
-	}, nil
+		key:      publicKey,
+	}
 }
 
 // auth0Claims facilitates the unmarshalling of JWTs containing Auth0 user

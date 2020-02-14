@@ -6,9 +6,8 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"time"
 
-	"github.com/stackrox/infra/config"
+	v1 "github.com/stackrox/infra/generated/api/v1"
 	"golang.org/x/oauth2"
 )
 
@@ -19,42 +18,23 @@ const (
 
 // OAuth facilitates an Oauth2 login flow via http handlers.
 type OAuth struct {
-	cfg      config.Auth0Config
+	endpoint string
+	tenant   string
 	jwtState *stateTokenizer
 	jwtAuth0 *auth0Tokenizer
 	jwtUser  *userTokenizer
 	conf     *oauth2.Config
 }
 
-// NewOAuth returns a new OAuth struct derived from the given config.
-func NewOAuth(cfg config.Auth0Config) (*OAuth, error) {
-	jwtAuth0, err := NewAuth0Tokenizer(0, cfg.PublicKey)
-	if err != nil {
-		return nil, err
-	}
-
-	return &OAuth{
-		cfg:      cfg,
-		jwtState: NewStateTokenizer(time.Minute, cfg.SessionKey),
-		jwtAuth0: jwtAuth0,
-		jwtUser:  NewUserTokenizer(time.Hour, cfg.SessionKey),
-		conf: &oauth2.Config{
-			ClientID:     cfg.ClientID,
-			ClientSecret: cfg.ClientSecret,
-			RedirectURL:  cfg.CallbackURL,
-			Scopes:       []string{"email", "openid", "profile"},
-			Endpoint: oauth2.Endpoint{
-				AuthURL:  cfg.AuthURL,
-				TokenURL: cfg.TokenURL,
-			},
-		},
-	}, nil
+// ValidateUser validates a user JWT and returns the contained v1.User struct.
+func (a OAuth) ValidateUser(token string) (*v1.User, error) {
+	return a.jwtUser.Validate(token)
 }
 
-// LoginHandler handles the login part of an Oauth2 flow.
+// loginHandler handles the login part of an Oauth2 flow.
 //
 // A state token is generated and sent along with the redirect to Auth0.
-func (a OAuth) LoginHandler(w http.ResponseWriter, r *http.Request) {
+func (a OAuth) loginHandler(w http.ResponseWriter, r *http.Request) {
 	// Generate a new state token.
 	stateToken, err := a.jwtState.Generate()
 	if err != nil {
@@ -63,17 +43,17 @@ func (a OAuth) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Redirect to Auth0 so that the user can login externally.
-	audience := oauth2.SetAuthURLParam("audience", a.cfg.UserinfoURL)
+	audience := oauth2.SetAuthURLParam("audience", fmt.Sprintf("https://%s/userinfo", a.tenant))
 	url := a.conf.AuthCodeURL(stateToken, audience)
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
-// CallbackHandler handles the callback part of an Oauth2 flow.
+// callbackHandler handles the callback part of an Oauth2 flow.
 //
 // After returning from Auth0, the state token is verified. A user profile is
 // then obtained from Auth0 that includes details about the newly logged-in
 // user. This user information is then stored in a cookie.
-func (a OAuth) CallbackHandler(w http.ResponseWriter, r *http.Request) {
+func (a OAuth) callbackHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the value of the "state" HTTP GET param, and validate that it is
 	// legitimate.
 	stateToken := r.URL.Query().Get("state")
@@ -117,17 +97,23 @@ func (a OAuth) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/v1/whoami", http.StatusTemporaryRedirect)
 }
 
-// LogoutHandler handles the logout part of an Oauth2 flow.
+// logoutHandler handles the logout part of an Oauth2 flow.
 //
 // The user token cookie is destroyed, and the user is redirected to Auth0 for logout.
-func (a OAuth) LogoutHandler(w http.ResponseWriter, r *http.Request) {
-	cfg := a.cfg
-	URL, _ := url.Parse(cfg.LogoutURL)
+func (a OAuth) logoutHandler(w http.ResponseWriter, r *http.Request) {
+	URL, _ := url.Parse(fmt.Sprintf("https://%s/v2/logout", a.tenant))
 	parameters := url.Values{}
-	parameters.Add("returnTo", cfg.LoginURL)
-	parameters.Add("client_id", cfg.ClientID)
+	parameters.Add("returnTo", fmt.Sprintf("https://%s/login", a.endpoint))
+	parameters.Add("client_id", a.conf.ClientID)
 	URL.RawQuery = parameters.Encode()
 
 	w.Header().Set("set-cookie", tokenCookieExpired)
 	http.Redirect(w, r, URL.String(), http.StatusTemporaryRedirect)
+}
+
+// Handle adds several standard OAuth routes handlers to the given http mux.
+func (a OAuth) Handle(mux *http.ServeMux) {
+	mux.Handle("/callback", http.HandlerFunc(a.callbackHandler))
+	mux.Handle("/login", http.HandlerFunc(a.loginHandler))
+	mux.Handle("/logout", http.HandlerFunc(a.logoutHandler))
 }
