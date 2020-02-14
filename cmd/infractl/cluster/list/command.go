@@ -38,14 +38,11 @@ func list(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []st
 
 	var results v1.ClusterListResponse
 	for _, cluster := range resp.Clusters {
-		cluster := cluster
-		var (
-			createdOn, _ = ptypes.Timestamp(cluster.GetCreatedOn())
-			lifespan, _  = ptypes.Duration(cluster.GetLifespan())
-			expiredBy    = time.Since(createdOn.Add(lifespan))
-		)
+		createdOn, _ := ptypes.Timestamp(cluster.GetCreatedOn())
+		lifespan, _ := ptypes.Duration(cluster.GetLifespan())
+		expiredBy := time.Since(createdOn.Add(lifespan))
 
-		if expiredBy < cutoff || cluster.GetStatus() == v1.Status_Ready || cluster.GetStatus() == v1.Status_Creating {
+		if expiredBy < cutoff || cluster.GetStatus() == v1.Status_READY || cluster.GetStatus() == v1.Status_CREATING {
 			results.Clusters = append(results.Clusters, cluster)
 		}
 	}

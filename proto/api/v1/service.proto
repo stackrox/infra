@@ -155,20 +155,20 @@ service FlavorService {
 
 // Status represents the various cluster states.
 enum Status {
-    // Failed is the state when the cluster has failed in one way or another.
-    Failed = 0;
+    // FAILED is the state when the cluster has failed in one way or another.
+    FAILED = 0;
 
-    // Creating is the state when the cluster is being created.
-    Creating = 1;
+    // CREATING is the state when the cluster is being created.
+    CREATING = 1;
 
-    // Ready is the state when the cluster is available and ready for use.
-    Ready = 2;
+    // READY is the state when the cluster is available and ready for use.
+    READY = 2;
 
-    // Destroying is the state when the cluster is being destroyed.
-    Destroying = 3;
+    // DESTROYING is the state when the cluster is being destroyed.
+    DESTROYING = 3;
 
-    // Finished is the state when the cluster has been successfully destroyed.
-    Finished = 4;
+    // FINISHED is the state when the cluster has been successfully destroyed.
+    FINISHED = 4;
 }
 
 // Cluster represents a single cluster.

@@ -8,12 +8,10 @@ import (
 // FormatExpiration formats the given duration in a human-friendly way,
 // indicating how long in the future the event will happen.
 func FormatExpiration(delta time.Duration) string {
-	var (
-		days    = int(delta.Hours() / 24)
-		hours   = int(delta.Hours()) % 24
-		minutes = int(delta.Minutes()) % 60
-		seconds = int(delta.Seconds()) % 60
-	)
+	days := int(delta.Hours() / 24)
+	hours := int(delta.Hours()) % 24
+	minutes := int(delta.Minutes()) % 60
+	seconds := int(delta.Seconds()) % 60
 
 	switch {
 	case delta >= 24*time.Hour:
@@ -45,16 +43,14 @@ func FormatExpiration(delta time.Duration) string {
 // FormatTime formats the given time in a human-friendly way, indicating how
 // long in the past the event happened.
 func FormatTime(moment time.Time) string {
-	var (
-		delta   = time.Now().Local().Sub(moment.Local())
-		hours   = int(delta.Hours())
-		minutes = int(delta.Minutes()) % 60
-		seconds = int(delta.Seconds()) % 60
-	)
+	delta := time.Since(moment)
+	hours := int(delta.Hours())
+	minutes := int(delta.Minutes()) % 60
+	seconds := int(delta.Seconds()) % 60
 
 	switch {
 	case delta >= 24*time.Hour:
-		return moment.Local().Format("Mon Jan 2 15:04:05 -0700 MST 2006")
+		return moment.Format("Mon Jan 2 15:04:05 -0700 MST 2006")
 
 	case delta > 8*time.Hour:
 		return fmt.Sprintf("%dh ago", hours)

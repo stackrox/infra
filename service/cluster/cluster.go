@@ -39,13 +39,13 @@ func NewClusterService() (middleware.APIService, error) {
 }
 
 // clusterFromWorkflow converts an Argo workflow into a cluster.
-func clusterFromWorkflow(workflow *v1alpha1.Workflow) *v1.Cluster {
+func clusterFromWorkflow(workflow v1alpha1.Workflow) *v1.Cluster {
 	cluster := &v1.Cluster{
 		ID:       workflow.GetName(),
 		Status:   workflowStatus(workflow.Status),
-		Flavor:   GetFlavor(workflow),
-		Owner:    GetOwner(workflow),
-		Lifespan: GetLifespan(workflow),
+		Flavor:   GetFlavor(&workflow),
+		Owner:    GetOwner(&workflow),
+		Lifespan: GetLifespan(&workflow),
 	}
 
 	cluster.CreatedOn, _ = ptypes.TimestampProto(workflow.Status.StartedAt.Time.UTC())
@@ -64,7 +64,7 @@ func (s *clusterImpl) Info(ctx context.Context, clusterID *v1.ResourceByID) (*v1
 		return nil, err
 	}
 
-	return clusterFromWorkflow(workflow), nil
+	return clusterFromWorkflow(*workflow), nil
 }
 
 // List implements ClusterService.List.
@@ -78,8 +78,7 @@ func (s *clusterImpl) List(ctx context.Context, clusterID *empty.Empty) (*v1.Clu
 		Clusters: make([]*v1.Cluster, len(workflows.Items)),
 	}
 	for index, workflow := range workflows.Items {
-		workflow := workflow
-		resp.Clusters[index] = clusterFromWorkflow(&workflow)
+		resp.Clusters[index] = clusterFromWorkflow(workflow)
 	}
 
 	return resp, nil
