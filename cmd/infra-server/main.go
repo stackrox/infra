@@ -13,6 +13,7 @@ import (
 	"github.com/stackrox/infra/pkg/buildinfo"
 	"github.com/stackrox/infra/server"
 	"github.com/stackrox/infra/service"
+	"github.com/stackrox/infra/service/cluster"
 	"github.com/stackrox/infra/service/middleware"
 )
 
@@ -52,6 +53,7 @@ func mainCmd() error {
 		},
 		service.NewUserService,
 		service.NewVersionService,
+		cluster.NewClusterService,
 	)
 	if err != nil {
 		return err
