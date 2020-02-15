@@ -122,8 +122,8 @@ message Flavor {
     // Description is an availability classification for the flavor.
     availability Availability = 4;
 
-    // Parameters is the list of parameters required for launching this flavor.
-    repeated Parameter Parameters = 5;
+    // Parameters is a map of parameters required for launching this flavor.
+    map<string, Parameter> Parameters = 5;
 }
 
 // FlavorListResponse represents details about the available cluster flavors.
@@ -210,6 +210,18 @@ message LifespanRequest {
     google.protobuf.Duration Lifespan = 2;
 }
 
+// CreateClusterRequest represents details for launching a new cluster.
+message CreateClusterRequest {
+    // ID is the flavor ID to launch.
+    string ID = 1;
+
+    // Lifespan is the initial cluster lifespan.
+    google.protobuf.Duration Lifespan = 2;
+
+    // Parameters is a map of launch parameter names to values.
+    map<string, string> Parameters = 3;
+}
+
 // FlavorService provides flavor based functionality.
 service ClusterService {
     // Info provides information about a specific cluster.
@@ -230,6 +242,14 @@ service ClusterService {
     rpc Lifespan (LifespanRequest) returns (google.protobuf.Duration) {
         option (google.api.http) = {
             post: "/v1/cluster/{id}/lifespan"
+            body: "*"
+        };
+    }
+
+    // Create launches a new cluster.
+    rpc Create (CreateClusterRequest) returns (ResourceByID) {
+        option (google.api.http) = {
+            post: "/v1/cluster"
             body: "*"
         };
     }
