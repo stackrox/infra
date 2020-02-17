@@ -77,16 +77,14 @@ func (t stateTokenizer) Validate(token string) error {
 // The token contains an expiration date and user profile data provided by
 // Auth0.
 type auth0Tokenizer struct {
-	lifetime time.Duration
-	key      *rsa.PublicKey
+	key *rsa.PublicKey
 }
 
 // NewAuth0Tokenizer creates a new auth0Tokenizer that can verify Auth0
 // generated tokens signed with the given public key.
 func NewAuth0Tokenizer(lifetime time.Duration, publicKey *rsa.PublicKey) *auth0Tokenizer {
 	return &auth0Tokenizer{
-		lifetime: lifetime,
-		key:      publicKey,
+		key: publicKey,
 	}
 }
 
@@ -113,7 +111,15 @@ func (c auth0Claims) Valid() error {
 	case !strings.HasSuffix(c.Email, "@stackrox.com"):
 		return errors.New("email address does not belong to StackRox")
 	default:
-		return c.StandardClaims.Valid()
+		// Account for minor clock drift between our host, and Auth0.
+		//
+		// See this issue for context:
+		// https://github.com/dgrijalva/jwt-go/issues/314#issuecomment-494585527
+		const leeway = int64(10 * time.Second)
+		c.StandardClaims.IssuedAt -= leeway
+		valid := c.StandardClaims.Valid()
+		c.StandardClaims.IssuedAt += leeway
+		return valid
 	}
 }
 
