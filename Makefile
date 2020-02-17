@@ -34,7 +34,8 @@ endif
 .PHONY: image
 image: server
 	@cp -f bin/infra-server-linux-amd64 image/infra-server
-	docker build -t us.gcr.io/ultra-current-825/infra-server:$(TAG) image
+	@cp -r static image/static
+	docker build -t us.gcr.io/stackrox-infra/infra-server:$(TAG) image
 
 ##############
 ## Protobuf ##
@@ -128,16 +129,14 @@ proto-generated-srcs: protoc-tools
 ##########
 .PHONY: push
 push: image
-	docker push us.gcr.io/ultra-current-825/infra-server:$(TAG) | cat
+	docker push us.gcr.io/stackrox-infra/infra-server:$(TAG) | cat
 
 .PHONY: render
 render:
 	@mkdir -p chart-rendered
 	helm template chart/infra-server --output-dir chart-rendered \
 		--name infra-server --namespace infra \
-		--set tag=$(TAG) \
-		--set host=test1.demo.stackrox.com \
-		--set ip=34.94.91.159
+		--set tag=$(TAG)
 
 .PHONY: sanity
 sanity:

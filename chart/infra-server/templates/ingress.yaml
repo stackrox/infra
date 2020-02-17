@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+
+metadata:
+  name: {{ .Release.Name }}-ingress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: {{ .Values.reservedAddressName }}
+    networking.gke.io/managed-certificates: {{ .Values.managedCertificateName }}
+
+spec:
+  backend:
+    serviceName: {{ .Release.Name }}-service
+    servicePort: 8443

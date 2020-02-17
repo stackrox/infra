@@ -6,28 +6,15 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: {{ .Release.Name }}
+  annotations:
+    cloud.google.com/app-protocols: '{"https":"HTTP2"}'
 
 spec:
-  type: LoadBalancer
-  externalTrafficPolicy: Cluster
-  loadBalancerIP: {{ .Values.ip }}
-  loadBalancerSourceRanges:
-    - 0.0.0.0/0
-  ports:
-    - port: 80
-      name: http
-      protocol: TCP
-      targetPort: 80
-
-    - port: 443
-      name: https
-      protocol: TCP
-      targetPort: 443
-
-    - port: 823
-      name: grpc
-      protocol: TCP
-      targetPort: 823
+  type: NodePort
   selector:
     app.kubernetes.io/name: {{ .Release.Name }}
-
+  ports:
+    - protocol: TCP
+      port: 8443
+      targetPort: 8443
+      name: https

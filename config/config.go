@@ -42,12 +42,9 @@ type Auth0Config struct {
 // ServerConfig represents the configuration used for running the HTTP & GRPC
 // servers, and providing TLS.
 type ServerConfig struct {
-	GRPC      string `json:"grpc"`
-	HTTPS     string `json:"https"`
-	Domain    string `json:"domain"`
+	Port      int    `json:"port"`
 	CertFile  string `json:"cert"`
 	KeyFile   string `json:"key"`
-	CertDir   string `json:"certs"`
 	StaticDir string `json:"static"`
 }
 

@@ -1,7 +1,9 @@
-image: us.gcr.io/ultra-current-825/infra-server
+image: us.gcr.io/stackrox-infra/infra-server
 
 tag: latest
 
-host: test1.demo.stackrox.com
+host: dev.infra.stackrox.com
 
-ip: 34.94.91.159
+managedCertificateName: infra-server-certificate
+
+reservedAddressName: infra-address-development

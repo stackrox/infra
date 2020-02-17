@@ -78,11 +78,7 @@ func mainCmd() error {
 		return err
 	}
 
-	srv, err := server.New(*cfg, *auth0, services...)
-	if err != nil {
-		return err
-	}
-
+	srv := server.New(*cfg, *auth0, services...)
 	errCh, err := srv.RunServer()
 	if err != nil {
 		return err

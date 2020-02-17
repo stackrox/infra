@@ -4,8 +4,10 @@ generated/
 vendor/
 infra
 infra.toml
-static/
 certs/
 sessions/
 image/infra-server
 chart-rendered
+chart/infra-server/configs
+chart/infra-server/secrets
+configuration/

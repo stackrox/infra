@@ -9,44 +9,38 @@ metadata:
     app.kubernetes.io/version: {{ .Values.tag }}
 
 spec:
-  replicas: 1
+  replicas: 3
   template:
     metadata:
       namespace: {{ .Release.Namespace }}
       labels:
         app.kubernetes.io/name: {{ .Release.Name }}
-        app.kubernetes.io/version: {{ .Values.tag }}
 
     spec:
       containers:
         - name: infra-server
           image: {{ .Values.image }}:{{ .Values.tag }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8443
+              scheme: HTTPS
+            initialDelaySeconds: 5
+            periodSeconds: 5
           command:
             - /infra-server
-            - -config
-            - /infra.toml
+            - -config-dir
+            - /configuration
           ports:
-            - name: http
-              containerPort: 80
             - name: https
-              containerPort: 443
-            - name: grpc
-              containerPort: 823
+              containerPort: 8443
           imagePullPolicy: Always
           volumeMounts:
-            - mountPath: /infra.toml
-              name: configs
+            - mountPath: /configuration
+              name: configuration
               readOnly: true
-              subPath: infra.toml
-            - mountPath: /certs
-              name: certs
 
       volumes:
-        - name: configs
-          configMap:
-            name: {{ .Release.Name }}-configs
-
-        - name: certs
-          hostPath:
-            path: /tmp/certs
-            type: DirectoryOrCreate
+        - name: configuration
+          secret:
+            secretName: {{ .Release.Name }}-secrets

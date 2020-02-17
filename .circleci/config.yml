@@ -18,7 +18,7 @@ jobs:
         name: Build infra-server docker image
         command: |
           make image
-          docker run --rm us.gcr.io/ultra-current-825/infra-server:$(make tag) -version
+          docker run --rm us.gcr.io/stackrox-infra/infra-server:$(make tag) -version
 
   build-infractl:
     <<: *defaults
