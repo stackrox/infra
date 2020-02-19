@@ -222,6 +222,18 @@ message CreateClusterRequest {
     map<string, string> Parameters = 3;
 }
 
+message Artifact {
+    string Name = 1;
+
+    string Description = 2;
+
+    string URL = 3;
+}
+
+message ClusterArtifacts {
+    repeated Artifact Artifacts = 1;
+}
+
 // FlavorService provides flavor based functionality.
 service ClusterService {
     // Info provides information about a specific cluster.
@@ -251,6 +263,12 @@ service ClusterService {
         option (google.api.http) = {
             post: "/v1/cluster"
             body: "*"
+        };
+    }
+
+    rpc Artifacts (ResourceByID) returns (ClusterArtifacts) {
+        option (google.api.http) = {
+            get: "/v1/cluster/{id}/artifacts"
         };
     }
 }

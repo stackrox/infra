@@ -3,6 +3,7 @@ package cluster
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/stackrox/infra/cmd/infractl/cluster/artifacts"
 	"github.com/stackrox/infra/cmd/infractl/cluster/create"
 	"github.com/stackrox/infra/cmd/infractl/cluster/info"
 	"github.com/stackrox/infra/cmd/infractl/cluster/lifespan"
@@ -19,6 +20,9 @@ func Command() *cobra.Command {
 	}
 
 	cmd.AddCommand(
+		// $ infractl cluster artifacts
+		artifacts.Command(),
+
 		// $ infractl cluster create
 		create.Command(),
 
