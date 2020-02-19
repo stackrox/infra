@@ -17,20 +17,27 @@ type Config struct {
 	ServiceAccounts []ServiceAccountConfig `json:"service-accounts"`
 }
 
-//// Auth0Config represents the configuration used for authentication,
-//// encryption, and interacting with Auth0.
-//type Auth0Config struct {
-//	ClientID     string `toml:"client-id"`
-//	ClientSecret string `toml:"client-secret"`
-//	AuthURL      string `toml:"auth-url"`
-//	TokenURL     string `toml:"token-url"`
-//	CallbackURL  string `toml:"callback-url"`
-//	UserinfoURL  string `toml:"userinfo-url"`
-//	LogoutURL    string `toml:"logout-url"`
-//	LoginURL     string `toml:"login-url"`
-//	SessionKey   string `toml:"session-key"`
-//	PublicKey    string `toml:"public-key"`
-//}
+// Auth0Config represents the configuration for integrating with Auth0.
+type Auth0Config struct {
+	// Tenant is the full Auth0 tenant name. An example value would be
+	// "example.auth0.com".
+	Tenant string `json:"tenant"`
+
+	// ClientID is the client ID for the Auth0 application integration.
+	ClientID string `json:"clientID"`
+
+	// ClientSecret is the client secret for the Auth0 application integration.
+	ClientSecret string `json:"clientSecret"`
+
+	// Endpoint is the server hostname with optional port used for redirecting
+	// requests back from Auth0. An example value would be "localhost:8443" or
+	// "example.com".
+	Endpoint string `json:"endpoint"`
+
+	// SessionSecret is an arbitrary string used in the signing of session
+	// tokens. Changing this value would invalidate current sessions.
+	SessionSecret string `json:"sessionSecret"`
+}
 
 // ServerConfig represents the configuration used for running the HTTP & GRPC
 // servers, and providing TLS.
@@ -56,28 +63,6 @@ type ServiceAccountConfig struct {
 	// Token is a pre-shared-key used for directly authenticating as this
 	// service account.
 	Token string `json:"token"`
-}
-
-// Auth0Config represents the configuration for integrating with Auth0.
-type Auth0Config struct {
-	// Tenant is the full Auth0 tenant name. An example value would be
-	// "example.auth0.com".
-	Tenant string `json:"tenant"`
-
-	// ClientID is the client ID for the Auth0 application integration.
-	ClientID string `json:"clientID"`
-
-	// ClientSecret is the client secret for the Auth0 application integration.
-	ClientSecret string `json:"clientSecret"`
-
-	// Endpoint is the server hostname with optional port used for redirecting
-	// requests back from Auth0. An example value would be "localhost:8443" or
-	// "example.com".
-	Endpoint string `json:"endpoint"`
-
-	// SessionSecret is an arbitrary string used in the signing of session
-	// tokens. Changing this value would invalidate current sessions.
-	SessionSecret string `json:"sessionSecret"`
 }
 
 // FlavorConfig represents the configuration for a single automation flavor.

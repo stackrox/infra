@@ -11,6 +11,13 @@ import (
 	v1 "github.com/stackrox/infra/generated/api/v1"
 )
 
+// clockDriftLeeway is used to account for minor clock drift between our host,
+// and Auth0.
+//
+// See this issue for context:
+// https://github.com/dgrijalva/jwt-go/issues/314#issuecomment-494585527
+const clockDriftLeeway = int64(10 * time.Second)
+
 // createHumanUser synthesizes a v1.User struct from an auth0Claims struct.
 func createHumanUser(profile auth0Claims) *v1.User {
 	return &v1.User{
@@ -111,14 +118,9 @@ func (c auth0Claims) Valid() error {
 	case !strings.HasSuffix(c.Email, "@stackrox.com"):
 		return errors.New("email address does not belong to StackRox")
 	default:
-		// Account for minor clock drift between our host, and Auth0.
-		//
-		// See this issue for context:
-		// https://github.com/dgrijalva/jwt-go/issues/314#issuecomment-494585527
-		const leeway = int64(10 * time.Second)
-		c.StandardClaims.IssuedAt -= leeway
+		c.StandardClaims.IssuedAt -= clockDriftLeeway
 		valid := c.StandardClaims.Valid()
-		c.StandardClaims.IssuedAt += leeway
+		c.StandardClaims.IssuedAt += clockDriftLeeway
 		return valid
 	}
 }
