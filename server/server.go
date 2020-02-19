@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -90,21 +89,6 @@ func (s *server) RunServer() (<-chan error, error) {
 		}
 	}()
 
-	//var tlsCfg tls.Config
-	rootCAs := x509.NewCertPool()
-	pem, err := ioutil.ReadFile(s.cfg.Server.CertFile)
-	if err != nil {
-		log.Fatalf("failed to load root CA certificates  error=%v", err)
-	}
-	if !rootCAs.AppendCertsFromPEM(pem) {
-		log.Fatalf("no root CA certs parsed from file ")
-	}
-	//tlsCfg.RootCAs = rootCAs
-	//tlsCfg.ServerName = "localhost"
-
-	//ce := credentials.NewTLS(&tlsCfg)
-	//conn, err = grpc.Dial(*address, grpc.WithTransportCredentials(ce))
-
 	dialOption, err := grpcLocalCredentials(s.cfg.Server.CertFile)
 	if err != nil {
 		return nil, err
@@ -116,11 +100,11 @@ func (s *server) RunServer() (<-chan error, error) {
 		return nil, errors.Wrap(err, "dialing gRPC")
 	}
 
-	// Register each service
 	gwMux := runtime.NewServeMux(
 		runtime.WithMarshalerOption("*", &runtime.JSONPb{Indent: "  "}),
 	)
 
+	// Register each service
 	for _, apiSvc := range s.services {
 		if err := apiSvc.RegisterServiceHandler(context.Background(), gwMux, conn); err != nil {
 			return nil, err
@@ -130,16 +114,6 @@ func (s *server) RunServer() (<-chan error, error) {
 	// Updates http handler routes. This included "web-only" routes, like
 	// login/logout/static, and also gRPC-Gateway routes.
 	mux.Handle("/", http.FileServer(http.Dir(s.cfg.Server.StaticDir)))
-	//mux.Handle("/", http.HandlerFunc(hchandler))
-	//mux.Handle("/health", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	//	fmt.Fprint(w, "ok")
-	//	w.WriteHeader(http.StatusOK)
-	//}))
-	mux.Handle("/hostname", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		hostname, _ := os.Hostname()
-		fmt.Fprint(w, hostname)
-		w.WriteHeader(http.StatusOK)
-	}))
 	mux.Handle("/v1/", gwMux)
 	s.oauth.Handle(mux)
 
