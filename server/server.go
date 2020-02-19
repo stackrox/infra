@@ -25,26 +25,21 @@ type server struct {
 	services []middleware.APIService
 	cfg      config.Config
 	manager  TLSManager
-	oauth    *auth.OAuth
+	oauth    auth.OAuth
 }
 
 // New creates a new server that is ready to be launched.
-func New(cfg config.Config, services ...middleware.APIService) (*server, error) {
-	manager, err := NewTLSManager(cfg.Server)
-	if err != nil {
-		return nil, err
-	}
-
-	oauth, err := auth.NewOAuth(cfg.Auth0)
+func New(serverCfg config.Config, auth0 auth.OAuth, services ...middleware.APIService) (*server, error) {
+	manager, err := NewTLSManager(serverCfg.Server)
 	if err != nil {
 		return nil, err
 	}
 
 	return &server{
 		services: services,
-		cfg:      cfg,
+		cfg:      serverCfg,
 		manager:  manager,
-		oauth:    oauth,
+		oauth:    auth0,
 	}, nil
 }
 
@@ -64,9 +59,9 @@ func (s *server) RunServer() (<-chan error, error) {
 
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			// Extract user from JWT token stored in HTTP cookie.
-			middleware.ContextInterceptor(middleware.UserEnricher(s.cfg)),
+			middleware.ContextInterceptor(middleware.UserEnricher(s.oauth)),
 			// Extract service-account from token stored in Authorization header.
-			middleware.ContextInterceptor(middleware.ServiceAccountEnricher(s.cfg)),
+			middleware.ContextInterceptor(middleware.ServiceAccountEnricher(s.cfg.ServiceAccounts)),
 			// Enforce authenticated user access on resources that declare it.
 			middleware.ContextInterceptor(middleware.EnforceAnonymousAccess),
 		)),
@@ -128,11 +123,9 @@ func (s *server) RunServer() (<-chan error, error) {
 
 	// Updates http handler routes. This included "web-only" routes, like
 	// login/logout/static, and also gRPC-Gateway routes.
-	mux.Handle("/", http.FileServer(http.Dir(s.cfg.StaticDir)))
-	mux.Handle("/callback", http.HandlerFunc(s.oauth.CallbackHandler))
-	mux.Handle("/login", http.HandlerFunc(s.oauth.LoginHandler))
-	mux.Handle("/logout", http.HandlerFunc(s.oauth.LogoutHandler))
+	mux.Handle("/", http.FileServer(http.Dir(s.cfg.Server.StaticDir)))
 	mux.Handle("/v1/", gwMux)
+	s.oauth.Handle(mux)
 
 	return errCh, nil
 }

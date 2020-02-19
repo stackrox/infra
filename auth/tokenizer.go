@@ -11,6 +11,13 @@ import (
 	v1 "github.com/stackrox/infra/generated/api/v1"
 )
 
+// clockDriftLeeway is used to account for minor clock drift between our host,
+// and Auth0.
+//
+// See this issue for context:
+// https://github.com/dgrijalva/jwt-go/issues/314#issuecomment-494585527
+const clockDriftLeeway = int64(10 * time.Second)
+
 // createHumanUser synthesizes a v1.User struct from an auth0Claims struct.
 func createHumanUser(profile auth0Claims) *v1.User {
 	return &v1.User{
@@ -77,22 +84,15 @@ func (t stateTokenizer) Validate(token string) error {
 // The token contains an expiration date and user profile data provided by
 // Auth0.
 type auth0Tokenizer struct {
-	lifetime time.Duration
-	key      *rsa.PublicKey
+	key *rsa.PublicKey
 }
 
 // NewAuth0Tokenizer creates a new auth0Tokenizer that can verify Auth0
 // generated tokens signed with the given public key.
-func NewAuth0Tokenizer(lifetime time.Duration, publicKeyPEM string) (*auth0Tokenizer, error) {
-	key, err := jwt.ParseRSAPublicKeyFromPEM([]byte(publicKeyPEM))
-	if err != nil {
-		return nil, err
-	}
-
+func NewAuth0Tokenizer(lifetime time.Duration, publicKey *rsa.PublicKey) *auth0Tokenizer {
 	return &auth0Tokenizer{
-		lifetime: lifetime,
-		key:      key,
-	}, nil
+		key: publicKey,
+	}
 }
 
 // auth0Claims facilitates the unmarshalling of JWTs containing Auth0 user
@@ -118,7 +118,10 @@ func (c auth0Claims) Valid() error {
 	case !strings.HasSuffix(c.Email, "@stackrox.com"):
 		return errors.New("email address does not belong to StackRox")
 	default:
-		return c.StandardClaims.Valid()
+		c.StandardClaims.IssuedAt -= clockDriftLeeway
+		valid := c.StandardClaims.Valid()
+		c.StandardClaims.IssuedAt += clockDriftLeeway
+		return valid
 	}
 }
 

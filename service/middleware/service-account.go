@@ -17,7 +17,7 @@ type serviceAccountContextKey struct{}
 // v1.ServiceAccount struct, if possible. If there is no service account, this
 // function does not return an error, as anonymous API calls are a possibility.
 // Authorization must be independently enforced.
-func ServiceAccountEnricher(cfg config.Config) contextFunc {
+func ServiceAccountEnricher(svcaccts []config.ServiceAccountConfig) contextFunc {
 	return func(ctx context.Context, _ *grpc.UnaryServerInfo) (context.Context, error) {
 		// Extract request metadata (proxied http headers) from given context.
 		meta, ok := metadata.FromIncomingContext(ctx)
@@ -32,7 +32,7 @@ func ServiceAccountEnricher(cfg config.Config) contextFunc {
 		}
 
 		// Check if our bearer token matched any of the registered service accounts.
-		for _, account := range cfg.ServiceAccounts {
+		for _, account := range svcaccts {
 			if account.Token == token {
 				return contextWithServiceAccount(ctx, &v1.ServiceAccount{
 					Name:        account.Name,

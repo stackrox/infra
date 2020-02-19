@@ -4,63 +4,65 @@ package config
 import (
 	"io/ioutil"
 
-	"github.com/BurntSushi/toml"
+	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 )
 
 // Config represents the top-level configuration for infra-server.
 type Config struct {
-	// Auth0 is the authentication, encryption, and Auth0 configuration.
-	Auth0 Auth0Config `toml:"auth0"`
-
 	// Server is the server and TLS configuration.
-	Server ServerConfig `toml:"server"`
-
-	// StaticDir is the directory to server static assets from.
-	StaticDir string `toml:"static"`
+	Server ServerConfig `json:"server"`
 
 	// ServiceAccounts is a list of service accounts.
-	ServiceAccounts []ServiceAccountConfig `toml:"service-account"`
+	ServiceAccounts []ServiceAccountConfig `json:"service-accounts"`
 }
 
-// Auth0Config represents the configuration used for authentication,
-// encryption, and interacting with Auth0.
+// Auth0Config represents the configuration for integrating with Auth0.
 type Auth0Config struct {
-	ClientID     string `toml:"client-id"`
-	ClientSecret string `toml:"client-secret"`
-	AuthURL      string `toml:"auth-url"`
-	TokenURL     string `toml:"token-url"`
-	CallbackURL  string `toml:"callback-url"`
-	UserinfoURL  string `toml:"userinfo-url"`
-	LogoutURL    string `toml:"logout-url"`
-	LoginURL     string `toml:"login-url"`
-	SessionKey   string `toml:"session-key"`
-	PublicKey    string `toml:"public-key"`
+	// Tenant is the full Auth0 tenant name. An example value would be
+	// "example.auth0.com".
+	Tenant string `json:"tenant"`
+
+	// ClientID is the client ID for the Auth0 application integration.
+	ClientID string `json:"clientID"`
+
+	// ClientSecret is the client secret for the Auth0 application integration.
+	ClientSecret string `json:"clientSecret"`
+
+	// Endpoint is the server hostname with optional port used for redirecting
+	// requests back from Auth0. An example value would be "localhost:8443" or
+	// "example.com".
+	Endpoint string `json:"endpoint"`
+
+	// SessionSecret is an arbitrary string used in the signing of session
+	// tokens. Changing this value would invalidate current sessions.
+	SessionSecret string `json:"sessionSecret"`
 }
 
 // ServerConfig represents the configuration used for running the HTTP & GRPC
 // servers, and providing TLS.
 type ServerConfig struct {
-	GRPC     string `toml:"grpc"`
-	HTTPS    string `toml:"https"`
-	Domain   string `toml:"domain"`
-	CertFile string `toml:"cert"`
-	KeyFile  string `toml:"key"`
-	CertDir  string `toml:"certs"`
+	GRPC      string `json:"grpc"`
+	HTTPS     string `json:"https"`
+	Domain    string `json:"domain"`
+	CertFile  string `json:"cert"`
+	KeyFile   string `json:"key"`
+	CertDir   string `json:"certs"`
+	StaticDir string `json:"static"`
 }
 
 // ServiceAccountConfig represents the configuration for a single service
 // account.
 type ServiceAccountConfig struct {
 	// Name is a human readable name for the service account.
-	Name string `toml:"name"`
+	Name string `json:"name"`
 
 	// Description is a human readable description for the service account.
-	Description string `toml:"description"`
+	Description string `json:"description"`
 
 	// Token is a pre-shared-key used for directly authenticating as this
 	// service account.
-	Token string `toml:"token"`
+	Token string `json:"token"`
 }
 
 // FlavorConfig represents the configuration for a single automation flavor.
@@ -105,8 +107,8 @@ func Load(filename string) (*Config, error) {
 	}
 
 	var cfg Config
-	if _, err := toml.Decode(string(data), &cfg); err != nil {
-		return nil, errors.Wrap(err, "failed to decode toml")
+	if err := yaml.Unmarshal(data, &cfg); err != nil {
+		return nil, err
 	}
 
 	return &cfg, nil

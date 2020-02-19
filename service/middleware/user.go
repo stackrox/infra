@@ -3,11 +3,9 @@ package middleware
 import (
 	"context"
 	"strings"
-	"time"
 
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/auth"
-	"github.com/stackrox/infra/config"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -19,8 +17,7 @@ type userContextKey struct{}
 // possible. If there is no user, this function does not return an error, as
 // anonymous API calls are a possibility. Authorization must be independently
 // enforced.
-func UserEnricher(cfg config.Config) contextFunc {
-	jwtUser := auth.NewUserTokenizer(time.Hour, cfg.Auth0.SessionKey)
+func UserEnricher(cfg auth.OAuth) contextFunc {
 	return func(ctx context.Context, _ *grpc.UnaryServerInfo) (context.Context, error) {
 		// Extract request metadata (proxied http headers) from given context.
 		meta, ok := metadata.FromIncomingContext(ctx)
@@ -36,7 +33,7 @@ func UserEnricher(cfg config.Config) contextFunc {
 		}
 
 		// Validate the user JWT and extract the user and expiry properties.
-		user, err := jwtUser.Validate(token)
+		user, err := cfg.ValidateUser(token)
 		if err != nil {
 			return ctx, nil
 		}
