@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -261,7 +262,7 @@ func generateSignedGCSURL(artifact v1alpha1.Artifact, cfg jwt.Config, lifespan t
 	return storage.SignedURL(artifact.S3.Bucket, artifact.S3.Key, &storage.SignedURLOptions{
 		GoogleAccessID: cfg.Email,
 		PrivateKey:     cfg.PrivateKey,
-		Method:         "GET",
+		Method:         http.MethodGet,
 		Expires:        time.Now().Add(lifespan),
 	})
 }
