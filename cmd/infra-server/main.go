@@ -3,21 +3,23 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/pkg/errors"
+	"github.com/stackrox/infra/auth"
+	"github.com/stackrox/infra/cmd/infra-server/ops"
+	"github.com/stackrox/infra/config"
+	"github.com/stackrox/infra/flavor"
+	"github.com/stackrox/infra/pkg/buildinfo"
+	"github.com/stackrox/infra/pkg/scheduler"
+	"github.com/stackrox/infra/server"
+	"github.com/stackrox/infra/service"
+	"github.com/stackrox/infra/service/cluster"
+	"github.com/stackrox/infra/service/middleware"
 	"log"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"syscall"
-
-	"github.com/pkg/errors"
-	"github.com/stackrox/infra/auth"
-	"github.com/stackrox/infra/config"
-	"github.com/stackrox/infra/flavor"
-	"github.com/stackrox/infra/pkg/buildinfo"
-	"github.com/stackrox/infra/server"
-	"github.com/stackrox/infra/service"
-	"github.com/stackrox/infra/service/cluster"
-	"github.com/stackrox/infra/service/middleware"
+	"time"
 )
 
 // main is the entry point of the infra server.
@@ -83,6 +85,10 @@ func mainCmd() error {
 	if err != nil {
 		return err
 	}
+
+	sched := scheduler.NewScheduler(scheduler.SetWakeUpInterval(30*time.Second))
+	sched.Start()
+	sched.ExecuteEvery(5*time.Minute, ops.ResumeWorkflows)
 
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)

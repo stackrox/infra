@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/stackrox/infra/pkg/argoClient"
 	"strings"
 	"time"
 
@@ -38,13 +39,8 @@ var (
 
 // NewClusterService creates a new ClusterService.
 func NewClusterService(registry *flavor.Registry) (middleware.APIService, error) {
-	client, err := argoClient()
-	if err != nil {
-		return nil, err
-	}
-
 	return &clusterImpl{
-		argo:     client,
+		argo:     argoClient.Singleton(),
 		registry: registry,
 	}, nil
 }
