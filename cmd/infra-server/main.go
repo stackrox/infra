@@ -18,6 +18,7 @@ import (
 	"github.com/stackrox/infra/service"
 	"github.com/stackrox/infra/service/cluster"
 	"github.com/stackrox/infra/service/middleware"
+	"github.com/stackrox/infra/signer"
 )
 
 // main is the entry point of the infra server.
@@ -63,6 +64,11 @@ func mainCmd() error {
 		return errors.Wrapf(err, "failed to load auth0 config file %q", auth0ConfigFile)
 	}
 
+	signer, err := signer.NewFromEnv()
+	if err != nil {
+		return errors.Wrapf(err, "failed to load GCS signing credentials")
+	}
+
 	// Construct each individual service.
 	services, err := middleware.Services(
 		func() (middleware.APIService, error) {
@@ -71,7 +77,7 @@ func mainCmd() error {
 		service.NewUserService,
 		service.NewVersionService,
 		func() (middleware.APIService, error) {
-			return cluster.NewClusterService(registry)
+			return cluster.NewClusterService(registry, signer)
 		},
 	)
 	if err != nil {

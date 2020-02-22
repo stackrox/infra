@@ -19,6 +19,7 @@ import (
 	"github.com/stackrox/infra/flavor"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/service/middleware"
+	"github.com/stackrox/infra/signer"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -29,6 +30,7 @@ import (
 type clusterImpl struct {
 	argo     workflowv1.WorkflowInterface
 	registry *flavor.Registry
+	signer   *signer.Signer
 }
 
 var (
@@ -37,7 +39,7 @@ var (
 )
 
 // NewClusterService creates a new ClusterService.
-func NewClusterService(registry *flavor.Registry) (middleware.APIService, error) {
+func NewClusterService(registry *flavor.Registry, signer *signer.Signer) (middleware.APIService, error) {
 	client, err := argoClient()
 	if err != nil {
 		return nil, err
@@ -46,6 +48,7 @@ func NewClusterService(registry *flavor.Registry) (middleware.APIService, error)
 	return &clusterImpl{
 		argo:     client,
 		registry: registry,
+		signer:   signer,
 	}, nil
 }
 
@@ -195,6 +198,38 @@ func (s *clusterImpl) Create(ctx context.Context, req *v1.CreateClusterRequest) 
 	}
 
 	return &v1.ResourceByID{Id: created.Name}, nil
+}
+
+// Artifacts implements ClusterService.Artifacts.
+func (s *clusterImpl) Artifacts(_ context.Context, clusterID *v1.ResourceByID) (*v1.ClusterArtifacts, error) {
+	workflow, err := s.argo.Get(clusterID.Id, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	resp := v1.ClusterArtifacts{}
+
+	for _, nodeStatus := range workflow.Status.Nodes {
+		if nodeStatus.Outputs != nil {
+			for _, artifact := range nodeStatus.Outputs.Artifacts {
+				if artifact.S3 == nil {
+					continue
+				}
+
+				url, err := s.signer.Generate(artifact.S3.Bucket, artifact.S3.Key)
+				if err != nil {
+					return nil, err
+				}
+
+				resp.Artifacts = append(resp.Artifacts, &v1.Artifact{
+					Name: artifact.Name,
+					URL:  url,
+				})
+			}
+		}
+	}
+
+	return &resp, nil
 }
 
 // AllowAnonymous declares that this service can be called anonymously.
