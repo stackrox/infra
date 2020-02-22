@@ -6,13 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"os"
 	"strings"
 	"time"
 
-	"cloud.google.com/go/storage"
 	"github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
 	workflowv1 "github.com/argoproj/argo/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
 	"github.com/golang/protobuf/proto"
@@ -23,8 +19,7 @@ import (
 	"github.com/stackrox/infra/flavor"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/service/middleware"
-	"golang.org/x/oauth2/google"
-	"golang.org/x/oauth2/jwt"
+	"github.com/stackrox/infra/signer"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -35,7 +30,7 @@ import (
 type clusterImpl struct {
 	argo     workflowv1.WorkflowInterface
 	registry *flavor.Registry
-	jwtCfg   jwt.Config
+	signer   *signer.Signer
 }
 
 var (
@@ -44,23 +39,7 @@ var (
 )
 
 // NewClusterService creates a new ClusterService.
-func NewClusterService(registry *flavor.Registry) (middleware.APIService, error) {
-	const envvar = "GOOGLE_APPLICATION_CREDENTIALS"
-	credentialsFilename, found := os.LookupEnv(envvar)
-	if !found {
-		return nil, fmt.Errorf("environment variable %q was not set", envvar)
-	}
-
-	data, err := ioutil.ReadFile(credentialsFilename)
-	if err != nil {
-		return nil, err
-	}
-
-	jwtCfg, err := google.JWTConfigFromJSON(data)
-	if err != nil {
-		return nil, err
-	}
-
+func NewClusterService(registry *flavor.Registry, signer *signer.Signer) (middleware.APIService, error) {
 	client, err := argoClient()
 	if err != nil {
 		return nil, err
@@ -69,7 +48,7 @@ func NewClusterService(registry *flavor.Registry) (middleware.APIService, error)
 	return &clusterImpl{
 		argo:     client,
 		registry: registry,
-		jwtCfg:   *jwtCfg,
+		signer:   signer,
 	}, nil
 }
 
@@ -237,7 +216,7 @@ func (s *clusterImpl) Artifacts(_ context.Context, clusterID *v1.ResourceByID) (
 					continue
 				}
 
-				url, err := generateSignedGCSURL(artifact, s.jwtCfg, 10*time.Minute)
+				url, err := s.signer.Generate(artifact.S3.Bucket, artifact.S3.Key)
 				if err != nil {
 					return nil, err
 				}
@@ -251,20 +230,6 @@ func (s *clusterImpl) Artifacts(_ context.Context, clusterID *v1.ResourceByID) (
 	}
 
 	return &resp, nil
-}
-
-// generateSignedGCSURL generates a url that can be used to download the given
-// GCS object for some amount of time.
-//
-// This is accomplished by creating a GCS signed URL. For more information see:
-// https://cloud.google.com/storage/docs/access-control/signed-urls
-func generateSignedGCSURL(artifact v1alpha1.Artifact, cfg jwt.Config, lifespan time.Duration) (string, error) {
-	return storage.SignedURL(artifact.S3.Bucket, artifact.S3.Key, &storage.SignedURLOptions{
-		GoogleAccessID: cfg.Email,
-		PrivateKey:     cfg.PrivateKey,
-		Method:         http.MethodGet,
-		Expires:        time.Now().Add(lifespan),
-	})
 }
 
 // AllowAnonymous declares that this service can be called anonymously.
