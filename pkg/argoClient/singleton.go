@@ -2,18 +2,19 @@ package argoClient
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"sync"
+
 	"github.com/argoproj/argo/pkg/client/clientset/versioned"
 	workflowv1 "github.com/argoproj/argo/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"os"
-	"path/filepath"
-	"sync"
 )
 
 var (
 	argoCliInstance workflowv1.WorkflowInterface
-	once         sync.Once
+	once            sync.Once
 )
 
 func restConfig() (*rest.Config, error) {

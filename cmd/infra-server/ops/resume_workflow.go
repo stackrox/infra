@@ -2,6 +2,8 @@ package ops
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
 	"github.com/argoproj/argo/workflow/util"
 	"github.com/golang/protobuf/ptypes"
@@ -9,7 +11,6 @@ import (
 	"github.com/stackrox/infra/pkg/argoClient"
 	"github.com/stackrox/infra/utils/workflowUtils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"time"
 )
 
 func ResumeWorkflows(clusterIds ...string) error {

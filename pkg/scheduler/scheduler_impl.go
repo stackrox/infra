@@ -2,18 +2,19 @@ package scheduler
 
 import (
 	"fmt"
-	"github.com/stackrox/rox/pkg/concurrency"
 	"reflect"
 	"sync"
 	"time"
+
+	"github.com/stackrox/rox/pkg/concurrency"
 )
 
 type schedulerImpl struct {
-	interruptC chan struct{}
-	stopSig concurrency.Signal
-	stoppedSig concurrency.Signal
-	newjobs []*job
-	jobs []*job
+	interruptC  chan struct{}
+	stopSig     concurrency.Signal
+	stoppedSig  concurrency.Signal
+	newjobs     []*job
+	jobs        []*job
 	newJobMutex sync.Mutex
 
 	wakeUpInterval time.Duration
@@ -30,7 +31,7 @@ func SetWakeUpInterval(t time.Duration) SchedulerOption {
 }
 
 func SetJobsInParallel(p int) SchedulerOption {
-	return func (s *schedulerImpl) error {
+	return func(s *schedulerImpl) error {
 		s.jobsInParallel = p
 		return nil
 	}
@@ -113,9 +114,9 @@ func getJob(duration time.Duration, execFunction interface{}, args ...interface{
 
 	return &job{
 		execFunction: f,
-		nextRun: time.Now().Add(duration),
-		duration: duration,
-		params: params,
+		nextRun:      time.Now().Add(duration),
+		duration:     duration,
+		params:       params,
 	}, nil
 }
 
@@ -138,7 +139,7 @@ func (s *schedulerImpl) executeJobs() {
 		go func(idx int, j *job) {
 			defer func() {
 				wg.Done()
-				<- pChan
+				<-pChan
 			}()
 
 			j.Execute()
@@ -150,7 +151,7 @@ func (s *schedulerImpl) executeJobs() {
 
 	wg.Wait()
 	// prune jobs
-	cleanedJobsList := make([]*job, len(s.jobs) - len(pruneJobIdxs))
+	cleanedJobsList := make([]*job, len(s.jobs)-len(pruneJobIdxs))
 	pruned := 0
 	for i := 0; i < len(s.jobs); i++ {
 		if _, ok := pruneJobIdxs[i]; ok {
@@ -165,11 +166,11 @@ func (s *schedulerImpl) executeJobs() {
 }
 
 type job struct {
-	nextRun time.Time
-	duration time.Duration
+	nextRun      time.Time
+	duration     time.Duration
 	execFunction reflect.Value
-	params []reflect.Value
-	repeat bool
+	params       []reflect.Value
+	repeat       bool
 }
 
 func (j *job) Execute() {

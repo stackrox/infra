@@ -3,6 +3,13 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
+	"os"
+	"os/signal"
+	"path/filepath"
+	"syscall"
+	"time"
+
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/auth"
 	"github.com/stackrox/infra/cmd/infra-server/ops"
@@ -15,12 +22,6 @@ import (
 	"github.com/stackrox/infra/service/cluster"
 	"github.com/stackrox/infra/service/middleware"
 	"github.com/stackrox/infra/signer"
-	"log"
-	"os"
-	"os/signal"
-	"path/filepath"
-	"syscall"
-	"time"
 )
 
 // main is the entry point of the infra server.
@@ -94,14 +95,13 @@ func mainCmd() error {
 		return err
 	}
 
-	sched := scheduler.NewScheduler(scheduler.SetWakeUpInterval(30*time.Second))
+	sched := scheduler.NewScheduler(scheduler.SetWakeUpInterval(30 * time.Second))
 	sched.Start()
 	sched.ExecuteEvery(5*time.Minute, ops.ResumeWorkflows)
 	defer func() {
 		stoppedSig := sched.Stop()
 		<-stoppedSig.Done()
 	}()
-
 
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)

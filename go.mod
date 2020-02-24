@@ -3,13 +3,13 @@ module github.com/stackrox/infra
 go 1.13
 
 require (
-	cloud.google.com/go v0.47.0
-	github.com/BurntSushi/toml v0.3.1
+	cloud.google.com/go/storage v1.1.0
 	github.com/argoproj/argo v2.4.3+incompatible
 	github.com/argoproj/pkg v0.0.0-20200102163130-2dd1f3f6b4de // indirect
 	github.com/colinmarc/hdfs v0.0.0-00010101000000-000000000000 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/docker/spdystream v0.0.0-20181023171402-6480d4af844c // indirect
+	github.com/elazarl/goproxy v0.0.0-20200220113713-29f9e0ba54ea // indirect
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-openapi/spec v0.19.6 // indirect
 	github.com/golang/protobuf v1.3.3
@@ -27,6 +27,7 @@ require (
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	google.golang.org/genproto v0.0.0-20191009194640-548a555dbc03
 	google.golang.org/grpc v1.24.0
+	gopkg.in/jcmturner/goidentity.v2 v2.0.0 // indirect
 	k8s.io/apimachinery v0.17.2
 	k8s.io/client-go v11.0.1-0.20190816222228-6d55c1b1f1ca+incompatible
 	k8s.io/klog v1.0.0 // indirect

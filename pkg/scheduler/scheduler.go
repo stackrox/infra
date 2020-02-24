@@ -1,12 +1,13 @@
 package scheduler
 
 import (
-	"github.com/stackrox/rox/pkg/concurrency"
 	"time"
+
+	"github.com/stackrox/rox/pkg/concurrency"
 )
 
 const (
-	wakeUpInterval = 1*time.Second
+	wakeUpInterval = 1 * time.Second
 	jobsInParallel = 4
 )
 
@@ -20,9 +21,9 @@ type Scheduler interface {
 
 func NewScheduler(opts ...SchedulerOption) *schedulerImpl {
 	scheduler := &schedulerImpl{
-		interruptC: make(chan struct{}, 1),
-		stopSig: concurrency.NewSignal(),
-		stoppedSig: concurrency.NewSignal(),
+		interruptC:     make(chan struct{}, 1),
+		stopSig:        concurrency.NewSignal(),
+		stoppedSig:     concurrency.NewSignal(),
 		wakeUpInterval: wakeUpInterval,
 		jobsInParallel: jobsInParallel,
 	}

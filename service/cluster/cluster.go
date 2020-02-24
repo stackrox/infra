@@ -6,11 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/stackrox/infra/cmd/infra-server/ops"
 	"github.com/stackrox/infra/pkg/argoClient"
 	"github.com/stackrox/infra/utils/workflowUtils"
-	"strings"
-	"time"
 
 	"github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
 	workflowv1 "github.com/argoproj/argo/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
@@ -244,8 +245,8 @@ func (s *clusterImpl) Access() map[string]middleware.Access {
 func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.Empty, error) {
 	// Set lifespan to zero.
 	lifespanReq := &v1.LifespanRequest{
-		Id:			req.Id,
-		Lifespan:	&duration.Duration{},
+		Id:       req.Id,
+		Lifespan: &duration.Duration{},
 	}
 
 	if _, err := s.Lifespan(ctx, lifespanReq); err != nil {
