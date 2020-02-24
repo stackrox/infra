@@ -298,4 +298,11 @@ service ClusterService {
             get: "/v1/cluster/{id}/artifacts"
         };
     }
+
+    // Delete deletes an existing cluster.
+    rpc Delete (ResourceByID) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            delete: "/v1/cluster"
+        };
+    }
 }

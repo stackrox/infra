@@ -7,7 +7,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/pkg/argoClient"
-	"github.com/stackrox/infra/service/cluster"
+	"github.com/stackrox/infra/utils/workflowUtils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"time"
 )
@@ -40,7 +40,7 @@ func ResumeWorkflows(clusterIds ...string) error {
 			}
 
 			// Check expiry time.
-			lifespan, err := ptypes.Duration(cluster.GetLifespan(&workflow))
+			lifespan, err := ptypes.Duration(workflowUtils.GetLifespan(&workflow))
 			if err != nil {
 				continue
 			}

@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/stackrox/infra/cmd/infra-server/ops"
 	"github.com/stackrox/infra/pkg/argoClient"
+	"github.com/stackrox/infra/utils/workflowUtils"
 	"strings"
 	"time"
 
@@ -53,9 +55,9 @@ func clusterFromWorkflow(workflow v1alpha1.Workflow) *v1.Cluster {
 	cluster := &v1.Cluster{
 		ID:       workflow.GetName(),
 		Status:   workflowStatus(workflow.Status),
-		Flavor:   GetFlavor(&workflow),
-		Owner:    GetOwner(&workflow),
-		Lifespan: GetLifespan(&workflow),
+		Flavor:   workflowUtils.GetFlavor(&workflow),
+		Owner:    workflowUtils.GetOwner(&workflow),
+		Lifespan: workflowUtils.GetLifespan(&workflow),
 	}
 
 	cluster.CreatedOn, _ = ptypes.TimestampProto(workflow.Status.StartedAt.Time.UTC())
@@ -132,7 +134,7 @@ func (s *clusterImpl) Lifespan(_ context.Context, req *v1.LifespanRequest) (*dur
 	}
 
 	// Construct our replacement patch
-	payloadBytes, err := formatAnnotationPatch(annotationLifespanKey, fmt.Sprint(lifespan))
+	payloadBytes, err := formatAnnotationPatch(workflowUtils.AnnotationLifespanKey, fmt.Sprint(lifespan))
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +145,7 @@ func (s *clusterImpl) Lifespan(_ context.Context, req *v1.LifespanRequest) (*dur
 		return nil, err
 	}
 
-	return GetLifespan(workflow), nil
+	return workflowUtils.GetLifespan(workflow), nil
 }
 
 // Create implements ClusterService.Create.
@@ -175,9 +177,9 @@ func (s *clusterImpl) Create(ctx context.Context, req *v1.CreateClusterRequest) 
 	}
 
 	workflow.SetAnnotations(map[string]string{
-		annotationFlavorKey:   flav.ID,
-		annotationLifespanKey: fmt.Sprint(lifespan),
-		annotationOwnerKey:    owner,
+		workflowUtils.AnnotationFlavorKey:   flav.ID,
+		workflowUtils.AnnotationLifespanKey: fmt.Sprint(lifespan),
+		workflowUtils.AnnotationOwnerKey:    owner,
 	})
 
 	workflow.Spec.Arguments.Parameters = make([]v1alpha1.Parameter, 0, len(req.Parameters))
@@ -237,6 +239,25 @@ func (s *clusterImpl) Access() map[string]middleware.Access {
 		"/v1.ClusterService/Create":    middleware.Authenticated,
 		"/v1.ClusterService/Artifacts": middleware.Authenticated,
 	}
+}
+
+func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.Empty, error) {
+	// Set lifespan to zero.
+	lifespanReq := &v1.LifespanRequest{
+		Id:			req.Id,
+		Lifespan:	&duration.Duration{},
+	}
+
+	if _, err := s.Lifespan(ctx, lifespanReq); err != nil {
+		return nil, err
+	}
+
+	// Resume workflow for this cluster.
+	if err := ops.ResumeWorkflows(req.Id); err != nil {
+		return nil, err
+	}
+
+	return &empty.Empty{}, nil
 }
 
 // RegisterServiceServer registers this service with the given gRPC Server.

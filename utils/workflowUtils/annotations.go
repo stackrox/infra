@@ -1,4 +1,4 @@
-package cluster
+package workflowUtils
 
 import (
 	"time"
@@ -9,15 +9,15 @@ import (
 
 const (
 	// annotationFlavorKey is the k8s annotation that contains the flavor ID.
-	annotationFlavorKey = "infra.stackrox.com/flavor"
+	AnnotationFlavorKey = "infra.stackrox.com/flavor"
 
 	// annotationOwnerKey is the k8s annotation that contains the owner email
 	// address.
-	annotationOwnerKey = "infra.stackrox.com/owner"
+	AnnotationOwnerKey = "infra.stackrox.com/owner"
 
 	// annotationLifespanKey is the k8s annotation that contains the lifespan
 	// duration.
-	annotationLifespanKey = "infra.stackrox.com/lifespan"
+	AnnotationLifespanKey = "infra.stackrox.com/lifespan"
 )
 
 // Annotated represents a type that has annotations.
@@ -27,18 +27,18 @@ type Annotated interface {
 
 // GetFlavor returns the flavor ID if it exists.
 func GetFlavor(a Annotated) string {
-	return a.GetAnnotations()[annotationFlavorKey]
+	return a.GetAnnotations()[AnnotationFlavorKey]
 }
 
 // GetOwner returns the owner email address if it exists.
 func GetOwner(a Annotated) string {
-	return a.GetAnnotations()[annotationOwnerKey]
+	return a.GetAnnotations()[AnnotationOwnerKey]
 }
 
 // GetLifespan returns the lifespan duration if it exists. If it does not
 // exist, or is in an invalid format, a default 3 hours is returned.
 func GetLifespan(a Annotated) *duration.Duration {
-	lifespan, err := time.ParseDuration(a.GetAnnotations()[annotationLifespanKey])
+	lifespan, err := time.ParseDuration(a.GetAnnotations()[AnnotationLifespanKey])
 	if err != nil {
 		// Fallback to a default 3 hours.
 		lifespan = 3 * time.Hour
