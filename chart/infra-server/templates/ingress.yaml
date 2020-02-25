@@ -2,15 +2,15 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 
 metadata:
-  name: {{ .Release.Name }}-ingress
-  namespace: {{ .Release.Namespace }}
+  name: infra-server-ingress
+  namespace: infra
   labels:
-    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/name: infra-server
   annotations:
     kubernetes.io/ingress.global-static-ip-name: {{ .Values.reservedAddressName }}
-    networking.gke.io/managed-certificates: {{ .Values.managedCertificateName }}
+    networking.gke.io/managed-certificates: "infra-server-certificate-primary,infra-server-certificate-secondary"
 
 spec:
   backend:
-    serviceName: {{ .Release.Name }}-service
+    serviceName: infra-server-service
     servicePort: 8443

@@ -139,21 +139,69 @@ proto-generated-srcs: protoc-tools
 ##########
 ## Kube ##
 ##########
+.PHONY: configuration-download
+configuration-download:
+	@echo 'Downloading configuration from https://console.cloud.google.com/storage/browser/stackrox-licensing-configuration/configuration/?project=stackrox-licensing'
+	gsutil -m cp -R gs://infra-configuration/latest/configuration chart/infra-server/
+
+.PHONY: configuration-upload
+configuration-upload:
+	@echo 'Uploading configuration to https://console.cloud.google.com/storage/browser/stackrox-licensing-configuration/configuration/?project=stackrox-licensing'
+	gsutil -m cp -R chart/infra-server/configuration "gs://infra-configuration/$(shell date '+%Y-%m-%d-%H-%M-%S')/configuration"
+	gsutil -m cp -R chart/infra-server/configuration gs://infra-configuration/latest/configuration
+
 .PHONY: push
 push: image
 	docker push us.gcr.io/stackrox-infra/infra-server:$(TAG) | cat
 
-.PHONY: render
-render:
+.PHONY: clean-render
+clean-render:
+	@rm -rf chart-rendered
+
+.PHONY: render-development
+render-development: clean-render
 	@mkdir -p chart-rendered
-	helm template chart/infra-server --output-dir chart-rendered \
-		--name infra-server --namespace infra \
-		--set tag=$(TAG)
+	helm template chart/infra-server \
+	    --output-dir chart-rendered \
+		--set tag="$(TAG)" \
+		--values chart/infra-server/configuration/development-values.yaml
 
-.PHONY: sanity
-sanity:
-	@test -d chart/infra-server/configs || { echo "Deployment configs missing"; exit 1; }
+.PHONY: render-production
+render-production: clean-render
+	@mkdir -p chart-rendered
+	helm template chart/infra-server \
+	    --output-dir chart-rendered \
+		--set tag="$(TAG)" \
+		--values chart/infra-server/configuration/production-values.yaml
 
-.PHONY: deploy
-deploy: sanity render push
-	kubectl apply -R -f chart-rendered
+.PHONY: install-development
+install-development:
+	helm upgrade --install \
+	    --kube-context gke_stackrox-infra_us-west2_infra-development \
+		--repo https://argoproj.github.io/argo-helm \
+		--create-namespace \
+		--namespace argo \
+		argo argo
+	kubectl apply -R \
+	    --context gke_stackrox-infra_us-west2_infra-development \
+	    -f chart-rendered/infra-server
+
+.PHONY: install-production
+install-production:
+	helm upgrade --install \
+	    --kube-context gke_stackrox-infra_us-west2_infra-production \
+		--repo https://argoproj.github.io/argo-helm \
+		--create-namespace \
+		--namespace argo \
+		argo argo
+	kubectl apply -R \
+	    --context gke_stackrox-infra_us-west2_infra-production \
+	    -f chart-rendered/infra-server
+
+.PHONY: deploy-development
+deploy-development: push render-development install-development
+	@echo "All done!"
+
+.PHONY: deploy-production
+deploy-production: push render-production install-production
+	@echo "All done!"

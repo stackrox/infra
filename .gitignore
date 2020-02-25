@@ -9,6 +9,9 @@ sessions/
 image/infra-server
 image/static
 chart-rendered
+chart/infra-server/configuration
 chart/infra-server/configs
 chart/infra-server/secrets
+chart/argo/configs
+chart/argo/secrets
 configuration/

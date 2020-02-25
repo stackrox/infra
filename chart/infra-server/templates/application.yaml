@@ -2,10 +2,10 @@ apiVersion: app.k8s.io/v1beta1
 kind: Application
 
 metadata:
-  name: {{ .Release.Name }}
-  namespace: {{ .Release.Namespace }}
+  name: infra-server
+  namespace: infra
   labels:
-    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/name: infra-server
     app.kubernetes.io/version: {{ .Values.tag }}
   annotations:
     kubernetes-engine.cloud.google.com/icon: |-
@@ -27,11 +27,11 @@ spec:
       - description: CircleCI builds
         url: https://circleci.com/gh/stackrox/workflows/infra
       - description: User login
-        url: https://{{ .Values.host }}/login
+        url: https://{{ .Values.hosts.primary }}/login
       - description: Whoami API endpoint
-        url: https://{{ .Values.host }}/v1/whoami
+        url: https://{{ .Values.hosts.primary }}/v1/whoami
       - description: Version API endpoint
-        url: https://{{ .Values.host }}/v1/version
+        url: https://{{ .Values.hosts.primary }}/v1/version
     description: |-
       StackRox Infra Server
 
@@ -41,7 +41,7 @@ spec:
 
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ .Release.Name }}
+      app.kubernetes.io/name: infra-server
 
   componentKinds:
     - kind: ConfigMap

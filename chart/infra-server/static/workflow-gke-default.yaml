@@ -1,0 +1,74 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: gke-default-
+spec:
+  entrypoint: start
+  arguments:
+    parameters:
+      - name: name
+      - name: nodes
+  volumes:
+    - name: credentials
+      secret:
+        secretName: google-credentials
+
+  templates:
+    - name: start
+      steps:
+        - - name: create
+            template: create
+            arguments:
+              parameters:
+                - name: name
+                  value: "{{workflow.parameters.name}}"
+                - name: nodes
+                  value: "{{workflow.parameters.nodes}}"
+
+        - - name: wait
+            template: wait
+        - - name: destroy
+            template: destroy
+            arguments:
+              parameters:
+                - name: name
+                  value: "{{steps.create.outputs.parameters.cluster_name}}"
+
+    - name: create
+      inputs:
+        parameters:
+          - name: name
+          - name: nodes
+      outputs:
+        artifacts:
+          - name: kubeconfig
+            path: /outputs/kubeconfig
+        parameters:
+          - name: cluster_name
+            valueFrom:
+              path: /outputs/cluster_name
+      container:
+        image: gcr.io/stackrox-infra/automation-flavors/gke-default:v0.0.0-13-g1eb47b1
+        args:
+          - create
+          - "--name={{inputs.parameters.name}}"
+          - "--nodes={{inputs.parameters.nodes}}"
+        volumeMounts:
+          - name: credentials
+            mountPath: /tmp
+
+    - name: wait
+      suspend: {}
+
+    - name: destroy
+      inputs:
+        parameters:
+          - name: name
+      container:
+        image: gcr.io/stackrox-infra/automation-flavors/gke-default:v0.0.0-13-g1eb47b1
+        args:
+          - destroy
+          - "--name={{inputs.parameters.name}}"
+        volumeMounts:
+          - name: credentials
+            mountPath: /tmp
