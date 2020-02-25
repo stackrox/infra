@@ -9,10 +9,10 @@ import (
 	v1 "github.com/stackrox/infra/generated/api/v1"
 )
 
-type clusterListResponse v1.ClusterListResponse
+type prettyClusterListResponse v1.ClusterListResponse
 
-func (r clusterListResponse) PrettyPrint() {
-	for _, cluster := range r.Clusters {
+func (p prettyClusterListResponse) PrettyPrint() {
+	for _, cluster := range p.Clusters {
 		var (
 			createdOn, _   = ptypes.Timestamp(cluster.GetCreatedOn())
 			lifespan, _    = ptypes.Duration(cluster.GetLifespan())

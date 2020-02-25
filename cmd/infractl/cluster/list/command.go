@@ -13,22 +13,29 @@ import (
 	"google.golang.org/grpc"
 )
 
+const examples = `# List all clusters.
+$ infractl cluster list
+
+# Exclude clusters that expired over 30 minutes ago.
+$ infractl cluster list --expired-cutoff 30m`
+
 // Command defines the handler for infractl cluster list.
 func Command() *cobra.Command {
 	// $ infractl cluster list
 	cmd := &cobra.Command{
 		Use:     "list",
 		Short:   "List clusters",
-		Long:    "List lists the available clusters",
-		Example: "  $ infractl cluster list",
-		RunE:    common.WithGRPCHandler(list),
+		Long:    "List the available clusters",
+		Example: examples,
+		Args:    common.ArgsWithHelp(cobra.ExactArgs(0)),
+		RunE:    common.WithGRPCHandler(run),
 	}
 
 	cmd.Flags().Duration("expired-cutoff", time.Hour, "do not show cluster that expired before a cutoff")
 	return cmd
 }
 
-func list(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []string) (common.PrettyPrinter, error) {
+func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []string) (common.PrettyPrinter, error) {
 	cutoff, _ := cmd.Flags().GetDuration("expired-cutoff")
 
 	resp, err := v1.NewClusterServiceClient(conn).List(ctx, &empty.Empty{})
@@ -47,5 +54,5 @@ func list(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []st
 		}
 	}
 
-	return clusterListResponse(results), nil
+	return prettyClusterListResponse(results), nil
 }

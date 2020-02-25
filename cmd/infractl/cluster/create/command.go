@@ -15,14 +15,22 @@ import (
 	"google.golang.org/grpc"
 )
 
+const examples = `# Create a new "gke-default" cluster.
+$ infractl cluster create gke-default --arg name=test --arg nodes=3
+
+# Create a new "gke-default" cluster with a 30 minute lifespan.
+$ infractl cluster create gke-default --lifespan 30m --arg name=test --arg nodes=3`
+
 // Command defines the handler for infractl cluster create.
 func Command() *cobra.Command {
 	// $ infractl cluster create
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "create on a specific cluster",
-		Long:  "create displays create on a specific cluster",
-		RunE:  common.WithGRPCHandler(create),
+		Use:     "create FLAVOR",
+		Short:   "Create a new cluster",
+		Long:    "Creates a new cluster",
+		Example: examples,
+		Args:    common.ArgsWithHelp(cobra.ExactArgs(1), args),
+		RunE:    common.WithGRPCHandler(run),
 	}
 
 	cmd.Flags().StringArray("arg", []string{}, "repeated key=value parameter pairs")
@@ -30,13 +38,16 @@ func Command() *cobra.Command {
 	return cmd
 }
 
-func create(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []string) (common.PrettyPrinter, error) {
+func args(_ *cobra.Command, args []string) error {
+	if args[0] == "" {
+		return errors.New("no flavor ID given")
+	}
+	return nil
+}
+
+func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []string) (common.PrettyPrinter, error) {
 	params, _ := cmd.Flags().GetStringArray("arg")
 	lifespan, _ := cmd.Flags().GetDuration("lifespan")
-
-	if len(args) != 1 {
-		return nil, errors.New("invalid arguments")
-	}
 
 	req := v1.CreateClusterRequest{
 		ID:         args[0],
@@ -57,5 +68,5 @@ func create(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args
 		return nil, err
 	}
 
-	return id(*resp), nil
+	return prettyResourceByID(*resp), nil
 }

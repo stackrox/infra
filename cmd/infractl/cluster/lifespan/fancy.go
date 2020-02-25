@@ -7,10 +7,10 @@ import (
 	durpb "github.com/golang/protobuf/ptypes/duration"
 )
 
-type dur durpb.Duration
+type prettyDuration durpb.Duration
 
-func (r dur) PrettyPrint() {
-	delta := durpb.Duration(r)
+func (p prettyDuration) PrettyPrint() {
+	delta := durpb.Duration(p)
 	lifespan, _ := ptypes.Duration(&delta)
 
 	fmt.Println(lifespan)

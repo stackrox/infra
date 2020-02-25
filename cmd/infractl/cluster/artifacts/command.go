@@ -22,29 +22,32 @@ const examples = `# List the artifacts for cluster "example-s3maj".
 $ infractl cluster artifacts example-s3maj
 
 # Download the artifacts for cluster "example-s3maj" into the "artifacts" directory.
-$ infractl cluster artifacts example-s3maj --download-dir=artifacts
-`
+$ infractl cluster artifacts example-s3maj --download-dir=artifacts`
 
 // Command defines the handler for infractl cluster artifacts.
 func Command() *cobra.Command {
 	// $ infractl cluster artifacts
 	cmd := &cobra.Command{
-		Use:     "artifacts <cluster id>",
+		Use:     "artifacts CLUSTER",
 		Short:   "Download cluster artifacts",
 		Long:    "Download artifacts from a cluster",
 		Example: examples,
-		RunE:    common.WithGRPCHandler(artifacts),
+		Args:    common.ArgsWithHelp(cobra.ExactArgs(1), args),
+		RunE:    common.WithGRPCHandler(run),
 	}
 
 	cmd.Flags().String("download-dir", "", "artifact download directory")
 	return cmd
 }
 
-func artifacts(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []string) (common.PrettyPrinter, error) {
-	if len(args) != 1 {
-		return nil, errors.New("invalid arguments")
+func args(_ *cobra.Command, args []string) error {
+	if args[0] == "" {
+		return errors.New("no cluster ID given")
 	}
+	return nil
+}
 
+func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []string) (common.PrettyPrinter, error) {
 	downloadDir, _ := cmd.Flags().GetString("download-dir")
 
 	resp, err := v1.NewClusterServiceClient(conn).Artifacts(ctx, &v1.ResourceByID{Id: args[0]})
@@ -55,7 +58,7 @@ func artifacts(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, a
 	// If no --download-dir flag was given, skip downloading the artifacts
 	// altogether.
 	if downloadDir == "" {
-		return clusterArtifacts(*resp), nil
+		return prettyClusterArtifacts(*resp), nil
 	}
 
 	for _, artifact := range resp.Artifacts {
@@ -64,7 +67,7 @@ func artifacts(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, a
 		}
 	}
 
-	return clusterArtifacts(*resp), nil
+	return prettyClusterArtifacts(*resp), nil
 }
 
 // download will save the given cluster artifact to disk inside the given

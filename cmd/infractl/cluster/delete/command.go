@@ -23,7 +23,7 @@ func Command() *cobra.Command {
 		Long:    "Deletes a specific cluster",
 		Example: examples,
 		Args:    common.ArgsWithHelp(cobra.ExactArgs(1), args),
-		RunE:    common.WithGRPCHandler(delete),
+		RunE:    common.WithGRPCHandler(run),
 	}
 }
 
@@ -31,11 +31,10 @@ func args(_ *cobra.Command, args []string) error {
 	if args[0] == "" {
 		return errors.New("no cluster ID given")
 	}
-
 	return nil
 }
 
-func delete(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []string) (common.PrettyPrinter, error) {
+func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []string) (common.PrettyPrinter, error) {
 	req := v1.ResourceByID{
 		Id: args[0],
 	}

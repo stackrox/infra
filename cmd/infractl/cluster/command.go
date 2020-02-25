@@ -16,7 +16,7 @@ func Command() *cobra.Command {
 	// $ infractl cluster
 	cmd := &cobra.Command{
 		Use:   "cluster",
-		Short: "cluster interactions",
+		Short: "Interact with clusters",
 		Long:  "Interact with clusters",
 	}
 

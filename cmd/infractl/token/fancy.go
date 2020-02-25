@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/stackrox/infra/cmd/infractl/common"
-
 	v1 "github.com/stackrox/infra/generated/api/v1"
 )
 

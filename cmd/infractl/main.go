@@ -3,12 +3,11 @@ package main
 import (
 	"os"
 
-	"github.com/stackrox/infra/cmd/infractl/token"
-
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/cluster"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	"github.com/stackrox/infra/cmd/infractl/flavor"
+	"github.com/stackrox/infra/cmd/infractl/token"
 	"github.com/stackrox/infra/cmd/infractl/version"
 	"github.com/stackrox/infra/cmd/infractl/whoami"
 	"github.com/stackrox/infra/pkg/buildinfo"
@@ -27,14 +26,18 @@ func main() {
 	cmd.AddCommand(
 		// $ infractl cluster
 		cluster.Command(),
+
 		// $ infractl flavor
 		flavor.Command(),
+
 		// $ infractl token
 		token.Command(),
-		// $ infractl whoami
-		whoami.Command(),
+
 		// $ infractl version
 		version.Command(),
+
+		// $ infractl whoami
+		whoami.Command(),
 	)
 
 	if err := cmd.Execute(); err != nil {
