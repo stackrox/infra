@@ -45,7 +45,7 @@ var (
 // NewClusterService creates a new ClusterService.
 func NewClusterService(registry *flavor.Registry, signer *signer.Signer) (middleware.APIService, error) {
 	return &clusterImpl{
-		argo:     argoClient.Singleton(),
+		argo:     argoClient.NewArgoClient(),
 		registry: registry,
 		signer:   signer,
 	}, nil

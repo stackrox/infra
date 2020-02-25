@@ -1,4 +1,4 @@
-// Package create implements the infractl cluster delete command.
+// Package delete implements the infractl cluster delete command.
 package delete
 
 import (
@@ -11,17 +11,22 @@ import (
 	"google.golang.org/grpc"
 )
 
+const examples = `# Delete cluster.
+infractl cluster delete <cluster-id>
+
+# example
+infractl cluster delete gke-default-x99rc
+`
+
 // Command defines the handler for infractl cluster delete.
 func Command() *cobra.Command {
 	// $ infractl cluster delete
-	cmd := &cobra.Command{
+	return &cobra.Command{
 		Use:   "delete",
 		Short: "delete a specific cluster",
-		Long:  "create displays create on a specific cluster",
+		Long:  "deletes a specific cluster",
 		RunE:  common.WithGRPCHandler(delete),
 	}
-
-	return cmd
 }
 
 func delete(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []string) (common.PrettyPrinter, error) {

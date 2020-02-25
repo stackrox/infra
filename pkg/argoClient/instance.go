@@ -4,17 +4,11 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sync"
 
 	"github.com/argoproj/argo/pkg/client/clientset/versioned"
 	workflowv1 "github.com/argoproj/argo/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-)
-
-var (
-	argoCliInstance workflowv1.WorkflowInterface
-	once            sync.Once
 )
 
 func restConfig() (*rest.Config, error) {
@@ -32,16 +26,11 @@ func restConfig() (*rest.Config, error) {
 	return rest.InClusterConfig()
 }
 
-func initializeArgoClient() {
+func NewArgoClient() workflowv1.WorkflowInterface {
 	config, err := restConfig()
 	if err != nil {
 		panic(fmt.Sprintf("%+v", err))
 	}
 
-	argoCliInstance = versioned.NewForConfigOrDie(config).ArgoprojV1alpha1().Workflows("default")
-}
-
-func Singleton() workflowv1.WorkflowInterface {
-	once.Do(initializeArgoClient)
-	return argoCliInstance
+	return versioned.NewForConfigOrDie(config).ArgoprojV1alpha1().Workflows("default")
 }
