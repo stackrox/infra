@@ -58,9 +58,11 @@ func (s *server) RunServer() (<-chan error, error) {
 			// Extract user from JWT token stored in HTTP cookie.
 			middleware.ContextInterceptor(middleware.UserEnricher(s.oauth)),
 			// Extract service-account from token stored in Authorization header.
-			middleware.ContextInterceptor(middleware.ServiceAccountEnricher(s.cfg.ServiceAccounts)),
+			middleware.ContextInterceptor(middleware.ServiceAccountEnricher(s.oauth.ValidateServiceAccountToken)),
+
+			middleware.ContextInterceptor(middleware.AdminEnricher(s.cfg.Password)),
 			// Enforce authenticated user access on resources that declare it.
-			middleware.ContextInterceptor(middleware.EnforceAnonymousAccess),
+			middleware.ContextInterceptor(middleware.EnforceAccess),
 		)),
 	)
 

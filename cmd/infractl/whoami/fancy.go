@@ -16,6 +16,7 @@ func (r whoamiResp) PrettyPrint() {
 		fmt.Println("Service Account")
 		fmt.Printf("  Name:        %s\n", p.ServiceAccount.GetName())
 		fmt.Printf("  Description: %s\n", p.ServiceAccount.GetDescription())
+		fmt.Printf("  Email:       %s\n", p.ServiceAccount.GetEmail())
 	case nil:
 		fmt.Println("Anonymous")
 	}

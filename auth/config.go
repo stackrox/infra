@@ -39,6 +39,9 @@ func NewFromConfig(auth0ConfigFile string, auth0PublicKeyPEMFile string) (*OAuth
 		jwtState: NewStateTokenizer(time.Minute, cfg.SessionSecret),
 		jwtAuth0: NewAuth0Tokenizer(0, publicKey),
 		jwtUser:  NewUserTokenizer(time.Hour, cfg.SessionSecret),
+		jwtSvcAcct: serviceAccountTokenizer{
+			secret: []byte(cfg.SessionSecret),
+		},
 		conf: &oauth2.Config{
 			ClientID:     cfg.ClientID,
 			ClientSecret: cfg.ClientSecret,

@@ -74,7 +74,9 @@ func mainCmd() error {
 		func() (middleware.APIService, error) {
 			return service.NewFlavorService(registry)
 		},
-		service.NewUserService,
+		func() (middleware.APIService, error) {
+			return service.NewUserService(auth0.GenerateServiceAccountToken)
+		},
 		service.NewVersionService,
 		func() (middleware.APIService, error) {
 			return cluster.NewClusterService(registry, signer)

@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/stackrox/infra/config"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -17,7 +16,7 @@ type serviceAccountContextKey struct{}
 // v1.ServiceAccount struct, if possible. If there is no service account, this
 // function does not return an error, as anonymous API calls are a possibility.
 // Authorization must be independently enforced.
-func ServiceAccountEnricher(svcaccts []config.ServiceAccountConfig) contextFunc {
+func ServiceAccountEnricher(validator func(string) (v1.ServiceAccount, error)) contextFunc {
 	return func(ctx context.Context, _ *grpc.UnaryServerInfo) (context.Context, error) {
 		// Extract request metadata (proxied http headers) from given context.
 		meta, ok := metadata.FromIncomingContext(ctx)
@@ -31,17 +30,13 @@ func ServiceAccountEnricher(svcaccts []config.ServiceAccountConfig) contextFunc 
 			return ctx, nil
 		}
 
-		// Check if our bearer token matched any of the registered service accounts.
-		for _, account := range svcaccts {
-			if account.Token == token {
-				return contextWithServiceAccount(ctx, &v1.ServiceAccount{
-					Name:        account.Name,
-					Description: account.Description,
-				}), nil
-			}
+		// Validate the JWT
+		svcacct, err := validator(token)
+		if err != nil {
+			return ctx, nil
 		}
 
-		return ctx, nil
+		return contextWithServiceAccount(ctx, &svcacct), nil
 	}
 }
 

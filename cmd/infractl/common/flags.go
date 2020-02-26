@@ -11,9 +11,9 @@ import (
 )
 
 const (
-	// tokenEnvVarName is the environment variable name used to pass a service
+	// TokenEnvVarName is the environment variable name used to pass a service
 	// account token.
-	tokenEnvVarName = "INFRACTL_TOKEN"
+	TokenEnvVarName = "INFRACTL_TOKEN"
 
 	// defaultEndpoint is the default infra-server address to connect to.
 	defaultEndpoint = "localhost:8823"
@@ -35,7 +35,7 @@ func AddCommonFlags(c *cobra.Command) {
 	c.PersistentFlags().BoolVarP(&flags.insecure, "insecure", "k", false, "enable insecure connection")
 	c.PersistentFlags().BoolVar(&flags.json, "json", false, "output as JSON")
 	c.PersistentFlags().DurationVarP(&flags.timeout, "timeout", "t", time.Minute, "timeout for API requests")
-	flags.token = os.Getenv(tokenEnvVarName)
+	flags.token = os.Getenv(TokenEnvVarName)
 }
 
 // ContextWithTimeout returns a context and a cancel function that is bound to

@@ -18,17 +18,28 @@ const (
 
 // OAuth facilitates an Oauth2 login flow via http handlers.
 type OAuth struct {
-	endpoint string
-	tenant   string
-	jwtState *stateTokenizer
-	jwtAuth0 *auth0Tokenizer
-	jwtUser  *userTokenizer
-	conf     *oauth2.Config
+	endpoint   string
+	tenant     string
+	jwtState   *stateTokenizer
+	jwtAuth0   *auth0Tokenizer
+	jwtUser    *userTokenizer
+	jwtSvcAcct serviceAccountTokenizer
+	conf       *oauth2.Config
 }
 
 // ValidateUser validates a user JWT and returns the contained v1.User struct.
 func (a OAuth) ValidateUser(token string) (*v1.User, error) {
 	return a.jwtUser.Validate(token)
+}
+
+// ValidateUser validates a user JWT and returns the contained v1.User struct.
+func (a OAuth) GenerateServiceAccountToken(svcacct v1.ServiceAccount) (string, error) {
+	return a.jwtSvcAcct.Generate(svcacct)
+}
+
+// ValidateUser validates a user JWT and returns the contained v1.User struct.
+func (a OAuth) ValidateServiceAccountToken(token string) (v1.ServiceAccount, error) {
+	return a.jwtSvcAcct.Validate(token)
 }
 
 // loginHandler handles the login part of an Oauth2 flow.
