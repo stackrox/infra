@@ -1,4 +1,4 @@
-package argoClient
+package argo_client
 
 import (
 	"fmt"
@@ -26,6 +26,7 @@ func restConfig() (*rest.Config, error) {
 	return rest.InClusterConfig()
 }
 
+// NewArgoClient creates a new instance of argo client.
 func NewArgoClient() workflowv1.WorkflowInterface {
 	config, err := restConfig()
 	if err != nil {

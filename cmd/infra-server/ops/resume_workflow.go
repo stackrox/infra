@@ -1,3 +1,4 @@
+// ops contains various desired functionalities as op units.
 package ops
 
 import (
@@ -8,13 +9,14 @@ import (
 	"github.com/argoproj/argo/workflow/util"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/pkg/errors"
-	"github.com/stackrox/infra/pkg/argoClient"
-	"github.com/stackrox/infra/utils/workflowUtils"
+	"github.com/stackrox/infra/pkg/argo-client"
+	"github.com/stackrox/infra/utils/workflows"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// ResumeWorkflows resumes suspended workflows.
 func ResumeWorkflows(workflowNames ...string) error {
-	argo := argoClient.NewArgoClient()
+	argo := argo_client.NewArgoClient()
 	var workflows []*v1alpha1.Workflow
 	if len(workflowNames) == 0 {
 		workflowList, err := argo.List(metav1.ListOptions{})
@@ -23,14 +25,14 @@ func ResumeWorkflows(workflowNames ...string) error {
 			return err
 		}
 
-		for idx, _ := range workflowList.Items {
+		for idx := range workflowList.Items {
 			workflows = append(workflows, &workflowList.Items[idx])
 		}
 	} else {
 		for _, name := range workflowNames {
 			workflow, err := argo.Get(name, metav1.GetOptions{})
 			if err != nil {
-				fmt.Println("Error: %v, while fetching workflow: %s", err, name)
+				fmt.Printf("Error: %v, while fetching workflow: %s\n", err, name)
 				continue
 			}
 
@@ -46,7 +48,7 @@ func ResumeWorkflows(workflowNames ...string) error {
 		fmt.Println("Resuming workflow: ", workflow.GetName())
 		err := util.ResumeWorkflow(argo, workflow.GetName())
 		if err != nil {
-			fmt.Println("Error: %v, while resuming workflow: %s", err, workflow.GetName())
+			fmt.Printf("Error: %v, while resuming workflow: %s\n", err, workflow.GetName())
 		}
 	}
 
@@ -54,16 +56,12 @@ func ResumeWorkflows(workflowNames ...string) error {
 }
 
 func isWorkflowExpired(workflow *v1alpha1.Workflow) bool {
-	lifespan, err := ptypes.Duration(workflowUtils.GetLifespan(workflow))
+	lifespan, err := ptypes.Duration(workflows.GetLifespan(workflow))
 	if err != nil {
-		fmt.Println("Error while determining lifespan of workflow: %v", workflow)
+		fmt.Println("Error while determining lifespan of workflow: ", workflow)
 		return false
 	}
 
 	workflowExpiryTime := workflow.Status.StartedAt.Time.Add(lifespan)
-	if time.Now().After(workflowExpiryTime) {
-		return true
-	}
-
-	return false
+	return time.Now().After(workflowExpiryTime)
 }

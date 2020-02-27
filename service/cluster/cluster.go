@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/stackrox/infra/cmd/infra-server/ops"
-	"github.com/stackrox/infra/pkg/argoClient"
-	"github.com/stackrox/infra/utils/workflowUtils"
+	"github.com/stackrox/infra/pkg/argo-client"
+	"github.com/stackrox/infra/utils/workflows"
 
 	"github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
 	workflowv1 "github.com/argoproj/argo/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
@@ -45,7 +45,7 @@ var (
 // NewClusterService creates a new ClusterService.
 func NewClusterService(registry *flavor.Registry, signer *signer.Signer) (middleware.APIService, error) {
 	return &clusterImpl{
-		argo:     argoClient.NewArgoClient(),
+		argo:     argo_client.NewArgoClient(),
 		registry: registry,
 		signer:   signer,
 	}, nil
@@ -56,9 +56,9 @@ func clusterFromWorkflow(workflow v1alpha1.Workflow) *v1.Cluster {
 	cluster := &v1.Cluster{
 		ID:       workflow.GetName(),
 		Status:   workflowStatus(workflow.Status),
-		Flavor:   workflowUtils.GetFlavor(&workflow),
-		Owner:    workflowUtils.GetOwner(&workflow),
-		Lifespan: workflowUtils.GetLifespan(&workflow),
+		Flavor:   workflows.GetFlavor(&workflow),
+		Owner:    workflows.GetOwner(&workflow),
+		Lifespan: workflows.GetLifespan(&workflow),
 	}
 
 	cluster.CreatedOn, _ = ptypes.TimestampProto(workflow.Status.StartedAt.Time.UTC())
@@ -135,7 +135,7 @@ func (s *clusterImpl) Lifespan(_ context.Context, req *v1.LifespanRequest) (*dur
 	}
 
 	// Construct our replacement patch
-	payloadBytes, err := formatAnnotationPatch(workflowUtils.AnnotationLifespanKey, fmt.Sprint(lifespan))
+	payloadBytes, err := formatAnnotationPatch(workflows.AnnotationLifespanKey, fmt.Sprint(lifespan))
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +146,7 @@ func (s *clusterImpl) Lifespan(_ context.Context, req *v1.LifespanRequest) (*dur
 		return nil, err
 	}
 
-	return workflowUtils.GetLifespan(workflow), nil
+	return workflows.GetLifespan(workflow), nil
 }
 
 // Create implements ClusterService.Create.
@@ -178,9 +178,9 @@ func (s *clusterImpl) Create(ctx context.Context, req *v1.CreateClusterRequest) 
 	}
 
 	workflow.SetAnnotations(map[string]string{
-		workflowUtils.AnnotationFlavorKey:   flav.ID,
-		workflowUtils.AnnotationLifespanKey: fmt.Sprint(lifespan),
-		workflowUtils.AnnotationOwnerKey:    owner,
+		workflows.AnnotationFlavorKey:   flav.ID,
+		workflows.AnnotationLifespanKey: fmt.Sprint(lifespan),
+		workflows.AnnotationOwnerKey:    owner,
 	})
 
 	workflow.Spec.Arguments.Parameters = make([]v1alpha1.Parameter, 0, len(req.Parameters))

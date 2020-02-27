@@ -1,4 +1,4 @@
-package workflowUtils
+package workflows
 
 import (
 	"time"
@@ -8,14 +8,14 @@ import (
 )
 
 const (
-	// annotationFlavorKey is the k8s annotation that contains the flavor ID.
+	// AnnotationFlavorKey is the k8s annotation that contains the flavor ID.
 	AnnotationFlavorKey = "infra.stackrox.com/flavor"
 
-	// annotationOwnerKey is the k8s annotation that contains the owner email
+	// AnnotationOwnerKey is the k8s annotation that contains the owner email
 	// address.
 	AnnotationOwnerKey = "infra.stackrox.com/owner"
 
-	// annotationLifespanKey is the k8s annotation that contains the lifespan
+	// AnnotationLifespanKey is the k8s annotation that contains the lifespan
 	// duration.
 	AnnotationLifespanKey = "infra.stackrox.com/lifespan"
 )

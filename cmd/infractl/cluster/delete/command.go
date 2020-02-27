@@ -25,6 +25,7 @@ func Command() *cobra.Command {
 		Use:   "delete",
 		Short: "delete a specific cluster",
 		Long:  "deletes a specific cluster",
+		Example: examples,
 		RunE:  common.WithGRPCHandler(delete),
 	}
 }

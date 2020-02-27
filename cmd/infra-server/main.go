@@ -94,7 +94,7 @@ func mainCmd() error {
 		return err
 	}
 
-	StartCronJobs()
+	startCronJobs()
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 
@@ -106,10 +106,14 @@ func mainCmd() error {
 	}
 }
 
-func StartCronJobs() {
+func startCronJobs() {
 	go func() {
 		for {
-			ops.ResumeWorkflows()
+			err := ops.ResumeWorkflows()
+			if err != nil {
+				fmt.Println("Error while resuming all workflows", err)
+			}
+
 			time.Sleep(5 * time.Minute)
 		}
 	}()
