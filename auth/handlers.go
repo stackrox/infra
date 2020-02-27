@@ -32,12 +32,14 @@ func (a OAuth) ValidateUser(token string) (*v1.User, error) {
 	return a.jwtUser.Validate(token)
 }
 
-// ValidateUser validates a user JWT and returns the contained v1.User struct.
+// GenerateServiceAccountToken generates a service account JWT containing a
+// v1.User struct.
 func (a OAuth) GenerateServiceAccountToken(svcacct v1.ServiceAccount) (string, error) {
 	return a.jwtSvcAcct.Generate(svcacct)
 }
 
-// ValidateUser validates a user JWT and returns the contained v1.User struct.
+// ValidateServiceAccountToken validates a service account JWT and returns the
+// contained v1.ServiceAccount struct.
 func (a OAuth) ValidateServiceAccountToken(token string) (v1.ServiceAccount, error) {
 	return a.jwtSvcAcct.Validate(token)
 }

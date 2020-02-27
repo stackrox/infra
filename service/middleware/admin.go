@@ -37,14 +37,13 @@ func AdminEnricher(password string) contextFunc {
 	}
 }
 
-// AdminFromContext extracts an admin value from the given context, if one
-// exists.
-func AdminFromContext(ctx context.Context) bool {
-	admin, ok := ctx.Value(adminContextKey{}).(bool)
-	return ok && admin
+// AdminInContext determines if an admin value is in the given context.
+func AdminInContext(ctx context.Context) bool {
+	_, ok := ctx.Value(adminContextKey{}).(struct{})
+	return ok
 }
 
 // contextWithAdmin returns the given context enriched as an admin.
 func contextWithAdmin(ctx context.Context) context.Context {
-	return context.WithValue(ctx, adminContextKey{}, true)
+	return context.WithValue(ctx, adminContextKey{}, struct{}{})
 }

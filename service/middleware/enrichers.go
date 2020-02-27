@@ -4,6 +4,7 @@ package middleware
 
 import (
 	"context"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -58,7 +59,7 @@ func getAccess(ctx context.Context) Access {
 	}
 
 	// Check if an authenticated service account is accessing the service.
-	if AdminFromContext(ctx) {
+	if AdminInContext(ctx) {
 		return Admin
 	}
 

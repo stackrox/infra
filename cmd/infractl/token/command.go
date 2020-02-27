@@ -3,6 +3,8 @@ package token
 
 import (
 	"context"
+	"errors"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/common"
@@ -10,23 +12,44 @@ import (
 	"google.golang.org/grpc"
 )
 
+const examples = `# Generate a service account token.
+$ infractl token ci-robot 'CI service account' ci@stackrox.com`
+
 // Command defines the handler for infractl token.
 func Command() *cobra.Command {
 	// $ infractl token
 	return &cobra.Command{
-		Use: "token <name> <description> <email>",
-		//Short: "Authentication information",
-		//Long:  "token prints information about the current authentication method",
-		RunE:   common.WithGRPCHandler(token),
-		Hidden: true,
+		Use:     "token NAME DESCRIPTION EMAIL",
+		Short:   "Generate tokens",
+		Long:    "Generates a service account token",
+		Example: examples,
+		Args:    common.ArgsWithHelp(cobra.ExactArgs(3), args),
+		RunE:    common.WithGRPCHandler(token),
+		Hidden:  true,
 	}
 }
 
-func token(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, _ []string) (common.PrettyPrinter, error) {
+func args(_ *cobra.Command, args []string) error {
+	name, description, email := args[0], args[1], args[2]
+	switch {
+	case name == "":
+		return errors.New("no name given")
+	case description == "":
+		return errors.New("no description given")
+	case email == "":
+		return errors.New("no email given")
+	case !strings.HasSuffix(email, "@stackrox.com"):
+		return errors.New("given email was not a stackrox.com address")
+	default:
+		return nil
+	}
+}
+
+func token(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, args []string) (common.PrettyPrinter, error) {
 	resp, err := v1.NewUserServiceClient(conn).Token(ctx, &v1.ServiceAccount{
-		Name:        "test name",
-		Description: "test description",
-		Email:       "test@stackrox.com",
+		Name:        args[0],
+		Description: args[1],
+		Email:       args[2],
 	})
 	if err != nil {
 		return nil, err

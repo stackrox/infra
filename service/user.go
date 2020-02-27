@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/pkg/errors"
@@ -33,7 +34,8 @@ func (s *userImpl) Token(_ context.Context, req *v1.ServiceAccount) (*v1.TokenRe
 	}
 
 	return &v1.TokenResponse{
-		Token: token,
+		Account: req,
+		Token:   token,
 	}, nil
 }
 

@@ -2,7 +2,6 @@ package auth
 
 import (
 	"crypto/rsa"
-	"fmt"
 	"strings"
 	"time"
 
@@ -96,19 +95,9 @@ func NewAuth0Tokenizer(lifetime time.Duration, publicKey *rsa.PublicKey) *auth0T
 	}
 }
 
-//type infraData struct {
-//	appMetadata map[string]string
-//}
-
-type appMetadata struct {
-	Admin bool `json:"admin"`
-}
-
 // auth0Claims facilitates the unmarshalling of JWTs containing Auth0 user
 // profile data.
 type auth0Claims struct {
-	Metadata appMetadata `json:"https://infra.stackrox.com/app_metadata"`
-
 	FamilyName    string `json:"family_name"`
 	GivenName     string `json:"given_name"`
 	Name          string `json:"name"`
@@ -138,15 +127,12 @@ func (c auth0Claims) Valid() error {
 
 // Validate validates an Auth0 JWT and returns a synthesized v1.User struct.
 func (t auth0Tokenizer) Validate(token string) (*v1.User, error) {
-	fmt.Printf("TOKEN: %s\n", token)
 	var claims auth0Claims
 	if _, err := jwt.ParseWithClaims(token, &claims, func(_ *jwt.Token) (interface{}, error) {
 		return t.key, nil
 	}); err != nil {
 		return nil, err
 	}
-
-	fmt.Printf("CLAIMS: %+v\n", claims)
 
 	return createHumanUser(claims), nil
 }
@@ -228,9 +214,14 @@ type serviceAccountTokenizer struct {
 	secret []byte
 }
 
-// Generate generates a user JWT containing a v1.User struct.
+// Generate generates a service account JWT containing a v1.ServiceAccount.
 func (t serviceAccountTokenizer) Generate(svcacct v1.ServiceAccount) (string, error) {
 	svc := serviceAccountValidator(svcacct)
+
+	// Ensure that our service account is well-formed.
+	if err := svc.Valid(); err != nil {
+		return "", errors.Wrap(err, "invalid service account")
+	}
 
 	// Generate new token object, containing the wrapped data.
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, svc)
@@ -239,7 +230,8 @@ func (t serviceAccountTokenizer) Generate(svcacct v1.ServiceAccount) (string, er
 	return token.SignedString(t.secret)
 }
 
-// Validate validates a user JWT and returns the contained v1.User struct.
+// Validate validates a service account JWT and returns the contained
+// v1.ServiceAccount.
 func (t serviceAccountTokenizer) Validate(token string) (v1.ServiceAccount, error) {
 	var claims serviceAccountValidator
 	if _, err := jwt.ParseWithClaims(token, &claims, func(_ *jwt.Token) (interface{}, error) {
