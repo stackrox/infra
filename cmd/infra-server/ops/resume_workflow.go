@@ -9,7 +9,7 @@ import (
 	"github.com/argoproj/argo/workflow/util"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/pkg/errors"
-	"github.com/stackrox/infra/pkg/argoclient"
+	"github.com/stackrox/infra/utils/argoclient"
 	"github.com/stackrox/infra/utils/workflows"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

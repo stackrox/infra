@@ -1,3 +1,4 @@
+// Package argoclient helps with fetching a new instance of argo client.
 package argoclient
 
 import (

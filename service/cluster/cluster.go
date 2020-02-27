@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/stackrox/infra/cmd/infra-server/ops"
-	"github.com/stackrox/infra/pkg/argoclient"
+	"github.com/stackrox/infra/utils/argoclient"
 	"github.com/stackrox/infra/utils/workflows"
 
 	"github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
