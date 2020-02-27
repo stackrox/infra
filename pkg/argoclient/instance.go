@@ -1,4 +1,4 @@
-package argo_client
+package argoclient
 
 import (
 	"fmt"

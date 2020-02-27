@@ -22,11 +22,11 @@ infractl cluster delete gke-default-x99rc
 func Command() *cobra.Command {
 	// $ infractl cluster delete
 	return &cobra.Command{
-		Use:   "delete",
-		Short: "delete a specific cluster",
-		Long:  "deletes a specific cluster",
+		Use:     "delete",
+		Short:   "delete a specific cluster",
+		Long:    "deletes a specific cluster",
 		Example: examples,
-		RunE:  common.WithGRPCHandler(delete),
+		RunE:    common.WithGRPCHandler(delete),
 	}
 }
 

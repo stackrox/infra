@@ -1,4 +1,4 @@
-// ops contains various desired functionalities as op units.
+// Package ops contains reusable or desired feature functionalities as op units.
 package ops
 
 import (
@@ -9,14 +9,14 @@ import (
 	"github.com/argoproj/argo/workflow/util"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/pkg/errors"
-	"github.com/stackrox/infra/pkg/argo-client"
+	"github.com/stackrox/infra/pkg/argoclient"
 	"github.com/stackrox/infra/utils/workflows"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // ResumeWorkflows resumes suspended workflows.
 func ResumeWorkflows(workflowNames ...string) error {
-	argo := argo_client.NewArgoClient()
+	argo := argoclient.NewArgoClient()
 	var workflows []*v1alpha1.Workflow
 	if len(workflowNames) == 0 {
 		workflowList, err := argo.List(metav1.ListOptions{})

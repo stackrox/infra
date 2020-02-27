@@ -1,3 +1,4 @@
+// Package workflows contains utilities around argo workflows.
 package workflows
 
 import (

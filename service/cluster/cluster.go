@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/stackrox/infra/cmd/infra-server/ops"
-	"github.com/stackrox/infra/pkg/argo-client"
+	"github.com/stackrox/infra/pkg/argoclient"
 	"github.com/stackrox/infra/utils/workflows"
 
 	"github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
@@ -45,7 +45,7 @@ var (
 // NewClusterService creates a new ClusterService.
 func NewClusterService(registry *flavor.Registry, signer *signer.Signer) (middleware.APIService, error) {
 	return &clusterImpl{
-		argo:     argo_client.NewArgoClient(),
+		argo:     argoclient.NewArgoClient(),
 		registry: registry,
 		signer:   signer,
 	}, nil
