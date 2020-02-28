@@ -68,6 +68,17 @@ message ServiceAccount {
 
     // Description is a human readable description for the service account.
     string Description = 2;
+
+    // Email is the StackRox email address for the service account.
+    string Email = 3;
+}
+
+message TokenResponse {
+    // Account is the service account the token was generated for.
+    ServiceAccount Account = 1;
+
+    // Token is the token generated for the service account.
+    string Token = 2;
 }
 
 service UserService {
@@ -75,6 +86,22 @@ service UserService {
     rpc Whoami (google.protobuf.Empty) returns (WhoamiResponse) {
         option (google.api.http) = {
             get: "/v1/whoami"
+        };
+    }
+
+    // CreateToken generates an arbitrary service account token
+    rpc CreateToken (ServiceAccount) returns (TokenResponse) {
+        option (google.api.http) = {
+            post: "/v1/token-create"
+            body: "*"
+        };
+    }
+
+    // Token generates a service account token for the current user.
+    rpc Token (google.protobuf.Empty) returns (TokenResponse) {
+        option (google.api.http) = {
+            post: "/v1/token"
+            body: "*"
         };
     }
 

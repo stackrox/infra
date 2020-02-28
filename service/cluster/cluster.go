@@ -232,9 +232,15 @@ func (s *clusterImpl) Artifacts(_ context.Context, clusterID *v1.ResourceByID) (
 	return &resp, nil
 }
 
-// AllowAnonymous declares that this service can be called anonymously.
-func (s *clusterImpl) AllowAnonymous() bool {
-	return false
+// Access configures access for this service.
+func (s *clusterImpl) Access() map[string]middleware.Access {
+	return map[string]middleware.Access{
+		"/v1.ClusterService/Info":      middleware.Authenticated,
+		"/v1.ClusterService/List":      middleware.Authenticated,
+		"/v1.ClusterService/Lifespan":  middleware.Authenticated,
+		"/v1.ClusterService/Create":    middleware.Authenticated,
+		"/v1.ClusterService/Artifacts": middleware.Authenticated,
+	}
 }
 
 // RegisterServiceServer registers this service with the given gRPC Server.

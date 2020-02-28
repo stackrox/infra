@@ -4,6 +4,9 @@ package whoami
 import (
 	"context"
 
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/common"
@@ -25,6 +28,11 @@ func Command() *cobra.Command {
 func whoami(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, _ []string) (common.PrettyPrinter, error) {
 	resp, err := v1.NewUserServiceClient(conn).Whoami(ctx, &empty.Empty{})
 	if err != nil {
+		if serr, ok := status.FromError(err); ok {
+			if serr.Code() == codes.PermissionDenied {
+				return &whoamiResp{}, nil
+			}
+		}
 		return nil, err
 	}
 

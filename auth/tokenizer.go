@@ -194,3 +194,51 @@ func (t userTokenizer) Validate(token string) (*v1.User, error) {
 	}
 	return &claims.User, nil
 }
+
+type serviceAccountValidator v1.ServiceAccount
+
+func (s serviceAccountValidator) Valid() error {
+	switch {
+	case s.Name == "":
+		return errors.New("name was empty")
+	case s.Description == "":
+		return errors.New("description was empty")
+	case !strings.HasSuffix(s.Email, "@stackrox.com"):
+		return errors.New("email was not a StackRox address")
+	default:
+		return nil
+	}
+}
+
+type serviceAccountTokenizer struct {
+	secret []byte
+}
+
+// Generate generates a service account JWT containing a v1.ServiceAccount.
+func (t serviceAccountTokenizer) Generate(svcacct v1.ServiceAccount) (string, error) {
+	svc := serviceAccountValidator(svcacct)
+
+	// Ensure that our service account is well-formed.
+	if err := svc.Valid(); err != nil {
+		return "", errors.Wrap(err, "invalid service account")
+	}
+
+	// Generate new token object, containing the wrapped data.
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, svc)
+
+	// Sign and get the complete encoded token as a string using the secret
+	return token.SignedString(t.secret)
+}
+
+// Validate validates a service account JWT and returns the contained
+// v1.ServiceAccount.
+func (t serviceAccountTokenizer) Validate(token string) (v1.ServiceAccount, error) {
+	var claims serviceAccountValidator
+	if _, err := jwt.ParseWithClaims(token, &claims, func(_ *jwt.Token) (interface{}, error) {
+		return t.secret, nil
+	}); err != nil {
+		return v1.ServiceAccount{}, err
+	}
+
+	return v1.ServiceAccount(claims), nil
+}

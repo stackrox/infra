@@ -13,8 +13,7 @@ type Config struct {
 	// Server is the server and TLS configuration.
 	Server ServerConfig `json:"server"`
 
-	// ServiceAccounts is a list of service accounts.
-	ServiceAccounts []ServiceAccountConfig `json:"service-accounts"`
+	Password string `json:"password"`
 }
 
 // Auth0Config represents the configuration for integrating with Auth0.
@@ -46,20 +45,6 @@ type ServerConfig struct {
 	CertFile  string `json:"cert"`
 	KeyFile   string `json:"key"`
 	StaticDir string `json:"static"`
-}
-
-// ServiceAccountConfig represents the configuration for a single service
-// account.
-type ServiceAccountConfig struct {
-	// Name is a human readable name for the service account.
-	Name string `json:"name"`
-
-	// Description is a human readable description for the service account.
-	Description string `json:"description"`
-
-	// Token is a pre-shared-key used for directly authenticating as this
-	// service account.
-	Token string `json:"token"`
 }
 
 // FlavorConfig represents the configuration for a single automation flavor.

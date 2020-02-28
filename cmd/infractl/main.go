@@ -3,6 +3,8 @@ package main
 import (
 	"os"
 
+	"github.com/stackrox/infra/cmd/infractl/token"
+
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/cluster"
 	"github.com/stackrox/infra/cmd/infractl/common"
@@ -27,6 +29,8 @@ func main() {
 		cluster.Command(),
 		// $ infractl flavor
 		flavor.Command(),
+		// $ infractl token
+		token.Command(),
 		// $ infractl whoami
 		whoami.Command(),
 		// $ infractl version
