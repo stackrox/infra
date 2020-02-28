@@ -46,7 +46,7 @@ func args(_ *cobra.Command, args []string) error {
 }
 
 func token(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, args []string) (common.PrettyPrinter, error) {
-	resp, err := v1.NewUserServiceClient(conn).Token(ctx, &v1.ServiceAccount{
+	resp, err := v1.NewUserServiceClient(conn).CreateToken(ctx, &v1.ServiceAccount{
 		Name:        args[0],
 		Description: args[1],
 		Email:       args[2],

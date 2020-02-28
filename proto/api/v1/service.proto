@@ -73,7 +73,6 @@ message ServiceAccount {
     string Email = 3;
 }
 
-
 message TokenResponse {
     // Account is the service account the token was generated for.
     ServiceAccount Account = 1;
@@ -90,8 +89,16 @@ service UserService {
         };
     }
 
-    // Token generates an arbitrary service account token
-    rpc Token (ServiceAccount) returns (TokenResponse) {
+    // CreateToken generates an arbitrary service account token
+    rpc CreateToken (ServiceAccount) returns (TokenResponse) {
+        option (google.api.http) = {
+            post: "/v1/token-create"
+            body: "*"
+        };
+    }
+
+    // Token generates a service account token for the current user.
+    rpc Token (google.protobuf.Empty) returns (TokenResponse) {
         option (google.api.http) = {
             post: "/v1/token"
             body: "*"

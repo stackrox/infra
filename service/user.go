@@ -27,7 +27,9 @@ func NewUserService(generator func(v1.ServiceAccount) (string, error)) (middlewa
 	}, nil
 }
 
-func (s *userImpl) Token(_ context.Context, req *v1.ServiceAccount) (*v1.TokenResponse, error) {
+// CreateToken implements UserService.CreateToken.
+func (s *userImpl) CreateToken(_ context.Context, req *v1.ServiceAccount) (*v1.TokenResponse, error) {
+	// Generate the service account token.
 	token, err := s.generate(*req)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to generate token")
@@ -37,6 +39,24 @@ func (s *userImpl) Token(_ context.Context, req *v1.ServiceAccount) (*v1.TokenRe
 		Account: req,
 		Token:   token,
 	}, nil
+}
+
+// Token implements UserService.Token.
+func (s *userImpl) Token(ctx context.Context, _ *empty.Empty) (*v1.TokenResponse, error) {
+	// Extract the calling user from the context.
+	user, found := middleware.UserFromContext(ctx)
+	if !found {
+		return nil, errors.New("not called by a user")
+	}
+
+	// Synthesize a service account from the current user.
+	svcacct := v1.ServiceAccount{
+		Name:        user.Name,
+		Description: "Personal service account for " + user.Email,
+		Email:       user.Email,
+	}
+
+	return s.CreateToken(ctx, &svcacct)
 }
 
 // GetVersion implements UserService.Whoami.
@@ -63,8 +83,9 @@ func (s *userImpl) Whoami(ctx context.Context, _ *empty.Empty) (*v1.WhoamiRespon
 // Access configures access for this service.
 func (s *userImpl) Access() map[string]middleware.Access {
 	return map[string]middleware.Access{
-		"/v1.UserService/Token":  middleware.Admin,
-		"/v1.UserService/Whoami": middleware.Anonymous,
+		"/v1.UserService/Token":       middleware.Authenticated,
+		"/v1.UserService/CreateToken": middleware.Admin,
+		"/v1.UserService/Whoami":      middleware.Anonymous,
 	}
 }
 
