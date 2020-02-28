@@ -28,11 +28,6 @@ func (s *versionImpl) GetVersion(ctx context.Context, _ *empty.Empty) (*v1.Versi
 	return buildinfo.All(), nil
 }
 
-//// AllowAnonymous declares that this service can be called anonymously.
-//func (s *versionImpl) AllowAnonymous() bool {
-//	return true
-//}
-
 // Access configures access for this service.
 func (s *versionImpl) Access() map[string]middleware.Access {
 	return map[string]middleware.Access{

@@ -52,11 +52,6 @@ func (s *flavorImpl) Info(_ context.Context, flavorID *v1.ResourceByID) (*v1.Fla
 	return &flavor, nil
 }
 
-//// AllowAnonymous declares that this service can be called anonymously.
-//func (s *flavorImpl) AllowAnonymous() bool {
-//	return false
-//}
-
 // Access configures access for this service.
 func (s *flavorImpl) Access() map[string]middleware.Access {
 	return map[string]middleware.Access{
