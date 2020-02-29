@@ -14,20 +14,29 @@ import (
 const examples = `# Delete cluster.
 infractl cluster delete <cluster-id>
 
-# example
-infractl cluster delete gke-default-x99rc
-`
+# Delete cluster example-s3maj.
+infractl cluster delete example-s3maj`
 
 // Command defines the handler for infractl cluster delete.
 func Command() *cobra.Command {
 	// $ infractl cluster delete
 	return &cobra.Command{
-		Use:     "delete",
-		Short:   "delete a specific cluster",
-		Long:    "deletes a specific cluster",
+		Use:     "delete CLUSTER",
+		Short:   "Delete a specific cluster",
+		Long:    "Deletes a specific cluster",
 		Example: examples,
+		Args:    common.ArgsWithHelp(cobra.ExactArgs(1), args),
 		RunE:    common.WithGRPCHandler(delete),
 	}
+}
+
+func args(_ *cobra.Command, args []string) error {
+	clusterId := args[0]
+	if clusterId == "" {
+		return errors.New("no clusterid given")
+	}
+
+	return nil
 }
 
 func delete(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []string) (common.PrettyPrinter, error) {

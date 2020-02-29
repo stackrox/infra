@@ -8,11 +8,9 @@ import (
 	"os/signal"
 	"path/filepath"
 	"syscall"
-	"time"
 
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/auth"
-	"github.com/stackrox/infra/cmd/infra-server/ops"
 	"github.com/stackrox/infra/config"
 	"github.com/stackrox/infra/flavor"
 	"github.com/stackrox/infra/pkg/buildinfo"
@@ -94,7 +92,6 @@ func mainCmd() error {
 		return err
 	}
 
-	startCronJobs()
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 
@@ -104,17 +101,4 @@ func mainCmd() error {
 	case <-sigCh:
 		return errors.New("signal caught")
 	}
-}
-
-func startCronJobs() {
-	go func() {
-		for {
-			err := ops.ResumeWorkflows()
-			if err != nil {
-				fmt.Println("Error while resuming all workflows", err)
-			}
-
-			time.Sleep(5 * time.Minute)
-		}
-	}()
 }

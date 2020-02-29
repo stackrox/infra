@@ -4,17 +4,16 @@ package cluster
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
-	"github.com/stackrox/infra/cmd/infra-server/ops"
-	"github.com/stackrox/infra/utils/argoclient"
-	"github.com/stackrox/infra/utils/workflows"
+	"github.com/pkg/errors"
 
 	"github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
 	workflowv1 "github.com/argoproj/argo/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
+	"github.com/argoproj/argo/workflow/util"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/duration"
@@ -31,6 +30,10 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
+const (
+	resumeExpiredWorkflowInterval = 5 * time.Minute
+)
+
 type clusterImpl struct {
 	argo     workflowv1.WorkflowInterface
 	registry *flavor.Registry
@@ -44,11 +47,14 @@ var (
 
 // NewClusterService creates a new ClusterService.
 func NewClusterService(registry *flavor.Registry, signer *signer.Signer) (middleware.APIService, error) {
-	return &clusterImpl{
-		argo:     argoclient.NewArgoClient(),
+	impl := &clusterImpl{
+		argo:     argoClient(),
 		registry: registry,
 		signer:   signer,
-	}, nil
+	}
+
+	go impl.cleanupExpiredWorkflows()
+	return impl, nil
 }
 
 // clusterFromWorkflow converts an Argo workflow into a cluster.
@@ -56,9 +62,9 @@ func clusterFromWorkflow(workflow v1alpha1.Workflow) *v1.Cluster {
 	cluster := &v1.Cluster{
 		ID:       workflow.GetName(),
 		Status:   workflowStatus(workflow.Status),
-		Flavor:   workflows.GetFlavor(&workflow),
-		Owner:    workflows.GetOwner(&workflow),
-		Lifespan: workflows.GetLifespan(&workflow),
+		Flavor:   GetFlavor(&workflow),
+		Owner:    GetOwner(&workflow),
+		Lifespan: GetLifespan(&workflow),
 	}
 
 	cluster.CreatedOn, _ = ptypes.TimestampProto(workflow.Status.StartedAt.Time.UTC())
@@ -135,7 +141,7 @@ func (s *clusterImpl) Lifespan(_ context.Context, req *v1.LifespanRequest) (*dur
 	}
 
 	// Construct our replacement patch
-	payloadBytes, err := formatAnnotationPatch(workflows.AnnotationLifespanKey, fmt.Sprint(lifespan))
+	payloadBytes, err := formatAnnotationPatch(annotationLifespanKey, fmt.Sprint(lifespan))
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +152,7 @@ func (s *clusterImpl) Lifespan(_ context.Context, req *v1.LifespanRequest) (*dur
 		return nil, err
 	}
 
-	return workflows.GetLifespan(workflow), nil
+	return GetLifespan(workflow), nil
 }
 
 // Create implements ClusterService.Create.
@@ -178,9 +184,9 @@ func (s *clusterImpl) Create(ctx context.Context, req *v1.CreateClusterRequest) 
 	}
 
 	workflow.SetAnnotations(map[string]string{
-		workflows.AnnotationFlavorKey:   flav.ID,
-		workflows.AnnotationLifespanKey: fmt.Sprint(lifespan),
-		workflows.AnnotationOwnerKey:    owner,
+		annotationFlavorKey:   flav.ID,
+		annotationLifespanKey: fmt.Sprint(lifespan),
+		annotationOwnerKey:    owner,
 	})
 
 	workflow.Spec.Arguments.Parameters = make([]v1alpha1.Parameter, 0, len(req.Parameters))
@@ -254,7 +260,7 @@ func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.
 	}
 
 	// Resume workflow for this cluster.
-	if err := ops.ResumeWorkflows(req.Id); err != nil {
+	if err := util.ResumeWorkflow(s.argo, req.Id); err != nil {
 		return nil, err
 	}
 
@@ -269,4 +275,37 @@ func (s *clusterImpl) RegisterServiceServer(server *grpc.Server) {
 // RegisterServiceHandler registers this service with the given gRPC Gateway endpoint.
 func (s *clusterImpl) RegisterServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
 	return v1.RegisterClusterServiceHandler(ctx, mux, conn)
+}
+
+func (s *clusterImpl) cleanupExpiredWorkflows() {
+	for ; ; time.Sleep(resumeExpiredWorkflowInterval) {
+		workflowList, err := s.argo.List(metav1.ListOptions{})
+		if err != nil {
+			log.Fatal(errors.Wrap(err, "Error while listing all workflows"))
+			continue
+		}
+
+		for _, workflow := range workflowList.Items {
+			if workflowStatus(workflow.Status) == v1.Status_FINISHED || !isWorkflowExpired(&workflow) {
+				continue
+			}
+
+			log.Printf("Resuming workflow: %s\n", workflow.GetName())
+			err := util.ResumeWorkflow(s.argo, workflow.GetName())
+			if err != nil {
+				log.Printf("Error: %v, while resuming workflow: %s\n", err, workflow.GetName())
+			}
+		}
+	}
+}
+
+func isWorkflowExpired(workflow *v1alpha1.Workflow) bool {
+	lifespan, err := ptypes.Duration(GetLifespan(workflow))
+	if err != nil {
+		log.Printf("Error while determining lifespan of workflow: %s\n", workflow.GetName())
+		return false
+	}
+
+	workflowExpiryTime := workflow.Status.StartedAt.Time.Add(lifespan)
+	return time.Now().After(workflowExpiryTime)
 }
