@@ -281,7 +281,7 @@ func (s *clusterImpl) cleanupExpiredWorkflows() {
 	for ; ; time.Sleep(resumeExpiredWorkflowInterval) {
 		workflowList, err := s.argo.List(metav1.ListOptions{})
 		if err != nil {
-			log.Fatal(errors.Wrap(err, "Error while listing all workflows"))
+			log.Println(errors.Wrap(err, "Error while listing all workflows"))
 			continue
 		}
 
