@@ -1,7 +1,6 @@
 package cluster
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -9,11 +8,11 @@ import (
 	"github.com/argoproj/argo/pkg/client/clientset/versioned"
 	workflowv1 "github.com/argoproj/argo/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
 	v1 "github.com/stackrox/infra/generated/api/v1"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 
 	// Load GCP auth plugin for k8s requests
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 func restConfig() (*rest.Config, error) {
@@ -31,13 +30,13 @@ func restConfig() (*rest.Config, error) {
 	return rest.InClusterConfig()
 }
 
-func argoClient() workflowv1.WorkflowInterface {
+func argoClient() (workflowv1.WorkflowInterface, error) {
 	config, err := restConfig()
 	if err != nil {
-		panic(fmt.Sprintf("%+v", err))
+		return nil, err
 	}
 
-	return versioned.NewForConfigOrDie(config).ArgoprojV1alpha1().Workflows("default")
+	return versioned.NewForConfigOrDie(config).ArgoprojV1alpha1().Workflows("default"), nil
 }
 
 func workflowStatus(workflowStatus v1alpha1.WorkflowStatus) v1.Status {

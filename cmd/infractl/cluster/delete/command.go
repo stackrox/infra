@@ -11,10 +11,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-const examples = `# Delete cluster.
-infractl cluster delete <cluster-id>
-
-# Delete cluster example-s3maj.
+const examples = `# Delete cluster "example-s3maj".
 infractl cluster delete example-s3maj`
 
 // Command defines the handler for infractl cluster delete.
@@ -31,25 +28,19 @@ func Command() *cobra.Command {
 }
 
 func args(_ *cobra.Command, args []string) error {
-	clusterId := args[0]
-	if clusterId == "" {
-		return errors.New("no clusterid given")
+	if args[0] == "" {
+		return errors.New("no cluster ID given")
 	}
 
 	return nil
 }
 
 func delete(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []string) (common.PrettyPrinter, error) {
-	if len(args) != 1 {
-		return nil, errors.New("invalid arguments")
-	}
-
 	req := v1.ResourceByID{
 		Id: args[0],
 	}
 
-	_, err := v1.NewClusterServiceClient(conn).Delete(ctx, &req)
-	if err != nil {
+	if _, err := v1.NewClusterServiceClient(conn).Delete(ctx, &req); err != nil {
 		return nil, err
 	}
 

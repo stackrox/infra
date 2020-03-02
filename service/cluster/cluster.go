@@ -46,8 +46,13 @@ var (
 
 // NewClusterService creates a new ClusterService.
 func NewClusterService(registry *flavor.Registry, signer *signer.Signer) (middleware.APIService, error) {
+	argo, err := argoClient()
+	if err != nil {
+		return nil, err
+	}
+
 	impl := &clusterImpl{
-		argo:     argoClient(),
+		argo:     argo,
 		registry: registry,
 		signer:   signer,
 	}
@@ -280,19 +285,19 @@ func (s *clusterImpl) cleanupExpiredWorkflows() {
 	for ; ; time.Sleep(resumeExpiredWorkflowInterval) {
 		workflowList, err := s.argo.List(metav1.ListOptions{})
 		if err != nil {
-			log.Println(errors.Wrap(err, "Error while listing all workflows"))
+			log.Printf("failed to list workflows: %v", err)
 			continue
 		}
 
-		for _, workflow := range workflowList.Items {
-			if workflowStatus(workflow.Status) == v1.Status_FINISHED || !isWorkflowExpired(&workflow) {
+		for idx, workflow := range workflowList.Items {
+			if workflowStatus(workflow.Status) == v1.Status_FINISHED || !isWorkflowExpired(&workflowList.Items[idx]) {
 				continue
 			}
 
 			log.Printf("Resuming workflow: %s\n", workflow.GetName())
 			err := util.ResumeWorkflow(s.argo, workflow.GetName())
 			if err != nil {
-				log.Printf("Error: %v, while resuming workflow: %s\n", err, workflow.GetName())
+				log.Printf("failed to resume workflow %q: %v", workflow.GetName(), err)
 			}
 		}
 	}

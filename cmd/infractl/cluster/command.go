@@ -27,17 +27,17 @@ func Command() *cobra.Command {
 		// $ infractl cluster create
 		create.Command(),
 
+		// $ infractl cluster delete
+		delete.Command(),
+
 		// $ infractl cluster info
 		info.Command(),
-
-		// $ infractl cluster list
-		list.Command(),
 
 		// $ infractl cluster lifespan
 		lifespan.Command(),
 
-		// $ infractl cluster delete
-		delete.Command(),
+		// $ infractl cluster list
+		list.Command(),
 	)
 
 	return cmd
