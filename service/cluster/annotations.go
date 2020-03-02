@@ -15,7 +15,7 @@ const (
 	// address.
 	annotationOwnerKey = "infra.stackrox.com/owner"
 
-	// AnnotationLifespanKey is the k8s annotation that contains the lifespan
+	// annotationLifespanKey is the k8s annotation that contains the lifespan
 	// duration.
 	annotationLifespanKey = "infra.stackrox.com/lifespan"
 )

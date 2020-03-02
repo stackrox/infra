@@ -285,7 +285,7 @@ func (s *clusterImpl) cleanupExpiredWorkflows() {
 	for ; ; time.Sleep(resumeExpiredWorkflowInterval) {
 		workflowList, err := s.argo.List(metav1.ListOptions{})
 		if err != nil {
-			log.Printf("failed to list workflows: %v", err)
+			log.Printf("[ERROR] failed to list workflows: %v", err)
 			continue
 		}
 
@@ -294,10 +294,10 @@ func (s *clusterImpl) cleanupExpiredWorkflows() {
 				continue
 			}
 
-			log.Printf("Resuming workflow: %s\n", workflow.GetName())
+			log.Printf("resuming workflow %q", workflow.GetName())
 			err := util.ResumeWorkflow(s.argo, workflow.GetName())
 			if err != nil {
-				log.Printf("failed to resume workflow %q: %v", workflow.GetName(), err)
+				log.Printf("[ERROR] failed to resume workflow %q: %v", workflow.GetName(), err)
 			}
 		}
 	}
@@ -306,7 +306,7 @@ func (s *clusterImpl) cleanupExpiredWorkflows() {
 func isWorkflowExpired(workflow *v1alpha1.Workflow) bool {
 	lifespan, err := ptypes.Duration(GetLifespan(workflow))
 	if err != nil {
-		log.Printf("Error while determining lifespan of workflow: %s\n", workflow.GetName())
+		log.Printf("[ERROR] failed to determine lifespan of workflow: %s", workflow.GetName())
 		return false
 	}
 
