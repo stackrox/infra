@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/cluster/artifacts"
 	"github.com/stackrox/infra/cmd/infractl/cluster/create"
+	"github.com/stackrox/infra/cmd/infractl/cluster/delete"
 	"github.com/stackrox/infra/cmd/infractl/cluster/info"
 	"github.com/stackrox/infra/cmd/infractl/cluster/lifespan"
 	"github.com/stackrox/infra/cmd/infractl/cluster/list"
@@ -26,14 +27,17 @@ func Command() *cobra.Command {
 		// $ infractl cluster create
 		create.Command(),
 
+		// $ infractl cluster delete
+		delete.Command(),
+
 		// $ infractl cluster info
 		info.Command(),
 
-		// $ infractl cluster list
-		list.Command(),
-
 		// $ infractl cluster lifespan
 		lifespan.Command(),
+
+		// $ infractl cluster list
+		list.Command(),
 	)
 
 	return cmd

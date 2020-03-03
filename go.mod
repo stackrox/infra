@@ -5,12 +5,18 @@ go 1.13
 require (
 	cloud.google.com/go v0.38.0
 	github.com/argoproj/argo v2.4.3+incompatible
+	github.com/argoproj/pkg v0.0.0-20200226231057-d69f0b04da65 // indirect
+	github.com/colinmarc/hdfs v0.0.0-00010101000000-000000000000 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/docker/spdystream v0.0.0-20181023171402-6480d4af844c // indirect
+	github.com/elazarl/goproxy v0.0.0-20200220113713-29f9e0ba54ea // indirect
+	github.com/evanphx/json-patch v4.5.0+incompatible // indirect
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-openapi/spec v0.19.6 // indirect
 	github.com/gogo/protobuf v1.2.2-0.20190723190241-65acae22fc9d // indirect
 	github.com/golang/protobuf v1.3.3
 	github.com/google/gofuzz v1.1.0 // indirect
+	github.com/gorilla/websocket v1.4.1 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
 	github.com/grpc-ecosystem/grpc-gateway v1.12.1
 	github.com/imdario/mergo v0.3.8 // indirect
@@ -18,6 +24,7 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/valyala/fasttemplate v1.1.0 // indirect
 	go.opencensus.io v0.22.1 // indirect
 	golang.org/x/crypto v0.0.0-20200210222208-86ce3cb69678 // indirect
 	golang.org/x/net v0.0.0-20191004110552-13f9640d40b9
@@ -28,6 +35,7 @@ require (
 	google.golang.org/genproto v0.0.0-20190927181202-20e1ac93f88c
 	google.golang.org/grpc v1.24.0
 	gopkg.in/inf.v0 v0.9.1 // indirect
+	gopkg.in/jcmturner/goidentity.v2 v2.0.0 // indirect
 	k8s.io/api v0.0.0-20190816222004-e3a6b8045b0b // indirect
 	k8s.io/apimachinery v0.17.2
 	k8s.io/client-go v11.0.1-0.20190816222228-6d55c1b1f1ca+incompatible
