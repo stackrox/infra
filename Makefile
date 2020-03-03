@@ -113,7 +113,7 @@ proto-generated-srcs: protoc-tools
 		-I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
 		-I${GOPATH}/src/github.com/protocolbuffers/protobuf/src \
 		-I${GOPATH}/src/github.com/gogo/protobuf/protobuf \
-		--grpc-gateway_out=logtostderr=true:$(PROTO_OUTPUT_DIR) \
+		--grpc-gateway_out=logtostderr=true,allow_delete_body=true:$(PROTO_OUTPUT_DIR) \
 		$(PROTO_FILES)
 
 	# Generate JSON Swagger manifest
@@ -121,7 +121,7 @@ proto-generated-srcs: protoc-tools
 		-I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
 		-I${GOPATH}/src/github.com/protocolbuffers/protobuf/src \
 		-I${GOPATH}/src/github.com/gogo/protobuf/protobuf \
-		--swagger_out=logtostderr=true:$(PROTO_OUTPUT_DIR) \
+		--swagger_out=logtostderr=true,allow_delete_body=true:$(PROTO_OUTPUT_DIR) \
 		$(PROTO_FILES)
 
 ##########

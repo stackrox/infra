@@ -249,6 +249,7 @@ func (s *clusterImpl) Access() map[string]middleware.Access {
 		"/v1.ClusterService/Lifespan":  middleware.Authenticated,
 		"/v1.ClusterService/Create":    middleware.Authenticated,
 		"/v1.ClusterService/Artifacts": middleware.Authenticated,
+		"/v1.ClusterService/Delete":    middleware.Authenticated,
 	}
 }
 

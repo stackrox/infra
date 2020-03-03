@@ -303,6 +303,7 @@ service ClusterService {
     rpc Delete (ResourceByID) returns (google.protobuf.Empty) {
         option (google.api.http) = {
             delete: "/v1/cluster"
+            body: "*"
         };
     }
 }
