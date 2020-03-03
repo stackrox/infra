@@ -29,9 +29,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-const (
-	resumeExpiredWorkflowInterval = 5 * time.Minute
-)
+const resumeExpiredWorkflowInterval = 5 * time.Minute
 
 type clusterImpl struct {
 	argo     workflowv1.WorkflowInterface
@@ -291,7 +289,13 @@ func (s *clusterImpl) cleanupExpiredWorkflows() {
 		}
 
 		for idx, workflow := range workflowList.Items {
-			if workflowStatus(workflow.Status) == v1.Status_FINISHED || !isWorkflowExpired(&workflowList.Items[idx]) {
+			if workflowStatus(workflow.Status) == v1.Status_FINISHED {
+				continue
+			}
+
+			if expired, err := isWorkflowExpired(&workflowList.Items[idx]); err != nil {
+				log.Printf("[ERROR] failed to determine expiration of workflow %q: %v", workflow.GetName(), err)
+			} else if expired {
 				continue
 			}
 
@@ -304,13 +308,12 @@ func (s *clusterImpl) cleanupExpiredWorkflows() {
 	}
 }
 
-func isWorkflowExpired(workflow *v1alpha1.Workflow) bool {
+func isWorkflowExpired(workflow *v1alpha1.Workflow) (bool, error) {
 	lifespan, err := ptypes.Duration(GetLifespan(workflow))
 	if err != nil {
-		log.Printf("[ERROR] failed to determine lifespan of workflow: %s", workflow.GetName())
-		return false
+		return false, err
 	}
 
 	workflowExpiryTime := workflow.Status.StartedAt.Time.Add(lifespan)
-	return time.Now().After(workflowExpiryTime)
+	return time.Now().After(workflowExpiryTime), nil
 }
