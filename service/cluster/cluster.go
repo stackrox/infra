@@ -289,13 +289,13 @@ func (s *clusterImpl) cleanupExpiredWorkflows() {
 		}
 
 		for idx, workflow := range workflowList.Items {
-			if workflowStatus(workflow.Status) == v1.Status_FINISHED {
+			if workflowStatus(workflow.Status) != v1.Status_READY {
 				continue
 			}
 
 			if expired, err := isWorkflowExpired(&workflowList.Items[idx]); err != nil {
 				log.Printf("[ERROR] failed to determine expiration of workflow %q: %v", workflow.GetName(), err)
-			} else if expired {
+			} else if !expired {
 				continue
 			}
 
