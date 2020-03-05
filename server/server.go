@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"path/filepath"
 	"strings"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -117,6 +118,7 @@ func (s *server) RunServer() (<-chan error, error) {
 	// login/logout/static, and also gRPC-Gateway routes.
 	mux.Handle("/", http.FileServer(http.Dir(s.cfg.Server.StaticDir)))
 	mux.Handle("/v1/", gwMux)
+	mux.Handle("/download/infractl", assetsHandler(s.cfg.Server.AssetsDir))
 	s.oauth.Handle(mux)
 
 	return errCh, nil
@@ -143,4 +145,12 @@ func grpcLocalCredentials(certFile string) (grpc.DialOption, error) {
 			ServerName: "localhost",
 		}),
 	), nil
+}
+
+// Handler returns a handler for serving files from assets folder.
+func assetsHandler(dir string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		r.URL.Path = filepath.Base(r.URL.Path)
+		http.FileServer(http.Dir(dir)).ServeHTTP(w, r)
+	}
 }
