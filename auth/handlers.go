@@ -130,3 +130,33 @@ func (a OAuth) Handle(mux *http.ServeMux) {
 	mux.Handle("/login", http.HandlerFunc(a.loginHandler))
 	mux.Handle("/logout", http.HandlerFunc(a.logoutHandler))
 }
+
+// Authorized wraps the given http.Handler in an authorization check. The given
+// handler is only called if the user is authorized, otherwise a 404 status
+// code is returned.
+func (a OAuth) Authorized(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Extract the "token" cookie from the request.
+		cookie, err := r.Cookie("token")
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		// Validate the token JWT.
+		if _, err := a.jwtUser.Validate(cookie.Value); err != nil {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		// USer is authorized, invoke original handler.
+		handler.ServeHTTP(w, r)
+	})
+}
+
+// AuthorizedFunc wraps the given http.HandlerFunc in an authorization check.
+// The given handler is only called if the user is authorized, otherwise a 404
+// status code is returned.
+func (a OAuth) AuthorizedFunc(handler http.HandlerFunc) http.Handler {
+	return a.Authorized(handler)
+}
