@@ -149,7 +149,7 @@ func (a OAuth) Authorized(handler http.Handler) http.Handler {
 			return
 		}
 
-		// USer is authorized, invoke original handler.
+		// User is authorized, invoke original handler.
 		handler.ServeHTTP(w, r)
 	})
 }
