@@ -157,6 +157,6 @@ func (a OAuth) Authorized(handler http.Handler) http.Handler {
 // AuthorizedFunc wraps the given http.HandlerFunc in an authorization check.
 // The given handler is only called if the user is authorized, otherwise a 404
 // status code is returned.
-func (a OAuth) AuthorizedFunc(handler http.HandlerFunc) http.Handler {
+func (a OAuth) AuthorizedFunc(handler http.HandlerFunc) http.Handler { // nolint:interfacer
 	return a.Authorized(handler)
 }
