@@ -261,6 +261,25 @@ message ClusterArtifacts {
     repeated Artifact Artifacts = 1;
 }
 
+// Log represents the logs from a specific pod.
+message Log {
+    // Name is the name given to this pod in the workflow.
+    string Name  = 1;
+
+    // Started is the time at which this pod was started. Used for ordering
+    // between pods.
+    google.protobuf.Timestamp Started = 2;
+
+    // Body is the raw pod logs.
+    bytes Body = 3;
+}
+
+// LogsResponse represents a collection of logs.
+message LogsResponse {
+    // Logs are all of the logs from a cluster.
+    repeated Log Logs = 1;
+}
+
 // FlavorService provides flavor based functionality.
 service ClusterService {
     // Info provides information about a specific cluster.
@@ -293,6 +312,7 @@ service ClusterService {
         };
     }
 
+    // Artifacts returns the artifacts for a specific cluster.
     rpc Artifacts (ResourceByID) returns (ClusterArtifacts) {
         option (google.api.http) = {
             get: "/v1/cluster/{id}/artifacts"
@@ -303,6 +323,13 @@ service ClusterService {
     rpc Delete (ResourceByID) returns (google.protobuf.Empty) {
         option (google.api.http) = {
             delete: "/v1/cluster/{id}"
+        };
+    }
+
+    // Logs returns the logs for a specific cluster.
+    rpc Logs (ResourceByID) returns (LogsResponse) {
+        option (google.api.http) = {
+            get: "/v1/cluster/{id}/logs"
         };
     }
 }

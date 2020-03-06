@@ -36,7 +36,7 @@ require (
 	google.golang.org/grpc v1.24.0
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/jcmturner/goidentity.v2 v2.0.0 // indirect
-	k8s.io/api v0.0.0-20190816222004-e3a6b8045b0b // indirect
+	k8s.io/api v0.0.0-20190816222004-e3a6b8045b0b
 	k8s.io/apimachinery v0.17.2
 	k8s.io/client-go v11.0.1-0.20190816222228-6d55c1b1f1ca+incompatible
 	k8s.io/klog v1.0.0 // indirect
