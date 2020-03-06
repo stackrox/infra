@@ -12,7 +12,7 @@ func Command() *cobra.Command {
 	// $ infractl flavor
 	cmd := &cobra.Command{
 		Use:   "flavor",
-		Short: "flavor interactions",
+		Short: "Interact with flavors",
 		Long:  "Interact with flavors",
 	}
 

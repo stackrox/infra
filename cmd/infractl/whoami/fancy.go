@@ -6,10 +6,10 @@ import (
 	v1 "github.com/stackrox/infra/generated/api/v1"
 )
 
-type whoamiResp v1.WhoamiResponse
+type prettyWhoamiResp v1.WhoamiResponse
 
-func (r whoamiResp) PrettyPrint() {
-	switch p := r.Principal.(type) {
+func (p prettyWhoamiResp) PrettyPrint() {
+	switch p := p.Principal.(type) {
 	case *v1.WhoamiResponse_User:
 		panic("authenticating as a user is not possible in this context")
 	case *v1.WhoamiResponse_ServiceAccount:

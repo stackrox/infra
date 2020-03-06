@@ -7,14 +7,14 @@ import (
 	v1 "github.com/stackrox/infra/generated/api/v1"
 )
 
-type versionResp struct {
+type prettyVersionResp struct {
 	Client *v1.Version `json:"Client"`
 	Server *v1.Version `json:"Server"`
 }
 
-func (r versionResp) PrettyPrint() {
-	printVersion("Client", r.Client)
-	printVersion("Server", r.Server)
+func (p prettyVersionResp) PrettyPrint() {
+	printVersion("Client", p.Client)
+	printVersion("Server", p.Server)
 }
 
 // printVersion pretty prints the given version indented under the given title.

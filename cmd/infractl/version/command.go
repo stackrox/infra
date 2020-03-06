@@ -12,18 +12,23 @@ import (
 	"google.golang.org/grpc"
 )
 
+const examples = `# Print client and server version.
+$ infractl version`
+
 // Command defines the handler for infractl version.
 func Command() *cobra.Command {
 	// $ infractl version
 	return &cobra.Command{
-		Use:   "version",
-		Short: "Version information",
-		Long:  "Version prints the Client and server version",
-		RunE:  common.WithGRPCHandler(version),
+		Use:     "version",
+		Short:   "Version information",
+		Long:    "Print client and server version",
+		Example: examples,
+		Args:    common.ArgsWithHelp(cobra.ExactArgs(0)),
+		RunE:    common.WithGRPCHandler(run),
 	}
 }
 
-func version(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, _ []string) (common.PrettyPrinter, error) {
+func run(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, _ []string) (common.PrettyPrinter, error) {
 	clientVersion := buildinfo.All()
 	var serverVersion *v1.Version
 
@@ -31,7 +36,7 @@ func version(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, _ []s
 	// normal operation, and ignore any errors.
 	serverVersion, _ = v1.NewVersionServiceClient(conn).GetVersion(ctx, &empty.Empty{})
 
-	return versionResp{
+	return prettyVersionResp{
 		Client: clientVersion,
 		Server: serverVersion,
 	}, nil

@@ -17,26 +17,32 @@ const examples = `# Set the lifespan of cluster example-s3maj to 30 minutes.
 infractl cluster lifespan example-s3maj 30m
 
 # Expire cluster example-s3maj.
-infractl cluster lifespan example-s3maj 0
-`
+infractl cluster lifespan example-s3maj 0`
 
 // Command defines the handler for infractl cluster lifespan.
 func Command() *cobra.Command {
 	// $ infractl cluster lifespan
 	return &cobra.Command{
-		Use:     "lifespan <cluster id> <duration>",
+		Use:     "lifespan CLUSTER DURATION",
 		Short:   "update cluster lifespan",
 		Long:    "lifespan updates the cluster lifespan",
 		Example: examples,
-		RunE:    common.WithGRPCHandler(lifespan),
+		Args:    common.ArgsWithHelp(cobra.ExactArgs(2), args),
+		RunE:    common.WithGRPCHandler(run),
 	}
 }
 
-func lifespan(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, args []string) (common.PrettyPrinter, error) {
-	if len(args) != 2 {
-		return nil, errors.New("invalid arguments")
+func args(_ *cobra.Command, args []string) error {
+	if args[0] == "" {
+		return errors.New("no cluster ID given")
 	}
+	if args[1] == "" {
+		return errors.New("no duration given")
+	}
+	return nil
+}
 
+func run(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, args []string) (common.PrettyPrinter, error) {
 	lifespan, err := time.ParseDuration(args[1])
 	if err != nil {
 		return nil, err
@@ -50,5 +56,5 @@ func lifespan(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, args
 		return nil, err
 	}
 
-	return dur(*resp), nil
+	return prettyDuration(*resp), nil
 }

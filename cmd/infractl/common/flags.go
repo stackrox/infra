@@ -13,10 +13,10 @@ import (
 const (
 	// TokenEnvVarName is the environment variable name used to pass a service
 	// account token.
-	TokenEnvVarName = "INFRACTL_TOKEN"
+	TokenEnvVarName = "INFRA_TOKEN"
 
 	// defaultEndpoint is the default infra-server address to connect to.
-	defaultEndpoint = "localhost:8823"
+	defaultEndpoint = "infra.stackrox.com:443"
 )
 
 // flags represents the collection of flag and environment variable values

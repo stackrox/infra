@@ -6,12 +6,12 @@ import (
 	v1 "github.com/stackrox/infra/generated/api/v1"
 )
 
-type flavorListResponse v1.FlavorListResponse
+type prettyFlavorListResponse v1.FlavorListResponse
 
-func (r flavorListResponse) PrettyPrint() {
-	for _, flavor := range r.Flavors {
+func (p prettyFlavorListResponse) PrettyPrint() {
+	for _, flavor := range p.Flavors {
 		fmt.Printf("%s ", flavor.GetID())
-		if flavor.GetID() == r.Default {
+		if flavor.GetID() == p.Default {
 			fmt.Printf("(default)")
 		}
 		fmt.Println()
