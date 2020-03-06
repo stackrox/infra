@@ -6,4 +6,6 @@ COPY static /static
 
 COPY infra-server /infra-server
 
+COPY infractl-darwin-amd64 infractl-linux-amd64 /downloads/
+
 ENTRYPOINT ["/infra-server"]

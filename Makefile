@@ -31,10 +31,19 @@ else
 	./scripts/go-build -o $(GOPATH)/bin/infractl  ./cmd/infractl
 endif
 
+# cli-image - Builds the infractl client binary
+# Used to build infractl specifically when a docker image is prepared.
+.PHONY: cli-image
+cli-image: proto-generated-srcs
+	GOARCH=amd64 GOOS=darwin ./scripts/go-build -o bin/infractl-darwin-amd64 ./cmd/infractl
+	GOARCH=amd64 GOOS=linux  ./scripts/go-build -o bin/infractl-linux-amd64  ./cmd/infractl
+
 .PHONY: image
-image: server
+image: server cli-image
 	@cp -f bin/infra-server-linux-amd64 image/infra-server
 	@cp -r static image/static
+	@cp bin/infractl-darwin-amd64 image/
+	@cp bin/infractl-linux-amd64 image/
 	docker build -t us.gcr.io/stackrox-infra/infra-server:$(TAG) image
 
 ##############
