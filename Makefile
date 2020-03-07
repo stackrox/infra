@@ -24,22 +24,12 @@ server: proto-generated-srcs
 # When run in CI, a Darwin and Linux binary is built.
 .PHONY: cli
 cli: proto-generated-srcs
-ifdef CI
 	GOARCH=amd64 GOOS=darwin ./scripts/go-build -o bin/infractl-darwin-amd64 ./cmd/infractl
 	GOARCH=amd64 GOOS=linux  ./scripts/go-build -o bin/infractl-linux-amd64  ./cmd/infractl
-else
 	./scripts/go-build -o $(GOPATH)/bin/infractl  ./cmd/infractl
-endif
-
-# cli-image - Builds the infractl client binary
-# Used to build infractl specifically when a docker image is prepared.
-.PHONY: cli-image
-cli-image: proto-generated-srcs
-	GOARCH=amd64 GOOS=darwin ./scripts/go-build -o bin/infractl-darwin-amd64 ./cmd/infractl
-	GOARCH=amd64 GOOS=linux  ./scripts/go-build -o bin/infractl-linux-amd64  ./cmd/infractl
 
 .PHONY: image
-image: server cli-image
+image: server cli
 	@cp -f bin/infra-server-linux-amd64 image/infra-server
 	@cp -r static image/static
 	@cp bin/infractl-darwin-amd64 image/
