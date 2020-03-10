@@ -20,21 +20,24 @@ server: proto-generated-srcs
 	GOARCH=amd64 GOOS=linux ./scripts/go-build -o bin/infra-server-linux-amd64 ./cmd/infra-server
 
 # cli - Builds the infractl client binary
-# When run locally, a Darwin binary is built and installed into the user's GOPATH bin.
-# When run in CI, a Darwin and Linux binary is built.
+# When run in CI or when preparing an image, a Darwin and Linux binary is built.
 .PHONY: cli
 cli: proto-generated-srcs
-ifdef CI
 	GOARCH=amd64 GOOS=darwin ./scripts/go-build -o bin/infractl-darwin-amd64 ./cmd/infractl
 	GOARCH=amd64 GOOS=linux  ./scripts/go-build -o bin/infractl-linux-amd64  ./cmd/infractl
-else
+
+# cli-local - Builds the infractl client binary
+# When run locally, a Darwin binary is built and installed into the user's GOPATH bin.
+.PHONY: cli-local
+cli-local: proto-generated-srcs
 	./scripts/go-build -o $(GOPATH)/bin/infractl  ./cmd/infractl
-endif
 
 .PHONY: image
-image: server
+image: server cli
 	@cp -f bin/infra-server-linux-amd64 image/infra-server
 	@cp -r static image/static
+	@cp bin/infractl-darwin-amd64 image/
+	@cp bin/infractl-linux-amd64 image/
 	docker build -t us.gcr.io/stackrox-infra/infra-server:$(TAG) image
 
 ##############

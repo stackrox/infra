@@ -117,6 +117,7 @@ func (s *server) RunServer() (<-chan error, error) {
 	// login/logout/static, and also gRPC-Gateway routes.
 	mux.Handle("/", http.FileServer(http.Dir(s.cfg.Server.StaticDir)))
 	mux.Handle("/v1/", gwMux)
+	mux.Handle("/downloads/", s.oauth.Authorized(http.FileServer(http.Dir(s.cfg.Server.StaticDir))))
 	s.oauth.Handle(mux)
 
 	return errCh, nil
