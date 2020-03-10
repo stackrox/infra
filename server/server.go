@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"path/filepath"
 	"strings"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -117,6 +118,7 @@ func (s *server) RunServer() (<-chan error, error) {
 	// login/logout/static, and also gRPC-Gateway routes.
 	mux.Handle("/", http.FileServer(http.Dir(s.cfg.Server.StaticDir)))
 	mux.Handle("/v1/", gwMux)
+	mux.Handle("/downloads/", s.oauth.AuthorizedFunc(downloadsHandler(s.cfg.Server.AssetsDir)))
 	s.oauth.Handle(mux)
 
 	return errCh, nil
@@ -143,4 +145,12 @@ func grpcLocalCredentials(certFile string) (grpc.DialOption, error) {
 			ServerName: "localhost",
 		}),
 	), nil
+}
+
+func downloadsHandler(downloadPath string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Need to remove the rest of the URL path so that it just contains the file wanted
+		r.URL.Path = filepath.Base(r.URL.Path)
+		http.FileServer(http.Dir(downloadPath)).ServeHTTP(w, r)
+	}
 }

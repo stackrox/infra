@@ -45,6 +45,7 @@ type ServerConfig struct {
 	CertFile  string `json:"cert"`
 	KeyFile   string `json:"key"`
 	StaticDir string `json:"static"`
+	AssetsDir string `json:"assets"`
 }
 
 // FlavorConfig represents the configuration for a single automation flavor.
