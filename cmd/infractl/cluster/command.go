@@ -9,6 +9,7 @@ import (
 	"github.com/stackrox/infra/cmd/infractl/cluster/info"
 	"github.com/stackrox/infra/cmd/infractl/cluster/lifespan"
 	"github.com/stackrox/infra/cmd/infractl/cluster/list"
+	"github.com/stackrox/infra/cmd/infractl/cluster/logs"
 )
 
 // Command defines the handler for infractl cluster.
@@ -38,6 +39,9 @@ func Command() *cobra.Command {
 
 		// $ infractl cluster list
 		list.Command(),
+
+		// $ infractl cluster logs
+		logs.Command(),
 	)
 
 	return cmd

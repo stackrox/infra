@@ -5,8 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
@@ -25,16 +28,19 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	k8sv1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
 const resumeExpiredWorkflowInterval = 5 * time.Minute
 
 type clusterImpl struct {
-	argo     workflowv1.WorkflowInterface
-	registry *flavor.Registry
-	signer   *signer.Signer
+	clientWorkflows workflowv1.WorkflowInterface
+	clientPods      k8sv1.PodInterface
+	registry        *flavor.Registry
+	signer          *signer.Signer
 }
 
 var (
@@ -44,15 +50,21 @@ var (
 
 // NewClusterService creates a new ClusterService.
 func NewClusterService(registry *flavor.Registry, signer *signer.Signer) (middleware.APIService, error) {
-	argo, err := argoClient()
+	clientWorkflows, err := workflowClient()
+	if err != nil {
+		return nil, err
+	}
+
+	clientPods, err := podsClient()
 	if err != nil {
 		return nil, err
 	}
 
 	impl := &clusterImpl{
-		argo:     argo,
-		registry: registry,
-		signer:   signer,
+		clientWorkflows: clientWorkflows,
+		clientPods:      clientPods,
+		registry:        registry,
+		signer:          signer,
 	}
 
 	go impl.cleanupExpiredWorkflows()
@@ -80,7 +92,7 @@ func clusterFromWorkflow(workflow v1alpha1.Workflow) *v1.Cluster {
 
 // Info implements ClusterService.Info.
 func (s *clusterImpl) Info(ctx context.Context, clusterID *v1.ResourceByID) (*v1.Cluster, error) {
-	workflow, err := s.argo.Get(clusterID.Id, metav1.GetOptions{})
+	workflow, err := s.clientWorkflows.Get(clusterID.Id, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +102,7 @@ func (s *clusterImpl) Info(ctx context.Context, clusterID *v1.ResourceByID) (*v1
 
 // List implements ClusterService.List.
 func (s *clusterImpl) List(ctx context.Context, clusterID *empty.Empty) (*v1.ClusterListResponse, error) {
-	workflows, err := s.argo.List(metav1.ListOptions{})
+	workflows, err := s.clientWorkflows.List(metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -149,7 +161,7 @@ func (s *clusterImpl) Lifespan(_ context.Context, req *v1.LifespanRequest) (*dur
 	}
 
 	// Submit the patch.
-	workflow, err := s.argo.Patch(req.Id, types.JSONPatchType, payloadBytes)
+	workflow, err := s.clientWorkflows.Patch(req.Id, types.JSONPatchType, payloadBytes)
 	if err != nil {
 		return nil, err
 	}
@@ -199,7 +211,7 @@ func (s *clusterImpl) Create(ctx context.Context, req *v1.CreateClusterRequest) 
 		})
 	}
 
-	created, err := s.argo.Create(&workflow)
+	created, err := s.clientWorkflows.Create(&workflow)
 	if err != nil {
 		return nil, err
 	}
@@ -209,7 +221,7 @@ func (s *clusterImpl) Create(ctx context.Context, req *v1.CreateClusterRequest) 
 
 // Artifacts implements ClusterService.Artifacts.
 func (s *clusterImpl) Artifacts(_ context.Context, clusterID *v1.ResourceByID) (*v1.ClusterArtifacts, error) {
-	workflow, err := s.argo.Get(clusterID.Id, metav1.GetOptions{})
+	workflow, err := s.clientWorkflows.Get(clusterID.Id, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -248,6 +260,7 @@ func (s *clusterImpl) Access() map[string]middleware.Access {
 		"/v1.ClusterService/Create":    middleware.Authenticated,
 		"/v1.ClusterService/Artifacts": middleware.Authenticated,
 		"/v1.ClusterService/Delete":    middleware.Authenticated,
+		"/v1.ClusterService/Logs":      middleware.Authenticated,
 	}
 }
 
@@ -263,11 +276,58 @@ func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.
 	}
 
 	// Resume workflow for this cluster.
-	if err := util.ResumeWorkflow(s.argo, req.Id); err != nil {
+	if err := util.ResumeWorkflow(s.clientWorkflows, req.Id); err != nil {
 		return nil, err
 	}
 
 	return &empty.Empty{}, nil
+}
+
+func (s *clusterImpl) Logs(_ context.Context, clusterID *v1.ResourceByID) (*v1.LogsResponse, error) {
+	workflow, err := s.clientWorkflows.Get(clusterID.Id, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	var podNodes []v1alpha1.NodeStatus
+	for _, node := range workflow.Status.Nodes {
+		if node.Type == v1alpha1.NodeTypePod && node.Phase != v1alpha1.NodeError {
+			podNodes = append(podNodes, node)
+		}
+	}
+
+	// Fetch logs for each individual pod.
+	var wg sync.WaitGroup
+	logChan := make(chan *v1.Log)
+	for _, node := range podNodes {
+		wg.Add(1)
+		go func(node v1alpha1.NodeStatus) {
+			defer wg.Done()
+
+			if log, err := s.getLogs(node); err == nil {
+				logChan <- log
+			}
+		}(node)
+	}
+
+	// Close the channel when all goroutines are done.
+	go func() {
+		wg.Wait()
+		close(logChan)
+	}()
+
+	// Consume all logs from the channel.
+	logs := make([]*v1.Log, 0, len(podNodes))
+	for log := range logChan {
+		logs = append(logs, log)
+	}
+
+	// Sort the logs by when they started.
+	sort.SliceStable(logs, func(i, j int) bool {
+		return logs[i].Started.GetSeconds() < logs[j].Started.GetSeconds()
+	})
+
+	return &v1.LogsResponse{Logs: logs}, nil
 }
 
 // RegisterServiceServer registers this service with the given gRPC Server.
@@ -282,7 +342,7 @@ func (s *clusterImpl) RegisterServiceHandler(ctx context.Context, mux *runtime.S
 
 func (s *clusterImpl) cleanupExpiredWorkflows() {
 	for ; ; time.Sleep(resumeExpiredWorkflowInterval) {
-		workflowList, err := s.argo.List(metav1.ListOptions{})
+		workflowList, err := s.clientWorkflows.List(metav1.ListOptions{})
 		if err != nil {
 			log.Printf("[ERROR] failed to list workflows: %v", err)
 			continue
@@ -300,7 +360,7 @@ func (s *clusterImpl) cleanupExpiredWorkflows() {
 			}
 
 			log.Printf("resuming workflow %q", workflow.GetName())
-			err := util.ResumeWorkflow(s.argo, workflow.GetName())
+			err := util.ResumeWorkflow(s.clientWorkflows, workflow.GetName())
 			if err != nil {
 				log.Printf("[ERROR] failed to resume workflow %q: %v", workflow.GetName(), err)
 			}
@@ -316,4 +376,27 @@ func isWorkflowExpired(workflow *v1alpha1.Workflow) (bool, error) {
 
 	workflowExpiryTime := workflow.Status.StartedAt.Time.Add(lifespan)
 	return time.Now().After(workflowExpiryTime), nil
+}
+
+func (s *clusterImpl) getLogs(node v1alpha1.NodeStatus) (*v1.Log, error) {
+	stream, err := s.clientPods.GetLogs(node.ID, &corev1.PodLogOptions{
+		Container:  "main",
+		Follow:     false,
+		Timestamps: true,
+	}).Stream()
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := ioutil.ReadAll(stream)
+	if err != nil {
+		return nil, err
+	}
+
+	started, _ := ptypes.TimestampProto(node.StartedAt.UTC())
+	return &v1.Log{
+		Name:    node.DisplayName,
+		Body:    body,
+		Started: started,
+	}, nil
 }

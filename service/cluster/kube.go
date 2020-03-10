@@ -8,6 +8,8 @@ import (
 	"github.com/argoproj/argo/pkg/client/clientset/versioned"
 	workflowv1 "github.com/argoproj/argo/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
 	v1 "github.com/stackrox/infra/generated/api/v1"
+	"k8s.io/client-go/kubernetes"
+	k8sv1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	// Load GCP auth plugin for k8s requests
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -30,13 +32,32 @@ func restConfig() (*rest.Config, error) {
 	return rest.InClusterConfig()
 }
 
-func argoClient() (workflowv1.WorkflowInterface, error) {
+func workflowClient() (workflowv1.WorkflowInterface, error) {
 	config, err := restConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	return versioned.NewForConfigOrDie(config).ArgoprojV1alpha1().Workflows("default"), nil
+	client, err := versioned.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
+
+	return client.ArgoprojV1alpha1().Workflows("default"), nil
+}
+
+func podsClient() (k8sv1.PodInterface, error) {
+	config, err := restConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	client, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
+
+	return client.CoreV1().Pods("default"), nil
 }
 
 func workflowStatus(workflowStatus v1alpha1.WorkflowStatus) v1.Status {
