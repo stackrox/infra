@@ -115,12 +115,53 @@ func (s *server) RunServer() (<-chan error, error) {
 
 	// Updates http handler routes. This included "web-only" routes, like
 	// login/logout/static, and also gRPC-Gateway routes.
-	mux.Handle("/", http.FileServer(http.Dir(s.cfg.Server.StaticDir)))
+	mux.Handle("/", serveContent(s.cfg.Server.StaticDir, s.oauth))
 	mux.Handle("/v1/", gwMux)
-	mux.Handle("/downloads/", s.oauth.Authorized(http.FileServer(http.Dir(s.cfg.Server.StaticDir))))
 	s.oauth.Handle(mux)
 
 	return errCh, nil
+}
+
+// serveContent serves the main application (static files) content. Auth is
+// enforced on most routes.
+func serveContent(dir string, oAuth auth.OAuth) http.Handler {
+	whitelist := map[string]struct{}{
+		"/favicon.ico": {},
+	}
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if isHealthCheck(w, r) {
+			return
+		}
+
+		// If a whitelisted file is being requested, serve it without auth.
+		if _, found := whitelist[r.RequestURI]; found {
+			http.FileServer(http.Dir(dir)).ServeHTTP(w, r)
+			return
+		}
+
+		// Serve the requested file with auth.
+		oAuth.Authorized(http.FileServer(http.Dir(dir))).ServeHTTP(w, r)
+	})
+}
+
+// isHealthCheck determines if the given request is a health check, and
+// responds appropriately with a 200 OK status code.
+func isHealthCheck(w http.ResponseWriter, r *http.Request) bool {
+	switch {
+	case strings.HasPrefix(r.UserAgent(), "kube-probe"):
+		// Kubernetes internal service health check.
+		w.WriteHeader(http.StatusOK)
+		return true
+
+	case strings.HasPrefix(r.UserAgent(), "GoogleHC"):
+		// GCP backend health check.
+		w.WriteHeader(http.StatusOK)
+		return true
+
+	default:
+		return false
+	}
 }
 
 func grpcLocalCredentials(certFile string) (grpc.DialOption, error) {

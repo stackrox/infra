@@ -107,7 +107,7 @@ func (a OAuth) callbackHandler(w http.ResponseWriter, r *http.Request) {
 	// Persist the user token as a cookie in the user's browser and redirect to
 	// a logged in page
 	w.Header().Set("set-cookie", fmt.Sprintf(tokenCookieNew, userToken))
-	http.Redirect(w, r, "/v1/whoami", http.StatusTemporaryRedirect)
+	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }
 
 // logoutHandler handles the logout part of an Oauth2 flow.
@@ -139,13 +139,13 @@ func (a OAuth) Authorized(handler http.Handler) http.Handler {
 		// Extract the "token" cookie from the request.
 		cookie, err := r.Cookie("token")
 		if err != nil {
-			w.WriteHeader(http.StatusNotFound)
+			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return
 		}
 
 		// Validate the token JWT.
 		if _, err := a.jwtUser.Validate(cookie.Value); err != nil {
-			w.WriteHeader(http.StatusNotFound)
+			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return
 		}
 

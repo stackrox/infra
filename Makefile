@@ -35,9 +35,10 @@ cli-local: proto-generated-srcs
 .PHONY: image
 image: server cli
 	@cp -f bin/infra-server-linux-amd64 image/infra-server
-	@cp -r static image/static
-	@cp bin/infractl-darwin-amd64 image/
-	@cp bin/infractl-linux-amd64 image/
+	@cp -r static image/
+	@mkdir -p image/static/downloads
+	@cp bin/infractl-darwin-amd64 image/static/downloads
+	@cp bin/infractl-linux-amd64 image/static/downloads
 	docker build -t us.gcr.io/stackrox-infra/infra-server:$(TAG) image
 
 ##############
