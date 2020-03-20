@@ -8,9 +8,11 @@ import (
 	"os/signal"
 	"path/filepath"
 	"syscall"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/auth"
+	"github.com/stackrox/infra/calendar"
 	"github.com/stackrox/infra/config"
 	"github.com/stackrox/infra/flavor"
 	"github.com/stackrox/infra/pkg/buildinfo"
@@ -69,6 +71,11 @@ func mainCmd() error {
 		return errors.Wrapf(err, "failed to load GCS signing credentials")
 	}
 
+	eventSource, err := calendar.NewGoogleCalendar(cfg.GoogleCalendarID, 2*time.Hour)
+	if err != nil {
+		return errors.Wrapf(err, "failed to create Google Calendar event source")
+	}
+
 	// Construct each individual service.
 	services, err := middleware.Services(
 		func() (middleware.APIService, error) {
@@ -79,7 +86,7 @@ func mainCmd() error {
 		},
 		service.NewVersionService,
 		func() (middleware.APIService, error) {
-			return cluster.NewClusterService(registry, signer)
+			return cluster.NewClusterService(registry, signer, eventSource)
 		},
 	)
 	if err != nil {

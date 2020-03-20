@@ -24,13 +24,14 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/stretchr/testify v1.4.0
 	github.com/valyala/fasttemplate v1.1.0 // indirect
 	go.opencensus.io v0.22.1 // indirect
 	golang.org/x/crypto v0.0.0-20200210222208-86ce3cb69678 // indirect
 	golang.org/x/net v0.0.0-20191004110552-13f9640d40b9
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/sys v0.0.0-20190826190057-c7b8b68b1456 // indirect
-	google.golang.org/api v0.10.0 // indirect
+	google.golang.org/api v0.10.0
 	google.golang.org/appengine v1.6.1 // indirect
 	google.golang.org/genproto v0.0.0-20190927181202-20e1ac93f88c
 	google.golang.org/grpc v1.24.0
