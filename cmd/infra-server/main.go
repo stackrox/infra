@@ -86,7 +86,7 @@ func mainCmd() error {
 		},
 		service.NewVersionService,
 		func() (middleware.APIService, error) {
-			return cluster.NewClusterService(registry, signer, eventSource)
+			return cluster.NewClusterService(registry, signer, eventSource, cfg.Slack)
 		},
 	)
 	if err != nil {

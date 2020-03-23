@@ -34,6 +34,7 @@ func Command() *cobra.Command {
 	}
 
 	cmd.Flags().StringArray("arg", []string{}, "repeated key=value parameter pairs")
+	cmd.Flags().String("description", "", "description for this cluster")
 	cmd.Flags().Duration("lifespan", 3*time.Hour, "initial lifespan of the cluster")
 	return cmd
 }
@@ -47,12 +48,14 @@ func args(_ *cobra.Command, args []string) error {
 
 func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []string) (common.PrettyPrinter, error) {
 	params, _ := cmd.Flags().GetStringArray("arg")
+	description, _ := cmd.Flags().GetString("description")
 	lifespan, _ := cmd.Flags().GetDuration("lifespan")
 
 	req := v1.CreateClusterRequest{
-		ID:         args[0],
-		Parameters: make(map[string]string),
-		Lifespan:   ptypes.DurationProto(lifespan),
+		ID:          args[0],
+		Parameters:  make(map[string]string),
+		Lifespan:    ptypes.DurationProto(lifespan),
+		Description: description,
 	}
 
 	for _, arg := range params {

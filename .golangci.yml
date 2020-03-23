@@ -7,9 +7,10 @@ linters:
   disable:
     - funlen
     - gomnd
-    - lll
-    - wsl
     - gosec
+    - lll
+    - maligned
+    - wsl
 
 issues:
   exclude-use-default: false

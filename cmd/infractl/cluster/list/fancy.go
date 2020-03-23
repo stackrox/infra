@@ -21,13 +21,14 @@ func (p prettyClusterListResponse) PrettyPrint() {
 		)
 
 		fmt.Printf("%s \n", cluster.GetID())
-		fmt.Printf("  Flavor:    %s\n", cluster.GetFlavor())
-		fmt.Printf("  Owner:     %s\n", cluster.GetOwner())
-		fmt.Printf("  Status:    %s\n", cluster.GetStatus())
-		fmt.Printf("  Created:   %v\n", common.FormatTime(createdOn))
+		fmt.Printf("  Flavor:      %s\n", cluster.GetFlavor())
+		fmt.Printf("  Owner:       %s\n", cluster.GetOwner())
+		fmt.Printf("  Description: %s\n", cluster.GetDescription())
+		fmt.Printf("  Status:      %s\n", cluster.GetStatus())
+		fmt.Printf("  Created:     %v\n", common.FormatTime(createdOn))
 		if destroyedOn.Unix() != 0 {
-			fmt.Printf("  Destroyed: %v\n", common.FormatTime(destroyedOn))
+			fmt.Printf("  Destroyed:   %v\n", common.FormatTime(destroyedOn))
 		}
-		fmt.Printf("  Lifespan:  %s\n", common.FormatExpiration(remaining))
+		fmt.Printf("  Lifespan:    %s\n", common.FormatExpiration(remaining))
 	}
 }

@@ -221,6 +221,9 @@ message Cluster {
 
     // Lifespan is the duration for which the cluster should be kept alive.
     google.protobuf.Duration Lifespan = 7;
+
+    // Description is a human readable description for the cluster.
+    string Description = 8;
 }
 
 // ClusterListResponse represents details about all clusters.
@@ -247,6 +250,9 @@ message CreateClusterRequest {
 
     // Parameters is a map of launch parameter names to values.
     map<string, string> Parameters = 3;
+
+    // Description is a human readable description for the cluster.
+    string Description = 4;
 }
 
 message Artifact {
