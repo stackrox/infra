@@ -395,17 +395,17 @@ func (s *clusterImpl) startCalendarCheck() {
 			continue
 		}
 
-		eventIDs := make(map[string]struct{})
+		existingWorkflowEventIDs := make(map[string]struct{})
 		for _, workflow := range workflowList.Items {
 			workflow := workflow
 			if eventID := GetEventID(&workflow); eventID != "" {
-				eventIDs[eventID] = struct{}{}
+				existingWorkflowEventIDs[eventID] = struct{}{}
 			}
 		}
 
 		for _, event := range events {
 			// If there is already a workflow with this event ID
-			if _, found := eventIDs[event.ID]; found {
+			if _, found := existingWorkflowEventIDs[event.ID]; found {
 				log.Printf("[DEBUG] skipping scheduled demo for %q", event.Title)
 				continue
 			}

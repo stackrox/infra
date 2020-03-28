@@ -43,7 +43,7 @@ type EventSource interface {
 type googleCalendar struct {
 	window     time.Duration
 	calendarID string
-	service    *calendar.EventsService
+	*calendar.EventsService
 }
 
 // NewGoogleCalendar creates a new Google Calendar connector for fetching events.
@@ -53,20 +53,21 @@ func NewGoogleCalendar(calendarID string, window time.Duration) (EventSource, er
 		return nil, err
 	}
 
-	return googleCalendar{
+	return &googleCalendar{
 		window:     window,
 		calendarID: calendarID,
-		service:    service.Events,
+		EventsService:    service.Events,
 	}, nil
 }
 
-func (gcal googleCalendar) Events() ([]Event, error) {
+func (gcal *googleCalendar) Events() ([]Event, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), calendarCheckTimeout)
 	defer cancel()
 
-	calEvents, err := gcal.service.List(gcal.calendarID).
-		TimeMin(time.Now().Format(time.RFC3339)).
-		TimeMax(time.Now().Add(gcal.window).Format(time.RFC3339)).
+	now := time.Now()
+	calEvents, err := gcal.List(gcal.calendarID).
+		TimeMin(now.Format(time.RFC3339)).
+		TimeMax(now.Add(gcal.window).Format(time.RFC3339)).
 		Context(ctx).
 		Do()
 	if err != nil {
