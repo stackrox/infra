@@ -54,9 +54,9 @@ func NewGoogleCalendar(calendarID string, window time.Duration) (EventSource, er
 	}
 
 	return &googleCalendar{
-		window:     window,
-		calendarID: calendarID,
-		EventsService:    service.Events,
+		window:        window,
+		calendarID:    calendarID,
+		EventsService: service.Events,
 	}, nil
 }
 
