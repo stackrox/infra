@@ -21,6 +21,13 @@ const (
 
 	// annotationEventKey is the k8s annotation that contains the event ID.
 	annotationEventKey = "infra.stackrox.com/event"
+
+	// annotationEventKey is the k8s annotation that contains the description.
+	annotationDescriptionKey = "infra.stackrox.com/description"
+
+	// annotationSlackKey is the k8s annotation that contains the Slack
+	// notification phase.
+	annotationSlackKey = "infra.stackrox.com/slack"
 )
 
 // Annotated represents a type that has annotations.
@@ -57,4 +64,14 @@ func GetLifespan(a Annotated) *duration.Duration {
 // GetEventID returns the event ID if it exists.
 func GetEventID(a Annotated) string {
 	return a.GetAnnotations()[annotationEventKey]
+}
+
+// GetDescription returns the description if it exists.
+func GetDescription(a Annotated) string {
+	return a.GetAnnotations()[annotationDescriptionKey]
+}
+
+// GetSlack returns the Slack notification phase if it exists.
+func GetSlack(a Annotated) string {
+	return a.GetAnnotations()[annotationSlackKey]
 }

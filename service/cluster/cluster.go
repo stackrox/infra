@@ -12,6 +12,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/stackrox/infra/config"
+
 	"github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
 	workflowv1 "github.com/argoproj/argo/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
 	"github.com/argoproj/argo/workflow/util"
@@ -21,6 +23,7 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/pkg/errors"
+	"github.com/slack-go/slack"
 	"github.com/stackrox/infra/calendar"
 	"github.com/stackrox/infra/flavor"
 	v1 "github.com/stackrox/infra/generated/api/v1"
@@ -43,6 +46,10 @@ const (
 	// calendarCheckInterval is how often to periodically check the calendar
 	// for scheduled demos.
 	calendarCheckInterval = 5 * time.Minute
+
+	// slackCheckInterval is how often to periodically check for workflow
+	// updates to send Slack messages.
+	slackCheckInterval = 1 * time.Minute
 )
 
 type clusterImpl struct {
@@ -51,6 +58,8 @@ type clusterImpl struct {
 	registry        *flavor.Registry
 	signer          *signer.Signer
 	eventSource     calendar.EventSource
+	slackClient     *slack.Client
+	slackChannel    string
 }
 
 var (
@@ -59,7 +68,7 @@ var (
 )
 
 // NewClusterService creates a new ClusterService.
-func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSource calendar.EventSource) (middleware.APIService, error) {
+func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSource calendar.EventSource, slackCfg config.SlackConfig) (middleware.APIService, error) {
 	clientWorkflows, err := workflowClient()
 	if err != nil {
 		return nil, err
@@ -76,7 +85,11 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSo
 		registry:        registry,
 		signer:          signer,
 		eventSource:     eventSource,
+		slackClient:     slack.New(slackCfg.Token),
+		slackChannel:    slackCfg.Channel,
 	}
+
+	go impl.startSlackCheck()
 
 	go impl.cleanupExpiredWorkflows()
 
@@ -87,11 +100,12 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSo
 // clusterFromWorkflow converts an Argo workflow into a cluster.
 func clusterFromWorkflow(workflow v1alpha1.Workflow) *v1.Cluster {
 	cluster := &v1.Cluster{
-		ID:       workflow.GetName(),
-		Status:   workflowStatus(workflow.Status),
-		Flavor:   GetFlavor(&workflow),
-		Owner:    GetOwner(&workflow),
-		Lifespan: GetLifespan(&workflow),
+		ID:          workflow.GetName(),
+		Status:      workflowStatus(workflow.Status),
+		Flavor:      GetFlavor(&workflow),
+		Owner:       GetOwner(&workflow),
+		Lifespan:    GetLifespan(&workflow),
+		Description: GetDescription(&workflow),
 	}
 
 	cluster.CreatedOn, _ = ptypes.TimestampProto(workflow.Status.StartedAt.Time.UTC())
@@ -197,7 +211,7 @@ func (s *clusterImpl) Create(ctx context.Context, req *v1.CreateClusterRequest) 
 	if user, found := middleware.UserFromContext(ctx); found {
 		owner = user.GetEmail()
 	} else if svcacct, found := middleware.ServiceAccountFromContext(ctx); found {
-		owner = svcacct.GetName()
+		owner = svcacct.GetEmail()
 	} else {
 		return nil, errors.New("could not determine owner")
 	}
@@ -211,9 +225,10 @@ func (s *clusterImpl) Create(ctx context.Context, req *v1.CreateClusterRequest) 
 	}
 
 	workflow.SetAnnotations(map[string]string{
-		annotationFlavorKey:   flav.ID,
-		annotationLifespanKey: fmt.Sprint(lifespan),
-		annotationOwnerKey:    owner,
+		annotationFlavorKey:      flav.ID,
+		annotationLifespanKey:    fmt.Sprint(lifespan),
+		annotationOwnerKey:       owner,
+		annotationDescriptionKey: req.Description,
 	})
 
 	workflow.Spec.Arguments.Parameters = make([]v1alpha1.Parameter, 0, len(req.Parameters))
@@ -430,10 +445,11 @@ func (s *clusterImpl) createFromEvent(event calendar.Event) (*v1.ResourceByID, e
 
 	// Set some workflow metadata.
 	workflow.SetAnnotations(map[string]string{
-		annotationEventKey:    event.ID,
-		annotationFlavorKey:   flav.ID,
-		annotationLifespanKey: fmt.Sprint(lifespan),
-		annotationOwnerKey:    event.Email,
+		annotationEventKey:       event.ID,
+		annotationFlavorKey:      flav.ID,
+		annotationLifespanKey:    fmt.Sprint(lifespan),
+		annotationOwnerKey:       event.Email,
+		annotationDescriptionKey: event.Title,
 	})
 
 	// Set the only parameter.
@@ -484,4 +500,50 @@ func (s *clusterImpl) getLogs(node v1alpha1.NodeStatus) (*v1.Log, error) {
 		Body:    body,
 		Started: started,
 	}, nil
+}
+
+func (s *clusterImpl) startSlackCheck() {
+	for ; ; time.Sleep(slackCheckInterval) {
+		workflowList, err := s.clientWorkflows.List(metav1.ListOptions{})
+		if err != nil {
+			log.Printf("[ERROR] failed to list workflows: %v", err)
+			continue
+		}
+
+		for _, workflow := range workflowList.Items {
+			workflow := workflow
+			cluster := clusterFromWorkflow(workflow)
+			wfStatus := workflowStatus(workflow.Status)
+			slackStatus := slackStatus(GetSlack(&workflow))
+
+			// Generate a Slack message for our current cluster state.
+			newSlackStatus, message := formatSlackMessage(cluster, wfStatus, slackStatus)
+
+			// Only bother to send a message if there is one to send.
+			if message != nil {
+				if _, _, err := s.slackClient.PostMessage(s.slackChannel, message...); err != nil {
+					log.Printf("failed to send Slack message: %v", err)
+					continue
+				}
+			}
+
+			// Only bother to update workflow annotation if our phase has
+			// transitioned.
+			if newSlackStatus != slackStatus {
+				// Construct our replacement patch
+				payloadBytes, err := formatAnnotationPatch(annotationSlackKey, string(newSlackStatus))
+				if err != nil {
+					log.Printf("failed to format Slack annotation patch: %v", err)
+					continue
+				}
+
+				// Submit the patch.
+				_, err = s.clientWorkflows.Patch(cluster.ID, types.JSONPatchType, payloadBytes)
+				if err != nil {
+					log.Printf("failed to patch Slack annotation for cluster %s: %v", cluster.ID, err)
+					continue
+				}
+			}
+		}
+	}
 }

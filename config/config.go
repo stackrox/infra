@@ -18,6 +18,9 @@ type Config struct {
 
 	// Google Calendar ID for scheduling demos.
 	GoogleCalendarID string `json:"calendar"`
+
+	// Slack notification configuration.
+	Slack SlackConfig `json:"slack"`
 }
 
 // Auth0Config represents the configuration for integrating with Auth0.
@@ -49,6 +52,16 @@ type ServerConfig struct {
 	CertFile  string `json:"cert"`
 	KeyFile   string `json:"key"`
 	StaticDir string `json:"static"`
+}
+
+// SlackConfig represents the configuration used for sending cluster lifecycle
+// notifications via Slack.
+type SlackConfig struct {
+	// Token is the Slack App token provisioned when an App is registered.
+	Token string `json:"token"`
+
+	// Channel is the channel ID of where to send messages.
+	Channel string `json:"channel"`
 }
 
 // FlavorConfig represents the configuration for a single automation flavor.
