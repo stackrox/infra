@@ -18,6 +18,9 @@ const (
 	// annotationLifespanKey is the k8s annotation that contains the lifespan
 	// duration.
 	annotationLifespanKey = "infra.stackrox.com/lifespan"
+
+	// annotationEventKey is the k8s annotation that contains the event ID.
+	annotationEventKey = "infra.stackrox.com/event"
 )
 
 // Annotated represents a type that has annotations.
@@ -49,4 +52,9 @@ func GetLifespan(a Annotated) *duration.Duration {
 		lifespan = 0
 	}
 	return ptypes.DurationProto(lifespan)
+}
+
+// GetEventID returns the event ID if it exists.
+func GetEventID(a Annotated) string {
+	return a.GetAnnotations()[annotationEventKey]
 }

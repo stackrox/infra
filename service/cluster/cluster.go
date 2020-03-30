@@ -21,6 +21,7 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/pkg/errors"
+	"github.com/stackrox/infra/calendar"
 	"github.com/stackrox/infra/flavor"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/service/middleware"
@@ -34,13 +35,22 @@ import (
 	k8sv1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
-const resumeExpiredWorkflowInterval = 5 * time.Minute
+const (
+	// resumeExpiredWorkflowInterval is how often to periodically check for
+	// expired workflows.
+	resumeExpiredWorkflowInterval = 5 * time.Minute
+
+	// calendarCheckInterval is how often to periodically check the calendar
+	// for scheduled demos.
+	calendarCheckInterval = 5 * time.Minute
+)
 
 type clusterImpl struct {
 	clientWorkflows workflowv1.WorkflowInterface
 	clientPods      k8sv1.PodInterface
 	registry        *flavor.Registry
 	signer          *signer.Signer
+	eventSource     calendar.EventSource
 }
 
 var (
@@ -49,7 +59,7 @@ var (
 )
 
 // NewClusterService creates a new ClusterService.
-func NewClusterService(registry *flavor.Registry, signer *signer.Signer) (middleware.APIService, error) {
+func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSource calendar.EventSource) (middleware.APIService, error) {
 	clientWorkflows, err := workflowClient()
 	if err != nil {
 		return nil, err
@@ -65,9 +75,12 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer) (middle
 		clientPods:      clientPods,
 		registry:        registry,
 		signer:          signer,
+		eventSource:     eventSource,
 	}
 
 	go impl.cleanupExpiredWorkflows()
+
+	go impl.startCalendarCheck()
 	return impl, nil
 }
 
@@ -366,6 +379,78 @@ func (s *clusterImpl) cleanupExpiredWorkflows() {
 			}
 		}
 	}
+}
+
+func (s *clusterImpl) startCalendarCheck() {
+	for ; ; time.Sleep(calendarCheckInterval) {
+		workflowList, err := s.clientWorkflows.List(metav1.ListOptions{})
+		if err != nil {
+			log.Printf("[ERROR] failed to list workflows: %v", err)
+			continue
+		}
+
+		events, err := s.eventSource.Events()
+		if err != nil {
+			log.Printf("[ERROR] failed to list calendar events: %v", err)
+			continue
+		}
+
+		existingWorkflowEventIDs := make(map[string]struct{})
+		for _, workflow := range workflowList.Items {
+			workflow := workflow
+			if eventID := GetEventID(&workflow); eventID != "" {
+				existingWorkflowEventIDs[eventID] = struct{}{}
+			}
+		}
+
+		for _, event := range events {
+			// If there is already a workflow with this event ID
+			if _, found := existingWorkflowEventIDs[event.ID]; found {
+				log.Printf("[DEBUG] skipping scheduled demo for %q", event.Title)
+				continue
+			}
+
+			id, err := s.createFromEvent(event)
+			if err != nil {
+				log.Printf("[ERROR] failed to launch scheduled demo for %q: %v", event.Title, err)
+				continue
+			} else {
+				log.Printf("Launched scheduled demo for %q: %s", event.Title, id.Id)
+			}
+		}
+	}
+}
+
+func (s *clusterImpl) createFromEvent(event calendar.Event) (*v1.ResourceByID, error) {
+	// Lookup the default flavor.
+	flav, workflow := s.registry.Default()
+
+	// Set lifespan to range from right now, until 1 hour after the event ends.
+	lifespan := time.Until(event.End.Add(time.Hour))
+
+	// Set some workflow metadata.
+	workflow.SetAnnotations(map[string]string{
+		annotationEventKey:    event.ID,
+		annotationFlavorKey:   flav.ID,
+		annotationLifespanKey: fmt.Sprint(lifespan),
+		annotationOwnerKey:    event.Email,
+	})
+
+	// Set the only parameter.
+	workflow.Spec.Arguments.Parameters = []v1alpha1.Parameter{
+		{
+			Name:  "name",
+			Value: proto.String(simpleName(event.Title)),
+		},
+	}
+
+	// Launch the demo!
+	created, err := s.clientWorkflows.Create(&workflow)
+	if err != nil {
+		return nil, err
+	}
+
+	return &v1.ResourceByID{Id: created.Name}, nil
 }
 
 func isWorkflowExpired(workflow *v1alpha1.Workflow) (bool, error) {

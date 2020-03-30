@@ -13,7 +13,11 @@ type Config struct {
 	// Server is the server and TLS configuration.
 	Server ServerConfig `json:"server"`
 
+	// Server administrator password.
 	Password string `json:"password"`
+
+	// Google Calendar ID for scheduling demos.
+	GoogleCalendarID string `json:"calendar"`
 }
 
 // Auth0Config represents the configuration for integrating with Auth0.
