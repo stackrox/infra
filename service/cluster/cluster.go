@@ -12,8 +12,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/stackrox/infra/config"
-
 	"github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
 	workflowv1 "github.com/argoproj/argo/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
 	"github.com/argoproj/argo/workflow/util"
@@ -25,6 +23,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/slack-go/slack"
 	"github.com/stackrox/infra/calendar"
+	"github.com/stackrox/infra/config"
 	"github.com/stackrox/infra/flavor"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/service/middleware"
@@ -254,6 +253,13 @@ func (s *clusterImpl) Artifacts(_ context.Context, clusterID *v1.ResourceByID) (
 		return nil, err
 	}
 
+	flavorMetadata := make(map[string]*v1.FlavorArtifact)
+	flavorName := GetFlavor(workflow)
+	flavor, _, found := s.registry.Get(flavorName)
+	if found && flavor.Artifacts != nil {
+		flavorMetadata = flavor.Artifacts
+	}
+
 	resp := v1.ClusterArtifacts{}
 
 	for _, nodeStatus := range workflow.Status.Nodes {
@@ -268,9 +274,15 @@ func (s *clusterImpl) Artifacts(_ context.Context, clusterID *v1.ResourceByID) (
 					return nil, err
 				}
 
+				var description string
+				if meta, found := flavorMetadata[artifact.Name]; found {
+					description = meta.Description
+				}
+
 				resp.Artifacts = append(resp.Artifacts, &v1.Artifact{
-					Name: artifact.Name,
-					URL:  url,
+					Name:        artifact.Name,
+					Description: description,
+					URL:         url,
 				})
 			}
 		}
@@ -516,8 +528,17 @@ func (s *clusterImpl) startSlackCheck() {
 			wfStatus := workflowStatus(workflow.Status)
 			slackStatus := slackStatus(GetSlack(&workflow))
 
+			var endpointURL string
+			if wfStatus == v1.Status_READY {
+				endpointURL, err = s.getEndpointURL(&workflow)
+				if err != nil {
+					log.Printf("failed to read URL artifact: %v", err)
+				}
+				endpointURL = strings.TrimSpace(endpointURL)
+			}
+
 			// Generate a Slack message for our current cluster state.
-			newSlackStatus, message := formatSlackMessage(cluster, wfStatus, slackStatus)
+			newSlackStatus, message := formatSlackMessage(cluster, wfStatus, slackStatus, endpointURL)
 
 			// Only bother to send a message if there is one to send.
 			if message != nil {
@@ -546,4 +567,38 @@ func (s *clusterImpl) startSlackCheck() {
 			}
 		}
 	}
+}
+
+func (s *clusterImpl) getEndpointURL(workflow *v1alpha1.Workflow) (string, error) {
+	const artifactTagURL = "url"
+	flavorMetadata := make(map[string]*v1.FlavorArtifact)
+	flavorName := GetFlavor(workflow)
+	flavor, _, found := s.registry.Get(flavorName)
+	if found && flavor.Artifacts != nil {
+		flavorMetadata = flavor.Artifacts
+	}
+
+	for _, nodeStatus := range workflow.Status.Nodes {
+		if nodeStatus.Outputs == nil {
+			continue
+		}
+
+		for _, artifact := range nodeStatus.Outputs.Artifacts {
+			if artifact.S3 == nil {
+				continue
+			}
+
+			if meta, found := flavorMetadata[artifact.Name]; found {
+				if _, found := meta.Tags[artifactTagURL]; found {
+					contents, err := s.signer.Contents(artifact.S3.Bucket, artifact.S3.Key)
+					if err != nil {
+						return "", err
+					}
+					return string(contents), nil
+				}
+			}
+		}
+	}
+
+	return "", nil
 }

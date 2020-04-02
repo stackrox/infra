@@ -2,7 +2,11 @@
 package signer
 
 import (
+	"archive/tar"
+	"compress/gzip"
+	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -25,7 +29,8 @@ const (
 
 // Signer facilitates the generation of signed GCS URLS.
 type Signer struct {
-	cfg jwt.Config
+	cfg    jwt.Config
+	client *storage.Client
 }
 
 // NewFromEnv constructs a Signer from the GOOGLE_APPLICATION_CREDENTIALS set
@@ -41,13 +46,19 @@ func NewFromEnv() (*Signer, error) {
 		return nil, err
 	}
 
+	client, err := storage.NewClient(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
 	jwtCfg, err := google.JWTConfigFromJSON(data)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Signer{
-		cfg: *jwtCfg,
+		cfg:    *jwtCfg,
+		client: client,
 	}, nil
 }
 
@@ -63,4 +74,32 @@ func (s Signer) Generate(gcsBucketName, gcsBucketKey string) (string, error) {
 		Method:         http.MethodGet,
 		Expires:        time.Now().Add(gcsSignedURLLifespan),
 	})
+}
+
+func (s Signer) Contents(gcsBucketName, gcsBucketKey string) ([]byte, error) {
+	br, err := s.client.Bucket(gcsBucketName).Object(gcsBucketKey).NewReader(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	// Archive is gzipped, so we need to strip that away.
+	gr, err := gzip.NewReader(br)
+	if err != nil {
+		return nil, err
+	}
+	defer gr.Close() // nolint:errcheck
+
+	// Archive is a normal tar archive.
+	tr := tar.NewReader(gr)
+
+	// We're expecting 1 and only 1 file in the archive, so read just the
+	// first entry.
+	if _, err := tr.Next(); err != nil {
+		if err == io.EOF {
+			return nil, fmt.Errorf("unexpected EOF reading artifact")
+		}
+		return nil, err
+	}
+
+	return ioutil.ReadAll(tr)
 }

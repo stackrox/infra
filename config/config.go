@@ -83,19 +83,35 @@ type FlavorConfig struct {
 	// Parameters is the list of parameters required for launching this flavor.
 	Parameters []parameter `json:"parameters"`
 
+	// Artifacts is the list of artifacts produced by this flavor.
+	Artifacts []artifact `json:"artifacts"`
+
+	// WorkflowFile is the filename of an Argo workflow definition.
 	WorkflowFile string `json:"workflow"`
 }
 
 // parameter represents a single parameter that is needed to launch a flavor.
 type parameter struct {
 	// Name is the unique name of the parameter.
-	Name string `toml:"name"`
+	Name string `json:"name"`
 
 	// Description is a human readable description for the parameter.
-	Description string `toml:"description"`
+	Description string `json:"description"`
 
 	// Example is an arbitrary hint for a valid parameter value.
-	Example string `toml:"example"`
+	Example string `json:"example"`
+}
+
+// artifact represents a single artifact that is produced by this flavor.
+type artifact struct {
+	// Name is the unique name of the artifact.
+	Name string `json:"name"`
+
+	// Description is a human readable description for the artifact.
+	Description string `json:"description"`
+
+	// Tags is a list of artifact tags.
+	Tags []string `json:"tags"`
 }
 
 // Load reads and parses the given configuration file.
