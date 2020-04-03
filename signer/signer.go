@@ -76,6 +76,7 @@ func (s Signer) Generate(gcsBucketName, gcsBucketKey string) (string, error) {
 	})
 }
 
+// Contents returns the raw contents of the named GCS object.
 func (s Signer) Contents(gcsBucketName, gcsBucketKey string) ([]byte, error) {
 	br, err := s.client.Bucket(gcsBucketName).Object(gcsBucketKey).NewReader(context.Background())
 	if err != nil {
