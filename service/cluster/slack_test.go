@@ -123,7 +123,7 @@ func Test(t *testing.T) {
 		name := fmt.Sprintf("%d %s", index+1, test.title)
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			actualNewSlackStatus, actualMessages := formatSlackMessage(&dummy, test.clusterStatus, test.slackStatus)
+			actualNewSlackStatus, actualMessages := formatSlackMessage(&dummy, test.clusterStatus, test.slackStatus, "")
 			assert.Equal(t, actualNewSlackStatus, test.expectedNewSlackStatus)
 			if test.expectedNoMessages {
 				assert.Nil(t, actualMessages)

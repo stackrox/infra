@@ -19,7 +19,7 @@ const (
 	slackStatusCreating  slackStatus = "creating"
 )
 
-func formatSlackMessage(cluster *v1.Cluster, wfStatus v1.Status, slackStatus slackStatus) (slackStatus, []slack.MsgOption) {
+func formatSlackMessage(cluster *v1.Cluster, wfStatus v1.Status, slackStatus slackStatus, stackroxURL string) (slackStatus, []slack.MsgOption) {
 	createdOn, _ := ptypes.Timestamp(cluster.CreatedOn)
 	lifespan, _ := ptypes.Duration(cluster.Lifespan)
 	remaining := time.Until(createdOn.Add(lifespan))
@@ -71,6 +71,15 @@ func formatSlackMessage(cluster *v1.Cluster, wfStatus v1.Status, slackStatus sla
 			cluster.Owner,
 			cluster.Description,
 		), false, false)
+
+		if stackroxURL != "" {
+			headerText = slack.NewTextBlockObject("mrkdwn", fmt.Sprintf(
+				"%s - Cluster for *%s* is now ready! :parrot:\n Browse to *%s* to login.",
+				cluster.Owner,
+				cluster.Description,
+				stackroxURL,
+			), false, false)
+		}
 
 		infoText := slack.NewTextBlockObject("mrkdwn", fmt.Sprintf(
 			"*ID*: %s\n*Flavor*: %s\n*Expiration*: %s",

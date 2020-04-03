@@ -119,6 +119,18 @@ message Parameter {
     string Example = 3;
 }
 
+// FlavorArtifact represents a single artifact that is produced by a flavor.
+message FlavorArtifact {
+    // Name is the unique name of the artifact.
+    string Name = 1;
+
+    // Description is a human readable description for the artifact.
+    string Description = 2;
+
+    // Tags is a set of artifact tags.
+    map<string, google.protobuf.Empty> Tags = 3;
+}
+
 // Flavor represents a configured cluster flavor.
 message Flavor {
     // ID is the unique, human type-able, ID for the flavor.
@@ -151,6 +163,9 @@ message Flavor {
 
     // Parameters is a map of parameters required for launching this flavor.
     map<string, Parameter> Parameters = 5;
+
+    // Artifacts is a map of artifacts produced by this flavor.
+    map<string, FlavorArtifact> Artifacts = 6;
 }
 
 // FlavorListResponse represents details about the available cluster flavors.

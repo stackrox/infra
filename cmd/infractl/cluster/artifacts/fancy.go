@@ -11,6 +11,9 @@ type prettyClusterArtifacts v1.ClusterArtifacts
 func (r prettyClusterArtifacts) PrettyPrint() {
 	for _, artifact := range r.Artifacts {
 		fmt.Printf("%s\n", artifact.Name)
+		if artifact.Description != "" {
+			fmt.Printf("  Description: %s\n", artifact.URL)
+		}
 		fmt.Printf("  URL: %s\n", artifact.URL)
 	}
 }

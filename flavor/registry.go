@@ -10,6 +10,7 @@ import (
 
 	"github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
 	"github.com/ghodss/yaml"
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/config"
 	v1 "github.com/stackrox/infra/generated/api/v1"
@@ -133,12 +134,28 @@ func NewFromConfig(filename string) (*Registry, error) {
 			}
 		}
 
+		artifacts := make(map[string]*v1.FlavorArtifact, len(flavorCfg.Artifacts))
+		for _, artifact := range flavorCfg.Artifacts {
+			// Pack the list of tags into a set of tags.
+			tags := make(map[string]*empty.Empty, len(artifact.Tags))
+			for _, tag := range artifact.Tags {
+				tags[tag] = &empty.Empty{}
+			}
+
+			artifacts[artifact.Name] = &v1.FlavorArtifact{
+				Name:        artifact.Name,
+				Description: artifact.Description,
+				Tags:        tags,
+			}
+		}
+
 		flavor := v1.Flavor{
 			ID:           flavorCfg.ID,
 			Name:         flavorCfg.Name,
 			Description:  flavorCfg.Description,
 			Availability: v1.FlavorAvailability(availability),
 			Parameters:   parameters,
+			Artifacts:    artifacts,
 		}
 
 		// Parse the references Argo workflow file.
