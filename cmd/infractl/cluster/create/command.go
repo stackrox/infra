@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -36,6 +37,7 @@ func Command() *cobra.Command {
 	cmd.Flags().StringArray("arg", []string{}, "repeated key=value parameter pairs")
 	cmd.Flags().String("description", "", "description for this cluster")
 	cmd.Flags().Duration("lifespan", 3*time.Hour, "initial lifespan of the cluster")
+	cmd.Flags().Bool("wait", false, "wait for cluster to be ready")
 	return cmd
 }
 
@@ -50,6 +52,8 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 	params, _ := cmd.Flags().GetStringArray("arg")
 	description, _ := cmd.Flags().GetString("description")
 	lifespan, _ := cmd.Flags().GetDuration("lifespan")
+	wait, _ := cmd.Flags().GetBool("wait")
+	client := v1.NewClusterServiceClient(conn)
 
 	req := v1.CreateClusterRequest{
 		ID:          args[0],
@@ -66,10 +70,46 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 		req.Parameters[parts[0]] = parts[1]
 	}
 
-	resp, err := v1.NewClusterServiceClient(conn).Create(ctx, &req)
+	clusterID, err := client.Create(ctx, &req)
 	if err != nil {
 		return nil, err
 	}
 
-	return prettyResourceByID(*resp), nil
+	if wait {
+		if err := waitForCluster(client, clusterID); err != nil {
+			return nil, err
+		}
+	}
+
+	return prettyResourceByID(*clusterID), nil
+}
+
+func waitForCluster(client v1.ClusterServiceClient, clusterID *v1.ResourceByID) error {
+	const timeoutSleep = 30 * time.Second
+	const timeoutAPI = 15 * time.Second
+
+	fmt.Fprintf(os.Stderr, "...creating %s\n", clusterID.Id)
+	for {
+		time.Sleep(timeoutSleep)
+		ctx, cancel := context.WithTimeout(context.Background(), timeoutAPI)
+
+		cluster, err := client.Info(ctx, clusterID)
+		cancel()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "...error")
+			continue
+		}
+
+		switch cluster.Status {
+		case v1.Status_CREATING:
+			fmt.Fprintln(os.Stderr, "...creating")
+			continue
+		case v1.Status_READY:
+			fmt.Fprintln(os.Stderr, "...ready")
+			return nil
+		default:
+			fmt.Fprintln(os.Stderr, "...failed")
+			return errors.New("failed to provision cluster")
+		}
+	}
 }
