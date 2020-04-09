@@ -76,36 +76,40 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 	}
 
 	if wait {
-		fmt.Fprintf(os.Stderr, "...creating %s\n", clusterID.Id)
-		err := func() error {
-			for {
-				time.Sleep(30 * time.Second)
-				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-
-				cluster, err := client.Info(ctx, clusterID)
-				cancel()
-				if err != nil {
-					fmt.Fprintln(os.Stderr, "...error")
-					continue
-				}
-
-				switch cluster.Status {
-				case v1.Status_CREATING:
-					fmt.Fprintln(os.Stderr, "...creating")
-					continue
-				case v1.Status_READY:
-					fmt.Fprintln(os.Stderr, "...ready")
-					return nil
-				default:
-					fmt.Fprintln(os.Stderr, "...failed")
-					return errors.New("failed to provision cluster")
-				}
-			}
-		}()
-		if err != nil {
+		if err := waitForCluster(client, clusterID); err != nil {
 			return nil, err
 		}
 	}
 
 	return prettyResourceByID(*clusterID), nil
+}
+
+func waitForCluster(client v1.ClusterServiceClient, clusterID *v1.ResourceByID) error {
+	const timeoutSleep = 30 * time.Second
+	const timeoutAPI = 15 * time.Second
+
+	fmt.Fprintf(os.Stderr, "...creating %s\n", clusterID.Id)
+	for {
+		time.Sleep(timeoutSleep)
+		ctx, cancel := context.WithTimeout(context.Background(), timeoutAPI)
+
+		cluster, err := client.Info(ctx, clusterID)
+		cancel()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "...error")
+			continue
+		}
+
+		switch cluster.Status {
+		case v1.Status_CREATING:
+			fmt.Fprintln(os.Stderr, "...creating")
+			continue
+		case v1.Status_READY:
+			fmt.Fprintln(os.Stderr, "...ready")
+			return nil
+		default:
+			fmt.Fprintln(os.Stderr, "...failed")
+			return errors.New("failed to provision cluster")
+		}
+	}
 }
