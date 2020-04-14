@@ -13,6 +13,7 @@ import (
 type slackStatus string
 
 const (
+	slackStatusSkip      slackStatus = "skip"
 	slackStatusFailed    slackStatus = "failed"
 	slackStatusDestroyed slackStatus = "destroyed"
 	slackStatusReady     slackStatus = "ready"
@@ -25,6 +26,8 @@ func formatSlackMessage(cluster *v1.Cluster, wfStatus v1.Status, slackStatus sla
 	remaining := time.Until(createdOn.Add(lifespan))
 
 	switch {
+	case slackStatus == slackStatusSkip:
+		return slackStatusSkip, nil
 	case wfStatus == v1.Status_FAILED && slackStatus != slackStatusFailed:
 		headerText := slack.NewTextBlockObject("mrkdwn", fmt.Sprintf(
 			"%s - Cluster for *%s* has failed! :fire:",
