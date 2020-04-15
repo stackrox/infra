@@ -38,6 +38,7 @@ func Command() *cobra.Command {
 	cmd.Flags().String("description", "", "description for this cluster")
 	cmd.Flags().Duration("lifespan", 3*time.Hour, "initial lifespan of the cluster")
 	cmd.Flags().Bool("wait", false, "wait for cluster to be ready")
+	cmd.Flags().Bool("no-slack", false, "skip sending Slack messages for lifecycle events")
 	return cmd
 }
 
@@ -53,6 +54,7 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 	description, _ := cmd.Flags().GetString("description")
 	lifespan, _ := cmd.Flags().GetDuration("lifespan")
 	wait, _ := cmd.Flags().GetBool("wait")
+	noSlack, _ := cmd.Flags().GetBool("no-slack")
 	client := v1.NewClusterServiceClient(conn)
 
 	req := v1.CreateClusterRequest{
@@ -60,6 +62,7 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 		Parameters:  make(map[string]string),
 		Lifespan:    ptypes.DurationProto(lifespan),
 		Description: description,
+		NoSlack:     noSlack,
 	}
 
 	for _, arg := range params {

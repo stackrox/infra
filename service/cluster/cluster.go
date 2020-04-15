@@ -223,11 +223,17 @@ func (s *clusterImpl) Create(ctx context.Context, req *v1.CreateClusterRequest) 
 		lifespan = 12 * time.Hour
 	}
 
+	var slackStatus slackStatus
+	if req.NoSlack {
+		slackStatus = slackStatusSkip
+	}
+
 	workflow.SetAnnotations(map[string]string{
 		annotationFlavorKey:      flav.ID,
 		annotationLifespanKey:    fmt.Sprint(lifespan),
 		annotationOwnerKey:       owner,
 		annotationDescriptionKey: req.Description,
+		annotationSlackKey:       string(slackStatus),
 	})
 
 	workflow.Spec.Arguments.Parameters = make([]v1alpha1.Parameter, 0, len(req.Parameters))
