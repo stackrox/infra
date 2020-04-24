@@ -30,7 +30,6 @@ func main() {
 	common.AddCommonFlags(cmd)
 
 	cmd.AddCommand(
-
 		// $ infractl artifacts
 		artifacts.Command(),
 
