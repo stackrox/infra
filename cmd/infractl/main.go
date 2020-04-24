@@ -4,7 +4,13 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/stackrox/infra/cmd/infractl/cluster"
+	"github.com/stackrox/infra/cmd/infractl/cluster/artifacts"
+	"github.com/stackrox/infra/cmd/infractl/cluster/create"
+	"github.com/stackrox/infra/cmd/infractl/cluster/delete"
+	"github.com/stackrox/infra/cmd/infractl/cluster/get"
+	"github.com/stackrox/infra/cmd/infractl/cluster/lifespan"
+	"github.com/stackrox/infra/cmd/infractl/cluster/list"
+	"github.com/stackrox/infra/cmd/infractl/cluster/logs"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	"github.com/stackrox/infra/cmd/infractl/flavor"
 	"github.com/stackrox/infra/cmd/infractl/token"
@@ -24,8 +30,27 @@ func main() {
 	common.AddCommonFlags(cmd)
 
 	cmd.AddCommand(
-		// $ infractl cluster
-		cluster.Command(),
+
+		// $ infractl artifacts
+		artifacts.Command(),
+
+		// $ infractl create
+		create.Command(),
+
+		// $ infractl delete
+		delete.Command(),
+
+		// $ infractl info
+		get.Command(),
+
+		// $ infractl lifespan
+		lifespan.Command(),
+
+		// $ infractl list
+		list.Command(),
+
+		// $ infractl logs
+		logs.Command(),
 
 		// $ infractl flavor
 		flavor.Command(),

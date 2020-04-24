@@ -1,4 +1,4 @@
-// Package delete implements the infractl cluster delete command.
+// Package delete implements the infractl delete command.
 package delete
 
 import (
@@ -12,11 +12,11 @@ import (
 )
 
 const examples = `# Delete cluster "example-s3maj".
-infractl cluster delete example-s3maj`
+infractl delete example-s3maj`
 
-// Command defines the handler for infractl cluster delete.
+// Command defines the handler for infractl delete.
 func Command() *cobra.Command {
-	// $ infractl cluster delete
+	// $ infractl delete
 	return &cobra.Command{
 		Use:     "delete CLUSTER",
 		Short:   "Delete a specific cluster",

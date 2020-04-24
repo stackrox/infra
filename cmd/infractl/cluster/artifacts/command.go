@@ -1,4 +1,4 @@
-// Package artifacts implements the infractl cluster artifacts command.
+// Package artifacts implements the infractl artifacts command.
 package artifacts
 
 import (
@@ -19,14 +19,14 @@ import (
 )
 
 const examples = `# List the artifacts for cluster "example-s3maj".
-$ infractl cluster artifacts example-s3maj
+$ infractl artifacts example-s3maj
 
 # Download the artifacts for cluster "example-s3maj" into the "artifacts" directory.
-$ infractl cluster artifacts example-s3maj --download-dir=artifacts`
+$ infractl artifacts example-s3maj --download-dir=artifacts`
 
-// Command defines the handler for infractl cluster artifacts.
+// Command defines the handler for infractl artifacts.
 func Command() *cobra.Command {
-	// $ infractl cluster artifacts
+	// $ infractl artifacts
 	cmd := &cobra.Command{
 		Use:     "artifacts CLUSTER",
 		Short:   "Download cluster artifacts",

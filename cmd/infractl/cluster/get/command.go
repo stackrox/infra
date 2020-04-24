@@ -1,5 +1,5 @@
-// Package info implements the infractl cluster info command.
-package info
+// Package info implements the infractl info command.
+package get
 
 import (
 	"context"
@@ -12,13 +12,13 @@ import (
 )
 
 const examples = `Lookup info for the "example-s3maj" cluster.
-$ infractl cluster info example-s3maj`
+$ infractl get example-s3maj`
 
-// Command defines the handler for infractl cluster info.
+// Command defines the handler for infractl get.
 func Command() *cobra.Command {
-	// $ infractl cluster info
+	// $ infractl get
 	return &cobra.Command{
-		Use:     "info CLUSTER",
+		Use:     "get CLUSTER",
 		Short:   "Get info for a specific cluster",
 		Long:    "Displays info for a single cluster",
 		Example: examples,

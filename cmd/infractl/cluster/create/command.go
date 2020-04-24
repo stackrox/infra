@@ -1,4 +1,4 @@
-// Package create implements the infractl cluster create command.
+// Package create implements the infractl create command.
 package create
 
 import (
@@ -17,14 +17,14 @@ import (
 )
 
 const examples = `# Create a new "gke-default" cluster.
-$ infractl cluster create gke-default --arg name=test --arg nodes=3
+$ infractl create gke-default --arg name=test --arg nodes=3
 
 # Create a new "gke-default" cluster with a 30 minute lifespan.
-$ infractl cluster create gke-default --lifespan 30m --arg name=test --arg nodes=3`
+$ infractl create gke-default --lifespan 30m --arg name=test --arg nodes=3`
 
-// Command defines the handler for infractl cluster create.
+// Command defines the handler for infractl create.
 func Command() *cobra.Command {
-	// $ infractl cluster create
+	// $ infractl create
 	cmd := &cobra.Command{
 		Use:     "create FLAVOR",
 		Short:   "Create a new cluster",

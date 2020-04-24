@@ -1,4 +1,4 @@
-// Package logs implements the infractl cluster logs command.
+// Package logs implements the infractl logs command.
 package logs
 
 import (
@@ -12,11 +12,11 @@ import (
 )
 
 const examples = `Lookup logs for the "example-s3maj" cluster.
-$ infractl cluster logs example-s3maj`
+$ infractl logs example-s3maj`
 
-// Command defines the handler for infractl cluster logs.
+// Command defines the handler for infractl logs.
 func Command() *cobra.Command {
-	// $ infractl cluster logs
+	// $ infractl logs
 	return &cobra.Command{
 		Use:     "logs CLUSTER",
 		Short:   "Get logs for a specific cluster",

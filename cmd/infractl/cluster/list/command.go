@@ -1,4 +1,4 @@
-// Package list implements the infractl cluster list command.
+// Package list implements the infractl list command.
 package list
 
 import (
@@ -14,14 +14,14 @@ import (
 )
 
 const examples = `# List all clusters.
-$ infractl cluster list
+$ infractl list
 
 # Exclude clusters that expired over 30 minutes ago.
-$ infractl cluster list --expired-cutoff 30m`
+$ infractl list --expired-cutoff 30m`
 
-// Command defines the handler for infractl cluster list.
+// Command defines the handler for infractl list.
 func Command() *cobra.Command {
-	// $ infractl cluster list
+	// $ infractl list
 	cmd := &cobra.Command{
 		Use:     "list",
 		Short:   "List clusters",
