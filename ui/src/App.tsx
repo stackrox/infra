@@ -1,14 +1,12 @@
 import React from 'react';
 import StackRoxLogo from 'components/StackRoxLogo';
 
-function App() {
+function App(): JSX.Element {
   return (
     <div>
-      <header >
+      <header>
         <StackRoxLogo />
-        <p>
-          Here will go StackRox Setup Next UI!
-        </p>
+        <p>Here will go StackRox Setup Next UI!</p>
       </header>
     </div>
   );
