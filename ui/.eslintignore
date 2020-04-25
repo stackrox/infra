@@ -1,3 +1,6 @@
 /node_modules
 /build
 /coverage
+/src/generated
+!.eslintrc.js
+!.prettierrc.js

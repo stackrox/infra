@@ -14,11 +14,12 @@ module.exports = {
     tsconfigRootDir: __dirname,
   },
   rules: {
-    'prettier/prettier': [
+    'prettier/prettier': 'error',
+    'import/no-extraneous-dependencies': [
       'error',
       {
-        printWidth: 100,
-        singleQuote: true,
+        devDependencies: ['scripts/**/*'],
+        optionalDependencies: false,
       },
     ],
   },
