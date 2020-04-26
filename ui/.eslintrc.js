@@ -1,5 +1,6 @@
 module.exports = {
   plugins: ['@typescript-eslint', 'prettier'],
+  parser: '@typescript-eslint/parser',
   extends: [
     'react-app',
     'plugin:@typescript-eslint/recommended',
@@ -15,6 +16,7 @@ module.exports = {
   },
   rules: {
     'prettier/prettier': 'error',
+
     'import/no-extraneous-dependencies': [
       'error',
       {
@@ -23,4 +25,11 @@ module.exports = {
       },
     ],
   },
+
+  overrides: [
+    {
+      files: ['*.js'],
+      extends: ['react-app', 'plugin:eslint-comments/recommended', 'airbnb-typescript', 'prettier'],
+    },
+  ],
 };
