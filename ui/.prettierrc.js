@@ -3,6 +3,14 @@ module.exports = {
   singleQuote: true,
   overrides: [
     {
+      files: '*.css',
+      parser: 'css',
+    },
+    {
+      files: '*.json',
+      parser: 'json',
+    },
+    {
       files: '*.md',
       parser: 'markdown',
       options: {

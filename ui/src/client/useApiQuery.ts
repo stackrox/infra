@@ -32,11 +32,14 @@ export default function useApiQuery<T>(fetcher: DataFetcher<T>): RequestState<T>
 
     fetcher()
       .then((response) => {
-        if (!isCancelled)
+        if (!isCancelled) {
           setRequestState({ loading: false, error: undefined, data: response.data });
+        }
       })
       .catch((error) => {
-        if (isCancelled) setRequestState({ loading: false, error, data: undefined });
+        if (!isCancelled) {
+          setRequestState({ loading: false, error, data: undefined });
+        }
       });
 
     return (): void => {

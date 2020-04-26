@@ -26,6 +26,6 @@ about the available scripts and the tooling behavior.
 _Before starting, make sure you have the above tools installed on your machine
 and you've run `yarn install` to download dependencies._
 
-By default UI dev server will be looking for APIs at `https://localhost:8443`.
-To override it use `DEV_INFRA_API_ENDPOINT` env var. I.e. you can start dev
-server via `export DEV_INFRA_API_ENDPOINT=<remote_endpoint>; yarn start`.
+By default UI dev server will be looking for APIs at `https://localhost:8443`.To
+override it use `DEV_INFRA_API_ENDPOINT` env var. I.e. you can start dev server
+via `export DEV_INFRA_API_ENDPOINT=<remote_endpoint>; yarn start`.

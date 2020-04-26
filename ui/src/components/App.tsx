@@ -1,17 +1,20 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
+import { Gift } from 'react-feather';
 
-import StackRoxLogo from 'components/StackRoxLogo';
-import Version from 'components/Version';
+import { ThemeProvider } from 'components/ThemeProvider';
+import AppHeader from 'components/AppHeader';
 
-function App(): JSX.Element {
+function App(): ReactElement {
   return (
-    <div>
-      <header>
-        <StackRoxLogo />
-        <p>Here will go StackRox Setup Next UI!</p>
-      </header>
-      <Version />
-    </div>
+    <ThemeProvider>
+      <div className="flex flex-col h-full bg-base-0">
+        <AppHeader />
+        <div className="flex flex-col flex-1 items-center justify-center">
+          <Gift size={128} />
+          <span className="text-6xl pt-10">Coming Soon</span>
+        </div>
+      </div>
+    </ThemeProvider>
   );
 }
 

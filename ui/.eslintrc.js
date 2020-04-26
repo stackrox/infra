@@ -20,16 +20,14 @@ module.exports = {
     'import/no-extraneous-dependencies': [
       'error',
       {
-        devDependencies: ['scripts/**/*'],
+        devDependencies: [
+          '**/.eslintrc.js',
+          'tailwind.config.js',
+          '.prettierrc.js',
+          '.postcssrc.js',
+        ],
         optionalDependencies: false,
       },
     ],
   },
-
-  overrides: [
-    {
-      files: ['*.js'],
-      extends: ['react-app', 'plugin:eslint-comments/recommended', 'airbnb-typescript', 'prettier'],
-    },
-  ],
 };
