@@ -10,14 +10,14 @@ module.exports = {
     'import/no-extraneous-dependencies': [
       'error',
       {
-        devDependencies: ['**/*.test.tsx', 'src/setupTests.ts', 'src/setupProxy.ts'],
+        devDependencies: ['**/*.test.tsx', 'src/setupTests.ts', 'src/setupProxy.js'],
         optionalDependencies: false,
       },
     ],
   },
   overrides: [
     {
-      files: ['*.test.js'],
+      files: ['*.test.ts'],
       env: {
         browser: true,
         jest: true,
