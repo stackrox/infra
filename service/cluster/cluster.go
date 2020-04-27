@@ -613,7 +613,9 @@ func (s *clusterImpl) getEndpointURL(workflow *v1alpha1.Workflow) (string, error
 
 func (s *clusterImpl) startDeleteWorkflowCheck() {
 	// workflowMaxAgeGracePeriod is the time duration after a workflow finishes
-	// before it becomes eligible for deletion.
+	// before it becomes eligible for deletion. This is so that cluster
+	// logs/artifacts can still be retrieved from dead clusters for forensic
+	// purposes.
 	//
 	// E.g. a workflow must have finished more than 24 hours ago before it is
 	// considered for deletion.
@@ -634,9 +636,7 @@ func (s *clusterImpl) startDeleteWorkflowCheck() {
 				continue
 			}
 
-			// If this workflow isn't old enough, reject it. This is so that
-			// cluster logs/artifacts can still be retrieved from dead
-			// clusters for forensic purposes.
+			// If this workflow isn't old enough, reject it.
 			cutoff := time.Now().Add(-workflowMaxAgeGracePeriod)
 			if workflow.Status.FinishedAt.After(cutoff) {
 				continue
