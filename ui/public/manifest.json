@@ -1,6 +1,6 @@
 {
-  "short_name": "Setup Next UI",
-  "name": "Setup Next UI",
+  "short_name": "Infra",
+  "name": "StackRox Infra",
   "icons": [
     {
       "src": "favicon.ico",

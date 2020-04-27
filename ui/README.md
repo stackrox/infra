@@ -1,7 +1,6 @@
-# StackRox Setup Next App (UI)
+# StackRox Infra App (UI)
 
-This sub-project contains Web UI (SPA) for StackRox Setup Next (aka StackRox
-Infra).
+This sub-project contains Web UI (SPA) for StackRox Infra.
 
 This project was bootstrapped with
 [Create React App](https://github.com/facebook/create-react-app).
