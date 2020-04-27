@@ -20,4 +20,4 @@ docker run --rm -v "${PWD}/..:/local" "${OPENAPI_GENERATOR_CLI_IMAGE}" generate 
   --skip-validate-spec \
   -o "/local/${GENERATOR_OUTPUT_DIR}"
 
-yarn prettier --config .prettierrc.js --write "${CLIENT_DIR}"
+yarn prettier --ignore-path "!${CLIENT_DIR}" --write "${CLIENT_DIR}"

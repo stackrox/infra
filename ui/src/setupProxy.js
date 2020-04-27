@@ -1,4 +1,5 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+/* eslint @typescript-eslint/no-var-requires: 0, @typescript-eslint/explicit-function-return-type: 0 */
+
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const defaultOptions = {
@@ -7,7 +8,6 @@ const defaultOptions = {
   secure: false,
 };
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 module.exports = function main(app) {
   app.use('/v1', createProxyMiddleware(defaultOptions));
 };

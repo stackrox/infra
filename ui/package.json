@@ -18,7 +18,8 @@
     "lint:src": "eslint --ext .js,.jsx,.ts,.tsx ./",
     "lint-fix": "npm-run-all lint-fix:*",
     "lint-fix:non-src": "prettier --write '**/*.{md,css,json}'",
-    "lint-fix:src": "yarn lint:src --fix"
+    "lint-fix:src": "yarn lint:src --fix",
+    "gen:src": "./scripts/generate-client.sh"
   },
   "dependencies": {
     "@tippy.js/react": "^3.1.1",
