@@ -38,9 +38,9 @@ import (
 )
 
 const (
-	// resumeExpiredWorkflowInterval is how often to periodically check for
+	// resumeExpiredClusterInterval is how often to periodically check for
 	// expired workflows.
-	resumeExpiredWorkflowInterval = 5 * time.Minute
+	resumeExpiredClusterInterval = 5 * time.Minute
 
 	// calendarCheckInterval is how often to periodically check the calendar
 	// for scheduled demos.
@@ -49,6 +49,8 @@ const (
 	// slackCheckInterval is how often to periodically check for workflow
 	// updates to send Slack messages.
 	slackCheckInterval = 1 * time.Minute
+
+	workflowDeleteCheckInterval = 5 * time.Minute
 )
 
 type clusterImpl struct {
@@ -89,10 +91,10 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSo
 	}
 
 	go impl.startSlackCheck()
-
-	go impl.cleanupExpiredWorkflows()
-
+	go impl.cleanupExpiredClusters()
 	go impl.startCalendarCheck()
+	go impl.startDeleteWorkflowCheck()
+
 	return impl, nil
 }
 
@@ -386,8 +388,8 @@ func (s *clusterImpl) RegisterServiceHandler(ctx context.Context, mux *runtime.S
 	return v1.RegisterClusterServiceHandler(ctx, mux, conn)
 }
 
-func (s *clusterImpl) cleanupExpiredWorkflows() {
-	for ; ; time.Sleep(resumeExpiredWorkflowInterval) {
+func (s *clusterImpl) cleanupExpiredClusters() {
+	for ; ; time.Sleep(resumeExpiredClusterInterval) {
 		workflowList, err := s.clientWorkflows.List(metav1.ListOptions{})
 		if err != nil {
 			log.Printf("[ERROR] failed to list workflows: %v", err)
@@ -400,7 +402,7 @@ func (s *clusterImpl) cleanupExpiredWorkflows() {
 			}
 
 			if expired, err := isWorkflowExpired(&workflowList.Items[idx]); err != nil {
-				log.Printf("[ERROR] failed to determine expiration of workflow %q: %v", workflow.GetName(), err)
+				log.Printf("[ERROR] failed to determine expiration of cluster %q: %v", workflow.GetName(), err)
 			} else if !expired {
 				continue
 			}
@@ -607,4 +609,48 @@ func (s *clusterImpl) getEndpointURL(workflow *v1alpha1.Workflow) (string, error
 	}
 
 	return "", nil
+}
+
+func (s *clusterImpl) startDeleteWorkflowCheck() {
+	// workflowMaxAgeGracePeriod is the time duration after a workflow finishes
+	// before it becomes eligible for deletion. This is so that cluster
+	// logs/artifacts can still be retrieved from dead clusters for forensic
+	// purposes.
+	//
+	// E.g. a workflow must have finished more than 24 hours ago before it is
+	// considered for deletion.
+	const workflowMaxAgeGracePeriod = 24 * time.Hour
+
+	for ; ; time.Sleep(workflowDeleteCheckInterval) {
+		workflowList, err := s.clientWorkflows.List(metav1.ListOptions{})
+		if err != nil {
+			log.Printf("[ERROR] failed to list workflows: %v", err)
+			continue
+		}
+
+		for _, workflow := range workflowList.Items {
+			// If this workflow is not finished or failed (aka still running)
+			// reject it.
+			status := workflowStatus(workflow.Status)
+			if status != v1.Status_FAILED && status != v1.Status_FINISHED {
+				continue
+			}
+
+			// If this workflow isn't old enough, reject it.
+			cutoff := time.Now().Add(-workflowMaxAgeGracePeriod)
+			if workflow.Status.FinishedAt.After(cutoff) {
+				continue
+			}
+
+			// Perform the actual deletion via the Kube API.
+			var gracePeriod int64 = 0
+			if err := s.clientWorkflows.Delete(workflow.Name, &metav1.DeleteOptions{
+				GracePeriodSeconds: &gracePeriod,
+			}); err != nil {
+				log.Printf("[ERROR] failed to delete workflow %q: %v", workflow.Name, err)
+			} else {
+				log.Printf("[INFO] deleted workflow %q", workflow.Name)
+			}
+		}
+	}
 }
