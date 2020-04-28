@@ -22,13 +22,22 @@ about the available scripts and the tooling behavior.
 
 ### UI Dev Server
 
-_Before starting, make sure you have the above tools installed on your machine
-and you've run `yarn install` to download dependencies._
+_If you're going to use `yarn` instead of `make` targets, make sure you've run
+`yarn install` to download dependencies._
 
-`yarn start` command will start the UI dev server and open UI in a browser
-window that will auto-refresh on any source code or CSS changes.
+`make start-dev-server` OR `yarn start` will start the UI dev server and open UI
+in a browser window that will auto-refresh on any source code or CSS changes.
 
 By default UI dev server will try to proxy API requests to
 `https://dev.infra.stackrox.com`. To override the API endpoint use
 `INFRA_API_ENDPOINT` env var. I.e. you can start the dev server via
 `export INFRA_API_ENDPOINT=<api_endpoint>; yarn start`.
+
+### Generated Sources
+
+Some of the UI code has been generated automatically and checked in, like API
+client and models. To re-generate the sources run `make gen-src` or
+`yarn gen:src`.
+
+_Hint: for the API client to generate new Swagger definitions from protos in the
+parent dir run `make proto-generated-srcs`._
