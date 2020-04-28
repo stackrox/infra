@@ -20,11 +20,15 @@ about the available scripts and the tooling behavior.
   [nvm](https://github.com/creationix/nvm))
 - [Yarn](https://yarnpkg.com/en/)
 
-### Development
+### UI Dev Server
 
 _Before starting, make sure you have the above tools installed on your machine
 and you've run `yarn install` to download dependencies._
 
-By default UI dev server will be looking for APIs at `https://localhost:8443`.To
-override it use `DEV_INFRA_API_ENDPOINT` env var. I.e. you can start dev server
-via `export DEV_INFRA_API_ENDPOINT=<remote_endpoint>; yarn start`.
+`yarn start` command will start the UI dev server and open UI in a browser
+window that will auto-refresh on any source code or CSS changes.
+
+By default UI dev server will try to proxy API requests to
+`https://dev.infra.stackrox.com`. To override the API endpoint use
+`INFRA_API_ENDPOINT` env var. I.e. you can start the dev server via
+`export INFRA_API_ENDPOINT=<api_endpoint>; yarn start`.
