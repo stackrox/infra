@@ -1,6 +1,6 @@
 import React, { ReactElement } from 'react';
 
-import ProductLogoTile from 'components/ProductLogoTile';
+import ProductLogoTile from 'containers/ProductLogoTile';
 
 export default function AppHeader(): ReactElement {
   return (

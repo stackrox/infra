@@ -1,8 +1,8 @@
 import React, { ReactElement } from 'react';
 import { Gift } from 'react-feather';
 
-import { ThemeProvider } from 'components/ThemeProvider';
-import AppHeader from 'components/AppHeader';
+import { ThemeProvider } from 'containers/ThemeProvider';
+import AppHeader from 'containers/AppHeader';
 
 function App(): ReactElement {
   return (

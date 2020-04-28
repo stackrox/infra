@@ -7,8 +7,8 @@ import { ClipLoader } from 'react-spinners';
 import { VersionServiceApi, V1Version } from 'generated/client';
 import configuration from 'client/configuration';
 import useApiQuery from 'client/useApiQuery';
-import Tooltip from 'components/shared/Tooltip';
-import TooltipOverlay from 'components/shared/TooltipOverlay';
+import Tooltip from 'components/Tooltip';
+import TooltipOverlay from 'components/TooltipOverlay';
 
 const api = new VersionServiceApi(configuration);
 

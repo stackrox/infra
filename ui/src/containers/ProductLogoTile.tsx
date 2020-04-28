@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 
-import StackRoxLogo from 'components/shared/StackRoxLogo';
-import Version from 'components/Version';
+import StackRoxLogo from 'components//StackRoxLogo';
+import Version from 'containers/Version';
 
 export default function ProductLogoTile(): ReactElement {
   return (
