@@ -13,12 +13,12 @@
     "build:cra": "EXTEND_ESLINT=true react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
+    "lint-check": "npm-run-all lint-check:*",
+    "lint-check:non-src": "prettier --check '**/*.{md,css,json}'",
+    "lint-check:src": "eslint --ext .js,.jsx,.ts,.tsx ./",
     "lint": "npm-run-all lint:*",
-    "lint:non-src": "prettier --check '**/*.{md,css,json}'",
-    "lint:src": "eslint --ext .js,.jsx,.ts,.tsx ./",
-    "lint-fix": "npm-run-all lint-fix:*",
-    "lint-fix:non-src": "prettier --write '**/*.{md,css,json}'",
-    "lint-fix:src": "yarn lint:src --fix",
+    "lint:non-src": "prettier --write '**/*.{md,css,json}'",
+    "lint:src": "yarn lint-check:src --fix",
     "gen:src": "./scripts/generate-client.sh"
   },
   "dependencies": {
