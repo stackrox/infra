@@ -10,9 +10,9 @@ import useApiQuery from 'client/useApiQuery';
 import Tooltip from 'components/Tooltip';
 import TooltipOverlay from 'components/TooltipOverlay';
 
-const api = new VersionServiceApi(configuration);
+const versionService = new VersionServiceApi(configuration);
 
-const dataFetcher = (): AxiosPromise<V1Version> => api.getVersion();
+const fetchVersion = (): AxiosPromise<V1Version> => versionService.getVersion();
 
 function TooltipContentRow(props: { label: string; value?: string }): ReactElement {
   const { label, value = 'unknown' } = props;
@@ -54,7 +54,7 @@ function VersionContent(props: {
 }
 
 export default function Version(): ReactElement {
-  const { loading, error, data } = useApiQuery(dataFetcher);
+  const { loading, error, data } = useApiQuery(fetchVersion);
 
   if (loading)
     return (
