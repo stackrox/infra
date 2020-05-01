@@ -9,6 +9,7 @@ module.exports = {
     'airbnb-typescript',
     'prettier',
     'prettier/@typescript-eslint',
+    'prettier/react',
   ],
   parserOptions: {
     project: './tsconfig.eslint.json',
@@ -16,6 +17,9 @@ module.exports = {
   },
   rules: {
     'prettier/prettier': 'error',
+
+    // will rely on TypeScript compile time checks instead
+    'react/prop-types': 'off',
 
     'import/no-extraneous-dependencies': [
       'error',
@@ -25,9 +29,28 @@ module.exports = {
           'tailwind.config.js',
           '.prettierrc.js',
           '.postcssrc.js',
+          'src/setupProxy.js',
+          'src/setupTests.ts',
+          '**/*.test.tsx',
         ],
         optionalDependencies: false,
       },
     ],
   },
+
+  overrides: [
+    {
+      files: ['src/**/*'],
+      env: {
+        browser: true,
+      },
+    },
+    {
+      files: ['*.test.ts'],
+      env: {
+        browser: true,
+        jest: true,
+      },
+    },
+  ],
 };
