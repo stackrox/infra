@@ -1,23 +1,25 @@
 import React, { ReactElement } from 'react';
-import { Gift } from 'react-feather';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import UserAuthProvider from 'containers/UserAuthProvider';
 import { ThemeProvider } from 'containers/ThemeProvider';
 import AppHeader from 'containers/AppHeader';
+import HomePage from 'containers/HomePage';
 
 function App(): ReactElement {
   return (
-    <ThemeProvider>
-      <UserAuthProvider>
-        <div className="flex flex-col h-full bg-base-0">
-          <AppHeader />
-          <div className="flex flex-col flex-1 items-center justify-center">
-            <Gift size={128} />
-            <span className="text-6xl pt-10">Coming Soon</span>
+    <Router>
+      <ThemeProvider>
+        <UserAuthProvider>
+          <div className="flex flex-col h-full bg-base-0">
+            <AppHeader />
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+            </Routes>
           </div>
-        </div>
-      </UserAuthProvider>
-    </ThemeProvider>
+        </UserAuthProvider>
+      </ThemeProvider>
+    </Router>
   );
 }
 
