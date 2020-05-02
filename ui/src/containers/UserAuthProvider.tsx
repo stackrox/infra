@@ -28,7 +28,7 @@ type Props = {
   children: ReactNode;
 };
 
-function UserAuthProvider({ children }: Props): ReactElement {
+function UserAuthProvider({ children }: Props): ReactElement | null {
   const { loading, error, data } = useApiQuery(fetchWhoami);
 
   if (loading) {
@@ -43,12 +43,14 @@ function UserAuthProvider({ children }: Props): ReactElement {
 
   if (!data?.User) {
     // assuming we're not authenticated
-
-    // window.location.href = '/login';
-    // yet for now until backend supports it...
-    return (
-      <FullPageError message="For now, please add token cookie to the app through browser dev tools. Then refresh the page." />
-    );
+    if (process.env.NODE_ENV === 'development') {
+      // TODO-ivan: temporal "solution", until backend supports dynamically defined redirect URI
+      return (
+        <FullPageError message="For now, please add token cookie to the app through browser dev tools. Then refresh the page." />
+      );
+    }
+    window.location.href = '/login';
+    return null;
   }
 
   const contextValue: UserAuthContextData = {
