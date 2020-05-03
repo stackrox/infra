@@ -1,17 +1,23 @@
 import React, { ReactElement } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Tool } from 'react-feather';
 
 import UserAuthProvider from 'containers/UserAuthProvider';
 import { ThemeProvider } from 'containers/ThemeProvider';
 import AppHeader from 'containers/AppHeader';
 import HomePage from 'containers/HomePage';
 import DownloadsPage from 'containers/DownloadsPage';
+import FullPageError from 'components/FullPageError';
 
 function AppRoutes(): ReactElement {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/downloads" element={<DownloadsPage />} />
+      <Route
+        path="*"
+        element={<FullPageError message="WIP. Pardon our dust." IconComponent={Tool} />}
+      />
     </Routes>
   );
 }
