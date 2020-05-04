@@ -234,6 +234,9 @@ button:focus {
   padding: 4px;
 }
 
+/**
+ * Button styles
+ */
 .btn-class {
   @apply inline-flex px-2 rounded-sm font-600 uppercase text-center items-center min-w-16 justify-center border-2 !important;
   line-height: 14px; /* required because we were relying on the Chrome browser default of 14px earlier */
@@ -289,6 +292,11 @@ button:focus {
 
 .btn-base:hover {
   @apply btn-base bg-base-200 text-base-700 !important;
+}
+/** End of Button styles */
+
+.top-navigation {
+  box-shadow: inset 0px -1px 0 0 var(--base-400);
 }
 
 /**
@@ -410,6 +418,49 @@ button:focus {
 }
 /** End of tippy.js styles */
 
-.top-navigation {
-  box-shadow: inset 0px -1px 0 0 var(--base-400);
+/**
+ * React Number Input (rc-input-number) styles
+ */
+@import '~rc-input-number/assets/index.css';
+.rc-input-number {
+  @apply border-2 border-base-300 min-h-9 w-18;
 }
+
+.rc-input-number:hover {
+  @apply border-base-400;
+}
+
+.rc-input-number-input {
+  @apply bg-base-100 rounded font-600 text-base-600 leading-normal;
+}
+
+.rc-input-number-input:hover {
+  @apply border-base-400;
+}
+
+.rc-input-number .rc-input-number-handler-wrap,
+.rc-input-number .rc-input-number-handler-up,
+.rc-input-number .rc-input-number-handler-down {
+  @apply border-base-300;
+}
+
+.rc-input-number:hover .rc-input-number-handler-wrap,
+.rc-input-number:hover .rc-input-number-handler-up,
+.rc-input-number:hover .rc-input-number-handler-down {
+  @apply border-base-400;
+}
+
+.rc-input-number-handler-wrap {
+  @apply flex flex-col bg-base-100;
+}
+
+.rc-input-number-handler-up,
+.rc-input-number-handler-down {
+  @apply flex-grow;
+}
+
+.rc-input-number-handler-up-inner:after,
+.rc-input-number-handler-down-inner:after {
+  @apply text-base-500;
+}
+/** End of rc-input-number styles */
