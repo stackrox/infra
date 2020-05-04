@@ -47,7 +47,7 @@ function VersionContent(props: {
     <Tooltip content={tooltip}>
       <div className="flex items-center">
         {icon}
-        <span className="ml-1 text-2xs">{text}</span>
+        <span className="ml-1 text-2xs whitespace-no-wrap">{text}</span>
       </div>
     </Tooltip>
   );

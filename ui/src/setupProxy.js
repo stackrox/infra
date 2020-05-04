@@ -9,5 +9,9 @@ const defaultOptions = {
 };
 
 module.exports = function main(app) {
-  app.use('/v1', createProxyMiddleware(defaultOptions));
+  const proxy = createProxyMiddleware(defaultOptions);
+  app.use('/v1', proxy);
+  app.use('/login', proxy);
+  app.use('/callback', proxy);
+  app.use('/logout', proxy);
 };
