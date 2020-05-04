@@ -14,4 +14,5 @@ module.exports = function main(app) {
   app.use('/login', proxy);
   app.use('/callback', proxy);
   app.use('/logout', proxy);
+  app.use('/downloads/infractl-*', proxy);
 };
