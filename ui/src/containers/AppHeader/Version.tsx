@@ -59,7 +59,7 @@ export default function Version(): ReactElement {
   if (loading)
     return (
       <VersionContent
-        tooltip={<TooltipOverlay>Loading data...</TooltipOverlay>}
+        tooltip={<TooltipOverlay>Loading server version data...</TooltipOverlay>}
         icon={<ClipLoader loading size={16} color="currentColor" />}
         text="Loading..."
       />

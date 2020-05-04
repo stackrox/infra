@@ -5,22 +5,28 @@ import UserAuthProvider from 'containers/UserAuthProvider';
 import { ThemeProvider } from 'containers/ThemeProvider';
 import AppHeader from 'containers/AppHeader';
 import HomePage from 'containers/HomePage';
+import DownloadsPage from 'containers/DownloadsPage';
 
-function App(): ReactElement {
+function AppRoutes(): ReactElement {
+  return (
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/downloads" element={<DownloadsPage />} />
+    </Routes>
+  );
+}
+
+export default function App(): ReactElement {
   return (
     <Router>
       <ThemeProvider>
         <UserAuthProvider>
           <div className="flex flex-col h-full bg-base-0">
             <AppHeader />
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-            </Routes>
+            <AppRoutes />
           </div>
         </UserAuthProvider>
       </ThemeProvider>
     </Router>
   );
 }
-
-export default App;
