@@ -14,11 +14,7 @@ const userService = new UserServiceApi(configuration);
 
 const fetchToken = (): AxiosPromise<V1TokenResponse> => userService.token({});
 
-type Props = {
-  className?: string;
-};
-
-export default function UserServiceAccountToken({ className = '' }: Props): ReactElement {
+export default function UserServiceAccountToken(): ReactElement {
   const { loading, error, data } = useApiQuery(fetchToken);
   const clipboard = useClipboard({
     copiedTimeout: 800, // duration in milliseconds to show 'successfully copied' feedback
@@ -49,12 +45,17 @@ export default function UserServiceAccountToken({ className = '' }: Props): Reac
   const exportCommand = `export INFRA_TOKEN="${data.Token}"`;
 
   return (
-    <div className={className}>
+    <div>
       <div className="flex items-center">
         <span className="text-xl">
           Run the following in a terminal to configure infractl for use:
         </span>
-        <button type="button" onClick={clipboard.copy} className="ml-2">
+        <button
+          type="button"
+          aria-label="Copy to clipboard"
+          onClick={clipboard.copy}
+          className="ml-2"
+        >
           <Tooltip content={<TooltipOverlay>Copy to clipboard</TooltipOverlay>}>
             <div className="flex items-center">
               <Clipboard size={16} />

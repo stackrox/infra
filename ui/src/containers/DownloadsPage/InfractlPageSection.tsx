@@ -17,7 +17,9 @@ export default function InfractlPageSection(): ReactElement {
   return (
     <PageSection header="infractl (CLI)">
       <div className="mb-4">{infractlLinks}</div>
-      <UserServiceAccountToken className="md:w-1/2" />
+      <div className="md:w-1/2">
+        <UserServiceAccountToken />
+      </div>
     </PageSection>
   );
 }
