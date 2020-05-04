@@ -22,13 +22,13 @@ export interface UserAuthContextData {
 
 const UserAuthContext = createContext({ logout });
 
-const useUserAuth = (): UserAuthContextData => useContext(UserAuthContext);
+export const useUserAuth = (): UserAuthContextData => useContext(UserAuthContext);
 
 type Props = {
   children: ReactNode;
 };
 
-function UserAuthProvider({ children }: Props): ReactElement | null {
+export default function UserAuthProvider({ children }: Props): ReactElement | null {
   const { loading, error, data } = useApiQuery(fetchWhoami);
 
   if (loading) {
@@ -60,5 +60,3 @@ function UserAuthProvider({ children }: Props): ReactElement | null {
 
   return <UserAuthContext.Provider value={contextValue}>{children}</UserAuthContext.Provider>;
 }
-
-export { UserAuthProvider, useUserAuth };

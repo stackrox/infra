@@ -9,7 +9,7 @@ type Props = {
 
 export default function Avatar({ imageSrc, name, className = '' }: Props): ReactElement {
   const finalClassName = `flex w-12 h-12 justify-center items-center rounded-full bg-secondary-500 ${className}`;
-  const initials = name ? createInitials(name) : '??';
+  const initials = name ? createInitials(name) : '--';
 
   return imageSrc ? (
     <img src={imageSrc} alt={initials} className={finalClassName} />

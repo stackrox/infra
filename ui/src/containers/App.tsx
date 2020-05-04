@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import { Gift } from 'react-feather';
 
-import { UserAuthProvider } from 'containers/UserAuthProvider';
+import UserAuthProvider from 'containers/UserAuthProvider';
 import { ThemeProvider } from 'containers/ThemeProvider';
 import AppHeader from 'containers/AppHeader';
 
