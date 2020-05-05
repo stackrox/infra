@@ -24,7 +24,10 @@ export interface RequestState<T> {
  * @returns {RequestState<T>} the state of the request
  */
 export default function useApiQuery<T>(fetcher: DataFetcher<T>): RequestState<T> {
-  const [requestState, setRequestState] = useState<RequestState<T>>({ loading: false });
+  // setting `loading: true` from the beginning as that the intention of the hook
+  // to start making the request right away on component mounting through `useEffect`,
+  // yet React hook execution model doesn't guarantee synchronous execution of `useEffect`.
+  const [requestState, setRequestState] = useState<RequestState<T>>({ loading: true });
   useEffect(() => {
     setRequestState({ loading: true });
 
