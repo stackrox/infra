@@ -32,14 +32,22 @@ cli: proto-generated-srcs
 cli-local: proto-generated-srcs
 	./scripts/go-build -o $(GOPATH)/bin/infractl  ./cmd/infractl
 
+.PHONY: ui
+ui:
+	@make -C ui all
+
 .PHONY: image
-image: server cli
+image: server cli ui clean-image
 	@cp -f bin/infra-server-linux-amd64 image/infra-server
-	@cp -r static image/
 	@mkdir -p image/static/downloads
+	@ cp -R ui/build/* image/static/
 	@cp bin/infractl-darwin-amd64 image/static/downloads
 	@cp bin/infractl-linux-amd64 image/static/downloads
 	docker build -t us.gcr.io/stackrox-infra/infra-server:$(TAG) image
+
+.PHONY: clean-image
+clean-image:
+	@rm -rf image/infra-server image/static
 
 ##############
 ## Protobuf ##
