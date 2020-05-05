@@ -1,16 +1,17 @@
 version: 2.1
 
-defaults: &defaults
-  docker:
-    - image: docker.io/stackrox/apollo-ci:0.2.1
-      auth:
-        username: $DOCKER_IO_PULL_USERNAME
-        password: $DOCKER_IO_PULL_PASSWORD
-  working_directory: /go/src/github.com/stackrox/infra
+executors:
+  custom:
+    docker:
+      - image: docker.io/stackrox/apollo-ci:0.2.10
+        auth:
+          username: $DOCKER_IO_PULL_USERNAME
+          password: $DOCKER_IO_PULL_PASSWORD
+    working_directory: /go/src/github.com/stackrox/infra
 
 jobs:
   build-infra-server:
-    <<: *defaults
+    executor: custom
     steps:
     - checkout
     - setup_remote_docker
@@ -21,7 +22,7 @@ jobs:
           docker run --rm us.gcr.io/stackrox-infra/infra-server:$(make tag) -version
 
   build-infractl:
-    <<: *defaults
+    executor: custom
     steps:
       - checkout
       - run:
@@ -31,7 +32,7 @@ jobs:
             bin/infractl-linux-amd64 --version
 
   lint:
-    <<: *defaults
+    executor: custom
     steps:
       - checkout
       - run:
