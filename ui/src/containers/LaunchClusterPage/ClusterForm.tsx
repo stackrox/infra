@@ -105,7 +105,6 @@ function ParameterFormField(props: { parameter: V1Parameter }): ReactElement {
           name={`Parameters.${parameter.Name}`}
           min={getSchemaTestParamValue(schema, 'min')}
           max={getSchemaTestParamValue(schema, 'max')}
-          precision={0} // for now assume only integers
         />
       );
     default:
