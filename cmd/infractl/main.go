@@ -39,7 +39,7 @@ func main() {
 		// $ infractl delete
 		delete.Command(),
 
-		// $ infractl info
+		// $ infractl get
 		get.Command(),
 
 		// $ infractl lifespan

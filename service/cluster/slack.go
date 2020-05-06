@@ -92,17 +92,17 @@ func formatSlackMessage(cluster *v1.Cluster, wfStatus v1.Status, slackStatus sla
 		), false, false)
 
 		connect1Text := slack.NewTextBlockObject("mrkdwn", fmt.Sprintf(
-			":thinking_face: To view cluster *info*, you can run:\n ```$ infractl cluster info %s```",
+			":thinking_face: To view cluster *info*, you can run:\n ```$ infractl get %s```",
 			cluster.ID,
 		), false, false)
 
 		connect2Text := slack.NewTextBlockObject("mrkdwn", fmt.Sprintf(
-			":pencil: To read cluster *logs*, you can run:\n ```$ infractl cluster logs %s```",
+			":pencil: To read cluster *logs*, you can run:\n ```$ infractl logs %s```",
 			cluster.ID,
 		), false, false)
 
 		connect3Text := slack.NewTextBlockObject("mrkdwn", fmt.Sprintf(
-			":package: To download cluster *artifacts*, you can run:\n ```$ infractl cluster artifacts %s```",
+			":package: To download cluster *artifacts*, you can run:\n ```$ infractl artifacts %s```",
 			cluster.ID,
 		), false, false)
 
@@ -130,7 +130,7 @@ func formatSlackMessage(cluster *v1.Cluster, wfStatus v1.Status, slackStatus sla
 		), false, false)
 
 		connect1Text := slack.NewTextBlockObject("mrkdwn", fmt.Sprintf(
-			":thinking_face: To view cluster *info*, you can run:\n ```$ infractl cluster info %s```",
+			":thinking_face: To view cluster *info*, you can run:\n ```$ infractl get %s```",
 			cluster.ID,
 		), false, false)
 

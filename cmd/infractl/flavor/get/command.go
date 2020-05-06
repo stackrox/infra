@@ -1,5 +1,5 @@
-// Package info implements the infractl flavor info command.
-package info
+// Package get implements the infractl flavor get command.
+package get
 
 import (
 	"context"
@@ -12,13 +12,13 @@ import (
 )
 
 const examples = `# Display info about the "gke-default" flavor.
-$ infractl flavor info gke-default`
+$ infractl flavor get gke-default`
 
-// Command defines the handler for infractl flavor info.
+// Command defines the handler for infractl flavor get.
 func Command() *cobra.Command {
-	// $ infractl flavor info
+	// $ infractl flavor get
 	return &cobra.Command{
-		Use:     "info FLAVOR",
+		Use:     "get FLAVOR",
 		Short:   "Info on a specific flavor",
 		Long:    "Displays info for a single flavor",
 		Example: examples,

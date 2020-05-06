@@ -3,7 +3,7 @@ package flavor
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/stackrox/infra/cmd/infractl/flavor/info"
+	"github.com/stackrox/infra/cmd/infractl/flavor/get"
 	"github.com/stackrox/infra/cmd/infractl/flavor/list"
 )
 
@@ -17,8 +17,8 @@ func Command() *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		// $ infractl flavor info
-		info.Command(),
+		// $ infractl flavor get
+		get.Command(),
 
 		// $ infractl flavor list
 		list.Command(),

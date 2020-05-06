@@ -1,4 +1,4 @@
-// Package get implements the infractl info command.
+// Package get implements the infractl get command.
 package get
 
 import (
