@@ -34,7 +34,7 @@ export default function NumberFormField({
       max={max}
       disabled={disabled}
       onChange={(e): void => {
-        helpers.setValue(e.target.value || null); // force 0 instead of '', yet at the cost of user experience...
+        helpers.setValue(e.target.value || null); // force `null` instead of '' (otherwise it doesn't even trigger formik form validation)
       }}
       className={`bg-base-100 border-2 rounded p-2 border-base-300 font-600 text-base-600 leading-normal w-18 min-h-8 ${
         disabled ? 'bg-base-200' : 'hover:border-base-400'
