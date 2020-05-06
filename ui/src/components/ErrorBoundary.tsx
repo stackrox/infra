@@ -4,7 +4,7 @@ import { Location } from 'history';
 import { XSquare } from 'react-feather';
 
 type Props = {
-  message?: string;
+  message?: string | null;
   children: ReactNode;
 };
 
@@ -15,21 +15,22 @@ type PropsWithLocation = Props & {
 type State = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   error: any;
-  errorLocation?: Location;
+  errorLocation: Location | null;
 };
 
 class ErrorBoundary extends Component<PropsWithLocation, State> {
   constructor(props: PropsWithLocation) {
     super(props);
     this.state = {
-      error: undefined,
+      error: null,
+      errorLocation: null,
     };
   }
 
   static getDerivedStateFromProps(nextProps: PropsWithLocation, state: State): State | null {
     if (state.error && nextProps.location !== state.errorLocation) {
       // stop showing error on location change to allow user to navigate after error happens
-      return { error: undefined, errorLocation: undefined };
+      return { error: null, errorLocation: null };
     }
     return null;
   }

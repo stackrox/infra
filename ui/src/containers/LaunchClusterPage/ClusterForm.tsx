@@ -56,7 +56,7 @@ function createParameterSchemas(parameters: FlavorParameters): object {
 
 function createInitialParameterValues(parameters: FlavorParameters): object {
   return Object.keys(parameters).reduce<object>((fields, param) => {
-    if (!schemasByParameterName[param]) return fields;
+    if (!schemasByParameterName[param]) throw new Error(`Unknown parameter type "${param}"`);
     return {
       ...fields,
       [param]: schemasByParameterName[param].default(),
