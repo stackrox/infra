@@ -6,5 +6,5 @@ type Props = {
 };
 
 export default function FormFieldError({ error, touched }: Props): ReactElement | null {
-  return error && touched ? <div className="mt-2 text-alert-400">{error}</div> : null;
+  return error && touched ? <div className="text-alert-400">{error}</div> : null;
 }

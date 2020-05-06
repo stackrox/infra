@@ -15,8 +15,6 @@ import { ClipLoader } from 'react-spinners';
 
 import { ClusterServiceApi, V1Parameter } from 'generated/client';
 import configuration from 'client/configuration';
-import Labeled from 'components/Labeled';
-import FormFieldLabel from 'components/FormFieldLabel';
 import TextFormField from 'components/forms/TextFormField';
 import NumberFormField from 'components/forms/NumberFormField';
 
@@ -36,8 +34,10 @@ const schemasByParameterName: { [key: string]: yup.Schema<any> } = {
     ),
   nodes: yup
     .number()
+    .transform((v) => (Number.isNaN(v) ? 0.1 : v)) // workaround https://github.com/jquense/yup/issues/66
     .default(2)
     .required('Required')
+    .integer('Must be an integer')
     .min(1, 'Must be at least 1')
     .max(10, 'Be cost effective, please'),
 };
@@ -98,11 +98,19 @@ function ParameterFormField(props: { parameter: V1Parameter }): ReactElement {
 
   switch (schema.type) {
     case 'string':
-      return <TextFormField name={`Parameters.${parameter.Name}`} />;
+      return (
+        <TextFormField
+          name={`Parameters.${parameter.Name}`}
+          label={parameter.Description || parameter.Name}
+          required
+        />
+      );
     case 'number':
       return (
         <NumberFormField
           name={`Parameters.${parameter.Name}`}
+          label={parameter.Description || parameter.Name}
+          required
           min={getSchemaTestParamValue(schema, 'min')}
           max={getSchemaTestParamValue(schema, 'max')}
         />
@@ -116,22 +124,13 @@ function FormContent(props: { flavorParameters: FlavorParameters }): ReactElemen
   const { isSubmitting } = useFormikContext();
   const { flavorParameters } = props;
   const parameterFields = Object.entries(flavorParameters).map(([param, metadata]) => (
-    <Labeled
-      key={param}
-      label={
-        <FormFieldLabel text={metadata.Description || param} required className="capitalize" />
-      }
-    >
-      <ParameterFormField parameter={metadata} />
-    </Labeled>
+    <ParameterFormField key={param} parameter={metadata} />
   ));
   return (
     <>
       {parameterFields}
 
-      <Labeled label={<FormFieldLabel text="Description" />}>
-        <TextFormField name="Description" />
-      </Labeled>
+      <TextFormField name="Description" label="Description" />
 
       <button type="submit" className="btn btn-base" disabled={isSubmitting}>
         {isSubmitting ? <ClipLoader size={16} color="currentColor" /> : 'Launch'}
