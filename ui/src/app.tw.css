@@ -234,6 +234,9 @@ button:focus {
   padding: 4px;
 }
 
+/**
+ * Button styles
+ */
 .btn-class {
   @apply inline-flex px-2 rounded-sm font-600 uppercase text-center items-center min-w-16 justify-center border-2 !important;
   line-height: 14px; /* required because we were relying on the Chrome browser default of 14px earlier */
@@ -289,6 +292,11 @@ button:focus {
 
 .btn-base:hover {
   @apply btn-base bg-base-200 text-base-700 !important;
+}
+/** End of Button styles */
+
+.top-navigation {
+  box-shadow: inset 0px -1px 0 0 var(--base-400);
 }
 
 /**
@@ -409,7 +417,3 @@ button:focus {
   right: calc(-1 * (var(--arrow-size) - 1px));
 }
 /** End of tippy.js styles */
-
-.top-navigation {
-  box-shadow: inset 0px -1px 0 0 var(--base-400);
-}

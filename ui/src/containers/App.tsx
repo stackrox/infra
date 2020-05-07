@@ -7,6 +7,7 @@ import { ThemeProvider } from 'containers/ThemeProvider';
 import AppHeader from 'containers/AppHeader';
 import HomePage from 'containers/HomePage';
 import DownloadsPage from 'containers/DownloadsPage';
+import LaunchClusterPage from 'containers/LaunchClusterPage';
 import FullPageError from 'components/FullPageError';
 
 function AppRoutes(): ReactElement {
@@ -14,6 +15,16 @@ function AppRoutes(): ReactElement {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/downloads" element={<DownloadsPage />} />
+      <Route path="/launch/:flavorId" element={<LaunchClusterPage />} />
+      <Route
+        path="/cluster/:clusterId"
+        element={
+          <FullPageError
+            message="Cluster page is under construction. Use infractl instead."
+            IconComponent={Tool}
+          />
+        }
+      />
       <Route
         path="*"
         element={<FullPageError message="WIP. Pardon our dust." IconComponent={Tool} />}
