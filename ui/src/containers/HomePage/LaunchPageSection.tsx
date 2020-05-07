@@ -29,8 +29,7 @@ function FlavorCards(): ReactElement {
       key={flavor.ID}
       to={`launch/${flavor.ID}`}
       header={flavor.Name || 'Unnamed'}
-      footer={flavor.Availability}
-      className="s-1"
+      footer={flavor.Availability || 'Alpha'}
     >
       <p className="text-lg">{flavor.Description}</p>
     </LinkCard>
@@ -41,7 +40,7 @@ function FlavorCards(): ReactElement {
 export default function LaunchPageSection(): ReactElement {
   return (
     <PageSection header="Launch Cluster">
-      <div className="grid grid-gap-4 grid-auto-fit grid-dense">
+      <div className="flex flex-wrap">
         <FlavorCards />
       </div>
     </PageSection>
