@@ -29,7 +29,7 @@ function FlavorCards(): ReactElement {
       key={flavor.ID}
       to={`launch/${flavor.ID}`}
       header={flavor.Name || 'Unnamed'}
-      footer={flavor.Availability || 'Alpha'}
+      footer={<span className="capitalize">{flavor.Availability || 'Alpha'}</span>}
     >
       <p className="text-lg">{flavor.Description}</p>
     </LinkCard>

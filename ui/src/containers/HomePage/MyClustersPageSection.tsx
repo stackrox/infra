@@ -16,6 +16,12 @@ const clusterService = new ClusterServiceApi(configuration);
 
 const fetchClusters = (): AxiosPromise<V1ClusterListResponse> => clusterService.list();
 
+/**
+ * Converts backend returned lifespan to the moment duration
+ * @param lifespan lifespan string the way it comes from the backend
+ * @returns duration object
+ * @throws error if it cannot parse lifespan string
+ */
 function lifespanToDuration(lifespan: string): moment.Duration {
   // API returns lifespan in seconds, but it's being very explicit about it with `10800s` format...
   const matches = /\d+/.exec(lifespan);
@@ -26,6 +32,14 @@ function lifespanToDuration(lifespan: string): moment.Duration {
   return moment.duration(seconds, 's');
 }
 
+function NoClustersMessage(): ReactElement {
+  return (
+    <div className="m-6 flex w-full justify-center">
+      <span className="text-4xl">You haven‘t created any clusters recently.</span>
+    </div>
+  );
+}
+
 function ClusterCards(): ReactElement {
   const { user } = useUserAuth();
   const { loading, error, data } = useApiQuery(fetchClusters);
@@ -34,8 +48,12 @@ function ClusterCards(): ReactElement {
     return <FullPageSpinner />;
   }
 
-  if (error || !data?.Clusters) {
+  if (error || !data) {
     return <FullPageError message={error?.message || 'Unexpected server response'} />;
+  }
+
+  if (!data.Clusters) {
+    return <NoClustersMessage />;
   }
 
   // only this user clusters sorted in descending order by creation date
@@ -44,23 +62,29 @@ function ClusterCards(): ReactElement {
   );
 
   if (clusters.length === 0) {
-    return (
-      <div className="m-6 flex w-full justify-center">
-        <span className="text-4xl">You don&apos;t have any clusters created recently</span>
-      </div>
-    );
+    return <NoClustersMessage />;
   }
 
   const cards = clusters.map((cluster) => {
-    const expirationDate =
-      cluster.Lifespan &&
-      moment(cluster.CreatedOn).add(lifespanToDuration(cluster.Lifespan)).toDate();
+    let expirationDate: Date | null = null;
+    try {
+      expirationDate = !cluster.Lifespan
+        ? null
+        : moment(cluster.CreatedOn).add(lifespanToDuration(cluster.Lifespan)).toDate();
+    } catch (e) {
+      // should never happen, ignore, we'll just show N/A for expiration
+      // TODO: eventually log the error to the backend
+    }
+
     return (
       <LinkCard
         key={cluster.ID}
         to={`cluster/${cluster.ID}`}
         header={cluster.ID || 'No ID'}
-        footer={cluster.Status && expirationDate && <Countdown targetDate={expirationDate} />}
+        footer={
+          (cluster.Status && expirationDate && <Countdown targetDate={expirationDate} />) ||
+          'Expiration: N/A'
+        }
       >
         {cluster.Description && (
           <span className="mb-2 text-lg">Description: {cluster.Description}</span>
