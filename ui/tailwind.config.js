@@ -19,6 +19,7 @@ function remCalc(pixel) {
 }
 
 module.exports = {
+  purge: ['./public/index.html', './src/**/*.tsx', './src/**/*.tw.css'],
   important: true,
   theme: {
     screens: {
