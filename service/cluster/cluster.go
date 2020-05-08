@@ -418,18 +418,27 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 
 func (s *clusterImpl) startCalendarCheck() {
 	for ; ; time.Sleep(calendarCheckInterval) {
-		workflowList, err := s.clientWorkflows.List(metav1.ListOptions{})
-		if err != nil {
-			log.Printf("[ERROR] failed to list workflows: %v", err)
-			continue
-		}
-
+		// Retrieve upcoming calendar events.
 		events, err := s.eventSource.Events()
 		if err != nil {
 			log.Printf("[ERROR] failed to list calendar events: %v", err)
 			continue
 		}
 
+		// If there are no events scheduled, then there's nothing to do here.
+		if len(events) == 0 {
+			continue
+		}
+
+		// List out all of the current workflows.
+		workflowList, err := s.clientWorkflows.List(metav1.ListOptions{})
+		if err != nil {
+			log.Printf("[ERROR] failed to list workflows: %v", err)
+			continue
+		}
+
+		// Build a lookup of current workflow IDs that were launched from
+		// calendar events.
 		existingWorkflowEventIDs := make(map[string]struct{})
 		for _, workflow := range workflowList.Items {
 			workflow := workflow

@@ -6,6 +6,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/stackrox/infra/config"
 	"google.golang.org/api/calendar/v3"
 )
 
@@ -46,16 +47,31 @@ type googleCalendar struct {
 	*calendar.EventsService
 }
 
+type disabledCalendar struct{}
+
+func (*disabledCalendar) Events() ([]Event, error) {
+	return nil, nil
+}
+
 // NewGoogleCalendar creates a new Google Calendar connector for fetching events.
-func NewGoogleCalendar(calendarID string, window time.Duration) (EventSource, error) {
+func NewGoogleCalendar(cfg config.CalendarConfig) (EventSource, error) {
+	if cfg.Disabled {
+		return &disabledCalendar{}, nil
+	}
+
 	service, err := calendar.NewService(context.Background())
 	if err != nil {
 		return nil, err
 	}
 
+	window := cfg.Window.Duration()
+	if window == 0 {
+		window = 30 * time.Minute
+	}
+
 	return &googleCalendar{
 		window:        window,
-		calendarID:    calendarID,
+		calendarID:    cfg.ID,
 		EventsService: service.Events,
 	}, nil
 }
