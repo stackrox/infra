@@ -109,6 +109,12 @@ export interface V1Cluster {
    * @memberof V1Cluster
    */
   Description?: string;
+  /**
+   * URL is an optional URL for this cluster.
+   * @type {string}
+   * @memberof V1Cluster
+   */
+  URL?: string;
 }
 /**
  *
@@ -764,10 +770,12 @@ export const ClusterServiceApiAxiosParamCreator = function (configuration?: Conf
     /**
      *
      * @summary CreateToken generates an arbitrary service account token
+     * @param {boolean} [all] All indicates that all clusters should be returned, not just the ones owned by the user.
+     * @param {boolean} [expired] Expired indicates that expired clusters should be returned, not just the ones that are launching/ready.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    list(options: any = {}): RequestArgs {
+    list(all?: boolean, expired?: boolean, options: any = {}): RequestArgs {
       const localVarPath = `/v1/cluster`;
       const localVarUrlObj = globalImportUrl.parse(localVarPath, true);
       let baseOptions;
@@ -777,6 +785,14 @@ export const ClusterServiceApiAxiosParamCreator = function (configuration?: Conf
       const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
+
+      if (all !== undefined) {
+        localVarQueryParameter['All'] = all;
+      }
+
+      if (expired !== undefined) {
+        localVarQueryParameter['Expired'] = expired;
+      }
 
       localVarUrlObj.query = {
         ...localVarUrlObj.query,
@@ -970,13 +986,21 @@ export const ClusterServiceApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary CreateToken generates an arbitrary service account token
+     * @param {boolean} [all] All indicates that all clusters should be returned, not just the ones owned by the user.
+     * @param {boolean} [expired] Expired indicates that expired clusters should be returned, not just the ones that are launching/ready.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     list(
+      all?: boolean,
+      expired?: boolean,
       options?: any
     ): (axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1ClusterListResponse> {
-      const localVarAxiosArgs = ClusterServiceApiAxiosParamCreator(configuration).list(options);
+      const localVarAxiosArgs = ClusterServiceApiAxiosParamCreator(configuration).list(
+        all,
+        expired,
+        options
+      );
       return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
         const axiosRequestArgs = {
           ...localVarAxiosArgs.options,
@@ -1071,11 +1095,13 @@ export const ClusterServiceApiFactory = function (
     /**
      *
      * @summary CreateToken generates an arbitrary service account token
+     * @param {boolean} [all] All indicates that all clusters should be returned, not just the ones owned by the user.
+     * @param {boolean} [expired] Expired indicates that expired clusters should be returned, not just the ones that are launching/ready.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    list(options?: any): AxiosPromise<V1ClusterListResponse> {
-      return ClusterServiceApiFp(configuration).list(options)(axios, basePath);
+    list(all?: boolean, expired?: boolean, options?: any): AxiosPromise<V1ClusterListResponse> {
+      return ClusterServiceApiFp(configuration).list(all, expired, options)(axios, basePath);
     },
     /**
      *
@@ -1167,12 +1193,18 @@ export class ClusterServiceApi extends BaseAPI {
   /**
    *
    * @summary CreateToken generates an arbitrary service account token
+   * @param {boolean} [all] All indicates that all clusters should be returned, not just the ones owned by the user.
+   * @param {boolean} [expired] Expired indicates that expired clusters should be returned, not just the ones that are launching/ready.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof ClusterServiceApi
    */
-  public list(options?: any) {
-    return ClusterServiceApiFp(this.configuration).list(options)(this.axios, this.basePath);
+  public list(all?: boolean, expired?: boolean, options?: any) {
+    return ClusterServiceApiFp(this.configuration).list(
+      all,
+      expired,
+      options
+    )(this.axios, this.basePath);
   }
 
   /**
