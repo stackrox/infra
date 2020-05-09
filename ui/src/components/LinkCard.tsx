@@ -18,7 +18,7 @@ export default function LinkCard({
 }: Props): ReactElement {
   return (
     <Link
-      className={`flex flex-col items-start h-32 w-64 m-2 p-2 border-2 border-base-400 shadow rounded font-600 bg-base-100 hover:bg-base-200 text-base-600 hover:text-base-700 ${className}`}
+      className={`flex flex-col items-start h-32 w-64 p-2 border-2 border-base-400 shadow rounded font-600 bg-base-100 hover:bg-base-200 text-base-600 hover:text-base-700 ${className}`}
       to={to}
     >
       <h2 className="w-full pb-1 text-2xl border-b-2 border-base-500 mb-4">{header}</h2>
