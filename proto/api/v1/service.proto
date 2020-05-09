@@ -244,6 +244,17 @@ message Cluster {
     string URL = 9;
 }
 
+// ClusterListRequest represents a request to ClusterService.List.
+message ClusterListRequest {
+    // All indicates that all clusters should be returned, not just the ones
+    // owned by the user.
+    bool All = 1;
+
+    // Expired indicates that expired clusters should be returned, not just the
+    // ones that are launching/ready.
+    bool Expired = 2;
+}
+
 // ClusterListResponse represents details about all clusters.
 message ClusterListResponse {
     // Clusters is a list of all clusters.
@@ -318,7 +329,7 @@ service ClusterService {
     }
 
     // List provides information about the available clusters.
-    rpc List (google.protobuf.Empty) returns (ClusterListResponse) {
+    rpc List (ClusterListRequest) returns (ClusterListResponse) {
         option (google.api.http) = {
             get: "/v1/cluster"
         };

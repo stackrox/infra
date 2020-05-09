@@ -3,21 +3,21 @@ package list
 
 import (
 	"context"
-	"time"
 
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"google.golang.org/grpc"
 )
 
-const examples = `# List all clusters.
+const examples = `# List your clusters.
 $ infractl list
 
-# Exclude clusters that expired over 30 minutes ago.
-$ infractl list --expired-cutoff 30m`
+# List your clusters, including ones that have expired.
+$ infractl list --expired
+
+# List everyone's' clusters.
+$ infractl list --all`
 
 // Command defines the handler for infractl list.
 func Command() *cobra.Command {
@@ -31,28 +31,24 @@ func Command() *cobra.Command {
 		RunE:    common.WithGRPCHandler(run),
 	}
 
-	cmd.Flags().Duration("expired-cutoff", time.Hour, "do not show cluster that expired before a cutoff")
+	cmd.Flags().Bool("all", false, "include clusters not owned by you")
+	cmd.Flags().Bool("expired", false, "include expired clusters")
 	return cmd
 }
 
 func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []string) (common.PrettyPrinter, error) {
-	cutoff, _ := cmd.Flags().GetDuration("expired-cutoff")
+	includeAll, _ := cmd.Flags().GetBool("all")
+	includeExpired, _ := cmd.Flags().GetBool("expired")
 
-	resp, err := v1.NewClusterServiceClient(conn).List(ctx, &empty.Empty{})
+	req := v1.ClusterListRequest{
+		All:     includeAll,
+		Expired: includeExpired,
+	}
+
+	resp, err := v1.NewClusterServiceClient(conn).List(ctx, &req)
 	if err != nil {
 		return nil, err
 	}
 
-	var results v1.ClusterListResponse
-	for _, cluster := range resp.Clusters {
-		createdOn, _ := ptypes.Timestamp(cluster.GetCreatedOn())
-		lifespan, _ := ptypes.Duration(cluster.GetLifespan())
-		expiredBy := time.Since(createdOn.Add(lifespan))
-
-		if expiredBy < cutoff || cluster.GetStatus() == v1.Status_READY || cluster.GetStatus() == v1.Status_CREATING {
-			results.Clusters = append(results.Clusters, cluster)
-		}
-	}
-
-	return prettyClusterListResponse(results), nil
+	return prettyClusterListResponse(*resp), nil
 }
