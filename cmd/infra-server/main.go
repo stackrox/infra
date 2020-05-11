@@ -8,7 +8,6 @@ import (
 	"os/signal"
 	"path/filepath"
 	"syscall"
-	"time"
 
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/auth"
@@ -71,7 +70,7 @@ func mainCmd() error {
 		return errors.Wrapf(err, "failed to load GCS signing credentials")
 	}
 
-	eventSource, err := calendar.NewGoogleCalendar(cfg.GoogleCalendarID, 2*time.Hour)
+	eventSource, err := calendar.NewGoogleCalendar(cfg.Calendar)
 	if err != nil {
 		return errors.Wrapf(err, "failed to create Google Calendar event source")
 	}
