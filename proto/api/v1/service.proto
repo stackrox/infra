@@ -239,6 +239,9 @@ message Cluster {
 
     // Description is a human readable description for the cluster.
     string Description = 8;
+
+    // URL is an optional URL for this cluster.
+    string URL = 9;
 }
 
 // ClusterListResponse represents details about all clusters.

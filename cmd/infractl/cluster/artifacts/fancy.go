@@ -12,7 +12,7 @@ func (r prettyClusterArtifacts) PrettyPrint() {
 	for _, artifact := range r.Artifacts {
 		fmt.Printf("%s\n", artifact.Name)
 		if artifact.Description != "" {
-			fmt.Printf("  Description: %s\n", artifact.URL)
+			fmt.Printf("  Description: %s\n", artifact.Description)
 		}
 		fmt.Printf("  URL: %s\n", artifact.URL)
 	}

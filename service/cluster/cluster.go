@@ -51,6 +51,8 @@ const (
 	slackCheckInterval = 1 * time.Minute
 
 	workflowDeleteCheckInterval = 5 * time.Minute
+
+	artifactTagURL = "url"
 )
 
 type clusterImpl struct {
@@ -98,26 +100,6 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSo
 	return impl, nil
 }
 
-// clusterFromWorkflow converts an Argo workflow into a cluster.
-func clusterFromWorkflow(workflow v1alpha1.Workflow) *v1.Cluster {
-	cluster := &v1.Cluster{
-		ID:          workflow.GetName(),
-		Status:      workflowStatus(workflow.Status),
-		Flavor:      GetFlavor(&workflow),
-		Owner:       GetOwner(&workflow),
-		Lifespan:    GetLifespan(&workflow),
-		Description: GetDescription(&workflow),
-	}
-
-	cluster.CreatedOn, _ = ptypes.TimestampProto(workflow.Status.StartedAt.Time.UTC())
-
-	if !workflow.Status.FinishedAt.Time.IsZero() {
-		cluster.DestroyedOn, _ = ptypes.TimestampProto(workflow.Status.FinishedAt.Time.UTC())
-	}
-
-	return cluster
-}
-
 // Info implements ClusterService.Info.
 func (s *clusterImpl) Info(ctx context.Context, clusterID *v1.ResourceByID) (*v1.Cluster, error) {
 	workflow, err := s.clientWorkflows.Get(clusterID.Id, metav1.GetOptions{})
@@ -125,7 +107,13 @@ func (s *clusterImpl) Info(ctx context.Context, clusterID *v1.ResourceByID) (*v1
 		return nil, err
 	}
 
-	return clusterFromWorkflow(*workflow), nil
+	metacluster, err := s.metaClusterFromWorkflow(*workflow)
+	if err != nil {
+		log.Printf("failed to convert workflow to meta-cluster: %v", err)
+		return nil, err
+	}
+
+	return &metacluster.Cluster, nil
 }
 
 // List implements ClusterService.List.
@@ -396,21 +384,24 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 			continue
 		}
 
-		for idx, workflow := range workflowList.Items {
-			if workflowStatus(workflow.Status) != v1.Status_READY {
-				continue
-			}
-
-			if expired, err := isWorkflowExpired(&workflowList.Items[idx]); err != nil {
-				log.Printf("[ERROR] failed to determine expiration of cluster %q: %v", workflow.GetName(), err)
-			} else if !expired {
-				continue
-			}
-
-			log.Printf("resuming workflow %q", workflow.GetName())
-			err := util.ResumeWorkflow(s.clientWorkflows, workflow.GetName())
+		for _, workflow := range workflowList.Items {
+			metacluster, err := s.metaClusterFromWorkflow(workflow)
 			if err != nil {
-				log.Printf("[ERROR] failed to resume workflow %q: %v", workflow.GetName(), err)
+				log.Printf("failed to convert workflow to meta-cluster: %v", err)
+				continue
+			}
+
+			if metacluster.Status != v1.Status_READY {
+				continue
+			}
+
+			if !metacluster.Expired {
+				continue
+			}
+
+			log.Printf("resuming workflow %q", metacluster.ID)
+			if err := util.ResumeWorkflow(s.clientWorkflows, metacluster.ID); err != nil {
+				log.Printf("[ERROR] failed to resume workflow %q: %v", metacluster.ID, err)
 			}
 		}
 	}
@@ -441,9 +432,14 @@ func (s *clusterImpl) startCalendarCheck() {
 		// calendar events.
 		existingWorkflowEventIDs := make(map[string]struct{})
 		for _, workflow := range workflowList.Items {
-			workflow := workflow
-			if eventID := GetEventID(&workflow); eventID != "" {
-				existingWorkflowEventIDs[eventID] = struct{}{}
+			metacluster, err := s.metaClusterFromWorkflow(workflow)
+			if err != nil {
+				log.Printf("failed to convert workflow to meta-cluster: %v", err)
+				continue
+			}
+
+			if metacluster.EventID != "" {
+				existingWorkflowEventIDs[metacluster.EventID] = struct{}{}
 			}
 		}
 
@@ -498,16 +494,6 @@ func (s *clusterImpl) createFromEvent(event calendar.Event) (*v1.ResourceByID, e
 	return &v1.ResourceByID{Id: created.Name}, nil
 }
 
-func isWorkflowExpired(workflow *v1alpha1.Workflow) (bool, error) {
-	lifespan, err := ptypes.Duration(GetLifespan(workflow))
-	if err != nil {
-		return false, err
-	}
-
-	workflowExpiryTime := workflow.Status.StartedAt.Time.Add(lifespan)
-	return time.Now().After(workflowExpiryTime), nil
-}
-
 func (s *clusterImpl) getLogs(node v1alpha1.NodeStatus) (*v1.Log, error) {
 	stream, err := s.clientPods.GetLogs(node.ID, &corev1.PodLogOptions{
 		Container:  "main",
@@ -540,22 +526,18 @@ func (s *clusterImpl) startSlackCheck() {
 		}
 
 		for _, workflow := range workflowList.Items {
-			workflow := workflow
-			cluster := clusterFromWorkflow(workflow)
-			wfStatus := workflowStatus(workflow.Status)
-			slackStatus := slackStatus(GetSlack(&workflow))
-
-			var endpointURL string
-			if wfStatus == v1.Status_READY {
-				endpointURL, err = s.getEndpointURL(&workflow)
-				if err != nil {
-					log.Printf("failed to read URL artifact: %v", err)
-				}
-				endpointURL = strings.TrimSpace(endpointURL)
+			metacluster, err := s.metaClusterFromWorkflow(workflow)
+			if err != nil {
+				log.Printf("failed to convert workflow to meta-cluster: %v", err)
+				continue
 			}
 
+			wfStatus := metacluster.Status
+			slackStatus := metacluster.Slack
+			endpointURL := metacluster.URL
+
 			// Generate a Slack message for our current cluster state.
-			newSlackStatus, message := formatSlackMessage(cluster, wfStatus, slackStatus, endpointURL)
+			newSlackStatus, message := formatSlackMessage(&metacluster.Cluster, wfStatus, slackStatus, endpointURL)
 
 			// Only bother to send a message if there is one to send.
 			if message != nil {
@@ -576,48 +558,14 @@ func (s *clusterImpl) startSlackCheck() {
 				}
 
 				// Submit the patch.
-				_, err = s.clientWorkflows.Patch(cluster.ID, types.JSONPatchType, payloadBytes)
+				_, err = s.clientWorkflows.Patch(metacluster.Cluster.ID, types.JSONPatchType, payloadBytes)
 				if err != nil {
-					log.Printf("failed to patch Slack annotation for cluster %s: %v", cluster.ID, err)
+					log.Printf("failed to patch Slack annotation for cluster %s: %v", metacluster.Cluster.ID, err)
 					continue
 				}
 			}
 		}
 	}
-}
-
-func (s *clusterImpl) getEndpointURL(workflow *v1alpha1.Workflow) (string, error) {
-	const artifactTagURL = "url"
-	flavorMetadata := make(map[string]*v1.FlavorArtifact)
-	flavorName := GetFlavor(workflow)
-	flavor, _, found := s.registry.Get(flavorName)
-	if found && flavor.Artifacts != nil {
-		flavorMetadata = flavor.Artifacts
-	}
-
-	for _, nodeStatus := range workflow.Status.Nodes {
-		if nodeStatus.Outputs == nil {
-			continue
-		}
-
-		for _, artifact := range nodeStatus.Outputs.Artifacts {
-			if artifact.S3 == nil {
-				continue
-			}
-
-			if meta, found := flavorMetadata[artifact.Name]; found {
-				if _, found := meta.Tags[artifactTagURL]; found {
-					contents, err := s.signer.Contents(artifact.S3.Bucket, artifact.S3.Key)
-					if err != nil {
-						return "", err
-					}
-					return string(contents), nil
-				}
-			}
-		}
-	}
-
-	return "", nil
 }
 
 func (s *clusterImpl) startDeleteWorkflowCheck() {
@@ -638,27 +586,33 @@ func (s *clusterImpl) startDeleteWorkflowCheck() {
 		}
 
 		for _, workflow := range workflowList.Items {
+			metacluster, err := s.metaClusterFromWorkflow(workflow)
+			if err != nil {
+				log.Printf("failed to convert workflow to meta-cluster: %v", err)
+				continue
+			}
+
 			// If this workflow is not finished or failed (aka still running)
 			// reject it.
-			status := workflowStatus(workflow.Status)
+			status := metacluster.Status
 			if status != v1.Status_FAILED && status != v1.Status_FINISHED {
 				continue
 			}
 
 			// If this workflow isn't old enough, reject it.
 			cutoff := time.Now().Add(-workflowMaxAgeGracePeriod)
-			if workflow.Status.FinishedAt.After(cutoff) {
+			if time.Unix(metacluster.DestroyedOn.Seconds, 0).After(cutoff) {
 				continue
 			}
 
 			// Perform the actual deletion via the Kube API.
 			var gracePeriod int64 = 0
-			if err := s.clientWorkflows.Delete(workflow.Name, &metav1.DeleteOptions{
+			if err := s.clientWorkflows.Delete(metacluster.ID, &metav1.DeleteOptions{
 				GracePeriodSeconds: &gracePeriod,
 			}); err != nil {
-				log.Printf("[ERROR] failed to delete workflow %q: %v", workflow.Name, err)
+				log.Printf("[ERROR] failed to delete workflow %q: %v", metacluster.ID, err)
 			} else {
-				log.Printf("[INFO] deleted workflow %q", workflow.Name)
+				log.Printf("[INFO] deleted workflow %q", metacluster.ID)
 			}
 		}
 	}

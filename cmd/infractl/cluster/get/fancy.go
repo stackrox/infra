@@ -22,9 +22,14 @@ func (p prettyCluster) PrettyPrint() {
 	fmt.Printf("ID:          %s\n", p.ID)
 	fmt.Printf("Flavor:      %s\n", p.Flavor)
 	fmt.Printf("Owner:       %s\n", p.Owner)
-	fmt.Printf("Description: %s\n", p.Description)
+	if p.Description != "" {
+		fmt.Printf("Description: %s\n", p.Description)
+	}
 	fmt.Printf("Status:      %s\n", p.Status.String())
 	fmt.Printf("Created:     %v\n", common.FormatTime(createdOn))
+	if p.URL != "" {
+		fmt.Printf("URL:         %s\n", p.URL)
+	}
 	if destroyedOn.Unix() != 0 {
 		fmt.Printf("Destroyed:   %v\n", common.FormatTime(destroyedOn))
 	}
