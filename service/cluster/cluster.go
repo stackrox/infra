@@ -117,17 +117,49 @@ func (s *clusterImpl) Info(ctx context.Context, clusterID *v1.ResourceByID) (*v1
 }
 
 // List implements ClusterService.List.
-func (s *clusterImpl) List(ctx context.Context, clusterID *empty.Empty) (*v1.ClusterListResponse, error) {
-	workflows, err := s.clientWorkflows.List(metav1.ListOptions{})
+func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) (*v1.ClusterListResponse, error) {
+	workflowList, err := s.clientWorkflows.List(metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	resp := &v1.ClusterListResponse{
-		Clusters: make([]*v1.Cluster, len(workflows.Items)),
+	// Obtain the email of the current principal.
+	var email string
+	if user, found := middleware.UserFromContext(ctx); found {
+		email = user.Email
+	} else if svcacct, found := middleware.ServiceAccountFromContext(ctx); found {
+		email = svcacct.Email
 	}
-	for index, workflow := range workflows.Items {
-		resp.Clusters[index] = clusterFromWorkflow(workflow)
+
+	clusters := make([]*v1.Cluster, 0, len(workflowList.Items))
+
+	// Loop over all of the workflows, and keep only the ones that match our
+	// request criteria.
+	for _, workflow := range workflowList.Items {
+		metacluster, err := s.metaClusterFromWorkflow(workflow)
+		if err != nil {
+			log.Printf("failed to convert workflow to meta-cluster: %v", err)
+			continue
+		}
+
+		// This cluster is expired, and we did not request to include expired
+		// clusters.
+		if !request.Expired && metacluster.Expired {
+			continue
+		}
+
+		// This cluster is not ours, and we did not request to include all
+		// clusters.
+		if !request.All && metacluster.Owner != email {
+			continue
+		}
+
+		// This cluster wasn't rejected, so we'll keep it for the response.
+		clusters = append(clusters, &metacluster.Cluster)
+	}
+
+	resp := &v1.ClusterListResponse{
+		Clusters: clusters,
 	}
 
 	return resp, nil
