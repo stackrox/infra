@@ -7,6 +7,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/spf13/pflag"
+
 	"github.com/spf13/cobra"
 )
 
@@ -62,4 +64,14 @@ func jsonOutput() bool {
 // token returns the given INFRACTL_TOKEN value.
 func token() string {
 	return flags.token
+}
+
+// MustBool looks up the named bool flag in the given flag set and panics if an
+// error is returned.
+func MustBool(flags *pflag.FlagSet, name string) bool {
+	value, err := flags.GetBool(name)
+	if err != nil {
+		panic(err)
+	}
+	return value
 }

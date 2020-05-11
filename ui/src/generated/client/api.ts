@@ -770,8 +770,8 @@ export const ClusterServiceApiAxiosParamCreator = function (configuration?: Conf
     /**
      *
      * @summary CreateToken generates an arbitrary service account token
-     * @param {boolean} [all] All indicates that all clusters should be returned, not just the ones owned by the user.
-     * @param {boolean} [expired] Expired indicates that expired clusters should be returned, not just the ones that are launching/ready.
+     * @param {boolean} [all] all indicates that all clusters should be returned, not just the ones owned by the user.
+     * @param {boolean} [expired] expired indicates that expired clusters should be returned, not just the ones that are launching/ready.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -787,11 +787,11 @@ export const ClusterServiceApiAxiosParamCreator = function (configuration?: Conf
       const localVarQueryParameter = {} as any;
 
       if (all !== undefined) {
-        localVarQueryParameter['All'] = all;
+        localVarQueryParameter['all'] = all;
       }
 
       if (expired !== undefined) {
-        localVarQueryParameter['Expired'] = expired;
+        localVarQueryParameter['expired'] = expired;
       }
 
       localVarUrlObj.query = {
@@ -986,8 +986,8 @@ export const ClusterServiceApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary CreateToken generates an arbitrary service account token
-     * @param {boolean} [all] All indicates that all clusters should be returned, not just the ones owned by the user.
-     * @param {boolean} [expired] Expired indicates that expired clusters should be returned, not just the ones that are launching/ready.
+     * @param {boolean} [all] all indicates that all clusters should be returned, not just the ones owned by the user.
+     * @param {boolean} [expired] expired indicates that expired clusters should be returned, not just the ones that are launching/ready.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -1095,8 +1095,8 @@ export const ClusterServiceApiFactory = function (
     /**
      *
      * @summary CreateToken generates an arbitrary service account token
-     * @param {boolean} [all] All indicates that all clusters should be returned, not just the ones owned by the user.
-     * @param {boolean} [expired] Expired indicates that expired clusters should be returned, not just the ones that are launching/ready.
+     * @param {boolean} [all] all indicates that all clusters should be returned, not just the ones owned by the user.
+     * @param {boolean} [expired] expired indicates that expired clusters should be returned, not just the ones that are launching/ready.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -1193,8 +1193,8 @@ export class ClusterServiceApi extends BaseAPI {
   /**
    *
    * @summary CreateToken generates an arbitrary service account token
-   * @param {boolean} [all] All indicates that all clusters should be returned, not just the ones owned by the user.
-   * @param {boolean} [expired] Expired indicates that expired clusters should be returned, not just the ones that are launching/ready.
+   * @param {boolean} [all] all indicates that all clusters should be returned, not just the ones owned by the user.
+   * @param {boolean} [expired] expired indicates that expired clusters should be returned, not just the ones that are launching/ready.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof ClusterServiceApi

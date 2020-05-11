@@ -131,7 +131,7 @@ func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) 
 		email = svcacct.Email
 	}
 
-	clusters := make([]*v1.Cluster, 0)
+	clusters := make([]*v1.Cluster, 0, len(workflowList.Items))
 
 	// Loop over all of the workflows, and keep only the ones that match our
 	// request criteria.
@@ -144,13 +144,13 @@ func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) 
 
 		// This cluster is expired, and we did not request to include expired
 		// clusters.
-		if metacluster.Expired && !request.Expired {
+		if !request.Expired && metacluster.Expired {
 			continue
 		}
 
 		// This cluster is not ours, and we did not request to include all
 		// clusters.
-		if metacluster.Owner != email && !request.All {
+		if !request.All && metacluster.Owner != email {
 			continue
 		}
 

@@ -246,13 +246,13 @@ message Cluster {
 
 // ClusterListRequest represents a request to ClusterService.List.
 message ClusterListRequest {
-    // All indicates that all clusters should be returned, not just the ones
+    // all indicates that all clusters should be returned, not just the ones
     // owned by the user.
-    bool All = 1;
+    bool all = 1;
 
-    // Expired indicates that expired clusters should be returned, not just the
+    // expired indicates that expired clusters should be returned, not just the
     // ones that are launching/ready.
-    bool Expired = 2;
+    bool expired = 2;
 }
 
 // ClusterListResponse represents details about all clusters.

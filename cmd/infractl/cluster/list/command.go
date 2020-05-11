@@ -37,8 +37,8 @@ func Command() *cobra.Command {
 }
 
 func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []string) (common.PrettyPrinter, error) {
-	includeAll, _ := cmd.Flags().GetBool("all")
-	includeExpired, _ := cmd.Flags().GetBool("expired")
+	includeAll := common.MustBool(cmd.Flags(), "all")
+	includeExpired := common.MustBool(cmd.Flags(), "expired")
 
 	req := v1.ClusterListRequest{
 		All:     includeAll,
