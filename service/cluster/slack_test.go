@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/slack-go/slack"
-
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stretchr/testify/assert"
 )
@@ -121,7 +119,7 @@ func Test(t *testing.T) {
 
 	var dummy metaCluster
 
-	data := slackTemplateContext(mockClient("example@example.com"), &dummy)
+	data := slackTemplateContext(disabledSlack{}, &dummy)
 
 	for index, test := range tests {
 		name := fmt.Sprintf("%d %s", index+1, test.title)
@@ -138,14 +136,14 @@ func Test(t *testing.T) {
 	}
 }
 
-type mockClient string
+//type mockClient string
+//
+//func (m mockClient) PostMessage(channelID string, options ...slack.MsgOption) (string, string, error) {
+//	panic("unimplemented")
+//}
+//
+//func (m mockClient) LookupUser(email string) (slack.User, bool) {
+//	return slack.User{ID: string(m)}, true
+//}
 
-func (m mockClient) PostMessage(channelID string, options ...slack.MsgOption) (string, string, error) {
-	panic("unimplemented")
-}
-
-func (m mockClient) LookupUser(email string) (slack.User, bool) {
-	return slack.User{ID: string(m)}, true
-}
-
-var _ Slacker = (*mockClient)(nil)
+//var _ Slacker = (*mockClient)(nil)

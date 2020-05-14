@@ -75,6 +75,11 @@ func mainCmd() error {
 		return errors.Wrapf(err, "failed to create Google Calendar event source")
 	}
 
+	slackClient, err := cluster.NewSlackClient(cfg.Slack)
+	if err != nil {
+		return errors.Wrapf(err, "failed to create Slack client")
+	}
+
 	// Construct each individual service.
 	services, err := middleware.Services(
 		func() (middleware.APIService, error) {
@@ -85,7 +90,7 @@ func mainCmd() error {
 		},
 		service.NewVersionService,
 		func() (middleware.APIService, error) {
-			return cluster.NewClusterService(registry, signer, eventSource, cfg.Slack)
+			return cluster.NewClusterService(registry, signer, eventSource, slackClient)
 		},
 	)
 	if err != nil {

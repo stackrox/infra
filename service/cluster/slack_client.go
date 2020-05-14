@@ -2,6 +2,7 @@ package cluster
 
 import (
 	"context"
+	"github.com/stackrox/infra/config"
 	"log"
 	"sync"
 	"time"
@@ -16,23 +17,43 @@ const (
 
 // Slacker represents a type that can interact with the Slack API.
 type Slacker interface {
-	PostMessage(channelID string, options ...slack.MsgOption) (string, string, error)
+	PostMessage(options ...slack.MsgOption) error
 	LookupUser(email string) (slack.User, bool)
 }
 
 var _ Slacker = (*slackClient)(nil)
+var _ Slacker = (*disabledSlack)(nil)
 
 type slackClient struct {
-	*slack.Client
+	client *slack.Client
+	channelID string
 	emailCache map[string]slack.User
 	lock       sync.RWMutex
 }
 
+type disabledSlack struct{}
+
+func (s disabledSlack) PostMessage(options ...slack.MsgOption) error {
+	return nil
+}
+
+func (s disabledSlack) LookupUser(email string) (slack.User, bool) {
+	return slack.User{}, false
+}
+
 // NewSlackClient creates a new Slack client that uses the given token for
 // authentication.
-func NewSlackClient(token string) (Slacker, error) {
+func NewSlackClient(cfg *config.SlackConfig) (Slacker, error) {
+	// If the config was missing a Slack configuration, disable the integration
+	// altogether.
+	if cfg == nil {
+		log.Printf("[INFO] Disabling Slack integration")
+		return &disabledSlack{}, nil
+	}
+
 	client := &slackClient{
-		Client:     slack.New(token),
+		client:     slack.New(cfg.Token),
+		channelID: cfg.Channel,
 		emailCache: make(map[string]slack.User),
 	}
 
@@ -59,8 +80,13 @@ func (s *slackClient) LookupUser(email string) (slack.User, bool) {
 	return user, found
 }
 
+func (s *slackClient) PostMessage(options ...slack.MsgOption) error {
+	_,_, err := s.client.PostMessage(s.channelID, options...)
+	return err
+}
+
 func (s *slackClient) updateUserEmailCache(ctx context.Context) error {
-	users, err := s.GetUsersContext(ctx)
+	users, err := s.client.GetUsersContext(ctx)
 	if err != nil {
 		return err
 	}

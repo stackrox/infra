@@ -22,7 +22,6 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/calendar"
-	"github.com/stackrox/infra/config"
 	"github.com/stackrox/infra/flavor"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/service/middleware"
@@ -70,18 +69,13 @@ var (
 )
 
 // NewClusterService creates a new ClusterService.
-func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSource calendar.EventSource, slackCfg config.SlackConfig) (middleware.APIService, error) {
+func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSource calendar.EventSource, slackClient Slacker) (middleware.APIService, error) {
 	clientWorkflows, err := workflowClient()
 	if err != nil {
 		return nil, err
 	}
 
 	clientPods, err := podsClient()
-	if err != nil {
-		return nil, err
-	}
-
-	slackClient, err := NewSlackClient(slackCfg.Token)
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +87,6 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSo
 		signer:          signer,
 		eventSource:     eventSource,
 		slackClient:     slackClient,
-		slackChannel:    slackCfg.Channel,
 	}
 
 	go impl.startSlackCheck()
@@ -574,7 +567,7 @@ func (s *clusterImpl) startSlackCheck() {
 
 			// Only bother to send a message if there is one to send.
 			if message != nil {
-				if _, _, err := s.slackClient.PostMessage(s.slackChannel, message...); err != nil {
+				if err := s.slackClient.PostMessage(message...); err != nil {
 					log.Printf("failed to send Slack message: %v", err)
 					continue
 				}
