@@ -1,70 +1,54 @@
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement } from 'react';
 import { AlertCircle, CheckCircle } from 'react-feather';
 import { ClipLoader } from 'react-spinners';
 
 import { V1Cluster, ClusterServiceApi } from 'generated/client';
 import configuration from 'client/configuration';
+import useApiOperation from 'client/useApiOperation';
 import Modal from 'components/Modal';
+import InformationalModal from 'components/InformationalModal';
 
 const clusterService = new ClusterServiceApi(configuration);
 
-function ConfirmationModal(props: {
-  header: string;
-  message: string;
-  success: boolean;
-  onAcknowledged: () => void;
-}): ReactElement {
-  const { header, message, success, onAcknowledged } = props;
-
-  const button = (
-    <button type="button" className="btn btn-base" onClick={onAcknowledged}>
-      OK
-    </button>
-  );
-
-  return (
-    <Modal isOpen onRequestClose={onAcknowledged} header={header} buttons={button}>
-      <div className="flex items-center">
-        {success ? (
-          <CheckCircle size={16} className="mr-2 text-success-600" />
-        ) : (
-          <AlertCircle size={16} className="mr-2 text-alert-600" />
-        )}
-        <span className={`text-lg ${success ? 'text-success-600' : 'text-alert-600'}`}>
-          {message}
-        </span>
-      </div>
-    </Modal>
-  );
-}
-
 type Props = {
   cluster: V1Cluster;
-  isOpen: boolean;
   onCancel: () => void;
   onDeleted: () => void;
 };
 
-type RequestState = {
-  processing: boolean;
-  success: boolean;
-  error?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-};
-
-export default function DeleteClusterModal({
-  cluster,
-  isOpen,
-  onCancel,
-  onDeleted,
-}: Props): ReactElement | null {
-  const [requestState, setRequestState] = useState<RequestState>({
-    processing: false,
-    success: false,
+export default function DeleteClusterModal({ cluster, onCancel, onDeleted }: Props): ReactElement {
+  const [deleteCluster, { called, loading, error }] = useApiOperation(() => {
+    if (!cluster.ID) throw new Error('Invalid state'); // should never happen, swagger definitions are too allowing
+    return clusterService._delete(cluster.ID); // eslint-disable-line no-underscore-dangle
   });
 
-  if (!cluster.ID) return null; // should never happen, better swagger definitions are needed
+  if (!called) {
+    // waiting for user confirmation
+    const buttons = (
+      <>
+        <button type="button" className="btn btn-base mr-2" onClick={deleteCluster}>
+          Yes
+        </button>
+        <button type="button" className="btn btn-base" onClick={onCancel}>
+          Cancel
+        </button>
+      </>
+    );
 
-  if (requestState.processing) {
+    return (
+      <Modal
+        isOpen
+        onRequestClose={onCancel}
+        header={`Are you sure you want to delete ${cluster.ID}?`}
+        buttons={buttons}
+      >
+        <span className="text-xl">This action cannot be undone.</span>
+      </Modal>
+    );
+  }
+
+  if (loading) {
+    // waiting for server response
     return (
       <Modal isOpen onRequestClose={(): void => {}} header={`Deleting ${cluster.ID}...`}>
         <div className="flex mb-4 w-64 items-center justify-center">
@@ -74,72 +58,27 @@ export default function DeleteClusterModal({
     );
   }
 
-  if (requestState.error) {
-    const message = `Cannot delete cluster. Server error occurred: "${requestState.error.message}".`;
-    const onAcknowledged = (): void => {
-      setRequestState({ processing: false, error: undefined, success: false });
-      onCancel();
-    };
+  if (error) {
+    // operation failed
+    const message = `Cannot delete cluster. Server error occurred: "${error.message}".`;
     return (
-      <ConfirmationModal
-        header={`Failed to delete ${cluster.ID}!`}
-        success={false}
-        message={message}
-        onAcknowledged={onAcknowledged}
-      />
+      <InformationalModal header={`Failed to delete ${cluster.ID}!`} onAcknowledged={onCancel}>
+        <div className="flex items-center">
+          <AlertCircle size={16} className="mr-2 text-alert-600" />
+          <span className="text-lg text-alert-600">{message}</span>
+        </div>
+      </InformationalModal>
     );
   }
 
-  if (requestState.success) {
-    const message = `Cluster ${cluster.ID} was deleted.`;
-    const onAcknowledged = (): void => {
-      setRequestState({ processing: false, error: undefined, success: false });
-      onDeleted();
-    };
-    return (
-      <ConfirmationModal
-        header={`Successfully deleted ${cluster.ID}!`}
-        success
-        message={message}
-        onAcknowledged={onAcknowledged}
-      />
-    );
-  }
-
-  const onDelete = (): void => {
-    if (!cluster.ID) return; // should never happen
-    setRequestState({ processing: true, error: undefined, success: false });
-
-    // eslint-disable-next-line no-underscore-dangle
-    clusterService
-      ._delete(`${cluster.ID}`)
-      .then(() => {
-        setRequestState({ processing: false, error: undefined, success: true });
-      })
-      .catch((error) => {
-        setRequestState({ processing: false, error, success: false });
-      });
-  };
-
-  const buttons = (
-    <>
-      <button type="button" className="btn btn-base mr-2" onClick={onDelete}>
-        Yes
-      </button>
-      <button type="button" className="btn btn-base" onClick={onCancel}>
-        Cancel
-      </button>
-    </>
-  );
-
+  // no need to check for data response from the server, "no error happened" means operation was successful
+  const message = `Cluster ${cluster.ID} is being destroyed now.`;
   return (
-    <Modal
-      isOpen={isOpen}
-      onRequestClose={onCancel}
-      header={`Are you sure you want delete ${cluster.ID}?`}
-      buttons={buttons}
-    >
-      <span className="text-xl">This action cannot be undone.</span>
-    </Modal>
+    <InformationalModal header={`Successfully deleted ${cluster.ID}!`} onAcknowledged={onDeleted}>
+      <div className="flex items-center">
+        <CheckCircle size={16} className="mr-2 text-success-600" />
+        <span className="text-lg text-success-600">{message}</span>
+      </div>
+    </InformationalModal>
   );
 }

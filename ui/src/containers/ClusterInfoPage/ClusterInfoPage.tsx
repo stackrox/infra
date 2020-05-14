@@ -72,12 +72,13 @@ export default function ClusterInfoPage(): ReactElement {
           )}
       </div>
 
-      <DeleteClusterModal
-        cluster={data}
-        isOpen={deletionModalOpen}
-        onCancel={(): void => setDeletionModalOpen(false)}
-        onDeleted={(): void => navigate('/')}
-      />
+      {deletionModalOpen && (
+        <DeleteClusterModal
+          cluster={data}
+          onCancel={(): void => setDeletionModalOpen(false)}
+          onDeleted={(): void => navigate('/')}
+        />
+      )}
     </>
   );
 }
