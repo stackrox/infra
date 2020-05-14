@@ -417,3 +417,8 @@ button:focus {
   right: calc(-1 * (var(--arrow-size) - 1px));
 }
 /** End of tippy.js styles */
+
+.react-modal-overlay {
+  @apply fixed top-0 left-0 w-full h-full z-60 !important;
+  background-color: hsla(225, 41%, 32%, 0.82);
+}

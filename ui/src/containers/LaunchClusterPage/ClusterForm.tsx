@@ -17,6 +17,7 @@ import { ClusterServiceApi, V1Parameter } from 'generated/client';
 import configuration from 'client/configuration';
 import TextFormField from 'components/forms/TextFormField';
 import NumberFormField from 'components/forms/NumberFormField';
+import { UploadCloud } from 'react-feather';
 
 const clusterService = new ClusterServiceApi(configuration);
 
@@ -126,6 +127,13 @@ function FormContent(props: { flavorParameters: FlavorParameters }): ReactElemen
   const parameterFields = Object.entries(flavorParameters).map(([param, metadata]) => (
     <ParameterFormField key={param} parameter={metadata} />
   ));
+
+  const launchBtnContent = (
+    <>
+      <UploadCloud size={16} className="mr-2" />
+      Launch
+    </>
+  );
   return (
     <>
       {parameterFields}
@@ -133,7 +141,7 @@ function FormContent(props: { flavorParameters: FlavorParameters }): ReactElemen
       <TextFormField name="Description" label="Description" />
 
       <button type="submit" className="btn btn-base" disabled={isSubmitting}>
-        {isSubmitting ? <ClipLoader size={16} color="currentColor" /> : 'Launch'}
+        {isSubmitting ? <ClipLoader size={16} color="currentColor" /> : launchBtnContent}
       </button>
     </>
   );

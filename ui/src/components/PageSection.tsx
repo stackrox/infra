@@ -1,16 +1,20 @@
 import React, { ReactElement, ReactNode } from 'react';
 
 type Props = {
-  header: string;
+  header: ReactNode;
   className?: string;
   children: ReactNode;
 };
 
 export default function PageSection({ header, className = '', children }: Props): ReactElement {
   return (
-    <div className={className}>
-      <h2 className="pb-2 m-4 border-b-2 text-base-600 font-700 text-4xl capitalize">{header}</h2>
-      <div className="ml-2 mr-2">{children}</div>
+    <div className="flex flex-col h-full min-h-0">
+      <div className={`h-full overflow-auto ${className}`}>
+        <h2 className="bg-base-0 border-b-2 border-base-400 capitalize font-600 mb-2 p-4 sticky text-4xl text-base-600 top-0">
+          {header}
+        </h2>
+        <div className="flex flex-col p-4">{children}</div>
+      </div>
     </div>
   );
 }

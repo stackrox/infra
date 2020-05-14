@@ -5,9 +5,9 @@ import MyClustersPageSection from './MyClustersPageSection';
 
 export default function HomePage(): ReactElement {
   return (
-    <div className="overflow-y-scroll">
+    <>
       <LaunchPageSection />
       <MyClustersPageSection />
-    </div>
+    </>
   );
 }

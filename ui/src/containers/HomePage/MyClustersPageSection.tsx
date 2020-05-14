@@ -8,29 +8,13 @@ import configuration from 'client/configuration';
 import { useUserAuth } from 'containers/UserAuthProvider';
 import PageSection from 'components/PageSection';
 import LinkCard from 'components/LinkCard';
-import Countdown from 'components/Countdown';
+import ClusterLifespanCountdown from 'components/ClusterLifespanCountdown';
 import FullPageSpinner from 'components/FullPageSpinner';
 import FullPageError from 'components/FullPageError';
 
 const clusterService = new ClusterServiceApi(configuration);
 
 const fetchClusters = (): AxiosPromise<V1ClusterListResponse> => clusterService.list();
-
-/**
- * Converts backend returned lifespan to the moment duration
- * @param lifespan lifespan string the way it comes from the backend
- * @returns duration object
- * @throws error if it cannot parse lifespan string
- */
-function lifespanToDuration(lifespan: string): moment.Duration {
-  // API returns lifespan in seconds, but it's being very explicit about it with `10800s` format...
-  const matches = /\d+/.exec(lifespan);
-  if (!matches || matches.length !== 1)
-    throw new Error(`Unexpected server response for lifespan ${lifespan}`);
-
-  const seconds = Number.parseInt(matches[0], 10);
-  return moment.duration(seconds, 's');
-}
 
 function NoClustersMessage(): ReactElement {
   return (
@@ -66,25 +50,13 @@ function ClusterCards(): ReactElement {
   }
 
   const cards = clusters.map((cluster) => {
-    let expirationDate: Date | null = null;
-    try {
-      expirationDate = !cluster.Lifespan
-        ? null
-        : moment(cluster.CreatedOn).add(lifespanToDuration(cluster.Lifespan)).toDate();
-    } catch (e) {
-      // should never happen, ignore, we'll just show N/A for expiration
-      // TODO: eventually log the error to the backend
-    }
-
     return (
       <LinkCard
         key={cluster.ID}
         to={`cluster/${cluster.ID}`}
         header={cluster.ID || 'No ID'}
-        footer={
-          (cluster.Status && expirationDate && <Countdown targetDate={expirationDate} />) ||
-          'Expiration: N/A'
-        }
+        footer={cluster.Status && <ClusterLifespanCountdown cluster={cluster} />}
+        className="m-2"
       >
         {cluster.Description && (
           <span className="mb-2 text-lg">Description: {cluster.Description}</span>
@@ -99,7 +71,7 @@ function ClusterCards(): ReactElement {
 export default function LaunchPageSection(): ReactElement {
   return (
     <PageSection header="My Clusters">
-      <div className="flex flex-wrap">
+      <div className="flex flex-wrap -m-2">
         <ClusterCards />
       </div>
     </PageSection>
