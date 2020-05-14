@@ -26,9 +26,8 @@ type Config struct {
 // CalendarConfig represents the configuration for integrating with Google
 // Calendar.
 type CalendarConfig struct {
-	ID       string       `json:"id"`
-	//Disabled bool         `json:"disabled"`
-	Window   JSONDuration `json:"window"`
+	ID     string       `json:"id"`
+	Window JSONDuration `json:"window"`
 }
 
 // Auth0Config represents the configuration for integrating with Auth0.

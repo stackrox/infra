@@ -1,14 +1,14 @@
-package cluster
+package slack
 
 import (
 	"context"
-	"github.com/stackrox/infra/config"
 	"log"
 	"sync"
 	"time"
 
 	"github.com/pkg/errors"
 	"github.com/slack-go/slack"
+	"github.com/stackrox/infra/config"
 )
 
 const (
@@ -25,8 +25,8 @@ var _ Slacker = (*slackClient)(nil)
 var _ Slacker = (*disabledSlack)(nil)
 
 type slackClient struct {
-	client *slack.Client
-	channelID string
+	client     *slack.Client
+	channelID  string
 	emailCache map[string]slack.User
 	lock       sync.RWMutex
 }
@@ -41,9 +41,9 @@ func (s disabledSlack) LookupUser(email string) (slack.User, bool) {
 	return slack.User{}, false
 }
 
-// NewSlackClient creates a new Slack client that uses the given token for
+// New creates a new Slack client that uses the given token for
 // authentication.
-func NewSlackClient(cfg *config.SlackConfig) (Slacker, error) {
+func New(cfg *config.SlackConfig) (Slacker, error) {
 	// If the config was missing a Slack configuration, disable the integration
 	// altogether.
 	if cfg == nil {
@@ -53,7 +53,7 @@ func NewSlackClient(cfg *config.SlackConfig) (Slacker, error) {
 
 	client := &slackClient{
 		client:     slack.New(cfg.Token),
-		channelID: cfg.Channel,
+		channelID:  cfg.Channel,
 		emailCache: make(map[string]slack.User),
 	}
 
@@ -81,7 +81,7 @@ func (s *slackClient) LookupUser(email string) (slack.User, bool) {
 }
 
 func (s *slackClient) PostMessage(options ...slack.MsgOption) error {
-	_,_, err := s.client.PostMessage(s.channelID, options...)
+	_, _, err := s.client.PostMessage(s.channelID, options...)
 	return err
 }
 

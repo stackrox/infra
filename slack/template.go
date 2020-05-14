@@ -1,18 +1,15 @@
-package cluster
+package slack
 
 import (
 	"bytes"
 	"strings"
 	"text/template"
-	"time"
 
-	"github.com/golang/protobuf/ptypes"
 	"github.com/slack-go/slack"
-	"github.com/stackrox/infra/cmd/infractl/common"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 )
 
-type slackTemplateData struct {
+type TemplateData struct {
 	Description string
 	Flavor      string
 	ID          string
@@ -24,14 +21,14 @@ type slackTemplateData struct {
 	OwnerID    string
 }
 
-type slackStatus string
+type Status string
 
 const (
-	slackStatusSkip      slackStatus = "skip"
-	slackStatusFailed    slackStatus = "failed"
-	slackStatusDestroyed slackStatus = "destroyed"
-	slackStatusReady     slackStatus = "ready"
-	slackStatusCreating  slackStatus = "creating"
+	StatusSkip      Status = "skip"
+	StatusFailed    Status = "failed"
+	StatusDestroyed Status = "destroyed"
+	StatusReady     Status = "ready"
+	StatusCreating  Status = "creating"
 )
 
 var (
@@ -59,7 +56,7 @@ var (
 	}
 )
 
-func templateBlocks(context slackTemplateData, templates []string) []slack.MsgOption {
+func templateBlocks(context TemplateData, templates []string) []slack.MsgOption {
 	blocks := make([]slack.Block, 0, len(templates))
 	for _, raw := range templates {
 		tpl := template.Must(template.New("template").Parse(raw))
@@ -93,46 +90,24 @@ func templateBlocks(context slackTemplateData, templates []string) []slack.MsgOp
 	}
 }
 
-func formatSlackMessage(wfStatus v1.Status, slackStatus slackStatus, contextData slackTemplateData) (slackStatus, []slack.MsgOption) {
+func FormatSlackMessage(wfStatus v1.Status, slackStatus Status, contextData TemplateData) (Status, []slack.MsgOption) {
 	switch {
-	case slackStatus == slackStatusSkip:
-		return slackStatusSkip, nil
+	case slackStatus == StatusSkip:
+		return StatusSkip, nil
 
-	case wfStatus == v1.Status_FAILED && slackStatus != slackStatusFailed:
-		return slackStatusFailed, templateBlocks(contextData, templatesFailed)
+	case wfStatus == v1.Status_FAILED && slackStatus != StatusFailed:
+		return StatusFailed, templateBlocks(contextData, templatesFailed)
 
-	case (wfStatus == v1.Status_DESTROYING || wfStatus == v1.Status_FINISHED) && slackStatus != slackStatusDestroyed:
-		return slackStatusDestroyed, templateBlocks(contextData, templatesDestroyed)
+	case (wfStatus == v1.Status_DESTROYING || wfStatus == v1.Status_FINISHED) && slackStatus != StatusDestroyed:
+		return StatusDestroyed, templateBlocks(contextData, templatesDestroyed)
 
-	case wfStatus == v1.Status_READY && slackStatus != slackStatusReady:
-		return slackStatusReady, templateBlocks(contextData, templatesReady)
+	case wfStatus == v1.Status_READY && slackStatus != StatusReady:
+		return StatusReady, templateBlocks(contextData, templatesReady)
 
-	case wfStatus == v1.Status_CREATING && slackStatus != slackStatusCreating:
-		return slackStatusCreating, templateBlocks(contextData, templatesCreating)
+	case wfStatus == v1.Status_CREATING && slackStatus != StatusCreating:
+		return StatusCreating, templateBlocks(contextData, templatesCreating)
 
 	default:
 		return slackStatus, nil
 	}
-}
-
-func slackTemplateContext(client Slacker, cluster *metaCluster) slackTemplateData {
-	createdOn, _ := ptypes.Timestamp(cluster.CreatedOn)
-	lifespan, _ := ptypes.Duration(cluster.Lifespan)
-	remaining := time.Until(createdOn.Add(lifespan))
-
-	data := slackTemplateData{
-		Description: cluster.Description,
-		Flavor:      cluster.Flavor,
-		ID:          cluster.ID,
-		OwnerEmail:  cluster.Owner,
-		Remaining:   common.FormatExpiration(remaining),
-		Scheduled:   cluster.EventID != "",
-		URL:         cluster.URL,
-	}
-
-	if user, found := client.LookupUser(cluster.Owner); found {
-		data.OwnerID = user.ID
-	}
-
-	return data
 }

@@ -22,10 +22,12 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/calendar"
+	"github.com/stackrox/infra/cmd/infractl/common"
 	"github.com/stackrox/infra/flavor"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/service/middleware"
 	"github.com/stackrox/infra/signer"
+	"github.com/stackrox/infra/slack"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -59,17 +61,40 @@ type clusterImpl struct {
 	registry        *flavor.Registry
 	signer          *signer.Signer
 	eventSource     calendar.EventSource
-	slackClient     Slacker
+	slackClient     slack.Slacker
 	slackChannel    string
 }
 
 var (
 	_ middleware.APIService   = (*clusterImpl)(nil)
 	_ v1.ClusterServiceServer = (*clusterImpl)(nil)
+
+	templatesFailed = []string{ // nolint:gochecknoglobals
+		"<@{{.OwnerID}}> - Your {{if .Scheduled}}scheduled {{end}}{{if .Description}}*{{.Description}}* {{else}}*{{.ID}}* {{end}}cluster has failed! :fire:",
+	}
+
+	templatesDestroyed = []string{ // nolint:gochecknoglobals
+		":skull_and_crossbones: The {{if .Scheduled}}scheduled {{end}}{{if .Description}}*{{.Description}}* {{else}}*{{.ID}}* {{end}}cluster has been destroyed.",
+	}
+
+	templatesReady = []string{ // nolint:gochecknoglobals
+		"<@{{.OwnerID}}> - Your {{if .Scheduled}}scheduled {{end}}{{if .Description}}*{{.Description}}* {{else}}*{{.ID}}* {{end}}cluster is now ready! :parrot:",
+		"{{if .URL}}:earth_americas: Browse to *{{.URL}}* to login.{{end}}",
+		":clock2: This cluster has about *{{.Remaining}}* before it is destroyed.",
+		":thinking_face: To view cluster *info*, you can run:\n```$ infractl get {{.ID}}```",
+		":pencil: To read cluster *logs*, you can run:\n```$ infractl logs {{.ID}}```",
+		":package: To download cluster *artifacts*, you can run:\n```$ infractl artifacts {{.ID}}```",
+	}
+
+	templatesCreating = []string{ // nolint:gochecknoglobals
+		"<@{{.OwnerID}}> - Your {{if .Scheduled}}scheduled {{end}}{{if .Description}}*{{.Description}}* {{else}}*{{.ID}}* {{end}}cluster is being created. :rocket:",
+		":clock2: This cluster has about *{{.Remaining}}* before it is destroyed.",
+		":thinking_face: To view cluster *info*, you can run:\n ```$ infractl get {{.ID}}```",
+	}
 )
 
 // NewClusterService creates a new ClusterService.
-func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSource calendar.EventSource, slackClient Slacker) (middleware.APIService, error) {
+func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSource calendar.EventSource, slackClient slack.Slacker) (middleware.APIService, error) {
 	clientWorkflows, err := workflowClient()
 	if err != nil {
 		return nil, err
@@ -242,9 +267,9 @@ func (s *clusterImpl) Create(ctx context.Context, req *v1.CreateClusterRequest) 
 		lifespan = 12 * time.Hour
 	}
 
-	var slackStatus slackStatus
+	var slackStatus slack.Status
 	if req.NoSlack {
-		slackStatus = slackStatusSkip
+		slackStatus = slack.StatusSkip
 	}
 
 	workflow.SetAnnotations(map[string]string{
@@ -563,7 +588,7 @@ func (s *clusterImpl) startSlackCheck() {
 
 			// Generate a Slack message for our current cluster state.
 			data := slackTemplateContext(s.slackClient, metacluster)
-			newSlackStatus, message := formatSlackMessage(metacluster.Status, metacluster.Slack, data)
+			newSlackStatus, message := slack.FormatSlackMessage(metacluster.Status, metacluster.Slack, data)
 
 			// Only bother to send a message if there is one to send.
 			if message != nil {
@@ -642,4 +667,26 @@ func (s *clusterImpl) startDeleteWorkflowCheck() {
 			}
 		}
 	}
+}
+
+func slackTemplateContext(client slack.Slacker, cluster *metaCluster) slack.TemplateData {
+	createdOn, _ := ptypes.Timestamp(cluster.CreatedOn)
+	lifespan, _ := ptypes.Duration(cluster.Lifespan)
+	remaining := time.Until(createdOn.Add(lifespan))
+
+	data := slack.TemplateData{
+		Description: cluster.Description,
+		Flavor:      cluster.Flavor,
+		ID:          cluster.ID,
+		OwnerEmail:  cluster.Owner,
+		Remaining:   common.FormatExpiration(remaining),
+		Scheduled:   cluster.EventID != "",
+		URL:         cluster.URL,
+	}
+
+	if user, found := client.LookupUser(cluster.Owner); found {
+		data.OwnerID = user.ID
+	}
+
+	return data
 }

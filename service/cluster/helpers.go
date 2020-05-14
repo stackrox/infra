@@ -7,6 +7,7 @@ import (
 	"github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
 	"github.com/golang/protobuf/ptypes"
 	v1 "github.com/stackrox/infra/generated/api/v1"
+	"github.com/stackrox/infra/slack"
 )
 
 // clusterFromWorkflow converts an Argo workflow into a cluster.
@@ -42,7 +43,7 @@ type metaCluster struct {
 	Artifacts map[string]artifactData
 	EventID   string
 	Expired   bool
-	Slack     slackStatus
+	Slack     slack.Status
 }
 
 type artifactData struct {
@@ -103,7 +104,7 @@ func (s *clusterImpl) metaClusterFromWorkflow(workflow v1alpha1.Workflow) (*meta
 
 	return &metaCluster{
 		Cluster:   *cluster,
-		Slack:     slackStatus(GetSlack(&workflow)),
+		Slack:     slack.Status(GetSlack(&workflow)),
 		Expired:   expired,
 		Artifacts: artifacts,
 		EventID:   GetEventID(&workflow),
