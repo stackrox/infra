@@ -9,6 +9,8 @@ import (
 	v1 "github.com/stackrox/infra/generated/api/v1"
 )
 
+// TemplateData represents the available context that is passed when executing
+// Slack message templates.
 type TemplateData struct {
 	Description string
 	Flavor      string
@@ -21,14 +23,25 @@ type TemplateData struct {
 	OwnerID    string
 }
 
+// Status represents which lifecycle stage a cluster has most recently sent a
+// slack message for.
 type Status string
 
 const (
-	StatusSkip      Status = "skip"
-	StatusFailed    Status = "failed"
+	// StatusSkip is for when cluster should not result in Slack messages.
+	StatusSkip Status = "skip"
+
+	// StatusFailed is for when a cluster has failed.
+	StatusFailed Status = "failed"
+
+	// StatusDestroyed is for when a cluster is being deleted.
 	StatusDestroyed Status = "destroyed"
-	StatusReady     Status = "ready"
-	StatusCreating  Status = "creating"
+
+	// StatusReady is for when a cluster is ready.
+	StatusReady Status = "ready"
+
+	// StatusCreating is for when a cluster is being created.
+	StatusCreating Status = "creating"
 )
 
 var (
@@ -90,6 +103,7 @@ func templateBlocks(context TemplateData, templates []string) []slack.MsgOption 
 	}
 }
 
+// FormatSlackMessage formats the correct Slack message given the current cluster state.
 func FormatSlackMessage(wfStatus v1.Status, slackStatus Status, contextData TemplateData) (Status, []slack.MsgOption) {
 	switch {
 	case slackStatus == StatusSkip:

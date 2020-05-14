@@ -62,35 +62,11 @@ type clusterImpl struct {
 	signer          *signer.Signer
 	eventSource     calendar.EventSource
 	slackClient     slack.Slacker
-	slackChannel    string
 }
 
 var (
 	_ middleware.APIService   = (*clusterImpl)(nil)
 	_ v1.ClusterServiceServer = (*clusterImpl)(nil)
-
-	templatesFailed = []string{ // nolint:gochecknoglobals
-		"<@{{.OwnerID}}> - Your {{if .Scheduled}}scheduled {{end}}{{if .Description}}*{{.Description}}* {{else}}*{{.ID}}* {{end}}cluster has failed! :fire:",
-	}
-
-	templatesDestroyed = []string{ // nolint:gochecknoglobals
-		":skull_and_crossbones: The {{if .Scheduled}}scheduled {{end}}{{if .Description}}*{{.Description}}* {{else}}*{{.ID}}* {{end}}cluster has been destroyed.",
-	}
-
-	templatesReady = []string{ // nolint:gochecknoglobals
-		"<@{{.OwnerID}}> - Your {{if .Scheduled}}scheduled {{end}}{{if .Description}}*{{.Description}}* {{else}}*{{.ID}}* {{end}}cluster is now ready! :parrot:",
-		"{{if .URL}}:earth_americas: Browse to *{{.URL}}* to login.{{end}}",
-		":clock2: This cluster has about *{{.Remaining}}* before it is destroyed.",
-		":thinking_face: To view cluster *info*, you can run:\n```$ infractl get {{.ID}}```",
-		":pencil: To read cluster *logs*, you can run:\n```$ infractl logs {{.ID}}```",
-		":package: To download cluster *artifacts*, you can run:\n```$ infractl artifacts {{.ID}}```",
-	}
-
-	templatesCreating = []string{ // nolint:gochecknoglobals
-		"<@{{.OwnerID}}> - Your {{if .Scheduled}}scheduled {{end}}{{if .Description}}*{{.Description}}* {{else}}*{{.ID}}* {{end}}cluster is being created. :rocket:",
-		":clock2: This cluster has about *{{.Remaining}}* before it is destroyed.",
-		":thinking_face: To view cluster *info*, you can run:\n ```$ infractl get {{.ID}}```",
-	}
 )
 
 // NewClusterService creates a new ClusterService.
