@@ -21,7 +21,6 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/pkg/errors"
-	"github.com/slack-go/slack"
 	"github.com/stackrox/infra/calendar"
 	"github.com/stackrox/infra/config"
 	"github.com/stackrox/infra/flavor"
@@ -61,7 +60,7 @@ type clusterImpl struct {
 	registry        *flavor.Registry
 	signer          *signer.Signer
 	eventSource     calendar.EventSource
-	slackClient     *slack.Client
+	slackClient     Slacker
 	slackChannel    string
 }
 
@@ -82,13 +81,18 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSo
 		return nil, err
 	}
 
+	slackClient, err := NewSlackClient(slackCfg.Token)
+	if err != nil {
+		return nil, err
+	}
+
 	impl := &clusterImpl{
 		clientWorkflows: clientWorkflows,
 		clientPods:      clientPods,
 		registry:        registry,
 		signer:          signer,
 		eventSource:     eventSource,
-		slackClient:     slack.New(slackCfg.Token),
+		slackClient:     slackClient,
 		slackChannel:    slackCfg.Channel,
 	}
 
@@ -564,12 +568,9 @@ func (s *clusterImpl) startSlackCheck() {
 				continue
 			}
 
-			wfStatus := metacluster.Status
-			slackStatus := metacluster.Slack
-			endpointURL := metacluster.URL
-
 			// Generate a Slack message for our current cluster state.
-			newSlackStatus, message := formatSlackMessage(&metacluster.Cluster, wfStatus, slackStatus, endpointURL)
+			data := slackTemplateContext(s.slackClient, metacluster)
+			newSlackStatus, message := formatSlackMessage(metacluster.Status, metacluster.Slack, data)
 
 			// Only bother to send a message if there is one to send.
 			if message != nil {
@@ -581,7 +582,7 @@ func (s *clusterImpl) startSlackCheck() {
 
 			// Only bother to update workflow annotation if our phase has
 			// transitioned.
-			if newSlackStatus != slackStatus {
+			if newSlackStatus != metacluster.Slack {
 				// Construct our replacement patch
 				payloadBytes, err := formatAnnotationPatch(annotationSlackKey, string(newSlackStatus))
 				if err != nil {

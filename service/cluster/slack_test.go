@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/slack-go/slack"
+
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stretchr/testify/assert"
 )
@@ -117,13 +119,15 @@ func Test(t *testing.T) {
 		},
 	}
 
-	var dummy v1.Cluster
+	var dummy metaCluster
+
+	data := slackTemplateContext(mockClient("example@example.com"), &dummy)
 
 	for index, test := range tests {
 		name := fmt.Sprintf("%d %s", index+1, test.title)
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			actualNewSlackStatus, actualMessages := formatSlackMessage(&dummy, test.clusterStatus, test.slackStatus, "")
+			actualNewSlackStatus, actualMessages := formatSlackMessage(test.clusterStatus, test.slackStatus, data)
 			assert.Equal(t, actualNewSlackStatus, test.expectedNewSlackStatus)
 			if test.expectedNoMessages {
 				assert.Nil(t, actualMessages)
@@ -133,3 +137,15 @@ func Test(t *testing.T) {
 		})
 	}
 }
+
+type mockClient string
+
+func (m mockClient) PostMessage(channelID string, options ...slack.MsgOption) (string, string, error) {
+	panic("unimplemented")
+}
+
+func (m mockClient) LookupUser(email string) (slack.User, bool) {
+	return slack.User{ID: string(m)}, true
+}
+
+var _ Slacker = (*mockClient)(nil)
