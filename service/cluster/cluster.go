@@ -21,13 +21,13 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/pkg/errors"
-	"github.com/slack-go/slack"
 	"github.com/stackrox/infra/calendar"
-	"github.com/stackrox/infra/config"
+	"github.com/stackrox/infra/cmd/infractl/common"
 	"github.com/stackrox/infra/flavor"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/service/middleware"
 	"github.com/stackrox/infra/signer"
+	"github.com/stackrox/infra/slack"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -61,8 +61,7 @@ type clusterImpl struct {
 	registry        *flavor.Registry
 	signer          *signer.Signer
 	eventSource     calendar.EventSource
-	slackClient     *slack.Client
-	slackChannel    string
+	slackClient     slack.Slacker
 }
 
 var (
@@ -71,7 +70,7 @@ var (
 )
 
 // NewClusterService creates a new ClusterService.
-func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSource calendar.EventSource, slackCfg config.SlackConfig) (middleware.APIService, error) {
+func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSource calendar.EventSource, slackClient slack.Slacker) (middleware.APIService, error) {
 	clientWorkflows, err := workflowClient()
 	if err != nil {
 		return nil, err
@@ -88,8 +87,7 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSo
 		registry:        registry,
 		signer:          signer,
 		eventSource:     eventSource,
-		slackClient:     slack.New(slackCfg.Token),
-		slackChannel:    slackCfg.Channel,
+		slackClient:     slackClient,
 	}
 
 	go impl.startSlackCheck()
@@ -245,9 +243,9 @@ func (s *clusterImpl) Create(ctx context.Context, req *v1.CreateClusterRequest) 
 		lifespan = 12 * time.Hour
 	}
 
-	var slackStatus slackStatus
+	var slackStatus slack.Status
 	if req.NoSlack {
-		slackStatus = slackStatusSkip
+		slackStatus = slack.StatusSkip
 	}
 
 	workflow.SetAnnotations(map[string]string{
@@ -564,16 +562,13 @@ func (s *clusterImpl) startSlackCheck() {
 				continue
 			}
 
-			wfStatus := metacluster.Status
-			slackStatus := metacluster.Slack
-			endpointURL := metacluster.URL
-
 			// Generate a Slack message for our current cluster state.
-			newSlackStatus, message := formatSlackMessage(&metacluster.Cluster, wfStatus, slackStatus, endpointURL)
+			data := slackTemplateContext(s.slackClient, metacluster)
+			newSlackStatus, message := slack.FormatSlackMessage(metacluster.Status, metacluster.Slack, data)
 
 			// Only bother to send a message if there is one to send.
 			if message != nil {
-				if _, _, err := s.slackClient.PostMessage(s.slackChannel, message...); err != nil {
+				if err := s.slackClient.PostMessage(message...); err != nil {
 					log.Printf("failed to send Slack message: %v", err)
 					continue
 				}
@@ -581,7 +576,7 @@ func (s *clusterImpl) startSlackCheck() {
 
 			// Only bother to update workflow annotation if our phase has
 			// transitioned.
-			if newSlackStatus != slackStatus {
+			if newSlackStatus != metacluster.Slack {
 				// Construct our replacement patch
 				payloadBytes, err := formatAnnotationPatch(annotationSlackKey, string(newSlackStatus))
 				if err != nil {
@@ -648,4 +643,26 @@ func (s *clusterImpl) startDeleteWorkflowCheck() {
 			}
 		}
 	}
+}
+
+func slackTemplateContext(client slack.Slacker, cluster *metaCluster) slack.TemplateData {
+	createdOn, _ := ptypes.Timestamp(cluster.CreatedOn)
+	lifespan, _ := ptypes.Duration(cluster.Lifespan)
+	remaining := time.Until(createdOn.Add(lifespan))
+
+	data := slack.TemplateData{
+		Description: cluster.Description,
+		Flavor:      cluster.Flavor,
+		ID:          cluster.ID,
+		OwnerEmail:  cluster.Owner,
+		Remaining:   common.FormatExpiration(remaining),
+		Scheduled:   cluster.EventID != "",
+		URL:         cluster.URL,
+	}
+
+	if user, found := client.LookupUser(cluster.Owner); found {
+		data.OwnerID = user.ID
+	}
+
+	return data
 }

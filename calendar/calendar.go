@@ -4,6 +4,7 @@ package calendar
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/stackrox/infra/config"
@@ -54,8 +55,9 @@ func (*disabledCalendar) Events() ([]Event, error) {
 }
 
 // NewGoogleCalendar creates a new Google Calendar connector for fetching events.
-func NewGoogleCalendar(cfg config.CalendarConfig) (EventSource, error) {
-	if cfg.Disabled {
+func NewGoogleCalendar(cfg *config.CalendarConfig) (EventSource, error) {
+	if cfg == nil {
+		log.Printf("[INFO] Disabling calendar integration")
 		return &disabledCalendar{}, nil
 	}
 

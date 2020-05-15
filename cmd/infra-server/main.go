@@ -20,6 +20,7 @@ import (
 	"github.com/stackrox/infra/service/cluster"
 	"github.com/stackrox/infra/service/middleware"
 	"github.com/stackrox/infra/signer"
+	"github.com/stackrox/infra/slack"
 )
 
 // main is the entry point of the infra server.
@@ -75,6 +76,11 @@ func mainCmd() error {
 		return errors.Wrapf(err, "failed to create Google Calendar event source")
 	}
 
+	slackClient, err := slack.New(cfg.Slack)
+	if err != nil {
+		return errors.Wrapf(err, "failed to create Slack client")
+	}
+
 	// Construct each individual service.
 	services, err := middleware.Services(
 		func() (middleware.APIService, error) {
@@ -85,7 +91,7 @@ func mainCmd() error {
 		},
 		service.NewVersionService,
 		func() (middleware.APIService, error) {
-			return cluster.NewClusterService(registry, signer, eventSource, cfg.Slack)
+			return cluster.NewClusterService(registry, signer, eventSource, slackClient)
 		},
 	)
 	if err != nil {

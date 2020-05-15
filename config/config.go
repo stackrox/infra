@@ -17,18 +17,17 @@ type Config struct {
 	Password string `json:"password"`
 
 	// Google Calendar integration configuration.
-	Calendar CalendarConfig `json:"calendar"`
+	Calendar *CalendarConfig `json:"calendar"`
 
 	// Slack notification configuration.
-	Slack SlackConfig `json:"slack"`
+	Slack *SlackConfig `json:"slack"`
 }
 
 // CalendarConfig represents the configuration for integrating with Google
 // Calendar.
 type CalendarConfig struct {
-	ID       string       `json:"id"`
-	Disabled bool         `json:"disabled"`
-	Window   JSONDuration `json:"window"`
+	ID     string       `json:"id"`
+	Window JSONDuration `json:"window"`
 }
 
 // Auth0Config represents the configuration for integrating with Auth0.
