@@ -46,10 +46,21 @@ export default function UserServiceAccountToken(): ReactElement {
 
   return (
     <div>
+      <div className="text-xl mb-8">
+        <p className="my-2">
+          After downloading the file, you can install it anywhere in your <code>$PATH</code>. For
+          example, you may put it in your Go executable directory.
+        </p>
+        <pre className="border border-base-400 p-4 text-lg">
+          $ install ~/Downloads/infractl-darwin-amd64 $GOPATH/bin/infractl
+          <br />$ xattr -c $GOPATH/bin/infractl
+          <br />$ which infractl
+        </pre>
+      </div>
+
+      <h3 className="text-3xl mb-2">Authenticating with infractl</h3>
       <div className="flex items-center">
-        <span className="text-xl">
-          Run the following in a terminal to configure infractl for use:
-        </span>
+        <p className="text-xl">Run the following in a terminal to authenticate infractl for use:</p>
         <button
           type="button"
           aria-label="Copy to clipboard"
@@ -64,8 +75,8 @@ export default function UserServiceAccountToken(): ReactElement {
           </Tooltip>
         </button>
       </div>
-      <input
-        type="text"
+      <textarea
+        rows={6}
         value={exportCommand}
         className="mt-4 w-full bg-base-100 p-1 rounded border-2 border-base-300 hover:border-base-400 font-600 leading-normal outline-none"
         readOnly

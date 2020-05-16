@@ -9,15 +9,15 @@ export default function InfractlPageSection(): ReactElement {
     'Download for Linux': '/downloads/infractl-linux-amd64',
   };
   const infractlLinks = Object.entries(infractlDownloads).map(([label, value]) => (
-    <a key={value} href={value} download={value} className="btn btn-base mr-2">
+    <a key={value} href={value} download className="btn btn-base mr-2">
       {label}
     </a>
   ));
 
   return (
     <PageSection header="infractl (CLI)">
-      <div className="mb-4">{infractlLinks}</div>
-      <div className="md:w-1/2">
+      <div className="mb-4 mx-2">{infractlLinks}</div>
+      <div className="md:w-1/2 mx-2">
         <UserServiceAccountToken />
       </div>
     </PageSection>
