@@ -51,10 +51,15 @@ export default function UserServiceAccountToken(): ReactElement {
           After downloading the file, you can install it anywhere in your <code>$PATH</code>. For
           example, you may put it in your Go executable directory.
         </p>
-        <pre className="border border-base-400 p-4 text-lg">
+        <p className="my-2">
+          Here are the commands to move the file, allow it to execute on a Mac, confirm its
+          location, and help you learn about its features.
+        </p>
+        <pre className="border border-base-400 p-4 text-lg whitespace-pre-wrap">
           $ install ~/Downloads/infractl-darwin-amd64 $GOPATH/bin/infractl
           <br />$ xattr -c $GOPATH/bin/infractl
           <br />$ which infractl
+          <br />$ infractl help
         </pre>
       </div>
 
