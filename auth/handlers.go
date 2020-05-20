@@ -160,3 +160,9 @@ func (a OAuth) Authorized(handler http.Handler) http.Handler {
 func (a OAuth) AuthorizedFunc(handler http.HandlerFunc) http.Handler { // nolint:interfacer
 	return a.Authorized(handler)
 }
+
+// Endpoint returns the OAuth service endpoint (host with optional port)
+// string. Used for generating redirects.
+func (a OAuth) Endpoint() string {
+	return a.endpoint
+}

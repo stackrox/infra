@@ -113,55 +113,160 @@ func (s *server) RunServer() (<-chan error, error) {
 		}
 	}
 
+	routeMux := http.NewServeMux()
+
 	// Updates http handler routes. This included "web-only" routes, like
 	// login/logout/static, and also gRPC-Gateway routes.
-	mux.Handle("/", serveContent(s.cfg.Server.StaticDir, s.oauth))
-	mux.Handle("/v1/", gwMux)
-	s.oauth.Handle(mux)
+	routeMux.Handle("/", serveApplicationResources(s.cfg.Server.StaticDir, s.oauth))
+	routeMux.Handle("/v1/", gwMux)
+	s.oauth.Handle(routeMux)
+
+	mux.Handle("/",
+		wrapHealthCheck(
+			wrapCanonicalRedirect(
+				s.oauth.Endpoint(),
+				routeMux,
+			),
+		),
+	)
 
 	return errCh, nil
 }
 
-// serveContent serves the main application (static files) content. Auth is
-// enforced on most routes.
-func serveContent(dir string, oAuth auth.OAuth) http.Handler {
-	whitelist := map[string]struct{}{
-		"/favicon.ico": {},
+// serveApplicationResources handles requests for SPA endpoints as well as
+// regular resources.
+func serveApplicationResources(dir string, oAuth auth.OAuth) http.Handler {
+	type rule struct {
+		path      string
+		spa       bool
+		anonymous bool
+		prefix    bool
+	}
+
+	// List of path rules, roughly ordered from most-likely matched to
+	// least-likely matched.
+	rules := []rule{
+		{
+			path:   "/static/",
+			prefix: true,
+		},
+		{
+			path: "/manifest.json",
+		},
+		{
+			path:      "/favicon.ico",
+			anonymous: true,
+		},
+		{
+			path: "/",
+			spa:  true,
+		},
+		{
+			path:   "/launch/",
+			spa:    true,
+			prefix: true,
+		},
+		{
+			path:   "/cluster/",
+			spa:    true,
+			prefix: true,
+		},
+		{
+			path: "/downloads",
+			spa:  true,
+		},
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if isHealthCheck(w, r) {
+		requestPath := r.URL.Path
+
+		for _, rule := range rules {
+			if rule.prefix {
+				// If this rule is supposed to match a path prefix, and that
+				// path prefix isn't matched, move onto the next rule.
+				if !strings.HasPrefix(requestPath, rule.path) {
+					continue
+				}
+			} else {
+				// If this rule is supposed to match a path exactly, and that
+				// path isn't exactly matched, move onto the next rule.
+				if requestPath != rule.path {
+					continue
+				}
+			}
+
+			// If the path is a path in the SPA, set the path to be the root,
+			// so that the index.html is served.
+			if rule.spa {
+				r.URL.Path = "/"
+			}
+
+			if rule.anonymous {
+				// Serve this path anonymously (without any authentication).
+				http.FileServer(http.Dir(dir)).ServeHTTP(w, r)
+			} else {
+				// Serve this path with authentication.
+				oAuth.Authorized(http.FileServer(http.Dir(dir))).ServeHTTP(w, r)
+			}
+
 			return
 		}
-
-		// If a whitelisted file is being requested, serve it without auth.
-		if _, found := whitelist[r.RequestURI]; found {
-			http.FileServer(http.Dir(dir)).ServeHTTP(w, r)
-			return
-		}
-
-		// Serve the requested file with auth.
+		// No rules matched, so serve this path with authentication by default.
 		oAuth.Authorized(http.FileServer(http.Dir(dir))).ServeHTTP(w, r)
 	})
 }
 
-// isHealthCheck determines if the given request is a health check, and
+// wrapCanonicalRedirect redirects proxied requests for non-canonical endpoints
+// to the canonical endpoint.
+//
+// Examples:
+//   http://example.com      --> https://example.com (non https)
+//   https://old.example.com --> https://example.com (CNAME)
+func wrapCanonicalRedirect(endpoint string, wrapped http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		headerXForwardedFor := r.Header.Get("X-Forwarded-For")
+		headerXForwardedProto := r.Header.Get("X-Forwarded-Proto")
+		headerVia := r.Header.Get("Via")
+
+		// It doesn't appear that this request came through an Ingress, process
+		// the request normally.
+		if headerVia == "" || headerXForwardedFor == "" || headerXForwardedProto == "" {
+			wrapped.ServeHTTP(w, r)
+			return
+		}
+
+		// Compare the endpoint the browser thinks it's talking with to the
+		// endpoint it should be talking with. If the match, process the
+		// request normally.
+		requestEndpoint := headerXForwardedProto + "://" + r.Host
+		canonicalEndpoint := "https://" + endpoint
+		if requestEndpoint == canonicalEndpoint {
+			wrapped.ServeHTTP(w, r)
+			return
+		}
+
+		// There was a mismatch, so redirect to the canonical URL.
+		http.Redirect(w, r, canonicalEndpoint, http.StatusMovedPermanently)
+	})
+}
+
+// wrapHealthCheck determines if the given request is a health check, and
 // responds appropriately with a 200 OK status code.
-func isHealthCheck(w http.ResponseWriter, r *http.Request) bool {
-	switch {
-	case strings.HasPrefix(r.UserAgent(), "kube-probe"):
-		// Kubernetes internal service health check.
-		w.WriteHeader(http.StatusOK)
-		return true
+func wrapHealthCheck(wrapped http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case strings.HasPrefix(r.UserAgent(), "kube-probe"):
+			// Kubernetes internal service health check.
+			w.WriteHeader(http.StatusOK)
 
-	case strings.HasPrefix(r.UserAgent(), "GoogleHC"):
-		// GCP backend health check.
-		w.WriteHeader(http.StatusOK)
-		return true
+		case strings.HasPrefix(r.UserAgent(), "GoogleHC"):
+			// GCP backend health check.
+			w.WriteHeader(http.StatusOK)
 
-	default:
-		return false
-	}
+		default:
+			wrapped.ServeHTTP(w, r)
+		}
+	})
 }
 
 func grpcLocalCredentials(certFile string) (grpc.DialOption, error) {
