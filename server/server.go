@@ -158,24 +158,17 @@ func serveApplicationResources(dir string, oAuth auth.OAuth) http.Handler {
 			anonymous: true,
 		},
 		{
-			path: "/",
-			spa:  true,
-		},
-		{
-			path:   "/launch/",
-			spa:    true,
+			path:   "/downloads/",
 			prefix: true,
 		},
 		{
-			path:   "/cluster/",
+			path:   "/",
 			spa:    true,
 			prefix: true,
-		},
-		{
-			path: "/downloads",
-			spa:  true,
 		},
 	}
+
+	fs := http.FileServer(http.Dir(dir))
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		requestPath := r.URL.Path
@@ -203,16 +196,16 @@ func serveApplicationResources(dir string, oAuth auth.OAuth) http.Handler {
 
 			if rule.anonymous {
 				// Serve this path anonymously (without any authentication).
-				http.FileServer(http.Dir(dir)).ServeHTTP(w, r)
+				fs.ServeHTTP(w, r)
 			} else {
 				// Serve this path with authentication.
-				oAuth.Authorized(http.FileServer(http.Dir(dir))).ServeHTTP(w, r)
+				oAuth.Authorized(fs).ServeHTTP(w, r)
 			}
 
 			return
 		}
 		// No rules matched, so serve this path with authentication by default.
-		oAuth.Authorized(http.FileServer(http.Dir(dir))).ServeHTTP(w, r)
+		oAuth.Authorized(fs).ServeHTTP(w, r)
 	})
 }
 
