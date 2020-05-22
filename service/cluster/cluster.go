@@ -681,6 +681,12 @@ func checkAndEnrichParameters(flavorParams map[string]*v1.Parameter, requestPara
 
 		switch {
 		case flavorParam.Internal:
+			// Extra sanity check to reject any internal parameters from the
+			// user.
+			if found {
+				return nil, fmt.Errorf("parameter %q was not requested", flavorParamName)
+			}
+
 			// Parameter is internally hardcoded.
 			value = flavorParam.Value
 
