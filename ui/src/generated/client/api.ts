@@ -342,19 +342,19 @@ export interface V1Parameter {
    */
   Description?: string;
   /**
-   *
+   * Value that this parameter could have. If the parameter is not optional, then value serves as an example. If the parameter is optional, then value serves as a default. If the parameter is internal, then value serves as a hardcoded constant.
    * @type {string}
    * @memberof V1Parameter
    */
   Value?: string;
   /**
-   *
+   * Optional indicates that this parameter can be optionally provided by a user. If the user does not provide a value, then Value serves as a default.
    * @type {boolean}
    * @memberof V1Parameter
    */
   Optional?: boolean;
   /**
-   *
+   * Internal indicates that this parameter should not be provided by a user, but rather treats Value as a hardcoded constant.
    * @type {boolean}
    * @memberof V1Parameter
    */

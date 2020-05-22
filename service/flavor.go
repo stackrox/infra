@@ -57,11 +57,22 @@ func (s *flavorImpl) Info(_ context.Context, flavorID *v1.ResourceByID) (*v1.Fla
 // scrubInternalParameters drops any internal parameters from the given flavor,
 // as the end user is not allowed to provide values for them.
 func scrubInternalParameters(flavor *v1.Flavor) {
+	newParams := make(map[string]*v1.Parameter)
 	for paramName, paramValue := range flavor.Parameters {
 		if paramValue.Internal {
-			delete(flavor.Parameters, paramName)
+			continue
+		}
+
+		// Clone parameter
+		newParams[paramName] = &v1.Parameter{
+			Name:        paramValue.Name,
+			Description: paramValue.Description,
+			Value:       paramValue.Value,
+			Optional:    paramValue.Optional,
 		}
 	}
+
+	flavor.Parameters = newParams
 }
 
 // Access configures access for this service.
