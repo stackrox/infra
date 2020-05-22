@@ -115,8 +115,20 @@ message Parameter {
     // Description is a human readable description for the parameter.
     string Description = 2;
 
-    // Example is an arbitrary hint for a valid parameter value.
-    string Example = 3;
+    // Value that this parameter could have.
+    // If the parameter is not optional, then value serves as an example.
+    // If the parameter is optional, then value serves as a default.
+    // If the parameter is internal, then value serves as a hardcoded constant.
+    string Value = 3;
+
+    // Optional indicates that this parameter can be optionally provided by a
+    // user. If the user does not provide a value, then Value serves as a
+    // default.
+    bool Optional = 4;
+
+    // Internal indicates that this parameter should not be provided by a user,
+    // but rather treats Value as a hardcoded constant.
+    bool Internal = 5;
 }
 
 // FlavorArtifact represents a single artifact that is produced by a flavor.
