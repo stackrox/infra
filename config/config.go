@@ -105,8 +105,18 @@ type parameter struct {
 	// Description is a human readable description for the parameter.
 	Description string `json:"description"`
 
-	// Example is an arbitrary hint for a valid parameter value.
-	Example string `json:"example"`
+	// Value represents an example, default, or hardcoded value, depending on
+	// the kind configured.
+	Value string `json:"value"`
+
+	// Kind represents the type of parameter (and corresponding value):
+	// required - The user must specify a value. The configured value is used
+	// as an example.
+	// optional - The user may specify a value. The configured value is used
+	// as a default.
+	// hardcoded - The user may not specify a value. The configured value is
+	// used as the only value.
+	Kind parameterKind `json:"kind"`
 }
 
 // artifact represents a single artifact that is produced by this flavor.

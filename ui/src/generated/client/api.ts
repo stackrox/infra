@@ -342,11 +342,23 @@ export interface V1Parameter {
    */
   Description?: string;
   /**
-   * Example is an arbitrary hint for a valid parameter value.
+   *
    * @type {string}
    * @memberof V1Parameter
    */
-  Example?: string;
+  Value?: string;
+  /**
+   *
+   * @type {boolean}
+   * @memberof V1Parameter
+   */
+  Optional?: boolean;
+  /**
+   *
+   * @type {boolean}
+   * @memberof V1Parameter
+   */
+  Internal?: boolean;
 }
 /**
  * ResourceByID represents a generic reference to a named/unique resource.

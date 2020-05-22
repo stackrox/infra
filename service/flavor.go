@@ -36,6 +36,7 @@ func (s *flavorImpl) List(context.Context, *empty.Empty) (*v1.FlavorListResponse
 	var resp v1.FlavorListResponse
 	for _, flavor := range s.registry.Flavors() {
 		flavor := flavor
+		scrubInternalParameters(&flavor)
 		resp.Flavors = append(resp.Flavors, &flavor)
 	}
 
@@ -48,8 +49,19 @@ func (s *flavorImpl) Info(_ context.Context, flavorID *v1.ResourceByID) (*v1.Fla
 	if !found {
 		return nil, status.Errorf(codes.NotFound, "flavor %q not found", flavorID.Id)
 	}
+	scrubInternalParameters(&flavor)
 
 	return &flavor, nil
+}
+
+// scrubInternalParameters drops any internal parameters from the given flavor,
+// as the end user is not allowed to provide values for them.
+func scrubInternalParameters(flavor *v1.Flavor) {
+	for paramName, paramValue := range flavor.Parameters {
+		if paramValue.Internal {
+			delete(flavor.Parameters, paramName)
+		}
+	}
 }
 
 // Access configures access for this service.

@@ -53,6 +53,8 @@ const (
 	workflowDeleteCheckInterval = 5 * time.Minute
 
 	artifactTagURL = "url"
+
+	artifactTagInternal = "internal"
 )
 
 type clusterImpl struct {
@@ -222,9 +224,14 @@ func (s *clusterImpl) Create(ctx context.Context, req *v1.CreateClusterRequest) 
 		return nil, status.Errorf(codes.NotFound, "flavor %q not found", req.ID)
 	}
 
-	if err := flavor.CheckParametersEquivalence(flav, req.Parameters); err != nil {
+	// Combine any hardcoded or default workflow parameters with the user
+	// provided parameters. Or return an error if the user provided
+	// insufficient or superfluous parameters.
+	workflowParams, err := checkAndEnrichParameters(flav.Parameters, req.Parameters)
+	if err != nil {
 		return nil, err
 	}
+	workflow.Spec.Arguments.Parameters = workflowParams
 
 	var owner string
 	if user, found := middleware.UserFromContext(ctx); found {
@@ -255,14 +262,6 @@ func (s *clusterImpl) Create(ctx context.Context, req *v1.CreateClusterRequest) 
 		annotationDescriptionKey: req.Description,
 		annotationSlackKey:       string(slackStatus),
 	})
-
-	workflow.Spec.Arguments.Parameters = make([]v1alpha1.Parameter, 0, len(req.Parameters))
-	for paramName, paramValue := range req.Parameters {
-		workflow.Spec.Arguments.Parameters = append(workflow.Spec.Arguments.Parameters, v1alpha1.Parameter{
-			Name:  paramName,
-			Value: proto.String(paramValue),
-		})
-	}
 
 	created, err := s.clientWorkflows.Create(&workflow)
 	if err != nil {
@@ -295,14 +294,20 @@ func (s *clusterImpl) Artifacts(_ context.Context, clusterID *v1.ResourceByID) (
 					continue
 				}
 
+				var description string
+
+				meta, found := flavorMetadata[artifact.Name]
+				if found {
+					if _, isInternal := meta.Tags[artifactTagInternal]; isInternal {
+						continue
+					}
+
+					description = meta.Description
+				}
+
 				url, err := s.signer.Generate(artifact.S3.Bucket, artifact.S3.Key)
 				if err != nil {
 					return nil, err
-				}
-
-				var description string
-				if meta, found := flavorMetadata[artifact.Name]; found {
-					description = meta.Description
 				}
 
 				resp.Artifacts = append(resp.Artifacts, &v1.Artifact{
@@ -665,4 +670,57 @@ func slackTemplateContext(client slack.Slacker, cluster *metaCluster) slack.Temp
 	}
 
 	return data
+}
+
+func checkAndEnrichParameters(flavorParams map[string]*v1.Parameter, requestParams map[string]string) ([]v1alpha1.Parameter, error) {
+	allParams := make([]v1alpha1.Parameter, 0, len(flavorParams))
+
+	for flavorParamName, flavorParam := range flavorParams {
+		requestValue, found := requestParams[flavorParamName]
+		var value string
+
+		switch {
+		case flavorParam.Internal:
+			// Extra sanity check to reject any internal parameters from the
+			// user.
+			if found {
+				return nil, fmt.Errorf("parameter %q was not requested", flavorParamName)
+			}
+
+			// Parameter is internally hardcoded.
+			value = flavorParam.Value
+
+		case flavorParam.Optional:
+			// Parameter is optional, so fall back to a default if the user
+			// hasn't provided a replacement value.
+			if !found {
+				// use default value.
+				value = flavorParam.Value
+			} else {
+				// Use user-provided value.
+				value = requestValue
+			}
+
+		default:
+			// Parameter is required. The user must provide a value.
+			if !found {
+				return nil, fmt.Errorf("parameter %q was not provided", flavorParamName)
+			}
+			value = requestValue
+		}
+
+		allParams = append(allParams, v1alpha1.Parameter{
+			Name:  flavorParamName,
+			Value: proto.String(value),
+		})
+	}
+
+	for requestParamName := range requestParams {
+		flavorParam, found := flavorParams[requestParamName]
+		if !found || flavorParam.Internal {
+			return nil, fmt.Errorf("parameter %q was not requested", requestParamName)
+		}
+	}
+
+	return allParams, nil
 }

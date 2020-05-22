@@ -127,11 +127,25 @@ func NewFromConfig(filename string) (*Registry, error) {
 
 		parameters := make(map[string]*v1.Parameter, len(flavorCfg.Parameters))
 		for _, parameter := range flavorCfg.Parameters {
-			parameters[parameter.Name] = &v1.Parameter{
+			param := &v1.Parameter{
 				Name:        parameter.Name,
 				Description: parameter.Description,
-				Example:     parameter.Example,
+				Value:       parameter.Value,
 			}
+
+			switch parameter.Kind {
+			case config.ParameterHardcoded:
+				param.Internal = true
+				param.Optional = true
+			case config.ParameterRequired:
+				param.Internal = false
+				param.Optional = false
+			case config.ParameterOptional:
+				param.Internal = false
+				param.Optional = true
+			}
+
+			parameters[parameter.Name] = param
 		}
 
 		artifacts := make(map[string]*v1.FlavorArtifact, len(flavorCfg.Artifacts))
@@ -202,32 +216,14 @@ func CheckWorkflowEquivalence(flavor v1.Flavor, workflow v1alpha1.Workflow) erro
 	}
 
 	// Verify that every flavor parameter has a matching workflow parameter.
-	for flavorParamName := range flavor.Parameters {
+	for flavorParamName, param := range flavor.Parameters {
+		// This parameter has a hardcoded value, and therefore doesn't need to
+		// be specified by the user.
+		if param.Value != "" {
+			continue
+		}
 		if _, found := workflowParamSet[flavorParamName]; !found {
 			return fmt.Errorf("flavor %q manifest had parameter %q but workflow did not", flavor.ID, flavorParamName)
-		}
-	}
-
-	// Sets are equivalent!
-	return nil
-}
-
-// CheckParametersEquivalence verifies that the given flavor parameters and
-// user parameters are equivalent sets.
-//
-// - All parameters from one set must be in the other.
-func CheckParametersEquivalence(flavor v1.Flavor, params map[string]string) error {
-	// Verify that every user parameter has a matching flavor parameter.
-	for paramName := range params {
-		if _, found := flavor.Parameters[paramName]; !found {
-			return fmt.Errorf("parameter %q was not requested", paramName)
-		}
-	}
-
-	// Verify that every flavor parameter has a matching user parameter.
-	for paramName := range flavor.Parameters {
-		if _, found := params[paramName]; !found {
-			return fmt.Errorf("parameter %q was not provided", paramName)
 		}
 	}
 

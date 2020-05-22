@@ -23,6 +23,10 @@ func (p prettyFlavor) PrettyPrint() {
 	for name, parameter := range p.Parameters {
 		fmt.Printf("  %s:\n", name)
 		fmt.Printf("    Description: %s\n", parameter.GetDescription())
-		fmt.Printf("    Example:     %q\n", parameter.GetExample())
+		if parameter.GetOptional() {
+			fmt.Printf("    Default:     %q\n", parameter.GetValue())
+		} else {
+			fmt.Printf("    Example:     %q\n", parameter.GetValue())
+		}
 	}
 }
