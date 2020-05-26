@@ -79,9 +79,8 @@ func (r *Registry) add(flavor v1.Flavor, workflow v1alpha1.Workflow) error {
 }
 
 // Default returns the default flavor
-func (r *Registry) Default() (v1.Flavor, v1alpha1.Workflow) {
-	pair := r.flavors[r.defaultFlavor]
-	return pair.flavor, pair.workflow
+func (r *Registry) Default() string {
+	return r.defaultFlavor
 }
 
 // Get returns the named flavor, and if it exists.
