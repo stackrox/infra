@@ -230,10 +230,10 @@ func (s *clusterImpl) Create(ctx context.Context, req *v1.CreateClusterRequest) 
 		return nil, errors.New("could not determine owner")
 	}
 
-	return s.create(ctx, req, owner, "")
+	return s.create(req, owner, "")
 }
 
-func (s *clusterImpl) create(_ context.Context, req *v1.CreateClusterRequest, owner, eventID string) (*v1.ResourceByID, error) {
+func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string) (*v1.ResourceByID, error) {
 	flav, workflow, found := s.registry.Get(req.ID)
 	if !found {
 		return nil, status.Errorf(codes.NotFound, "flavor %q not found", req.ID)
@@ -523,7 +523,7 @@ func (s *clusterImpl) createFromEvent(event calendar.Event) (*v1.ResourceByID, e
 		Description: event.Title,
 	}
 
-	return s.create(context.Background(), req, event.Email, event.ID)
+	return s.create(req, event.Email, event.ID)
 }
 
 func (s *clusterImpl) getLogs(node v1alpha1.NodeStatus) (*v1.Log, error) {
