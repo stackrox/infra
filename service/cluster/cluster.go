@@ -219,6 +219,21 @@ func (s *clusterImpl) Lifespan(_ context.Context, req *v1.LifespanRequest) (*dur
 
 // Create implements ClusterService.Create.
 func (s *clusterImpl) Create(ctx context.Context, req *v1.CreateClusterRequest) (*v1.ResourceByID, error) {
+	// Determine the owner for this cluster, which is derived from information
+	// about the current authenticated user stored in the request context.
+	var owner string
+	if user, found := middleware.UserFromContext(ctx); found {
+		owner = user.GetEmail()
+	} else if svcacct, found := middleware.ServiceAccountFromContext(ctx); found {
+		owner = svcacct.GetEmail()
+	} else {
+		return nil, errors.New("could not determine owner")
+	}
+
+	return s.create(req, owner, "")
+}
+
+func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string) (*v1.ResourceByID, error) {
 	flav, workflow, found := s.registry.Get(req.ID)
 	if !found {
 		return nil, status.Errorf(codes.NotFound, "flavor %q not found", req.ID)
@@ -233,15 +248,8 @@ func (s *clusterImpl) Create(ctx context.Context, req *v1.CreateClusterRequest) 
 	}
 	workflow.Spec.Arguments.Parameters = workflowParams
 
-	var owner string
-	if user, found := middleware.UserFromContext(ctx); found {
-		owner = user.GetEmail()
-	} else if svcacct, found := middleware.ServiceAccountFromContext(ctx); found {
-		owner = svcacct.GetEmail()
-	} else {
-		return nil, errors.New("could not determine owner")
-	}
-
+	// Determine the lifespan for this cluster. Apply some sanity/bounds
+	// checking on provided lifespans.
 	lifespan, _ := ptypes.Duration(req.Lifespan)
 	if lifespan <= 0 {
 		lifespan = 3 * time.Hour
@@ -255,11 +263,13 @@ func (s *clusterImpl) Create(ctx context.Context, req *v1.CreateClusterRequest) 
 		slackStatus = slack.StatusSkip
 	}
 
+	// Set workflow metadata annotations.
 	workflow.SetAnnotations(map[string]string{
+		annotationDescriptionKey: req.Description,
+		annotationEventKey:       eventID,
 		annotationFlavorKey:      flav.ID,
 		annotationLifespanKey:    fmt.Sprint(lifespan),
 		annotationOwnerKey:       owner,
-		annotationDescriptionKey: req.Description,
 		annotationSlackKey:       string(slackStatus),
 	})
 
@@ -498,35 +508,22 @@ func (s *clusterImpl) startCalendarCheck() {
 
 func (s *clusterImpl) createFromEvent(event calendar.Event) (*v1.ResourceByID, error) {
 	// Lookup the default flavor.
-	flav, workflow := s.registry.Default()
+	defaultFlavorID := s.registry.Default()
 
 	// Set lifespan to range from right now, until 1 hour after the event ends.
 	lifespan := time.Until(event.End.Add(time.Hour))
 
-	// Set some workflow metadata.
-	workflow.SetAnnotations(map[string]string{
-		annotationEventKey:       event.ID,
-		annotationFlavorKey:      flav.ID,
-		annotationLifespanKey:    fmt.Sprint(lifespan),
-		annotationOwnerKey:       event.Email,
-		annotationDescriptionKey: event.Title,
-	})
-
-	// Set the only parameter.
-	workflow.Spec.Arguments.Parameters = []v1alpha1.Parameter{
-		{
-			Name:  "name",
-			Value: proto.String(simpleName(event.Title)),
+	// Build cluster creation request.
+	req := &v1.CreateClusterRequest{
+		ID:       defaultFlavorID,
+		Lifespan: ptypes.DurationProto(lifespan),
+		Parameters: map[string]string{
+			"name": simpleName(event.Title),
 		},
+		Description: event.Title,
 	}
 
-	// Launch the demo!
-	created, err := s.clientWorkflows.Create(&workflow)
-	if err != nil {
-		return nil, err
-	}
-
-	return &v1.ResourceByID{Id: created.Name}, nil
+	return s.create(req, event.Email, event.ID)
 }
 
 func (s *clusterImpl) getLogs(node v1alpha1.NodeStatus) (*v1.Log, error) {
