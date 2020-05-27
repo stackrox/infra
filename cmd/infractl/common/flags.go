@@ -17,7 +17,7 @@ const (
 	TokenEnvVarName = "INFRA_TOKEN"
 
 	// defaultEndpoint is the default infra-server address to connect to.
-	defaultEndpoint = "infra.stackrox.com:443"
+	defaultEndpoint = "infra.rox.systems:443"
 )
 
 // flags represents the collection of flag and environment variable values

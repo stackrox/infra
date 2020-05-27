@@ -29,7 +29,7 @@ _If you're going to use `yarn` instead of `make` targets, make sure you've run
 in a browser window that will auto-refresh on any source code or CSS changes.
 
 By default UI dev server will try to proxy API requests to
-`https://dev.infra.stackrox.com`. To override the API endpoint use
+`https://dev.infra.rox.systems`. To override the API endpoint use
 `INFRA_API_ENDPOINT` env var. I.e. you can start the dev server via
 `export INFRA_API_ENDPOINT=<api_endpoint>; yarn start`.
 
