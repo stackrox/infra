@@ -3,7 +3,7 @@
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const defaultOptions = {
-  target: process.env.INFRA_API_ENDPOINT || 'https://dev.infra.stackrox.com',
+  target: process.env.INFRA_API_ENDPOINT || 'https://dev.infra.rox.systems',
   changeOrigin: true,
   secure: false,
 };
