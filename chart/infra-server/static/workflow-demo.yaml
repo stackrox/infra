@@ -1,0 +1,186 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: demo-
+
+spec:
+  entrypoint: start
+  onExit: stop
+  imagePullSecrets:
+    - name: docker-io-pull-secret
+    - name: stackrox-io-pull-secret
+
+  arguments:
+    parameters:
+      - name: name
+      - name: main-image
+      - name: scanner-image
+      - name: scanner-db-image
+
+  volumes:
+    - name: credentials
+      secret:
+        secretName: google-credentials-demo
+
+  templates:
+    - name: start
+      steps:
+        - - name: roxctl
+            template: roxctl
+            arguments:
+              parameters:
+                - name: main-image
+                  value: "{{workflow.parameters.main-image}}"
+
+        - - name: create
+            template: create
+            arguments:
+              parameters:
+                - name: name
+                  value: "{{workflow.parameters.name}}"
+                - name: main-image
+                  value: "{{workflow.parameters.main-image}}"
+                - name: scanner-image
+                  value: "{{workflow.parameters.scanner-image}}"
+                - name: scanner-db-image
+                  value: "{{workflow.parameters.scanner-db-image}}"
+              artifacts:
+                - name: roxctl
+                  from: "{{steps.roxctl.outputs.artifacts.roxctl}}"
+
+        - - name: wait
+            template: wait
+
+    - name: stop
+      steps:
+        - - name: destroy
+            template: destroy
+            arguments:
+              parameters:
+                - name: name
+                  value: "{{workflow.parameters.name}}"
+              artifacts:
+                - name: tfstate
+                  from: "{{workflow.outputs.artifacts.global-tfstate}}"
+
+    - name: roxctl
+      inputs:
+        parameters:
+          - name: main-image
+      outputs:
+        artifacts:
+          - name: roxctl
+            path: /assets/downloads/cli/roxctl-linux
+      container:
+        image: "{{inputs.parameters.main-image}}"
+        args:
+          - version
+          - "--json"
+
+    - name: create
+      inputs:
+        parameters:
+          - name: name
+          - name: main-image
+          - name: scanner-image
+          - name: scanner-db-image
+        artifacts:
+          - name: roxctl
+            path: /usr/bin/roxctl
+
+      outputs:
+        artifacts:
+          - name: kubeconfig
+            path: /data/kubeconfig.yaml
+            optional: true
+
+          - name: tfstate
+            globalName: global-tfstate
+            path: /data/terraform.tfstate
+            optional: true
+
+          - name: url
+            path: /data/url
+            optional: true
+
+      container:
+        image: gcr.io/stackrox-infra/automation-flavors/demo:v0.0.0-17-g6094079-snapshot
+        args:
+          - create
+          - "--name={{inputs.parameters.name}}"
+          - "--main-image={{inputs.parameters.main-image}}"
+          - "--scanner-image={{inputs.parameters.scanner-image}}"
+          - "--scanner-db-image={{inputs.parameters.scanner-db-image}}"
+          - --gcp-project=stackrox-ephemeral-1
+          - --dns-gcp-project=ultra-current-825
+        volumeMounts:
+          - name: credentials
+            mountPath: /tmp/google-credentials.json
+            subPath: google-credentials.json
+          - name: credentials
+            mountPath: /tmp/google-scanner-credentials.json
+            subPath: google-scanner-credentials.json
+        env:
+          - name: DOCKER_IO_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: demo-secrets
+                key: DOCKER_IO_USERNAME
+          - name: DOCKER_IO_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: demo-secrets
+                key: DOCKER_IO_PASSWORD
+          - name: STACKROX_IO_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: demo-secrets
+                key: STACKROX_IO_USERNAME
+          - name: STACKROX_IO_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: demo-secrets
+                key: STACKROX_IO_PASSWORD
+          - name: AUTH_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: demo-secrets
+                key: AUTH_CLIENT_ID
+          - name: AUTH_DOMAIN
+            valueFrom:
+              secretKeyRef:
+                name: demo-secrets
+                key: AUTH_DOMAIN
+          - name: SLACK_WEBHOOK
+            valueFrom:
+              secretKeyRef:
+                name: demo-secrets
+                key: SLACK_WEBHOOK
+          - name: STACKROX_LICENSE
+            valueFrom:
+              secretKeyRef:
+                name: demo-secrets
+                key: STACKROX_LICENSE
+
+    - name: wait
+      suspend: {}
+
+    - name: destroy
+      inputs:
+        parameters:
+          - name: name
+        artifacts:
+          - name: tfstate
+            path: /data/terraform.tfstate
+            optional: true
+      container:
+        image: gcr.io/stackrox-infra/automation-flavors/demo:v0.0.0-17-g6094079-snapshot
+        args:
+          - destroy
+          - "--name={{inputs.parameters.name}}"
+          - --gcp-project=stackrox-ephemeral-1
+          - --dns-gcp-project=ultra-current-825
+        volumeMounts:
+          - name: credentials
+            mountPath: /tmp/google-credentials.json
+            subPath: google-credentials.json

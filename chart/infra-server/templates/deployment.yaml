@@ -2,24 +2,27 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 
 metadata:
-  name: {{ .Release.Name }}-deployment
-  namespace: {{ .Release.Namespace }}
+  name: infra-server-deployment
+  namespace: infra
   labels:
-    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/name: infra-server
     app.kubernetes.io/version: {{ .Values.tag }}
 
 spec:
-  replicas: 3
+  replicas: 1
   template:
     metadata:
-      namespace: {{ .Release.Namespace }}
+      namespace: infra
       labels:
-        app.kubernetes.io/name: {{ .Release.Name }}
+        app.kubernetes.io/name: infra-server
 
     spec:
       containers:
         - name: infra-server
-          image: {{ .Values.image }}:{{ .Values.tag }}
+          image: us.gcr.io/stackrox-infra/infra-server:{{ required "A valid .Values.tag entry is required!" .Values.tag }}
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /configuration/google-credentials.json
           readinessProbe:
             httpGet:
               path: /
@@ -43,4 +46,4 @@ spec:
       volumes:
         - name: configuration
           secret:
-            secretName: {{ .Release.Name }}-secrets
+            secretName: infra-server-secrets

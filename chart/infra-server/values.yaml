@@ -1,9 +1,22 @@
-image: us.gcr.io/stackrox-infra/infra-server
 
-tag: latest
 
-host: dev.infra.stackrox.com
+#hosts:
+#  primary: dev.infra.stackrox.com
+#  secondary: dev.infra.rox.systems
+#reservedAddressName: infra-address-development
 
-managedCertificateName: infra-server-certificate
-
-reservedAddressName: infra-address-development
+#hosts:
+#  primary: infra.stackrox.com
+#  secondary: infra.rox.systems
+#reservedAddressName: infra-address-production
+#
+#pullSecrets:
+#  docker:
+#    registry: docker.io
+#    username: "stackroxciro"
+#    password: "=ZjR63x3W[[{92=UsP8RAs4]m[jQC?v6"
+#
+#  stackrox:
+#    registry: stackrox.io
+#    username: "sroxci"
+#    password: "NJbk@Tmay*MnJ5%y"

@@ -2,17 +2,17 @@ apiVersion: v1
 kind: Service
 
 metadata:
-  name: {{ .Release.Name }}-service
-  namespace: {{ .Release.Namespace }}
+  name: infra-server-service
+  namespace: infra
   labels:
-    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/name: infra-server
   annotations:
     cloud.google.com/app-protocols: '{"https":"HTTP2"}'
 
 spec:
   type: NodePort
   selector:
-    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/name: infra-server
   ports:
     - protocol: TCP
       port: 8443

@@ -1,0 +1,27 @@
+---
+
+apiVersion: networking.gke.io/v1beta1
+kind: ManagedCertificate
+
+metadata:
+  name: infra-server-certificate
+  namespace: infra
+
+spec:
+  domains:
+    - {{ .Values.hosts.primary }}
+
+---
+
+apiVersion: networking.gke.io/v1beta1
+kind: ManagedCertificate
+
+metadata:
+  name: infra-server-certificate-secondary
+  namespace: infra
+
+spec:
+  domains:
+    - {{ .Values.hosts.secondary }}
+
+---

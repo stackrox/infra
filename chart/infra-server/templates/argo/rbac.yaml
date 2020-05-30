@@ -1,0 +1,31 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+
+metadata:
+  name: argo-workflows
+
+rules:
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflows"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get"]
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+
+metadata:
+  name: argo-workflows
+
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: infra
+
+roleRef:
+  kind: ClusterRole
+  name: argo-workflows
+  apiGroup: rbac.authorization.k8s.io

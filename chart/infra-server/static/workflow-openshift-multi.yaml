@@ -1,0 +1,79 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: openshift-multi-
+spec:
+  entrypoint: start
+  arguments:
+    parameters:
+      - name: name
+      - name: crio
+  volumes:
+    - name: credentials
+      secret:
+        secretName: google-credentials-openshift
+
+  templates:
+    - name: start
+      steps:
+        - - name: create
+            template: create
+            arguments:
+              parameters:
+                - name: name
+                  value: "{{workflow.parameters.name}}"
+                - name: crio
+                  value: "{{workflow.parameters.crio}}"
+
+        - - name: wait
+            template: wait
+        - - name: destroy
+            template: destroy
+            arguments:
+              parameters:
+                - name: name
+                  value: "{{workflow.parameters.name}}"
+              artifacts:
+                - name: terraform-destroy-plan
+                  from: "{{steps.create.outputs.artifacts.terraform-destroy-plan}}"
+
+    - name: create
+      inputs:
+        parameters:
+          - name: name
+          - name: crio
+      outputs:
+        artifacts:
+          - name: kubeconfig
+            path: /well-known/artifacts/config
+          - name: terraform-destroy-plan
+            path: /well-known/artifacts/terraform-destroy.tfplan
+      container:
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:v0.0.0-14-g4c82dc6
+        args:
+          - create
+          - "--name={{inputs.parameters.name}}"
+          - "--crio={{inputs.parameters.crio}}"
+        volumeMounts:
+          - name: credentials
+            mountPath: /tmp/google-credentials.json
+            subPath: google-credentials.json
+
+    - name: wait
+      suspend: {}
+
+    - name: destroy
+      inputs:
+        parameters:
+          - name: name
+        artifacts:
+          - name: terraform-destroy-plan
+            path: /well-known/artifacts/terraform-destroy.tfplan
+      container:
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:v0.0.0-14-g4c82dc6
+        args:
+          - destroy
+        volumeMounts:
+          - name: credentials
+            mountPath: /tmp/google-credentials.json
+            subPath: google-credentials.json

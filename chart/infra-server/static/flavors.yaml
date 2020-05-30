@@ -1,0 +1,154 @@
+##########
+#  demo  #
+##########
+- id: demo
+  name: StackRox Demo
+  description: Demo running StackRox 3.0.43.1
+  availability: default
+  workflow: configuration/workflow-demo.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      value: example1
+
+    - name: main-image
+      value: stackrox.io/main:3.0.43.1
+      kind: hardcoded
+
+    - name: scanner-image
+      value: stackrox.io/scanner:2.2.6
+      kind: hardcoded
+
+    - name: scanner-db-image
+      value: stackrox.io/scanner-db:2.2.6
+      kind: hardcoded
+
+  artifacts:
+    - name: kubeconfig
+      description: Kube config for connecting to cluster
+
+    - name: tfstate
+      description: Terraform state file
+
+    - name: url
+      description: URL of StackRox UI
+      tags: [url]
+
+    - name: roxctl
+      tags: [internal]
+
+#############
+#  qa-demo  #
+#############
+- id: qa-demo
+  name: StackRox Demo for QA testing
+  description: TESTING ONLY - Demo running a provided StackRox version
+  availability: alpha
+  workflow: configuration/workflow-demo.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      value: example1
+
+    - name: main-image
+      description: StackRox Central image Docker name
+      value: stackrox.io/main:3.0.43.1
+
+    - name: scanner-image
+      description: StackRox Scanner image Docker name
+      value: stackrox.io/scanner:2.2.6
+
+    - name: scanner-db-image
+      description: StackRox Scanner DB image Docker name
+      value: stackrox.io/scanner-db:2.2.6
+
+  artifacts:
+    - name: kubeconfig
+      description: Kube config for connecting to cluster
+
+    - name: tfstate
+      description: Terraform state file
+
+    - name: url
+      description: URL of StackRox UI
+      tags: [url]
+
+    - name: roxctl
+      tags: [internal]
+
+#################
+#  gke-default  #
+#################
+- id: gke-default
+  name: GKE Default
+  description: GKE cluster running the default version
+  availability: stable
+  workflow: configuration/workflow-gke-default.yaml
+  parameters:
+    - name: nodes
+      description: number of nodes
+      value: "2"
+      kind: optional
+      
+    - name: name
+      description: cluster name
+      value: example1
+
+####################
+#  openshift-lite  #
+####################
+- id: openshift-lite
+  name: OpenShift Single Node
+  description: Single-node OpenShift cluster
+  availability: alpha
+  workflow: configuration/workflow-openshift-lite.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      value: example1
+
+#####################
+#  openshift-multi  #
+#####################
+- id: openshift-multi
+  name: OpenShift Multi Node
+  description: Multi-node CRI-O OpenShift cluster
+  availability: alpha
+  workflow: configuration/workflow-openshift-multi.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      value: example1
+
+    - name: crio
+      description: should CRI-O be used as the container runtime
+      value: true
+
+#############
+#  example  #
+#############
+- id: example
+  name: Example
+  description: Example flavor for testing
+  availability: alpha
+  workflow: configuration/workflow-example.yaml
+  parameters:
+    - name: create-sleep
+      description: time in seconds for create to take
+      value: 30
+      kind: optional
+
+    - name: create-success
+      description: should create succeed or fail
+      value: true
+      kind: optional
+
+    - name: destroy-sleep
+      description: time in seconds for destroy to take
+      value: 30
+      kind: optional
+
+    - name: destroy-success
+      description: should destroy succeed or fail
+      value: true
+      kind: optional
