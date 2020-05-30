@@ -94,6 +94,14 @@
       description: cluster name
       value: example1
 
+  artifacts:
+    - name: kubeconfig
+      description: Kube config for connecting to cluster
+
+    - name: connect
+      description: Shell script for connecting to clusters
+
+
 ####################
 #  openshift-lite  #
 ####################

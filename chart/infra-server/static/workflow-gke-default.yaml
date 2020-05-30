@@ -43,6 +43,8 @@ spec:
         artifacts:
           - name: kubeconfig
             path: /outputs/kubeconfig
+          - name: connect
+            path: /outputs/connect.sh
         parameters:
           - name: cluster_name
             valueFrom:

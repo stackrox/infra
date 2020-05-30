@@ -73,12 +73,12 @@ func (s *clusterImpl) metaClusterFromWorkflow(workflow v1alpha1.Workflow) (*meta
 		}
 
 		for _, artifact := range nodeStatus.Outputs.Artifacts {
-			if artifact.S3 == nil {
+			if artifact.GCS == nil {
 				continue
 			}
 
 			if meta, found := flavorMetadata[artifact.Name]; found {
-				contents, err := s.signer.Contents(artifact.S3.Bucket, artifact.S3.Key)
+				contents, err := s.signer.Contents(artifact.GCS.Bucket, artifact.GCS.Key)
 				if err != nil {
 					return nil, err
 				}

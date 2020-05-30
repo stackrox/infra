@@ -87,6 +87,9 @@ func workflowStatus(workflowStatus v1alpha1.WorkflowStatus) v1.Status {
 
 		// No suspend node was found, which means one hasn't been run yet, which means that this cluster is still creating.
 		return v1.Status_CREATING
+
+	case "":
+		return v1.Status_CREATING
 	}
 
 	panic("unknown situation")
