@@ -3,10 +3,8 @@ module github.com/stackrox/infra
 go 1.13
 
 require (
-	cloud.google.com/go v0.55.0
 	cloud.google.com/go/storage v1.6.0
 	github.com/argoproj/argo v0.0.0-20200506223611-54154c61eb4f
-	github.com/colinmarc/hdfs v1.1.4-0.20180805212432-9746310a4d31
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/elazarl/goproxy v0.0.0-20200220113713-29f9e0ba54ea // indirect
 	github.com/evanphx/json-patch v4.5.0+incompatible // indirect

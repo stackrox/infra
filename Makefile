@@ -147,8 +147,8 @@ configuration-download:
 .PHONY: configuration-upload
 configuration-upload:
 	@echo 'Uploading configuration to https://console.cloud.google.com/storage/browser/stackrox-licensing-configuration/configuration/?project=stackrox-licensing'
-	gsutil -m cp -R chart/infra-server/configuration "gs://infra-configuration/$(shell date '+%Y-%m-%d-%H-%M-%S')/configuration"
-	gsutil -m cp -R chart/infra-server/configuration gs://infra-configuration/latest/configuration
+	gsutil -m cp -R chart/infra-server/configuration "gs://infra-configuration/$(shell date '+%Y-%m-%d-%H-%M-%S')/"
+	gsutil -m cp -R chart/infra-server/configuration gs://infra-configuration/latest/
 
 .PHONY: push
 push: image
