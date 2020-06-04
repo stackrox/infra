@@ -3,7 +3,7 @@
 ##########
 - id: demo
   name: StackRox Demo
-  description: Demo running StackRox 3.0.43.1
+  description: Demo running StackRox 3.0.44.0
   availability: default
   workflow: configuration/workflow-demo.yaml
   parameters:
@@ -12,15 +12,15 @@
       value: example1
 
     - name: main-image
-      value: stackrox.io/main:3.0.43.1
+      value: stackrox.io/main:3.0.44.0
       kind: hardcoded
 
     - name: scanner-image
-      value: stackrox.io/scanner:2.2.6
+      value: stackrox.io/scanner:2.2.7
       kind: hardcoded
 
     - name: scanner-db-image
-      value: stackrox.io/scanner-db:2.2.6
+      value: stackrox.io/scanner-db:2.2.7
       kind: hardcoded
 
   artifacts:
@@ -52,15 +52,15 @@
 
     - name: main-image
       description: StackRox Central image Docker name
-      value: stackrox.io/main:3.0.43.1
+      value: stackrox.io/main:3.0.44.0
 
     - name: scanner-image
       description: StackRox Scanner image Docker name
-      value: stackrox.io/scanner:2.2.6
+      value: stackrox.io/scanner:2.2.7
 
     - name: scanner-db-image
       description: StackRox Scanner DB image Docker name
-      value: stackrox.io/scanner-db:2.2.6
+      value: stackrox.io/scanner-db:2.2.7
 
   artifacts:
     - name: kubeconfig
