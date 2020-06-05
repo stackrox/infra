@@ -104,7 +104,7 @@ spec:
             optional: true
 
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/demo:v0.0.0-17-g6094079-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/demo:v0.0.0-19-g1d79426
         args:
           - create
           - "--name={{inputs.parameters.name}}"
@@ -174,7 +174,7 @@ spec:
             path: /data/terraform.tfstate
             optional: true
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/demo:v0.0.0-17-g6094079-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/demo:v0.0.0-19-g1d79426
         args:
           - destroy
           - "--name={{inputs.parameters.name}}"
