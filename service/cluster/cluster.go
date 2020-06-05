@@ -300,7 +300,7 @@ func (s *clusterImpl) Artifacts(_ context.Context, clusterID *v1.ResourceByID) (
 	for _, nodeStatus := range workflow.Status.Nodes {
 		if nodeStatus.Outputs != nil {
 			for _, artifact := range nodeStatus.Outputs.Artifacts {
-				if artifact.S3 == nil {
+				if artifact.GCS == nil {
 					continue
 				}
 
@@ -315,7 +315,7 @@ func (s *clusterImpl) Artifacts(_ context.Context, clusterID *v1.ResourceByID) (
 					description = meta.Description
 				}
 
-				url, err := s.signer.Generate(artifact.S3.Bucket, artifact.S3.Key)
+				url, err := s.signer.Generate(artifact.GCS.Bucket, artifact.GCS.Key)
 				if err != nil {
 					return nil, err
 				}
@@ -357,7 +357,7 @@ func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.
 	}
 
 	// Resume workflow for this cluster.
-	if err := util.ResumeWorkflow(s.clientWorkflows, req.Id); err != nil {
+	if err := util.ResumeWorkflow(s.clientWorkflows, nil, req.Id, ""); err != nil {
 		return nil, err
 	}
 
@@ -445,7 +445,7 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 			}
 
 			log.Printf("resuming workflow %q", metacluster.ID)
-			if err := util.ResumeWorkflow(s.clientWorkflows, metacluster.ID); err != nil {
+			if err := util.ResumeWorkflow(s.clientWorkflows, nil, metacluster.ID, ""); err != nil {
 				log.Printf("[ERROR] failed to resume workflow %q: %v", metacluster.ID, err)
 			}
 		}
