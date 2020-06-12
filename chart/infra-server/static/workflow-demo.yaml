@@ -62,6 +62,8 @@ spec:
               artifacts:
                 - name: tfstate
                   from: "{{workflow.outputs.artifacts.global-tfstate}}"
+                - name: tfvars
+                  from: "{{workflow.outputs.artifacts.global-tfvars}}"
 
     - name: roxctl
       inputs:
@@ -73,6 +75,7 @@ spec:
             path: /assets/downloads/cli/roxctl-linux
       container:
         image: "{{inputs.parameters.main-image}}"
+        imagePullPolicy: Always
         args:
           - version
           - "--json"
@@ -99,12 +102,18 @@ spec:
             path: /data/terraform.tfstate
             optional: true
 
+          - name: tfvars
+            globalName: global-tfvars
+            path: /data/tfvars
+            optional: true
+
           - name: url
             path: /data/url
             optional: true
 
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/demo:v0.0.0-19-g1d79426
+        image: gcr.io/stackrox-infra/automation-flavors/demo:v0.0.0-22-g7be8933
+        imagePullPolicy: Always
         args:
           - create
           - "--name={{inputs.parameters.name}}"
@@ -173,13 +182,14 @@ spec:
           - name: tfstate
             path: /data/terraform.tfstate
             optional: true
+          - name: tfvars
+            path: /data/tfvars
+            optional: true
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/demo:v0.0.0-19-g1d79426
+        image: gcr.io/stackrox-infra/automation-flavors/demo:v0.0.0-22-g7be8933
+        imagePullPolicy: Always
         args:
           - destroy
-          - "--name={{inputs.parameters.name}}"
-          - --gcp-project=stackrox-ephemeral-1
-          - --dns-gcp-project=ultra-current-825
         volumeMounts:
           - name: credentials
             mountPath: /tmp/google-credentials.json
