@@ -3,7 +3,7 @@
 ##########
 - id: demo
   name: StackRox Demo
-  description: Demo running StackRox 3.0.44.0
+  description: Demo running StackRox 3.0.44.1
   availability: default
   workflow: configuration/workflow-demo.yaml
   parameters:
@@ -12,7 +12,7 @@
       value: example1
 
     - name: main-image
-      value: stackrox.io/main:3.0.44.0
+      value: stackrox.io/main:3.0.44.1
       kind: hardcoded
 
     - name: scanner-image
@@ -52,7 +52,7 @@
 
     - name: main-image
       description: StackRox Central image Docker name
-      value: stackrox.io/main:3.0.44.0
+      value: stackrox.io/main:3.0.44.1
 
     - name: scanner-image
       description: StackRox Scanner image Docker name
