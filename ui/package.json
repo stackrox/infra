@@ -26,7 +26,7 @@
     "axios": "^0.19.2",
     "formik": "^2.1.4",
     "history": "^5.0.0-beta.9",
-    "initials": "^3.0.1",
+    "initials": "^3.1.1",
     "lodash": "^4.17.15",
     "moment": "^2.25.3",
     "prop-types": "^15.7.2",
