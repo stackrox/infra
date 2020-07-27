@@ -38,7 +38,7 @@
     "react-router-dom": "^6.0.0-alpha.4",
     "react-spinners": "^0.8.1",
     "use-clipboard-copy": "^0.1.2",
-    "yup": "^0.28.5"
+    "yup": "^0.29.1"
   },
   "devDependencies": {
     "@tailwindcss/custom-forms": "^0.2.1",
