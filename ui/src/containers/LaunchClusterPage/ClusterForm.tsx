@@ -161,7 +161,7 @@ export default function ClusterForm({
   const schema = yup.object().shape({
     ID: yup.string().required(),
     Description: yup.string().default(''),
-    Parameters: yup.object().shape(createParameterSchemas(flavorParameters)),
+    Parameters: yup.object().shape<object>(createParameterSchemas(flavorParameters)),
   });
   const initialValues: FormikValues = {
     ID: flavorId,
