@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import createInitials from 'initials';
+import { find as createInitials } from 'initials';
 
 type Props = {
   imageSrc?: string;
