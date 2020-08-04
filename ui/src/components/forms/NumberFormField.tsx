@@ -31,6 +31,7 @@ export default function NumberFormField({
 
       <input
         {...field} // eslint-disable-line react/jsx-props-no-spreading
+        id={id}
         type="number"
         min={min}
         max={max}

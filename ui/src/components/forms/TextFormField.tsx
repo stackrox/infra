@@ -10,6 +10,7 @@ type Props = {
   required?: boolean;
   label: string;
   placeholder?: string;
+  helperText?: string;
   disabled?: boolean;
 };
 
@@ -19,6 +20,7 @@ export default function TextFormField({
   required = false,
   label,
   placeholder = '',
+  helperText = '',
   disabled = false,
 }: Props): ReactElement {
   const [field, meta] = useField(name);
@@ -38,6 +40,8 @@ export default function TextFormField({
           disabled ? 'bg-base-200' : 'hover:border-base-400'
         }`}
       />
+
+      {helperText.length > 0 && <span className="font-400 text-base-600 mb-">{helperText}</span>}
 
       <FormFieldError error={meta.error} touched={meta.touched} />
     </div>
