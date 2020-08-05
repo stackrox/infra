@@ -29,6 +29,8 @@ export default function TextFormField({
     <div className="flex flex-col mb-4">
       <FormFieldLabel text={label} labelFor={id} required={required} />
 
+      {helperText.length > 0 && <span className="font-400 text-base-600 my-1">{helperText}</span>}
+
       <input
         {...field} // eslint-disable-line react/jsx-props-no-spreading
         id={id}
@@ -40,8 +42,6 @@ export default function TextFormField({
           disabled ? 'bg-base-200' : 'hover:border-base-400'
         }`}
       />
-
-      {helperText.length > 0 && <span className="font-400 text-base-600 mb-">{helperText}</span>}
 
       <FormFieldError error={meta.error} touched={meta.touched} />
     </div>
