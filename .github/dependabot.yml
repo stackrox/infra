@@ -8,7 +8,8 @@ updates:
   - package-ecosystem: "npm"
     directory: "ui/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "friday"
+    open-pull-requests-limit: 10
     reviewers:
-      - "ikornienko"
-      - "vjwilson"
+      - "stackrox/ui"
