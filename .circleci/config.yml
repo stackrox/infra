@@ -1,5 +1,11 @@
 version: 2.1
 
+storeGitHubPackageRegistryNpmToken: &storeGitHubPackageRegistryNpmToken
+  run:
+    name: Store GitHub token to ~/.npmrc to access GitHub Packages NPM registry
+    command: |
+      echo "//npm.pkg.github.com/:_authToken=\"$GITHUB_TOKEN\"" > ~/.npmrc
+
 executors:
   custom:
     docker:
@@ -15,6 +21,7 @@ jobs:
     steps:
     - checkout
     - setup_remote_docker
+    - *storeGitHubPackageRegistryNpmToken
     - run:
         name: Build infra-server docker image
         command: |
