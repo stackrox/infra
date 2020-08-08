@@ -12,4 +12,8 @@ updates:
       day: "friday"
     open-pull-requests-limit: 10
     reviewers:
-      - "stackrox/ui"
+      - "alwayshooin"
+      - "ikornienko"
+      - "pedrottimark"
+      - "sachaudh"
+      - "vjwilson"
