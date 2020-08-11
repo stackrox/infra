@@ -20,6 +20,13 @@ about the available scripts and the tooling behavior.
   [nvm](https://github.com/creationix/nvm))
 - [Yarn](https://yarnpkg.com/en/)
 
+### GitHub Packages NPM Registry
+
+This project depends on packages with `@stackrox` scope accessible from GitHub
+Packages NPM registry. Setup your dev env by following
+[these instructions](https://stack-rox.atlassian.net/wiki/spaces/ENGKB/pages/1411515467/Using+GitHub+Packages+with+NPM#Setting-Up-Dev-Env)
+to authenticate with the registry.
+
 ### UI Dev Server
 
 _If you're going to use `yarn` instead of `make` targets, make sure you've run
