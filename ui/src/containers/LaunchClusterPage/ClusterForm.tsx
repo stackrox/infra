@@ -21,6 +21,9 @@ import { UploadCloud } from 'react-feather';
 
 const clusterService = new ClusterServiceApi(configuration);
 
+const nameRequirements =
+  "Only lowercase letters, numbers, and '-' allowed, must start with a letter and end with a letter or number";
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const schemasByParameterName: { [key: string]: yup.Schema<any> } = {
   name: yup
@@ -31,7 +34,7 @@ const schemasByParameterName: { [key: string]: yup.Schema<any> } = {
     .max(40, 'Too long')
     .matches(
       /^(?:[a-z](?:[-a-z0-9]{0,38}[a-z0-9])?)$/, // this is what GKE expects
-      "Only alphanumerics and '-' allowed, must start with a letter and end with an alphanumeric"
+      'The input value does not match the criteria above. Please correct this form field.'
     ),
   nodes: yup
     .number()
@@ -103,6 +106,7 @@ function ParameterFormField(props: { parameter: V1Parameter }): ReactElement {
         <TextFormField
           name={`Parameters.${parameter.Name}`}
           label={parameter.Description || parameter.Name}
+          helperText={nameRequirements}
           required
         />
       );

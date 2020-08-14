@@ -7,7 +7,6 @@ const StackRoxLogo = forwardRef<SVGSVGElement, {}>((_, ref) => (
     width="24"
     height="24"
     viewBox="0 0 180 104"
-    aria-labelledby="StackRox"
     ref={ref}
   >
     <title id="title">StackRox</title>

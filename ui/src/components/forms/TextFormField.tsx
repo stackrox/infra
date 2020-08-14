@@ -10,6 +10,7 @@ type Props = {
   required?: boolean;
   label: string;
   placeholder?: string;
+  helperText?: string;
   disabled?: boolean;
 };
 
@@ -19,6 +20,7 @@ export default function TextFormField({
   required = false,
   label,
   placeholder = '',
+  helperText = '',
   disabled = false,
 }: Props): ReactElement {
   const [field, meta] = useField(name);
@@ -26,6 +28,8 @@ export default function TextFormField({
   return (
     <div className="flex flex-col mb-4">
       <FormFieldLabel text={label} labelFor={id} required={required} />
+
+      {helperText.length > 0 && <span className="font-400 text-base-600 my-1">{helperText}</span>}
 
       <input
         {...field} // eslint-disable-line react/jsx-props-no-spreading
