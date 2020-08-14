@@ -62,7 +62,7 @@
     "react-scripts": "3.4.3",
     "tailwindcss": "^1.6.2",
     "typescript": "~3.9.7",
-    "wait-on": "^5.1.0"
+    "wait-on": "^5.2.0"
   },
   "browserslist": {
     "production": [
