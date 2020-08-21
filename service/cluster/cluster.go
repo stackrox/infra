@@ -195,15 +195,38 @@ func formatAnnotationPatch(annotationKey string, annotationValue string) ([]byte
 
 // Lifespan implements ClusterService.Lifespan.
 func (s *clusterImpl) Lifespan(_ context.Context, req *v1.LifespanRequest) (*duration.Duration, error) {
-	lifespan, _ := ptypes.Duration(req.Lifespan)
+	lifespanRequest, _ := ptypes.Duration(req.Lifespan)
+	lifespanCurrent := time.Duration(0)
+	lifespanUpdated := time.Duration(0)
 
-	// Sanity check that our lifespan doesn't go negative.
-	if lifespan <= 0 {
-		lifespan = 0
+	// If we're applying a relative lifespan (by adding or subtracting), we
+	// need to know the current lifespan. Get the named workflow to obtain said
+	// current lifespan.
+	if req.Method != v1.LifespanRequest_REPLACE {
+		workflow, err := s.clientWorkflows.Get(req.Id, metav1.GetOptions{})
+		if err != nil {
+			return nil, err
+		}
+		lifespanCurrent, _ = ptypes.Duration(GetLifespan(workflow))
+	}
+
+	// Compute the updated lifespan using the requested method.
+	switch req.Method {
+	case v1.LifespanRequest_REPLACE:
+		lifespanUpdated = lifespanRequest
+	case v1.LifespanRequest_ADD:
+		lifespanUpdated = lifespanCurrent + lifespanRequest
+	case v1.LifespanRequest_SUBTRACT:
+		lifespanUpdated = lifespanCurrent - lifespanRequest
+	}
+
+	// Sanity check that our updated lifespan doesn't go negative.
+	if lifespanUpdated <= 0 {
+		lifespanUpdated = 0
 	}
 
 	// Construct our replacement patch
-	payloadBytes, err := formatAnnotationPatch(annotationLifespanKey, fmt.Sprint(lifespan))
+	payloadBytes, err := formatAnnotationPatch(annotationLifespanKey, fmt.Sprint(lifespanUpdated))
 	if err != nil {
 		return nil, err
 	}
@@ -214,7 +237,9 @@ func (s *clusterImpl) Lifespan(_ context.Context, req *v1.LifespanRequest) (*dur
 		return nil, err
 	}
 
-	return GetLifespan(workflow), nil
+	// Return the remaining lifespan.
+	remaining := time.Until(workflow.CreationTimestamp.Add(lifespanUpdated))
+	return ptypes.DurationProto(remaining), nil
 }
 
 // Create implements ClusterService.Create.
@@ -253,9 +278,6 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 	lifespan, _ := ptypes.Duration(req.Lifespan)
 	if lifespan <= 0 {
 		lifespan = 3 * time.Hour
-	}
-	if lifespan > 12*time.Hour {
-		lifespan = 12 * time.Hour
 	}
 
 	var slackStatus slack.Status
@@ -350,6 +372,7 @@ func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.
 	lifespanReq := &v1.LifespanRequest{
 		Id:       req.Id,
 		Lifespan: &duration.Duration{},
+		Method:   v1.LifespanRequest_REPLACE,
 	}
 
 	if _, err := s.Lifespan(ctx, lifespanReq); err != nil {

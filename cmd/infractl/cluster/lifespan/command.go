@@ -43,7 +43,7 @@ func args(_ *cobra.Command, args []string) error {
 }
 
 func run(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, args []string) (common.PrettyPrinter, error) {
-	lifespan, err := time.ParseDuration(args[1])
+	method, lifespan, err := parseDuration(args[1])
 	if err != nil {
 		return nil, err
 	}
@@ -51,10 +51,37 @@ func run(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, args []st
 	resp, err := v1.NewClusterServiceClient(conn).Lifespan(ctx, &v1.LifespanRequest{
 		Id:       args[0],
 		Lifespan: ptypes.DurationProto(lifespan),
+		Method:   method,
 	})
 	if err != nil {
 		return nil, err
 	}
 
 	return prettyDuration(*resp), nil
+}
+
+func parseDuration(spec string) (v1.LifespanRequest_Method, time.Duration, error) {
+	if spec == "expire" {
+		return v1.LifespanRequest_REPLACE, 0, nil
+	}
+
+	method := v1.LifespanRequest_REPLACE
+	switch spec[0] {
+	case '+':
+		// Spec indicates that we're adding a duration, like "+5m".
+		method = v1.LifespanRequest_ADD
+		spec = spec[1:]
+	case '-':
+		// Spec indicates that we're subtracting a duration, like "-5m".
+		method = v1.LifespanRequest_SUBTRACT
+		spec = spec[1:]
+	case '=':
+		// Spec indicates that we're replacing the duration, like "=5m".
+		method = v1.LifespanRequest_REPLACE
+		spec = spec[1:]
+	}
+
+	// Parse the remaining spec duration.
+	duration, err := time.ParseDuration(spec)
+	return method, duration, err
 }
