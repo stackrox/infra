@@ -57,8 +57,7 @@ func run(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, args []st
 		return nil, err
 	}
 
-	v := prettyDuration(*resp)
-	return &v, nil
+	return prettyDuration{resp}, nil
 }
 
 func parseDuration(spec string) (v1.LifespanRequest_Method, time.Duration, error) {

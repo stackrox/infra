@@ -8,11 +8,12 @@ import (
 	"github.com/stackrox/infra/cmd/infractl/common"
 )
 
-type prettyDuration durpb.Duration
+type prettyDuration struct {
+	*durpb.Duration
+}
 
-func (p *prettyDuration) PrettyPrint() {
-	delta := durpb.Duration(*p)
-	remaining, _ := ptypes.Duration(&delta)
+func (p prettyDuration) PrettyPrint() {
+	remaining, _ := ptypes.Duration(p.Duration)
 
 	fmt.Println(common.FormatExpiration(remaining))
 }
