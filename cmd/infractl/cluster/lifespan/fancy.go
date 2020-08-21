@@ -10,8 +10,8 @@ import (
 
 type prettyDuration durpb.Duration
 
-func (p prettyDuration) PrettyPrint() {
-	delta := durpb.Duration(p)
+func (p *prettyDuration) PrettyPrint() {
+	delta := durpb.Duration(*p)
 	remaining, _ := ptypes.Duration(&delta)
 
 	fmt.Println(common.FormatExpiration(remaining))
