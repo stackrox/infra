@@ -5,13 +5,15 @@ import (
 
 	"github.com/golang/protobuf/ptypes"
 	durpb "github.com/golang/protobuf/ptypes/duration"
+	"github.com/stackrox/infra/cmd/infractl/common"
 )
 
-type prettyDuration durpb.Duration
+type prettyDuration struct {
+	*durpb.Duration
+}
 
 func (p prettyDuration) PrettyPrint() {
-	delta := durpb.Duration(p)
-	lifespan, _ := ptypes.Duration(&delta)
+	remaining, _ := ptypes.Duration(p.Duration)
 
-	fmt.Println(lifespan)
+	fmt.Println(common.FormatExpiration(remaining))
 }
