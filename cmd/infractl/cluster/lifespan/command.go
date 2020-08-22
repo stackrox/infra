@@ -65,7 +65,7 @@ func parseDuration(spec string) (v1.LifespanRequest_Method, time.Duration, error
 		return v1.LifespanRequest_REPLACE, 0, nil
 	}
 
-	method := v1.LifespanRequest_REPLACE
+	method := v1.LifespanRequest_ADD
 	switch spec[0] {
 	case '+':
 		// Spec indicates that we're adding a duration, like "+5m".
