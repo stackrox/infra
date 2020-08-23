@@ -1,12 +1,11 @@
 import React, { ReactElement } from 'react';
 import { AxiosPromise } from 'axios';
 import { useClipboard } from 'use-clipboard-copy';
+import { Tooltip, TooltipOverlay } from '@stackrox/ui-components';
 
 import { V1TokenResponse, UserServiceApi } from 'generated/client';
 import useApiQuery from 'client/useApiQuery';
 import configuration from 'client/configuration';
-import Tooltip from 'components/Tooltip';
-import TooltipOverlay from 'components/TooltipOverlay';
 import { AlertCircle, Clipboard } from 'react-feather';
 import { ClipLoader } from 'react-spinners';
 

@@ -3,12 +3,11 @@ import { AxiosPromise } from 'axios';
 import moment from 'moment';
 import { Info, AlertCircle } from 'react-feather';
 import { ClipLoader } from 'react-spinners';
+import { Tooltip, TooltipOverlay } from '@stackrox/ui-components';
 
 import { VersionServiceApi, V1Version } from 'generated/client';
 import configuration from 'client/configuration';
 import useApiQuery from 'client/useApiQuery';
-import Tooltip from 'components/Tooltip';
-import TooltipOverlay from 'components/TooltipOverlay';
 
 const versionService = new VersionServiceApi(configuration);
 

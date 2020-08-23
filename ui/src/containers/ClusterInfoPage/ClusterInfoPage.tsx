@@ -1,6 +1,7 @@
 import React, { useState, useCallback, ReactElement } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Download, Trash2 } from 'react-feather';
+import { Tooltip, TooltipOverlay } from '@stackrox/ui-components';
 
 import { ClusterServiceApi, V1Status } from 'generated/client';
 import useApiQuery from 'client/useApiQuery';
@@ -9,8 +10,6 @@ import PageSection from 'components/PageSection';
 import ClusterLifespanCountdown from 'components/ClusterLifespanCountdown';
 import FullPageSpinner from 'components/FullPageSpinner';
 import FullPageError from 'components/FullPageError';
-import Tooltip from 'components/Tooltip';
-import TooltipOverlay from 'components/TooltipOverlay';
 import ClusterLogs from './ClusterLogs';
 import DeleteClusterModal from './DeleteClusterModal';
 
