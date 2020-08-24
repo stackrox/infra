@@ -94,8 +94,8 @@
       description: cluster name
       value: example1
 
-    - name: node-machine-type
-      description: node machine node-machine-type
+    - name: machine-type
+      description: node machine type
       value: e2-standard-4
       kind: optional
 
