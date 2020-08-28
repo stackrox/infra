@@ -60,7 +60,7 @@
     "postcss-cli": "^7.1.1",
     "prettier": "^2.1.1",
     "react-scripts": "3.4.3",
-    "tailwindcss": "^1.7.3",
+    "tailwindcss": "^1.7.5",
     "typescript": "~3.9.7",
     "wait-on": "^5.2.0"
   },
