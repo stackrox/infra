@@ -19,6 +19,9 @@ infractl lifespan example-s3maj 1h
 # OR
 infractl lifespan example-s3maj +1h
 
+# Reduce the time remaining for cluster example-s3maj by 30 minutes.
+infractl lifespan example-s3maj -- -30m
+
 # Set the lifespan of cluster example-s3maj to 24h.
 infractl lifespan example-s3maj =24h
 
