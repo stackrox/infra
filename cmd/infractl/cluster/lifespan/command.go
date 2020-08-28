@@ -13,11 +13,20 @@ import (
 	"google.golang.org/grpc"
 )
 
-const examples = `# Set the lifespan of cluster example-s3maj to 30 minutes.
-infractl lifespan example-s3maj 30m
+const examples = `# Add an hour to cluster example-s3maj.
+infractl lifespan example-s3maj 1h
+
+# OR
+infractl lifespan example-s3maj +1h
+
+# Reduce the time remaining for cluster example-s3maj by 30 minutes.
+infractl lifespan example-s3maj -- -30m
+
+# Set the lifespan of cluster example-s3maj to 24h.
+infractl lifespan example-s3maj =24h
 
 # Expire cluster example-s3maj.
-infractl lifespan example-s3maj 0`
+infractl lifespan example-s3maj =0`
 
 // Command defines the handler for infractl lifespan.
 func Command() *cobra.Command {
