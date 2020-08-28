@@ -14,6 +14,9 @@ import (
 )
 
 const examples = `# Add an hour to cluster example-s3maj.
+infractl lifespan example-s3maj 1h
+
+# OR
 infractl lifespan example-s3maj +1h
 
 # Set the lifespan of cluster example-s3maj to 24h.
