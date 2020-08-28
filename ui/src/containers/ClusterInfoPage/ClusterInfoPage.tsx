@@ -60,7 +60,7 @@ export default function ClusterInfoPage(): ReactElement {
         </Tooltip>
 
         {data.Status &&
-        data.Status === V1Status.READY && ( // show Delete only for running clusters
+          data.Status === V1Status.READY && ( // show Delete only for running clusters
             <button
               className="btn btn-base ml-auto"
               type="button"
