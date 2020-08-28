@@ -38,7 +38,7 @@ export default function ClusterInfoPage(): ReactElement {
           {data.Description && ` (${data.Description})`} - {data.Status || 'FAILED'}
         </span>
       </div>
-      <ClusterLifespanCountdown cluster={data} />
+      <ClusterLifespanCountdown cluster={data} canModify />
     </div>
   );
 

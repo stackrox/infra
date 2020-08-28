@@ -22,9 +22,10 @@ function lifespanToDuration(lifespan: string): moment.Duration {
 
 type Props = {
   cluster: V1Cluster;
+  canModify: boolean;
 };
 
-export default function ClusterLifespanCountdown({ cluster }: Props): ReactElement {
+export default function ClusterLifespanCountdown({ cluster, canModify }: Props): ReactElement {
   let expirationDate: Date | null = null;
   try {
     const duration = lifespanToDuration(cluster.Lifespan || '0s');
@@ -35,5 +36,9 @@ export default function ClusterLifespanCountdown({ cluster }: Props): ReactEleme
     // TODO: eventually log the error to the backend
   }
 
-  return expirationDate ? <Countdown targetDate={expirationDate} /> : <>Expiration: N/A</>;
+  return expirationDate ? (
+    <Countdown targetDate={expirationDate} canModify={canModify} />
+  ) : (
+    <>Expiration: N/A</>
+  );
 }
