@@ -15,6 +15,11 @@ import DeleteClusterModal from './DeleteClusterModal';
 
 const clusterService = new ClusterServiceApi(configuration);
 
+function modifyLifespan(notation: string, incOrDec: string): void {
+  // eslint-disable-next-line no-console
+  console.log(notation, incOrDec);
+}
+
 export default function ClusterInfoPage(): ReactElement {
   const navigate = useNavigate();
   const { clusterId } = useParams();
@@ -38,7 +43,7 @@ export default function ClusterInfoPage(): ReactElement {
           {data.Description && ` (${data.Description})`} - {data.Status || 'FAILED'}
         </span>
       </div>
-      <ClusterLifespanCountdown cluster={data} canModify />
+      <ClusterLifespanCountdown cluster={data} canModify onModify={modifyLifespan} />
     </div>
   );
 

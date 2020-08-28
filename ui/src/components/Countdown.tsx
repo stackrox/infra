@@ -11,9 +11,15 @@ type Props = {
   targetDate: Date;
   className?: string;
   canModify: boolean;
+  onModify?: (notation: string, incOrDec: string) => void;
 };
 
-export default function Countdown({ targetDate, className = '', canModify }: Props): ReactElement {
+export default function Countdown({
+  targetDate,
+  className = '',
+  canModify,
+  onModify,
+}: Props): ReactElement {
   const [duration, setDuration] = useState<moment.Duration>(calcDuration(targetDate));
 
   useEffect(() => {
@@ -29,7 +35,7 @@ export default function Countdown({ targetDate, className = '', canModify }: Pro
       content={<TooltipOverlay>{`Expiration: ${moment(targetDate).format('LLL')}`}</TooltipOverlay>}
     >
       <div className={className}>
-        <FormatDuration duration={duration} canModify={canModify} />
+        <FormatDuration duration={duration} canModify={canModify} onModify={onModify} />
       </div>
     </Tooltip>
   );
@@ -38,9 +44,14 @@ export default function Countdown({ targetDate, className = '', canModify }: Pro
 type FormatDurationProps = {
   duration: moment.Duration;
   canModify: boolean;
+  onModify?: (notation: string, incOrDec: string) => void;
 };
 
-function FormatDuration({ duration, canModify = true }: FormatDurationProps): ReactElement {
+function FormatDuration({
+  duration,
+  canModify = true,
+  onModify,
+}: FormatDurationProps): ReactElement {
   // everything will be negative if it's a negative duration (i.e. expired)
   const expiredMultiplier = duration.asMilliseconds() <= 0 ? -1 : 1;
   if (expiredMultiplier * duration.asDays() > 30) {
@@ -65,19 +76,24 @@ function FormatDuration({ duration, canModify = true }: FormatDurationProps): Re
 
   return (
     <span>
-      {days > 0 && <TimeUnit value={days} notation="d" />} <TimeUnit value={hours} notation="h" />{' '}
-      <TimeUnit value={minutes} notation="m" /> remains
+      {days > 0 && <ModifiableTimeUnit value={days} notation="d" onChange={onModify} />}{' '}
+      <ModifiableTimeUnit value={hours} notation="h" onChange={onModify} />{' '}
+      <ModifiableTimeUnit value={minutes} notation="m" onChange={onModify} /> remains
     </span>
   );
 }
 
-type TimeUnitProps = {
+type ModifiableTimeUnitProps = {
   notation: string;
   value: number;
+  onChange?: (notation: string, incOrDec: string) => void;
 };
 
-/* eslint-disable no-nested-ternary */
-function TimeUnit({ notation, value }: TimeUnitProps): ReactElement {
+function ModifiableTimeUnit({
+  notation,
+  value,
+  onChange = (): void => {},
+}: ModifiableTimeUnitProps): ReactElement {
   return (
     <span className="inline-flex flex-col items-center">
       <span>
@@ -85,10 +101,9 @@ function TimeUnit({ notation, value }: TimeUnitProps): ReactElement {
         {notation}
       </span>
       <span className="inline-flex text-sm normal-case">
-        <PlusCircle className="mr-2" size={12} />
-        <MinusCircle size={12} />
+        <PlusCircle className="mr-2" size={12} onClick={(): void => onChange(notation, 'inc')} />
+        <MinusCircle size={12} onClick={(): void => onChange(notation, 'dec')} />
       </span>
     </span>
   );
 }
-/* eslint-enable no-nested-ternary */
