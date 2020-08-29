@@ -1,13 +1,17 @@
-import React, { useState, useCallback, ReactElement } from 'react';
+import React, { useState, useEffect, useCallback, ReactElement } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Download, Trash2 } from 'react-feather';
+<<<<<<< HEAD
 import { Tooltip, TooltipOverlay } from '@stackrox/ui-components';
+=======
+import moment from 'moment';
+>>>>>>> 1d73f24... optimistically update lifespan
 
 import { ClusterServiceApi, V1Status } from 'generated/client';
 import useApiQuery from 'client/useApiQuery';
 import configuration from 'client/configuration';
 import PageSection from 'components/PageSection';
-import ClusterLifespanCountdown from 'components/ClusterLifespanCountdown';
+import ClusterLifespanCountdown, { lifespanToDuration } from 'components/ClusterLifespanCountdown';
 import FullPageSpinner from 'components/FullPageSpinner';
 import FullPageError from 'components/FullPageError';
 import ClusterLogs from './ClusterLogs';
@@ -15,35 +19,50 @@ import DeleteClusterModal from './DeleteClusterModal';
 
 const clusterService = new ClusterServiceApi(configuration);
 
-function modifyLifespan(notation: string, incOrDec: string): void {
-  // eslint-disable-next-line no-console
-  console.log(notation, incOrDec);
-}
-
 export default function ClusterInfoPage(): ReactElement {
   const navigate = useNavigate();
   const { clusterId } = useParams();
   const fetchClusterInfo = useCallback(() => clusterService.info(clusterId), [clusterId]);
   const { loading, error, data } = useApiQuery(fetchClusterInfo, { pollInterval: 10000 });
   const [deletionModalOpen, setDeletionModalOpen] = useState<boolean>(false);
+  const [clientSideLifespan, setClientSideLifespan] = useState<string>('');
+
+  useEffect(() => {
+    if (data && data.Lifespan === clientSideLifespan) {
+      // Clear the client side optimistic setting when the fetchClusterInfo poll catches up
+      setClientSideLifespan('');
+    }
+  }, [data, clientSideLifespan]);
+
+  const cluster = clientSideLifespan ? { ...data, Lifespan: clientSideLifespan } : data;
 
   if (loading) {
     return <FullPageSpinner />;
   }
 
-  if (error || !data?.ID) {
+  if (error || !cluster?.ID) {
     return <FullPageError message={error?.message || 'Unexpected server response'} />;
   }
+
+  const modifyLifespan = async (notation: string, incOrDec: string): Promise<void> => {
+    if (cluster?.Lifespan) {
+      const current = lifespanToDuration(cluster.Lifespan);
+      const delta = moment.duration(1, notation as moment.DurationInputArg2);
+      const update = incOrDec === 'inc' ? current.add(delta) : current.subtract(delta);
+      setClientSideLifespan(`${update.asSeconds()}s`);
+      await clusterService.lifespan(clusterId, { Lifespan: `${update.asSeconds()}s` });
+    }
+  };
 
   const sectionHeader = (
     <div className="flex justify-between">
       <div>
-        <span className="lowercase">{data.ID}</span>
+        <span className="lowercase">{cluster.ID}</span>
         <span>
-          {data.Description && ` (${data.Description})`} - {data.Status || 'FAILED'}
+          {cluster.Description && ` (${cluster.Description})`} - {cluster.Status || 'FAILED'}
         </span>
       </div>
-      <ClusterLifespanCountdown cluster={data} canModify onModify={modifyLifespan} />
+      <ClusterLifespanCountdown cluster={cluster} canModify onModify={modifyLifespan} />
     </div>
   );
 
@@ -63,8 +82,13 @@ export default function ClusterInfoPage(): ReactElement {
           </button>
         </Tooltip>
 
+<<<<<<< HEAD
         {data.Status &&
           data.Status === V1Status.READY && ( // show Delete only for running clusters
+=======
+        {cluster.Status &&
+        cluster.Status === V1Status.READY && ( // show Delete only for running clusters
+>>>>>>> 1d73f24... optimistically update lifespan
             <button
               className="btn btn-base ml-auto"
               type="button"
@@ -78,7 +102,7 @@ export default function ClusterInfoPage(): ReactElement {
 
       {deletionModalOpen && (
         <DeleteClusterModal
-          cluster={data}
+          cluster={cluster}
           onCancel={(): void => setDeletionModalOpen(false)}
           onDeleted={(): void => navigate('/')}
         />

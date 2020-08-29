@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import moment from 'moment';
 import { PlusCircle, MinusCircle } from 'react-feather';
 import { Tooltip, TooltipOverlay } from '@stackrox/ui-components';
@@ -20,14 +20,7 @@ export default function Countdown({
   canModify,
   onModify,
 }: Props): ReactElement {
-  const [duration, setDuration] = useState<moment.Duration>(calcDuration(targetDate));
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setDuration(calcDuration(targetDate));
-    }, 10000);
-    return (): void => clearInterval(timer);
-  }, [targetDate]);
+  const duration = calcDuration(targetDate);
 
   return (
     <Tooltip
@@ -76,7 +69,7 @@ function FormatDuration({
 
   return (
     <span>
-      {days > 0 && <ModifiableTimeUnit value={days} notation="d" onChange={onModify} />}{' '}
+      <ModifiableTimeUnit value={days} notation="d" onChange={onModify} />{' '}
       <ModifiableTimeUnit value={hours} notation="h" onChange={onModify} />{' '}
       <ModifiableTimeUnit value={minutes} notation="m" onChange={onModify} /> remains
     </span>
@@ -97,12 +90,24 @@ function ModifiableTimeUnit({
   return (
     <span className="inline-flex flex-col items-center">
       <span>
-        {value}
+        {`${value}`.padStart(2, '0')}
         {notation}
       </span>
-      <span className="inline-flex text-sm normal-case">
-        <PlusCircle className="mr-2" size={12} onClick={(): void => onChange(notation, 'inc')} />
-        <MinusCircle size={12} onClick={(): void => onChange(notation, 'dec')} />
+      <span className="inline-flex text-sm normal-case select-none">
+        <PlusCircle
+          className="cursor-pointer mr-2"
+          size={12}
+          onClick={(): void => {
+            onChange(notation, 'inc');
+          }}
+        />
+        <MinusCircle
+          className="cursor-pointer"
+          size={12}
+          onClick={(): void => {
+            onChange(notation, 'dec');
+          }}
+        />
       </span>
     </span>
   );

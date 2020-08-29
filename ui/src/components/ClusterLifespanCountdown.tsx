@@ -10,7 +10,7 @@ import Countdown from 'components/Countdown';
  * @returns duration object
  * @throws error if it cannot parse lifespan string
  */
-function lifespanToDuration(lifespan: string): moment.Duration {
+export function lifespanToDuration(lifespan: string): moment.Duration {
   // API returns lifespan in seconds, but it's being very explicit about it with `10800s` format...
   const matches = /\d+/.exec(lifespan);
   if (!matches || matches.length !== 1)
