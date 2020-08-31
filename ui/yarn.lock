@@ -1319,10 +1319,10 @@
   dependencies:
     "@tailwindcss/custom-forms" "^0.2.1"
 
-"@stackrox/ui-components@^0.1.0-alpha.6":
-  version "0.1.0-alpha.6"
-  resolved "https://npm.pkg.github.com/download/@stackrox/ui-components/0.1.0-alpha.6/5f5a516a0787bc2ce59b1bc2e95d5a64fbcb43e822b61fc1eb44c16807431d49#fd290c8e7794456a625c7c87979026151c5cd1a1"
-  integrity sha512-X50E+ELvevSbZBzwlK8Gc1va0g1F1Icr5375ATbEWGqDKVnBUcGalwJsySVnidiWB0/YSKqxLBHAuH63iHAprg==
+"@stackrox/ui-components@^0.1.0":
+  version "0.1.0"
+  resolved "https://npm.pkg.github.com/download/@stackrox/ui-components/0.1.0/b93950d4551d2a79eb12c3884547bf005c762e6396526c00a5f81d9e25b2ca0b#f129a00f5381f6ba82663ea24ca649817af52214"
+  integrity sha512-2vUXcqcDD7ksZo23bm2sgon4gjt+6iRclD9YF90qZNlB1FQDXmpFzBLXQ/pkHcfyBBY6x0xnEmII4AIBwlK4hA==
   dependencies:
     "@tippy.js/react" "^3.1.1"
     initials "^3.1.0"

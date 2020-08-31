@@ -22,7 +22,7 @@
     "gen:src": "./scripts/generate-client.sh"
   },
   "dependencies": {
-    "@stackrox/ui-components": "^0.1.0-alpha.6",
+    "@stackrox/ui-components": "^0.1.0",
     "axios": "^0.20.0",
     "formik": "^2.1.5",
     "history": "^5.0.0",

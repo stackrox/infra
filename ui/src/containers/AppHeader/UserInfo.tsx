@@ -11,7 +11,7 @@ export default function UserInfo(): ReactElement {
       <Avatar
         name={user?.Name}
         imageSrc={user?.Picture}
-        className="flex w-12 h-12 justify-center items-center mr-2"
+        extraClassName="flex w-12 h-12 justify-center items-center mr-2"
       />
       <button onClick={logout} type="button" className="btn btn-base">
         <LogOut size={16} className="mr-2" />

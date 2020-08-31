@@ -26,7 +26,7 @@ function TooltipContentRow(props: { label: string; value?: string }): ReactEleme
 function TooltipContent(props: { data: V1Version }): ReactElement {
   const { data } = props;
   return (
-    <TooltipOverlay className="text-left">
+    <TooltipOverlay extraClassName="text-left">
       <TooltipContentRow label="Build Date" value={moment(data.BuildDate).format('LLL')} />
       <TooltipContentRow label="Git Commit" value={data.GitCommit} />
       <TooltipContentRow label="Workflow" value={data.Workflow} />
