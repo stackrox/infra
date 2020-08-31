@@ -3,12 +3,11 @@ import { AxiosPromise } from 'axios';
 import moment from 'moment';
 import { Info, AlertCircle } from 'react-feather';
 import { ClipLoader } from 'react-spinners';
+import { Tooltip, TooltipOverlay } from '@stackrox/ui-components';
 
 import { VersionServiceApi, V1Version } from 'generated/client';
 import configuration from 'client/configuration';
 import useApiQuery from 'client/useApiQuery';
-import Tooltip from 'components/Tooltip';
-import TooltipOverlay from 'components/TooltipOverlay';
 
 const versionService = new VersionServiceApi(configuration);
 
@@ -27,7 +26,7 @@ function TooltipContentRow(props: { label: string; value?: string }): ReactEleme
 function TooltipContent(props: { data: V1Version }): ReactElement {
   const { data } = props;
   return (
-    <TooltipOverlay className="text-left">
+    <TooltipOverlay extraClassName="text-left">
       <TooltipContentRow label="Build Date" value={moment(data.BuildDate).format('LLL')} />
       <TooltipContentRow label="Git Commit" value={data.GitCommit} />
       <TooltipContentRow label="Workflow" value={data.Workflow} />

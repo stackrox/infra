@@ -1,8 +1,6 @@
 import React, { useState, useEffect, ReactElement } from 'react';
 import moment from 'moment';
-
-import Tooltip from 'components/Tooltip';
-import TooltipOverlay from 'components/TooltipOverlay';
+import { Tooltip, TooltipOverlay } from '@stackrox/ui-components';
 
 function calcDuration(targetDate: Date): moment.Duration {
   return moment.duration(moment(targetDate).diff(moment()));
