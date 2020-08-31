@@ -2,7 +2,6 @@ import React, { useState, useCallback, ReactElement } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Download, Trash2 } from 'react-feather';
 import { Tooltip, TooltipOverlay } from '@stackrox/ui-components';
-import moment from 'moment';
 
 import { ClusterServiceApi, V1Status } from 'generated/client';
 import useApiQuery from 'client/useApiQuery';
@@ -61,7 +60,7 @@ export default function ClusterInfoPage(): ReactElement {
         </Tooltip>
 
         {cluster.Status &&
-        cluster.Status === V1Status.READY && ( // show Delete only for running clusters
+          cluster.Status === V1Status.READY && ( // show Delete only for running clusters
             <button
               className="btn btn-base ml-auto"
               type="button"
