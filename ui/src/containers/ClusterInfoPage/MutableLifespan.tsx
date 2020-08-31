@@ -16,14 +16,14 @@ type Props = {
 export default function MutableLifespan({ cluster }: Props): ReactElement {
   const [clientSideLifespan, setClientSideLifespan] = useState<string>();
   const [clearClientSideUpdate, setClearClientSideUpdate] = useState<number>();
-  const [error, setError] = useState<Error>();
+  const [error, setError] = useState<Error | null>(null);
 
   if (error) {
     const message = `Cannot change the cluster lifespan. A server error occurred: "${error.message}".`;
     return (
       <InformationalModal
         header="Cannot change the cluster lifespan"
-        onAcknowledged={(): void => setError(undefined)}
+        onAcknowledged={(): void => setError(null)}
       >
         <div className="flex items-center">
           <AlertCircle size={16} className="mr-2 text-alert-600" />

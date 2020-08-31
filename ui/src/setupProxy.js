@@ -6,10 +6,6 @@ const defaultOptions = {
   target: process.env.INFRA_API_ENDPOINT || 'https://dev.infra.rox.systems',
   changeOrigin: true,
   secure: false,
-  // test lifespan update failure
-  // pathRewrite: {
-  //   '^/v1/cluster/gke-default-pvs6z/lifespan': '/v1/cluster/gke-default-xxxx/lifespan'
-  // }
 };
 
 module.exports = function main(app) {
