@@ -7,11 +7,12 @@ import { ClusterServiceApi, V1Status } from 'generated/client';
 import useApiQuery from 'client/useApiQuery';
 import configuration from 'client/configuration';
 import PageSection from 'components/PageSection';
-import ClusterLifespanCountdown from 'components/ClusterLifespanCountdown';
 import FullPageSpinner from 'components/FullPageSpinner';
 import FullPageError from 'components/FullPageError';
 import ClusterLogs from './ClusterLogs';
 import DeleteClusterModal from './DeleteClusterModal';
+// eslint-disable import/no-named-as-default
+import MutableLifespan from './MutableLifespan';
 
 const clusterService = new ClusterServiceApi(configuration);
 
@@ -19,26 +20,26 @@ export default function ClusterInfoPage(): ReactElement {
   const navigate = useNavigate();
   const { clusterId } = useParams();
   const fetchClusterInfo = useCallback(() => clusterService.info(clusterId), [clusterId]);
-  const { loading, error, data } = useApiQuery(fetchClusterInfo, { pollInterval: 10000 });
+  const { loading, error, data: cluster } = useApiQuery(fetchClusterInfo, { pollInterval: 10000 });
   const [deletionModalOpen, setDeletionModalOpen] = useState<boolean>(false);
 
   if (loading) {
     return <FullPageSpinner />;
   }
 
-  if (error || !data?.ID) {
+  if (error || !cluster?.ID) {
     return <FullPageError message={error?.message || 'Unexpected server response'} />;
   }
 
   const sectionHeader = (
     <div className="flex justify-between">
       <div>
-        <span className="lowercase">{data.ID}</span>
+        <span className="lowercase">{cluster.ID}</span>
         <span>
-          {data.Description && ` (${data.Description})`} - {data.Status || 'FAILED'}
+          {cluster.Description && ` (${cluster.Description})`} - {cluster.Status || 'FAILED'}
         </span>
       </div>
-      <ClusterLifespanCountdown cluster={data} />
+      {!!cluster && <MutableLifespan cluster={cluster} />}
     </div>
   );
 
@@ -58,8 +59,8 @@ export default function ClusterInfoPage(): ReactElement {
           </button>
         </Tooltip>
 
-        {data.Status &&
-          data.Status === V1Status.READY && ( // show Delete only for running clusters
+        {cluster.Status &&
+          cluster.Status === V1Status.READY && ( // show Delete only for running clusters
             <button
               className="btn btn-base ml-auto"
               type="button"
@@ -73,7 +74,7 @@ export default function ClusterInfoPage(): ReactElement {
 
       {deletionModalOpen && (
         <DeleteClusterModal
-          cluster={data}
+          cluster={cluster}
           onCancel={(): void => setDeletionModalOpen(false)}
           onDeleted={(): void => navigate('/')}
         />

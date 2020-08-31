@@ -8,7 +8,7 @@ import configuration from 'client/configuration';
 import { useUserAuth } from 'containers/UserAuthProvider';
 import PageSection from 'components/PageSection';
 import LinkCard from 'components/LinkCard';
-import ClusterLifespanCountdown from 'components/ClusterLifespanCountdown';
+import Lifespan from 'components/Lifespan';
 import FullPageSpinner from 'components/FullPageSpinner';
 import FullPageError from 'components/FullPageError';
 
@@ -55,7 +55,7 @@ function ClusterCards(): ReactElement {
         key={cluster.ID}
         to={`cluster/${cluster.ID}`}
         header={cluster.ID || 'No ID'}
-        footer={cluster.Status && <ClusterLifespanCountdown cluster={cluster} />}
+        footer={cluster.Status && <Lifespan cluster={cluster} />}
         className="m-2"
       >
         {cluster.Description && (

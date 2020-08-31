@@ -10,7 +10,7 @@ import Countdown from 'components/Countdown';
  * @returns duration object
  * @throws error if it cannot parse lifespan string
  */
-function lifespanToDuration(lifespan: string): moment.Duration {
+export function lifespanToDuration(lifespan: string): moment.Duration {
   // API returns lifespan in seconds, but it's being very explicit about it with `10800s` format...
   const matches = /\d+/.exec(lifespan);
   if (!matches || matches.length !== 1)
@@ -22,9 +22,10 @@ function lifespanToDuration(lifespan: string): moment.Duration {
 
 type Props = {
   cluster: V1Cluster;
+  onModify?: (notation: string, incOrDec: string) => void;
 };
 
-export default function ClusterLifespanCountdown({ cluster }: Props): ReactElement {
+export default function Lifespan({ cluster, onModify }: Props): ReactElement {
   let expirationDate: Date | null = null;
   try {
     const duration = lifespanToDuration(cluster.Lifespan || '0s');
@@ -35,5 +36,9 @@ export default function ClusterLifespanCountdown({ cluster }: Props): ReactEleme
     // TODO: eventually log the error to the backend
   }
 
-  return expirationDate ? <Countdown targetDate={expirationDate} /> : <>Expiration: N/A</>;
+  return expirationDate ? (
+    <Countdown targetDate={expirationDate} onModify={onModify} />
+  ) : (
+    <>Expiration: N/A</>
+  );
 }
