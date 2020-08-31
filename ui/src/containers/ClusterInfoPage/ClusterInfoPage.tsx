@@ -40,7 +40,7 @@ export default function ClusterInfoPage(): ReactElement {
           {cluster.Description && ` (${cluster.Description})`} - {cluster.Status || 'FAILED'}
         </span>
       </div>
-      {cluster && <MutableLifespan cluster={cluster} />}
+      {!!cluster && <MutableLifespan cluster={cluster} />}
     </div>
   );
 
