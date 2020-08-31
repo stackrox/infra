@@ -1,8 +1,8 @@
 import React, { ReactElement } from 'react';
 import moment from 'moment';
 
-import { V1Cluster } from '../generated/client';
-import Countdown from './Countdown';
+import { V1Cluster } from 'generated/client';
+import Countdown from 'components/Countdown';
 
 /**
  * Converts backend returned lifespan to the moment duration
@@ -22,11 +22,10 @@ export function lifespanToDuration(lifespan: string): moment.Duration {
 
 type Props = {
   cluster: V1Cluster;
-  canModify: boolean;
   onModify?: (notation: string, incOrDec: string) => void;
 };
 
-export default function Lifespan({ cluster, canModify, onModify }: Props): ReactElement {
+export default function Lifespan({ cluster, onModify }: Props): ReactElement {
   let expirationDate: Date | null = null;
   try {
     const duration = lifespanToDuration(cluster.Lifespan || '0s');
@@ -38,7 +37,7 @@ export default function Lifespan({ cluster, canModify, onModify }: Props): React
   }
 
   return expirationDate ? (
-    <Countdown targetDate={expirationDate} canModify={canModify} onModify={onModify} />
+    <Countdown targetDate={expirationDate} onModify={onModify} />
   ) : (
     <>Expiration: N/A</>
   );

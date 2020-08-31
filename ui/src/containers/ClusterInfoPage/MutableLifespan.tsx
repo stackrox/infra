@@ -58,5 +58,5 @@ export default function MutableLifespan({ cluster }: Props): ReactElement {
       });
   };
 
-  return <Lifespan cluster={modifiedCluster} canModify onModify={onModify} />;
+  return <Lifespan cluster={modifiedCluster} onModify={onModify} />;
 }

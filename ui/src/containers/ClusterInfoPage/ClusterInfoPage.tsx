@@ -21,9 +21,8 @@ export default function ClusterInfoPage(): ReactElement {
   const navigate = useNavigate();
   const { clusterId } = useParams();
   const fetchClusterInfo = useCallback(() => clusterService.info(clusterId), [clusterId]);
-  const { loading, error, data } = useApiQuery(fetchClusterInfo, { pollInterval: 10000 });
+  const { loading, error, data: cluster } = useApiQuery(fetchClusterInfo, { pollInterval: 10000 });
   const [deletionModalOpen, setDeletionModalOpen] = useState<boolean>(false);
-  const cluster = data;
 
   if (loading) {
     return <FullPageSpinner />;

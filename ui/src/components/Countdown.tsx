@@ -10,16 +10,10 @@ function calcDuration(targetDate: Date): moment.Duration {
 type Props = {
   targetDate: Date;
   className?: string;
-  canModify: boolean;
   onModify?: (notation: string, incOrDec: string) => void;
 };
 
-export default function Countdown({
-  targetDate,
-  className = '',
-  canModify,
-  onModify,
-}: Props): ReactElement {
+export default function Countdown({ targetDate, className = '', onModify }: Props): ReactElement {
   const duration = calcDuration(targetDate);
 
   return (
@@ -28,7 +22,7 @@ export default function Countdown({
       content={<TooltipOverlay>{`Expiration: ${moment(targetDate).format('LLL')}`}</TooltipOverlay>}
     >
       <div className={className}>
-        <FormatDuration duration={duration} canModify={canModify} onModify={onModify} />
+        <FormatDuration duration={duration} onModify={onModify} />
       </div>
     </Tooltip>
   );
@@ -36,15 +30,10 @@ export default function Countdown({
 
 type FormatDurationProps = {
   duration: moment.Duration;
-  canModify: boolean;
   onModify?: (notation: string, incOrDec: string) => void;
 };
 
-function FormatDuration({
-  duration,
-  canModify = true,
-  onModify,
-}: FormatDurationProps): ReactElement {
+function FormatDuration({ duration, onModify }: FormatDurationProps): ReactElement {
   // everything will be negative if it's a negative duration (i.e. expired)
   const expiredMultiplier = duration.asMilliseconds() <= 0 ? -1 : 1;
   if (expiredMultiplier * duration.asDays() > 30) {
@@ -63,7 +52,7 @@ function FormatDuration({
   if (expiredMultiplier <= 0) {
     return <span>Expired {timeStr} ago</span>;
   }
-  if (!canModify) {
+  if (!onModify) {
     return <span>{timeStr} remains</span>;
   }
 

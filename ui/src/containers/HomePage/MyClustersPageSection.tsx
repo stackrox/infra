@@ -55,7 +55,7 @@ function ClusterCards(): ReactElement {
         key={cluster.ID}
         to={`cluster/${cluster.ID}`}
         header={cluster.ID || 'No ID'}
-        footer={cluster.Status && <Lifespan cluster={cluster} canModify={false} />}
+        footer={cluster.Status && <Lifespan cluster={cluster} />}
         className="m-2"
       >
         {cluster.Description && (
