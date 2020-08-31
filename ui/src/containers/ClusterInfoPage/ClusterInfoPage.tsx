@@ -12,6 +12,7 @@ import FullPageSpinner from 'components/FullPageSpinner';
 import FullPageError from 'components/FullPageError';
 import ClusterLogs from './ClusterLogs';
 import DeleteClusterModal from './DeleteClusterModal';
+// eslint-disable import/no-named-as-default
 import MutableLifespan from './MutableLifespan';
 
 const clusterService = new ClusterServiceApi(configuration);

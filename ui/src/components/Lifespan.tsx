@@ -26,11 +26,7 @@ type Props = {
   onModify?: (notation: string, incOrDec: string) => void;
 };
 
-export default function Lifespan({
-  cluster,
-  canModify,
-  onModify,
-}: Props): ReactElement {
+export default function Lifespan({ cluster, canModify, onModify }: Props): ReactElement {
   let expirationDate: Date | null = null;
   try {
     const duration = lifespanToDuration(cluster.Lifespan || '0s');
