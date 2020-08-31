@@ -1,4 +1,4 @@
-import React, { ReactElement, useState, useEffect } from 'react';
+import React, { ReactElement, useState } from 'react';
 import moment from 'moment';
 
 import Lifespan, { lifespanToDuration } from 'components/Lifespan';
@@ -15,14 +15,8 @@ type Props = {
 
 export default function MutableLifespan({ cluster }: Props): ReactElement {
   const [clientSideLifespan, setClientSideLifespan] = useState<string>();
+  const [clearClientSideUpdate, setClearClientSideUpdate] = useState<number>();
   const [error, setError] = useState<Error>();
-
-  useEffect(() => {
-    if (cluster && cluster.Lifespan === clientSideLifespan) {
-      // Clear the client side optimistic value if'n'when the caller catches up
-      setClientSideLifespan('');
-    }
-  }, [cluster, clientSideLifespan]);
 
   if (error) {
     const message = `Cannot change the cluster lifespan. A server error occurred: "${error.message}".`;
@@ -45,13 +39,19 @@ export default function MutableLifespan({ cluster }: Props): ReactElement {
 
   const onModify = (notation: string, incOrDec: string): void => {
     const lifespan = modifiedCluster.Lifespan;
-    if (!lifespan) return;
+    if (!lifespan || !modifiedCluster.ID) return;
     const current = lifespanToDuration(lifespan);
     const delta = moment.duration(1, notation as moment.DurationInputArg2);
     const update = incOrDec === 'inc' ? current.add(delta) : current.subtract(delta);
     setClientSideLifespan(`${update.asSeconds()}s`);
     clusterService
-      .lifespan(cluster.ID || '', { Lifespan: `${update.asSeconds()}s` })
+      .lifespan(modifiedCluster.ID, { Lifespan: `${update.asSeconds()}s` })
+      .then(() => {
+        if (clearClientSideUpdate) clearTimeout(clearClientSideUpdate);
+        setClearClientSideUpdate(
+          (setTimeout(() => setClientSideLifespan(''), 20000) as unknown) as number
+        );
+      })
       .catch((err) => {
         setError(err);
         setClientSideLifespan('');
