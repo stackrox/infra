@@ -1,21 +1,18 @@
-import React, { useState, useEffect, useCallback, ReactElement } from 'react';
+import React, { useState, useCallback, ReactElement } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Download, Trash2 } from 'react-feather';
-<<<<<<< HEAD
 import { Tooltip, TooltipOverlay } from '@stackrox/ui-components';
-=======
 import moment from 'moment';
->>>>>>> 1d73f24... optimistically update lifespan
 
 import { ClusterServiceApi, V1Status } from 'generated/client';
 import useApiQuery from 'client/useApiQuery';
 import configuration from 'client/configuration';
 import PageSection from 'components/PageSection';
-import ClusterLifespanCountdown, { lifespanToDuration } from 'components/ClusterLifespanCountdown';
 import FullPageSpinner from 'components/FullPageSpinner';
 import FullPageError from 'components/FullPageError';
 import ClusterLogs from './ClusterLogs';
 import DeleteClusterModal from './DeleteClusterModal';
+import MutableLifespan from './MutableLifespan';
 
 const clusterService = new ClusterServiceApi(configuration);
 
@@ -25,16 +22,7 @@ export default function ClusterInfoPage(): ReactElement {
   const fetchClusterInfo = useCallback(() => clusterService.info(clusterId), [clusterId]);
   const { loading, error, data } = useApiQuery(fetchClusterInfo, { pollInterval: 10000 });
   const [deletionModalOpen, setDeletionModalOpen] = useState<boolean>(false);
-  const [clientSideLifespan, setClientSideLifespan] = useState<string>('');
-
-  useEffect(() => {
-    if (data && data.Lifespan === clientSideLifespan) {
-      // Clear the client side optimistic setting when the fetchClusterInfo poll catches up
-      setClientSideLifespan('');
-    }
-  }, [data, clientSideLifespan]);
-
-  const cluster = clientSideLifespan ? { ...data, Lifespan: clientSideLifespan } : data;
+  const cluster = data;
 
   if (loading) {
     return <FullPageSpinner />;
@@ -44,16 +32,6 @@ export default function ClusterInfoPage(): ReactElement {
     return <FullPageError message={error?.message || 'Unexpected server response'} />;
   }
 
-  const modifyLifespan = async (notation: string, incOrDec: string): Promise<void> => {
-    if (cluster?.Lifespan) {
-      const current = lifespanToDuration(cluster.Lifespan);
-      const delta = moment.duration(1, notation as moment.DurationInputArg2);
-      const update = incOrDec === 'inc' ? current.add(delta) : current.subtract(delta);
-      setClientSideLifespan(`${update.asSeconds()}s`);
-      await clusterService.lifespan(clusterId, { Lifespan: `${update.asSeconds()}s` });
-    }
-  };
-
   const sectionHeader = (
     <div className="flex justify-between">
       <div>
@@ -62,7 +40,7 @@ export default function ClusterInfoPage(): ReactElement {
           {cluster.Description && ` (${cluster.Description})`} - {cluster.Status || 'FAILED'}
         </span>
       </div>
-      <ClusterLifespanCountdown cluster={cluster} canModify onModify={modifyLifespan} />
+      {cluster && <MutableLifespan cluster={cluster} />}
     </div>
   );
 
@@ -82,13 +60,8 @@ export default function ClusterInfoPage(): ReactElement {
           </button>
         </Tooltip>
 
-<<<<<<< HEAD
-        {data.Status &&
-          data.Status === V1Status.READY && ( // show Delete only for running clusters
-=======
         {cluster.Status &&
         cluster.Status === V1Status.READY && ( // show Delete only for running clusters
->>>>>>> 1d73f24... optimistically update lifespan
             <button
               className="btn btn-base ml-auto"
               type="button"

@@ -1,8 +1,8 @@
 import React, { ReactElement } from 'react';
 import moment from 'moment';
 
-import { V1Cluster } from 'generated/client';
-import Countdown from 'components/Countdown';
+import { V1Cluster } from '../generated/client';
+import Countdown from './Countdown';
 
 /**
  * Converts backend returned lifespan to the moment duration
@@ -26,7 +26,7 @@ type Props = {
   onModify?: (notation: string, incOrDec: string) => void;
 };
 
-export default function ClusterLifespanCountdown({
+export default function Lifespan({
   cluster,
   canModify,
   onModify,
