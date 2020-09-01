@@ -1,7 +1,6 @@
 import React, { useState, useCallback, ReactElement } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Download, Trash2 } from 'react-feather';
-import { Tooltip, TooltipOverlay } from '@stackrox/ui-components';
 
 import { ClusterServiceApi, V1Status } from 'generated/client';
 import useApiQuery from 'client/useApiQuery';
@@ -11,6 +10,7 @@ import FullPageSpinner from 'components/FullPageSpinner';
 import FullPageError from 'components/FullPageError';
 import ClusterLogs from './ClusterLogs';
 import DeleteClusterModal from './DeleteClusterModal';
+import DownloadArtifactsModal from './DownloadArtifactsModal';
 // eslint-disable import/no-named-as-default
 import MutableLifespan from './MutableLifespan';
 
@@ -22,6 +22,7 @@ export default function ClusterInfoPage(): ReactElement {
   const fetchClusterInfo = useCallback(() => clusterService.info(clusterId), [clusterId]);
   const { loading, error, data: cluster } = useApiQuery(fetchClusterInfo, { pollInterval: 10000 });
   const [deletionModalOpen, setDeletionModalOpen] = useState<boolean>(false);
+  const [downloadArtifactsOpen, setDownloadArtifactsOpen] = useState<boolean>(false);
 
   if (loading) {
     return <FullPageSpinner />;
@@ -43,6 +44,8 @@ export default function ClusterInfoPage(): ReactElement {
     </div>
   );
 
+  const clusterIsReady = cluster.Status && cluster.Status === V1Status.READY;
+
   return (
     <>
       <PageSection header={sectionHeader}>
@@ -52,24 +55,25 @@ export default function ClusterInfoPage(): ReactElement {
       </PageSection>
 
       <div className=" flex border-base-400 border-t p-4">
-        <Tooltip content={<TooltipOverlay>Not supported yet. Use infractl.</TooltipOverlay>}>
-          <button className="btn btn-base" type="button">
-            <Download size={16} className="mr-2" />
-            Artifacts
-          </button>
-        </Tooltip>
+        <button
+          className="btn btn-base"
+          type="button"
+          onClick={(): void => setDownloadArtifactsOpen(true)}
+        >
+          <Download size={16} className="mr-2" />
+          Artifacts
+        </button>
 
-        {cluster.Status &&
-          cluster.Status === V1Status.READY && ( // show Delete only for running clusters
-            <button
-              className="btn btn-base ml-auto"
-              type="button"
-              onClick={(): void => setDeletionModalOpen(true)}
-            >
-              <Trash2 size={16} className="mr-2" />
-              Delete
-            </button>
-          )}
+        {clusterIsReady && (
+          <button
+            className="btn btn-base ml-auto"
+            type="button"
+            onClick={(): void => setDeletionModalOpen(true)}
+          >
+            <Trash2 size={16} className="mr-2" />
+            Delete
+          </button>
+        )}
       </div>
 
       {deletionModalOpen && (
@@ -77,6 +81,13 @@ export default function ClusterInfoPage(): ReactElement {
           cluster={cluster}
           onCancel={(): void => setDeletionModalOpen(false)}
           onDeleted={(): void => navigate('/')}
+        />
+      )}
+
+      {downloadArtifactsOpen && (
+        <DownloadArtifactsModal
+          cluster={cluster}
+          onCancel={(): void => setDownloadArtifactsOpen(false)}
         />
       )}
     </>
