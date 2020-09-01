@@ -59,21 +59,21 @@ export default function ClusterInfoPage(): ReactElement {
           className="btn btn-base"
           type="button"
           onClick={(): void => setDownloadArtifactsOpen(true)}
+          disabled={!clusterIsReady}
         >
           <Download size={16} className="mr-2" />
           Artifacts
         </button>
 
-        {clusterIsReady && (
-          <button
-            className="btn btn-base ml-auto"
-            type="button"
-            onClick={(): void => setDeletionModalOpen(true)}
-          >
-            <Trash2 size={16} className="mr-2" />
-            Delete
-          </button>
-        )}
+        <button
+          className="btn btn-base ml-auto"
+          type="button"
+          onClick={(): void => setDeletionModalOpen(true)}
+          disabled={!clusterIsReady}
+        >
+          <Trash2 size={16} className="mr-2" />
+          Delete
+        </button>
       </div>
 
       {deletionModalOpen && (
