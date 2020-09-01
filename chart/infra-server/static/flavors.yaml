@@ -9,7 +9,7 @@
   parameters:
     - name: name
       description: cluster name
-      value: ""
+      value: "example1"
 
     - name: main-image
       value: stackrox.io/main:3.0.47.2
@@ -48,7 +48,7 @@
   parameters:
     - name: name
       description: cluster name
-      value: ""
+      value: "example1"
 
     - name: main-image
       description: StackRox Central image Docker name
@@ -85,14 +85,14 @@
   availability: stable
   workflow: configuration/workflow-gke-default.yaml
   parameters:
+    - name: name
+      description: cluster name
+      value: "example1"
+
     - name: nodes
       description: number of nodes
       value: "2"
       kind: optional
-
-    - name: name
-      description: cluster name
-      value: ""
 
     - name: machine-type
       description: node machine type
@@ -118,7 +118,7 @@
   parameters:
     - name: name
       description: cluster name
-      value: ""
+      value: "example1"
 
 #####################
 #  openshift-multi  #
@@ -131,7 +131,7 @@
   parameters:
     - name: name
       description: cluster name
-      value: ""
+      value: "example1"
 
     - name: crio
       description: should CRI-O be used as the container runtime
