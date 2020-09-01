@@ -51,7 +51,13 @@ function Artifacts({ cluster }: ArtifactsProps): ReactElement {
   }
 
   if (artifacts?.Artifacts?.length) {
-    return <ArtifactsList artifacts={artifacts.Artifacts} />;
+    return (
+      <>
+        <ArtifactsList artifacts={artifacts.Artifacts} />
+        <p>Note: You can download all artifacts at the command line with:</p>
+        <code>infractl artifacts --download-dir=&lt;some dir&gt; {cluster.ID}</code>
+      </>
+    );
   }
 
   return <p>There are no artifacts for this cluster.</p>;
