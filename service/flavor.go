@@ -69,6 +69,7 @@ func scrubInternalParameters(flavor *v1.Flavor) {
 			Description: paramValue.Description,
 			Value:       paramValue.Value,
 			Optional:    paramValue.Optional,
+			Order:       paramValue.Order,
 		}
 	}
 
