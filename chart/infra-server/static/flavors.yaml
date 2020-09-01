@@ -81,7 +81,7 @@
 #################
 - id: gke-default
   name: GKE Default
-  description: GKE cluster running the default version
+  description: GKE cluster running the default version WOOT!
   availability: stable
   workflow: configuration/workflow-gke-default.yaml
   parameters:
