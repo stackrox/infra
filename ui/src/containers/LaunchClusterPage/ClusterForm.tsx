@@ -21,15 +21,22 @@ import { UploadCloud } from 'react-feather';
 
 const clusterService = new ClusterServiceApi(configuration);
 
-const nameRequirements =
-  "Only lowercase letters, numbers, and '-' allowed, must start with a letter and end with a letter or number";
+function helpByParameterName(name?: string): string {
+  const help: { [key: string]: string } = {
+    name:
+      "Only lowercase letters, numbers, and '-' allowed, must start with a letter and end with a letter or number",
+  };
+
+  if (name && name in help) {
+    return help[name];
+  }
+  return '';
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const schemasByParameterName: { [key: string]: yup.Schema<any> } = {
   name: yup
     .string()
-    .default('')
-    .required('Required')
     .min(3, 'Too short')
     .max(40, 'Too long')
     .matches(
@@ -39,31 +46,38 @@ const schemasByParameterName: { [key: string]: yup.Schema<any> } = {
   nodes: yup
     .number()
     .transform((v) => (Number.isNaN(v) ? 0.1 : v)) // workaround https://github.com/jquense/yup/issues/66
-    .default(2)
-    .required('Required')
     .integer('Must be an integer')
     .min(1, 'Must be at least 1')
     .max(10, 'Be cost effective, please'),
 };
 
 type FlavorParameters = { [key: string]: V1Parameter };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ParameterSchemas = { [key: string]: yup.Schema<any> };
 
-function createParameterSchemas(parameters: FlavorParameters): object {
+function createParameterSchemas(parameters: FlavorParameters): ParameterSchemas {
   return Object.keys(parameters).reduce<object>((fields, param) => {
-    if (!schemasByParameterName[param]) throw new Error(`Unknown parameter type "${param}"`);
+    let thisParamSchema;
+    if (schemasByParameterName[param]) {
+      thisParamSchema = schemasByParameterName[param];
+    } else {
+      thisParamSchema = yup.string();
+    }
+    if (!parameters[param].Optional) {
+      thisParamSchema = (thisParamSchema as yup.MixedSchema).required('Required');
+    }
     return {
       ...fields,
-      [param]: schemasByParameterName[param],
+      [param]: thisParamSchema,
     };
-  }, {});
+  }, {}) as ParameterSchemas;
 }
 
 function createInitialParameterValues(parameters: FlavorParameters): object {
   return Object.keys(parameters).reduce<object>((fields, param) => {
-    if (!schemasByParameterName[param]) throw new Error(`Unknown parameter type "${param}"`);
     return {
       ...fields,
-      [param]: schemasByParameterName[param].default(),
+      [param]: parameters[param].Optional && parameters[param].Value ? parameters[param].Value : '',
     };
   }, {});
 }
@@ -95,27 +109,35 @@ function getSchemaTestParamValue<T = any, V = any>(
   return test?.params[testParamName] as V;
 }
 
-function ParameterFormField(props: { parameter: V1Parameter }): ReactElement {
-  const { parameter } = props;
-  const schema = parameter.Name && schemasByParameterName[parameter.Name];
-  if (!parameter.Name || !schema) throw new Error(`Unknown parameter "${parameter.Name}"`);
+function getFormLabelFromParameter(parameter: V1Parameter): string {
+  return parameter.Description || parameter.Name || '';
+}
+
+function ParameterFormField(props: {
+  parameter: V1Parameter;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  schema: yup.Schema<any>;
+}): ReactElement {
+  const { parameter, schema } = props;
+
+  const required = !parameter.Optional;
 
   switch (schema.type) {
     case 'string':
       return (
         <TextFormField
           name={`Parameters.${parameter.Name}`}
-          label={parameter.Description || parameter.Name}
-          helperText={nameRequirements}
-          required
+          label={getFormLabelFromParameter(parameter)}
+          helperText={helpByParameterName(parameter.Name)}
+          required={required}
         />
       );
     case 'number':
       return (
         <NumberFormField
           name={`Parameters.${parameter.Name}`}
-          label={parameter.Description || parameter.Name}
-          required
+          label={getFormLabelFromParameter(parameter)}
+          required={required}
           min={getSchemaTestParamValue(schema, 'min')}
           max={getSchemaTestParamValue(schema, 'max')}
         />
@@ -125,12 +147,36 @@ function ParameterFormField(props: { parameter: V1Parameter }): ReactElement {
   }
 }
 
-function FormContent(props: { flavorParameters: FlavorParameters }): ReactElement {
+function getOrderFromParameter(parameter: V1Parameter): number {
+  return parameter.Order || 0;
+}
+
+function getSchemaForParameter(
+  parameterSchemas: ParameterSchemas,
+  parameter: V1Parameter
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): yup.Schema<any> {
+  if (parameter.Name && parameter.Name in parameterSchemas) {
+    return parameterSchemas[parameter.Name];
+  }
+  return yup.string();
+}
+
+function FormContent(props: {
+  flavorParameters: FlavorParameters;
+  parameterSchemas: ParameterSchemas;
+}): ReactElement {
   const { isSubmitting } = useFormikContext();
-  const { flavorParameters } = props;
-  const parameterFields = Object.entries(flavorParameters).map(([param, metadata]) => (
-    <ParameterFormField key={param} parameter={metadata} />
-  ));
+  const { flavorParameters, parameterSchemas } = props;
+  const parameterFields = Object.values(flavorParameters)
+    .sort((a: V1Parameter, b: V1Parameter) => getOrderFromParameter(a) - getOrderFromParameter(b))
+    .map((parameter) => (
+      <ParameterFormField
+        key={parameter.Name}
+        parameter={parameter}
+        schema={getSchemaForParameter(parameterSchemas, parameter)}
+      />
+    ));
 
   const launchBtnContent = (
     <>
@@ -138,6 +184,7 @@ function FormContent(props: { flavorParameters: FlavorParameters }): ReactElemen
       Launch
     </>
   );
+
   return (
     <>
       {parameterFields}
@@ -162,10 +209,11 @@ export default function ClusterForm({
   flavorParameters,
   onClusterCreated,
 }: Props): ReactElement {
+  const parameterSchemas = createParameterSchemas(flavorParameters);
   const schema = yup.object().shape({
     ID: yup.string().required(),
     Description: yup.string().default(''),
-    Parameters: yup.object().shape<object>(createParameterSchemas(flavorParameters)),
+    Parameters: yup.object().shape<object>(parameterSchemas),
   });
   const initialValues: FormikValues = {
     ID: flavorId,
@@ -205,7 +253,7 @@ export default function ClusterForm({
             {error.response?.data?.error && ` (${error.response.data.error})`}
           </div>
         )}
-        <FormContent flavorParameters={flavorParameters} />
+        <FormContent flavorParameters={flavorParameters} parameterSchemas={parameterSchemas} />
       </Form>
     </Formik>
   );
