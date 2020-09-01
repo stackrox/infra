@@ -87,7 +87,7 @@ export default function ClusterInfoPage(): ReactElement {
       {downloadArtifactsOpen && (
         <DownloadArtifactsModal
           cluster={cluster}
-          onCancel={(): void => setDownloadArtifactsOpen(false)}
+          onClose={(): void => setDownloadArtifactsOpen(false)}
         />
       )}
     </>

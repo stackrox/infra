@@ -9,17 +9,28 @@ const clusterService = new ClusterServiceApi(configuration);
 
 type Props = {
   cluster: V1Cluster;
-  onCancel: () => void;
+  onClose: () => void;
 };
 
-export default function DownloadArtifactsModal({ cluster, onCancel }: Props): ReactElement {
+export default function DownloadArtifactsModal({ cluster, onClose }: Props): ReactElement {
   const fetchArtifacts = useCallback(() => clusterService.artifacts(cluster.ID || ''), [
     cluster.ID,
   ]);
   const { loading, error, data: artifacts } = useApiQuery(fetchArtifacts);
 
+  const closeButton = (
+    <button type="button" className="btn btn-base" onClick={onClose}>
+      Close
+    </button>
+  );
+
   return (
-    <Modal isOpen onRequestClose={onCancel} header={`Artifacts for ${cluster.ID}`}>
+    <Modal
+      isOpen
+      onRequestClose={onClose}
+      header={`Artifacts for ${cluster.ID}`}
+      buttons={closeButton}
+    >
       {loading && <p>Loading...</p>}
       {error && <p>Cannot load artifacts: `${error.message}`</p>}
       {artifacts?.Artifacts?.length === 0 && <p>This cluster has no artifacts</p>}
