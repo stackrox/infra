@@ -44,7 +44,7 @@ export default function ClusterInfoPage(): ReactElement {
     </div>
   );
 
-  const clusterIsReady = cluster.Status && cluster.Status === V1Status.READY;
+  const clusterIsReady = cluster.Status === V1Status.READY;
 
   return (
     <>

@@ -70,7 +70,7 @@ type ArtifactsListProps = {
 function ArtifactsList({ artifacts }: ArtifactsListProps): ReactElement {
   return (
     <ul className="list-disc ml-5">
-      {artifacts.map((artifact: V1Artifact) => (
+      {artifacts.map((artifact) => (
         <li key={artifact.Name}>
           <a href={artifact.URL} className="underline text-blue-500">
             {artifact.Name}
