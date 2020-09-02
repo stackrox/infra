@@ -82,13 +82,13 @@ After deploying the service, browse to the appropriate endpoint to verify that y
 
 | Environment | URL |
 | --- | --- |
-| Development | http://dev.infra.stackrox.com |
+| Development | http://dev.infra.rox.systems |
 | Production | https://infra.rox.systems |
 
 Download a copy of `infractl` and export your token. Verify API connectivity:
 
 | Environment | Command |
 | --- | --- |
-| Development | `infractl -e dev.infra.stackrox.com:443 whoami` |
+| Development | `infractl -e dev.infra.rox.systems:443 whoami` |
 | Production | `infractl whoami` |
 
