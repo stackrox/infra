@@ -129,6 +129,10 @@ message Parameter {
     // Internal indicates that this parameter should not be provided by a user,
     // but rather treats Value as a hardcoded constant.
     bool Internal = 5;
+
+    // The relative order of importance of this parameter for when presenting in
+    // a UI for example.
+    int32 Order = 6;
 }
 
 // FlavorArtifact represents a single artifact that is produced by a flavor.

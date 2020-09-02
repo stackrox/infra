@@ -85,14 +85,19 @@
   availability: stable
   workflow: configuration/workflow-gke-default.yaml
   parameters:
+    - name: name
+      description: cluster name
+      value: example1
+
     - name: nodes
       description: number of nodes
       value: "2"
       kind: optional
-      
-    - name: name
-      description: cluster name
-      value: example1
+
+    - name: machine-type
+      description: node machine type
+      value: e2-standard-4
+      kind: optional
 
   artifacts:
     - name: kubeconfig

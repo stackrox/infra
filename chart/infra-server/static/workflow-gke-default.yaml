@@ -8,6 +8,7 @@ spec:
     parameters:
       - name: name
       - name: nodes
+      - name: machine-type
   volumes:
     - name: credentials
       secret:
@@ -24,6 +25,8 @@ spec:
                   value: "{{workflow.parameters.name}}"
                 - name: nodes
                   value: "{{workflow.parameters.nodes}}"
+                - name: machine-type
+                  value: "{{workflow.parameters.machine-type}}"
 
         - - name: wait
             template: wait
@@ -39,6 +42,7 @@ spec:
         parameters:
           - name: name
           - name: nodes
+          - name: machine-type
       outputs:
         artifacts:
           - name: kubeconfig
@@ -50,11 +54,12 @@ spec:
             valueFrom:
               path: /outputs/cluster_name
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/gke-default:v0.0.0-27-g4924d62
+        image: gcr.io/stackrox-infra/automation-flavors/gke-default:v0.0.0-31-gf2e01c6-snapshot
         args:
           - create
           - "--name={{inputs.parameters.name}}"
           - "--nodes={{inputs.parameters.nodes}}"
+          - "--machine-type={{inputs.parameters.machine-type}}"
         volumeMounts:
           - name: credentials
             mountPath: /tmp
@@ -67,7 +72,7 @@ spec:
         parameters:
           - name: name
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/gke-default:v0.0.0-27-g4924d62
+        image: gcr.io/stackrox-infra/automation-flavors/gke-default:v0.0.0-31-gf2e01c6-snapshot
         args:
           - destroy
           - "--name={{inputs.parameters.name}}"

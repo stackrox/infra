@@ -125,11 +125,12 @@ func NewFromConfig(filename string) (*Registry, error) {
 		}
 
 		parameters := make(map[string]*v1.Parameter, len(flavorCfg.Parameters))
-		for _, parameter := range flavorCfg.Parameters {
+		for order, parameter := range flavorCfg.Parameters {
 			param := &v1.Parameter{
 				Name:        parameter.Name,
 				Description: parameter.Description,
 				Value:       parameter.Value,
+				Order:       int32(order) + 1,
 			}
 
 			switch parameter.Kind {

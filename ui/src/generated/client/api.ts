@@ -31,6 +31,17 @@ export enum Flavoravailability {
 }
 
 /**
+ * method represents the various lifespan operations.   - REPLACE: REPLACE indicates that the given lifespan should replace the current lifespan.  - ADD: ADD indicates that the given lifespan should be added to the current lifespan.  - SUBTRACT: SUBTRACT indicates that the given lifespan should be subtracted from the current lifespan.
+ * @export
+ * @enum {string}
+ */
+export enum LifespanRequestMethod {
+  REPLACE = 'REPLACE',
+  ADD = 'ADD',
+  SUBTRACT = 'SUBTRACT',
+}
+
+/**
  *
  * @export
  * @interface V1Artifact
@@ -284,6 +295,12 @@ export interface V1LifespanRequest {
    * @memberof V1LifespanRequest
    */
   Lifespan?: string;
+  /**
+   *
+   * @type {LifespanRequestMethod}
+   * @memberof V1LifespanRequest
+   */
+  method?: LifespanRequestMethod;
 }
 /**
  * Log represents the logs from a specific pod.
@@ -359,6 +376,12 @@ export interface V1Parameter {
    * @memberof V1Parameter
    */
   Internal?: boolean;
+  /**
+   * The relative order of importance of this parameter for when presenting in a UI for example.
+   * @type {number}
+   * @memberof V1Parameter
+   */
+  Order?: number;
 }
 /**
  * ResourceByID represents a generic reference to a named/unique resource.
