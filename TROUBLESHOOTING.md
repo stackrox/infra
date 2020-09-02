@@ -24,7 +24,7 @@ https://console.cloud.google.com/kubernetes/clusters/details/us-west2/infra-prod
 
 Production Address
 
-http://infra.stackrox.com
+https://infra.rox.systems
 
 GKE Development Cluster
 
@@ -32,7 +32,7 @@ https://console.cloud.google.com/kubernetes/clusters/details/us-west2/infra-deve
 
 Development Address
 
-http://infra.stackrox.com
+http://dev.infra.rox.systems
 
 ## Troubleshooting with Argo
 

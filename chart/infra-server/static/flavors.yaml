@@ -3,7 +3,7 @@
 ##########
 - id: demo
   name: StackRox Demo
-  description: Demo running StackRox 3.0.47.2
+  description: Demo running StackRox 3.0.48.0
   availability: default
   workflow: configuration/workflow-demo.yaml
   parameters:
