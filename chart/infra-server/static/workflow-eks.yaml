@@ -1,0 +1,63 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: eks-
+spec:
+  entrypoint: start
+  arguments:
+    parameters:
+      - name: name
+
+  templates:
+    - name: start
+      steps:
+        - - name: create
+            template: create
+            arguments:
+              parameters:
+                - name: name
+                  value: "{{workflow.parameters.name}}"
+
+        - - name: wait
+            template: wait
+
+        - - name: destroy
+            template: destroy
+            arguments:
+              parameters:
+                - name: name
+                  value: "{{workflow.parameters.name}}"
+
+    - name: create
+      inputs:
+        parameters:
+          - name: name
+      container:
+        image: stackrox/eks-automation:0.0.1
+        args:
+          - create
+          - "{{inputs.parameters.name}}"
+        env:
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: aws-access-secrets
+                key: AWS_ACCESS_KEY_ID
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: aws-access-secrets
+                key: AWS_SECRET_ACCESS_KEY
+      
+    - name: wait
+      suspend: {}
+
+    - name: destroy
+      inputs:
+        parameters:
+          - name: name
+      container:
+        image: stackrox/eks-automation:0.0.1
+        args:
+          - destroy
+          - "{{inputs.parameters.name}}"

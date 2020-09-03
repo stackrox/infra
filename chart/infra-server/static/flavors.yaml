@@ -165,3 +165,16 @@
       description: should destroy succeed or fail
       value: true
       kind: optional
+
+#####################
+#  eks  #
+#####################
+- id: eks
+  name: EKS
+  description: EKS cluster
+  availability: alpha
+  workflow: configuration/workflow-eks.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      value: example1
