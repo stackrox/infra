@@ -32,6 +32,10 @@ spec:
       inputs:
         parameters:
           - name: name
+      outputs:
+        artifacts:
+          - name: kubeconfig
+            path: /data/eks-kube.yaml    
       container:
         image: stackrox/eks-automation:0.0.1
         args:
@@ -48,7 +52,13 @@ spec:
               secretKeyRef:
                 name: aws-access-secrets
                 key: AWS_SECRET_ACCESS_KEY
-      
+        volumeMounts:
+          - name: data
+            mountPath: /data
+      volumes:
+        - name: data
+          emptyDir: {}
+
     - name: wait
       suspend: {}
 
@@ -61,3 +71,15 @@ spec:
         args:
           - destroy
           - "{{inputs.parameters.name}}"
+        env:
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: aws-access-secrets
+                key: AWS_ACCESS_KEY_ID
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: aws-access-secrets
+                key: AWS_SECRET_ACCESS_KEY
+  

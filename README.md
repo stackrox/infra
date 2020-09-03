@@ -34,7 +34,7 @@ For additional information on how this service is deployed, please refer to the 
 
 ## Runbook
 
-For additional information on how to debug and remediate issues with the deployed service, please refer to the [runbook instructions](https://github.com/stackrox/infra/blob/master/RUNBOOK.md).
+For additional information on how to debug and remediate issues with the deployed service, please refer to the [runbook instructions](https://github.com/stackrox/infra/blob/master/TROUBLESHOOTING.md).
 
 [circleci-badge]: https://circleci.com/gh/stackrox/infra.svg?style=shield&circle-token=afa342906b658b5349c68b70fa82fd85d1422212
 [circleci-link]:  https://circleci.com/gh/stackrox/infra

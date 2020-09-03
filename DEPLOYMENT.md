@@ -26,7 +26,7 @@ gcloud container clusters get-credentials infra-production \
 
 Service configuration is [stored in a GCS bucket](https://console.cloud.google.com/storage/browser/infra-configuration?organizationId=847401270788&project=stackrox-infra).
 
-You will need to download this configuration if you plan to do a deployment update.
+You will need to download this configuration if you plan to make a change to infra. Configuration changes are baked in to the `infra-server` image at build time. 
 
 To download the configuration locally to `chart/infra-server/configuration`, run:
 
@@ -58,9 +58,11 @@ To do everything in one command, run:
 
 `make deploy-development`
 
-Note: The deployment will not execute the latest image if the version string
-does not change. See the output from `make tag` versus the version reported by
-the `infra-server`.
+Note: If the development server version does not change then `make deploy-development` 
+will not result in a running `infra-server` that reflects
+your local changes. A brute force way to ensure an update is to delete the
+`infra-server-deployment` deployment in the `infra` namespace. It will be recreated by
+`make deploy-development`.
 
 ### Production
 
