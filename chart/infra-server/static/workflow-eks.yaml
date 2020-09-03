@@ -7,6 +7,8 @@ spec:
   arguments:
     parameters:
       - name: name
+      - name: nodes
+      - name: machine-type
 
   templates:
     - name: start
@@ -17,6 +19,10 @@ spec:
               parameters:
                 - name: name
                   value: "{{workflow.parameters.name}}"
+                - name: nodes
+                  value: "{{workflow.parameters.nodes}}"
+                - name: machine-type
+                  value: "{{workflow.parameters.machine-type}}"
 
         - - name: wait
             template: wait
@@ -32,6 +38,8 @@ spec:
       inputs:
         parameters:
           - name: name
+          - name: nodes
+          - name: machine-type
       outputs:
         artifacts:
           - name: kubeconfig
@@ -52,6 +60,10 @@ spec:
               secretKeyRef:
                 name: aws-access-secrets
                 key: AWS_SECRET_ACCESS_KEY
+          - name: NODE_COUNT
+            value: "{{inputs.parameters.nodes}}"
+          - name: INSTANCE_TYPE
+            value: "{{inputs.parameters.machine-type}}"
         volumeMounts:
           - name: data
             mountPath: /data

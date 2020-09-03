@@ -171,10 +171,20 @@
 #####################
 - id: eks
   name: EKS
-  description: EKS cluster
+  description: AWS EKS cluster
   availability: alpha
   workflow: configuration/workflow-eks.yaml
   parameters:
     - name: name
       description: cluster name
       value: example1
+
+    - name: nodes
+      description: number of nodes
+      value: "2"
+      kind: optional
+
+    - name: machine-type
+      description: node machine type
+      value: m5.xlarge
+      kind: optional
