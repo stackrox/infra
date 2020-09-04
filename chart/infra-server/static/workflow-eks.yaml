@@ -45,7 +45,7 @@ spec:
           - name: kubeconfig
             path: /data/eks-kube.yaml    
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/eks:v0.0.0-36-gfe33017-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/eks:0.0.3
         args:
           - create
           - "{{inputs.parameters.name}}"
@@ -79,7 +79,7 @@ spec:
         parameters:
           - name: name
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/eks:v0.0.0-36-gfe33017-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/eks:0.0.3
         args:
           - destroy
           - "{{inputs.parameters.name}}"
