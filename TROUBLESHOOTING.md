@@ -32,12 +32,18 @@ https://console.cloud.google.com/kubernetes/clusters/details/us-west2/infra-deve
 
 Development Address
 
-http://dev.infra.rox.systems
+http://infra.rox.systems
 
 ## Troubleshooting with Argo
 
-Argo is used as the underlying workflow orchestrator; Argo Workflow specs are submitted when a user requests a cluster, and Argo then consumes that spec and wires together a sequence of pods with volumes/secrets/logs/etc.
-By using the Argo CLI (`argo`) we can get a low-level view of the world, and debug potential issues.
+Argo is used as the underlying workflow orchestrator; Argo Workflow specs are
+submitted when a user requests a cluster, and Argo then consumes that spec and
+wires together a sequence of pods with volumes/secrets/logs/etc.
+
+`brew install argo`
+
+By using the Argo CLI (`argo`) we can get a low-level view of the world, and
+debug potential issues.
 
 To list all workflows, run:
 
@@ -85,6 +91,10 @@ argo logs demo-mxgf9-3875809567 | head -n 20
 [PASS] DOCKER_IO_USERNAME (username for Docker Hub)
 ```
 
-If a step is stuck in a pending state (e.x. a referenced secret doesn't exist), `argo get` should show that information.
-Otherwise `kubectl describe po ...` can be used to see exact reasons.
+If a step is stuck in a pending state (e.x. a referenced secret doesn't exist),
+`argo get` should show that information. Otherwise `kubectl describe po ...` can
+be used to see exact reasons.
+
+Note: The containers used to execute an argo workflow are created in the
+`default` k8s namespace.
 
