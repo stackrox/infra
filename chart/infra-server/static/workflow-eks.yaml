@@ -8,47 +8,35 @@ spec:
     parameters:
       - name: name
       - name: nodes
+        value: ""
       - name: machine-type
+        value: ""
+      - name: k8s-version
+        value: ""
 
   templates:
     - name: start
       steps:
         - - name: create
             template: create
-            arguments:
-              parameters:
-                - name: name
-                  value: "{{workflow.parameters.name}}"
-                - name: nodes
-                  value: "{{workflow.parameters.nodes}}"
-                - name: machine-type
-                  value: "{{workflow.parameters.machine-type}}"
 
         - - name: wait
             template: wait
 
         - - name: destroy
             template: destroy
-            arguments:
-              parameters:
-                - name: name
-                  value: "{{workflow.parameters.name}}"
 
     - name: create
-      inputs:
-        parameters:
-          - name: name
-          - name: nodes
-          - name: machine-type
       outputs:
         artifacts:
           - name: kubeconfig
             path: /data/eks-kube.yaml    
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/eks:0.0.3
+        image: gcr.io/stackrox-infra/automation-flavors/eks:0.0.4
+        imagePullPolicy: Always
         args:
           - create
-          - "{{inputs.parameters.name}}"
+          - "{{workflow.parameters.name}}"
         env:
           - name: AWS_ACCESS_KEY_ID
             valueFrom:
@@ -61,9 +49,11 @@ spec:
                 name: aws-access-secrets
                 key: AWS_SECRET_ACCESS_KEY
           - name: NODE_COUNT
-            value: "{{inputs.parameters.nodes}}"
+            value: "{{workflow.parameters.nodes}}"
           - name: INSTANCE_TYPE
-            value: "{{inputs.parameters.machine-type}}"
+            value: "{{workflow.parameters.machine-type}}"
+          - name: K8S_VERSION
+            value: "{{workflow.parameters.k8s-version}}"
         volumeMounts:
           - name: data
             mountPath: /data
@@ -75,14 +65,12 @@ spec:
       suspend: {}
 
     - name: destroy
-      inputs:
-        parameters:
-          - name: name
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/eks:0.0.3
+        image: gcr.io/stackrox-infra/automation-flavors/eks:0.0.4
+        imagePullPolicy: Always
         args:
           - destroy
-          - "{{inputs.parameters.name}}"
+          - "{{workflow.parameters.name}}"
         env:
           - name: AWS_ACCESS_KEY_ID
             valueFrom:
