@@ -167,7 +167,7 @@
       kind: optional
 
 #####################
-#  eks  #
+#  AWS EKS          #
 #####################
 - id: eks
   name: EKS
@@ -187,4 +187,9 @@
     - name: machine-type
       description: node machine type
       value: m5.xlarge
+      kind: optional
+
+    - name: k8s-version
+      description: kubernetes version
+      value: 1.17
       kind: optional
