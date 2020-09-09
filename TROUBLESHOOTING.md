@@ -98,3 +98,35 @@ be used to see exact reasons.
 Note: The containers used to execute an argo workflow are created in the
 `default` k8s namespace.
 
+## Submit an Argo workflow directly
+
+For a faster development iteration it can be useful to submit workflow changes
+directly to Argo and bypass `infra`. For example, if you only change the
+automation build image or the parameters for a workflow.
+
+```
+# make sure you are using the development cluster
+$ kubectl config current-context
+gke_stackrox-infra_us-west2_infra-development
+
+# submit the eks workflow with some parameters
+$ argo submit -p 'name=your-unique-name' -p 'user-arns=arn:aws:iam::051999192406:user/you@stackrox.com' chart/infra-server/static/workflow-eks.yaml
+Name:                eks-xrhx4
+Namespace:           default
+ServiceAccount:      default
+...
+
+# check on progress
+$ argo logs eks-xrhx4
+...
+
+# if it fails you may need to manually delete your cluster!
+
+# a typical cluster build workflow will wait at its wait step
+$ argo list
+NAME        STATUS                AGE   DURATION   PRIORITY
+eks-2h8gb   Running (Suspended)   24m   24m        0
+
+# and can be resumed to test steps after that i.e. delete
+$ argo resume eks-2h8gb
+```

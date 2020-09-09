@@ -13,6 +13,8 @@ spec:
         value: ""
       - name: k8s-version
         value: ""
+      - name: user-arns
+        value: ""
 
   templates:
     - name: start
@@ -32,11 +34,7 @@ spec:
           - name: kubeconfig
             path: /data/eks-kube.yaml    
       container:
-<<<<<<< HEAD
-        image: gcr.io/stackrox-infra/automation-flavors/eks:0.0.4
-=======
-        image: gcr.io/stackrox-infra/automation-flavors/eks:0.0.3-1-g429a940-snapshot
->>>>>>> 688c3b9... make kube version a parameter
+        image: gcr.io/stackrox-infra/automation-flavors/eks:0.0.4-3-gcc6f16f-snapshot
         imagePullPolicy: Always
         args:
           - create
@@ -58,6 +56,8 @@ spec:
             value: "{{workflow.parameters.machine-type}}"
           - name: K8S_VERSION
             value: "{{workflow.parameters.k8s-version}}"
+          - name: USER_ARNS
+            value: "{{workflow.parameters.user-arns}}"
         volumeMounts:
           - name: data
             mountPath: /data
@@ -70,11 +70,7 @@ spec:
 
     - name: destroy
       container:
-<<<<<<< HEAD
-        image: gcr.io/stackrox-infra/automation-flavors/eks:0.0.4
-=======
-        image: gcr.io/stackrox-infra/automation-flavors/eks:0.0.3-1-g429a940-snapshot
->>>>>>> 688c3b9... make kube version a parameter
+        image: gcr.io/stackrox-infra/automation-flavors/eks:0.0.4-3-gcc6f16f-snapshot
         imagePullPolicy: Always
         args:
           - destroy

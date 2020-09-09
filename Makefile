@@ -176,6 +176,7 @@ render-production: clean-render
 
 .PHONY: install-development
 install-development:
+	kubectl config current-context | grep development
 	helm upgrade --install \
 	    --kube-context gke_stackrox-infra_us-west2_infra-development \
 		--repo https://argoproj.github.io/argo-helm \
@@ -188,6 +189,7 @@ install-development:
 
 .PHONY: install-production
 install-production:
+	kubectl config current-context | grep production
 	helm upgrade --install \
 	    --kube-context gke_stackrox-infra_us-west2_infra-production \
 		--repo https://argoproj.github.io/argo-helm \
