@@ -179,6 +179,10 @@
       description: cluster name
       value: example1
 
+    - name: user-arns
+      description: AWS user ARNs that will get access to the cluster
+      value: arn:aws:iam::393282794030:user/joey@stackrox.com
+
     - name: nodes
       description: number of nodes
       value: "2"
