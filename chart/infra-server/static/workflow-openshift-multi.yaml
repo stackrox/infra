@@ -49,7 +49,7 @@ spec:
           - name: terraform-destroy-plan
             path: /well-known/artifacts/terraform-destroy.tfplan
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:v0.0.0-27-g4924d62
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:0.0.6-5-gccdcacb-snapshot
         args:
           - create
           - "--name={{inputs.parameters.name}}"
@@ -70,7 +70,7 @@ spec:
           - name: terraform-destroy-plan
             path: /well-known/artifacts/terraform-destroy.tfplan
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:v0.0.0-27-g4924d62
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:0.0.6-5-gccdcacb-snapshot
         args:
           - destroy
         volumeMounts:
