@@ -9,6 +9,7 @@ spec:
       - name: name
       - name: nodes
       - name: machine-type
+      - name: gcp-project
   volumes:
     - name: credentials
       secret:
@@ -27,6 +28,8 @@ spec:
                   value: "{{workflow.parameters.nodes}}"
                 - name: machine-type
                   value: "{{workflow.parameters.machine-type}}"
+                - name: gcp-project
+                  value: "{{workflow.parameters.gcp-project}}"
 
         - - name: wait
             template: wait
@@ -36,6 +39,8 @@ spec:
               parameters:
                 - name: name
                   value: "{{steps.create.outputs.parameters.cluster_name}}"
+                - name: gcp-project
+                  value: "{{workflow.parameters.gcp-project"
 
     - name: create
       inputs:
@@ -43,6 +48,7 @@ spec:
           - name: name
           - name: nodes
           - name: machine-type
+          - name: gcp-project
       outputs:
         artifacts:
           - name: kubeconfig
@@ -60,6 +66,7 @@ spec:
           - "--name={{inputs.parameters.name}}"
           - "--nodes={{inputs.parameters.nodes}}"
           - "--machine-type={{inputs.parameters.machine-type}}"
+          - --gcp-project=srox-temp-dev-test
         volumeMounts:
           - name: credentials
             mountPath: /tmp
@@ -71,11 +78,13 @@ spec:
       inputs:
         parameters:
           - name: name
+          - name: gcp-project
       container:
         image: gcr.io/stackrox-infra/automation-flavors/gke-default:v0.0.0-31-gf2e01c6-snapshot
         args:
           - destroy
           - "--name={{inputs.parameters.name}}"
+          - --gcp-project=srox-temp-dev-test
         volumeMounts:
           - name: credentials
             mountPath: /tmp
