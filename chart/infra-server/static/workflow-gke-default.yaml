@@ -54,7 +54,7 @@ spec:
             valueFrom:
               path: /outputs/cluster_name
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.0.6-5-gccdcacb-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.0.6-6-g7ec3030-snapshot
         args:
           - create
           - "--name={{inputs.parameters.name}}"
@@ -73,7 +73,7 @@ spec:
         parameters:
           - name: name
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.0.6-5-gccdcacb-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.0.6-6-g7ec3030-snapshot
         args:
           - destroy
           - "--name={{inputs.parameters.name}}"

@@ -44,7 +44,7 @@
   name: StackRox Demo for QA testing
   description: TESTING ONLY - Demo running a provided StackRox version
   availability: alpha
-  workflow: configuration/workflow-demo.yaml
+  workflow: configuration/workflow-qa-demo.yaml
   parameters:
     - name: name
       description: cluster name
