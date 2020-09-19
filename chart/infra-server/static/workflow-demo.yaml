@@ -120,7 +120,7 @@ spec:
           - "--main-image={{inputs.parameters.main-image}}"
           - "--scanner-image={{inputs.parameters.scanner-image}}"
           - "--scanner-db-image={{inputs.parameters.scanner-db-image}}"
-          - --gcp-project=stackrox-ephemeral-1
+          - --gcp-project=srox-temp-sales-demos
           - --dns-gcp-project=ultra-current-825
           - --src=infra
         volumeMounts:
