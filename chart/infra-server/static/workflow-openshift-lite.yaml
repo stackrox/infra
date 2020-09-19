@@ -49,6 +49,7 @@ spec:
         args:
           - create
           - "--name={{inputs.parameters.name}}"
+          - --src=infra
         volumeMounts:
           - name: credentials
             mountPath: /tmp/google-credentials.json
