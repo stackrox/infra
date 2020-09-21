@@ -54,12 +54,14 @@ spec:
             valueFrom:
               path: /outputs/cluster_name
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/gke-default:v0.0.0-31-gf2e01c6-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.0.7
         args:
           - create
           - "--name={{inputs.parameters.name}}"
           - "--nodes={{inputs.parameters.nodes}}"
           - "--machine-type={{inputs.parameters.machine-type}}"
+          - --gcp-project=srox-temp-dev-test
+          - --creation-source=infra
         volumeMounts:
           - name: credentials
             mountPath: /tmp
@@ -72,10 +74,11 @@ spec:
         parameters:
           - name: name
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/gke-default:v0.0.0-31-gf2e01c6-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.0.7
         args:
           - destroy
           - "--name={{inputs.parameters.name}}"
+          - --gcp-project=srox-temp-dev-test
         volumeMounts:
           - name: credentials
             mountPath: /tmp

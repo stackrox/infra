@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: demo-
+  generateName: qa-demo-
 
 spec:
   entrypoint: start
@@ -20,7 +20,7 @@ spec:
   volumes:
     - name: credentials
       secret:
-        secretName: google-credentials-demo
+        secretName: google-credentials-qa-demo
 
   templates:
     - name: start
@@ -120,7 +120,7 @@ spec:
           - "--main-image={{inputs.parameters.main-image}}"
           - "--scanner-image={{inputs.parameters.scanner-image}}"
           - "--scanner-db-image={{inputs.parameters.scanner-db-image}}"
-          - --gcp-project=srox-temp-sales-demos
+          - --gcp-project=srox-temp-dev-test
           - --dns-gcp-project=ultra-current-825
           - --creation-source=infra
         volumeMounts:

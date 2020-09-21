@@ -45,10 +45,11 @@ spec:
           - name: terraform-destroy-plan
             path: /well-known/artifacts/terraform-destroy.tfplan
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-lite:v0.0.0-27-g4924d62
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-lite:0.0.7
         args:
           - create
           - "--name={{inputs.parameters.name}}"
+          - --creation-source=infra
         volumeMounts:
           - name: credentials
             mountPath: /tmp/google-credentials.json
@@ -65,7 +66,7 @@ spec:
           - name: terraform-destroy-plan
             path: /well-known/artifacts/terraform-destroy.tfplan
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-lite:v0.0.0-27-g4924d62
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-lite:0.0.7
         args:
           - destroy
         volumeMounts:
