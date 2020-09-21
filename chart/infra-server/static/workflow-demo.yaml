@@ -122,7 +122,7 @@ spec:
           - "--scanner-db-image={{inputs.parameters.scanner-db-image}}"
           - --gcp-project=srox-temp-sales-demos
           - --dns-gcp-project=ultra-current-825
-          - --src=infra
+          - --creation-source=infra
         volumeMounts:
           - name: credentials
             mountPath: /tmp/google-credentials.json

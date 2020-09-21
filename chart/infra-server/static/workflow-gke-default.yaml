@@ -61,7 +61,7 @@ spec:
           - "--nodes={{inputs.parameters.nodes}}"
           - "--machine-type={{inputs.parameters.machine-type}}"
           - --gcp-project=srox-temp-dev-test
-          - --src=infra
+          - --creation-source=infra
         volumeMounts:
           - name: credentials
             mountPath: /tmp

@@ -54,7 +54,7 @@ spec:
           - create
           - "--name={{inputs.parameters.name}}"
           - "--crio={{inputs.parameters.crio}}"
-          - --src=infra
+          - --creation-source=infra
         volumeMounts:
           - name: credentials
             mountPath: /tmp/google-credentials.json
