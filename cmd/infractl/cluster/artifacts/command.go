@@ -161,7 +161,7 @@ func unpackSingleArtifact(tgzFilename string, downloadDir string, artifact v1.Ar
 	}
 	singleFile.Close()
 
-	hdr, err = tr.Next()
+	_, err = tr.Next()
 	if err != nil && err == io.EOF {
 		// The tar is a single file and now unpacked to the artifact name
 		file.Close()
