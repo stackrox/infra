@@ -273,6 +273,11 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 	}
 	workflow.Spec.Arguments.Parameters = workflowParams
 
+	// Use the user supplied name as the Argo workflow name.
+	if name, ok := req.Parameters["name"]; ok {
+		workflow.ObjectMeta.Name = name
+	}
+
 	// Determine the lifespan for this cluster. Apply some sanity/bounds
 	// checking on provided lifespans.
 	lifespan, _ := ptypes.Duration(req.Lifespan)

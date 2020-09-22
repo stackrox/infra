@@ -17,20 +17,20 @@ import (
 )
 
 const examples = `# Create a new "gke-default" cluster.
-$ infractl create gke-default --arg name=test --arg nodes=3
+$ infractl create gke-default you-20200921-1 --arg nodes=3
 
-# Create a new "gke-default" cluster with a 30 minute lifespan.
-$ infractl create gke-default --lifespan 30m --arg name=test --arg nodes=3`
+# Create another "gke-default" cluster with a 30 minute lifespan.
+$ infractl create gke-default you-20200921-2 --lifespan 30m --arg nodes=3`
 
 // Command defines the handler for infractl create.
 func Command() *cobra.Command {
 	// $ infractl create
 	cmd := &cobra.Command{
-		Use:     "create FLAVOR",
+		Use:     "create FLAVOR NAME",
 		Short:   "Create a new cluster",
 		Long:    "Creates a new cluster",
 		Example: examples,
-		Args:    common.ArgsWithHelp(cobra.ExactArgs(1), args),
+		Args:    common.ArgsWithHelp(cobra.ExactArgs(2), args),
 		RunE:    common.WithGRPCHandler(run),
 	}
 
@@ -45,6 +45,9 @@ func Command() *cobra.Command {
 func args(_ *cobra.Command, args []string) error {
 	if args[0] == "" {
 		return errors.New("no flavor ID given")
+	}
+	if args[1] == "" {
+		return errors.New("no cluster name given")
 	}
 	return nil
 }
@@ -72,6 +75,7 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 		}
 		req.Parameters[parts[0]] = parts[1]
 	}
+	req.Parameters["name"] = args[1]
 
 	clusterID, err := client.Create(ctx, &req)
 	if err != nil {
