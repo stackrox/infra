@@ -6,11 +6,11 @@ import (
 	"compress/gzip"
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/common"
@@ -62,8 +62,12 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 	}
 
 	for _, artifact := range resp.Artifacts {
-		if err := download(downloadDir, *artifact); err != nil {
+		filename, err := download(downloadDir, *artifact)
+		if err != nil {
 			return nil, err
+		}
+		if strings.HasSuffix(filename, ".tgz") {
+			unpackSingleArtifact(filename, downloadDir, *artifact)
 		}
 	}
 
@@ -72,18 +76,32 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 
 // download will save the given cluster artifact to disk inside the given
 // directory.
-func download(downloadDir string, artifact v1.Artifact) (err error) {
+func download(downloadDir string, artifact v1.Artifact) (filename string, err error) {
 	// Create the download directory if it doesn't exist. All artifacts will be
 	// downloaded into this directory.
 	if err := os.MkdirAll(downloadDir, 0755); err != nil {
-		return err
+		return "", err
+	}
+
+	// Download the (GCS signed) URL.
+	resp, err := http.Get(artifact.URL)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close() // nolint:errcheck
+
+	var artifactName string
+	if strings.Contains(resp.Header.Get("Content-Type"), "gzip") {
+		artifactName = artifact.Name + ".tgz"
+	} else {
+		artifactName = artifact.Name
 	}
 
 	// Create a new, empty file.
-	filename := filepath.Join(downloadDir, artifact.Name)
+	filename = filepath.Join(downloadDir, artifactName)
 	file, err := os.Create(filename)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer func() {
 		// if the file fails to close, return that error only if there was no
@@ -93,37 +111,63 @@ func download(downloadDir string, artifact v1.Artifact) (err error) {
 		}
 	}()
 
-	// Download the (GCS signed) URL.
-	resp, err := http.Get(artifact.URL)
-	if err != nil {
-		return err
+	if _, err := io.Copy(file, resp.Body); err != nil {
+		return "", err
 	}
-	defer resp.Body.Close() // nolint:errcheck
 
-	// Archive is gzipped, so we need to strip that away.
-	gr, err := gzip.NewReader(resp.Body)
+	return filename, nil
+}
+
+// Unpack single file .tgz's. Workflows that specify single file artifacts
+// without indicating compression are tar'd and gzip'd. Note: errors are largely
+// ignored here as the artifact is already saved.
+func unpackSingleArtifact(tgzFilename string, downloadDir string, artifact v1.Artifact) {
+	file, err := os.Open(tgzFilename)
 	if err != nil {
-		return err
+		return
+	}
+	defer file.Close() // nolint:errcheck
+
+	gr, err := gzip.NewReader(file)
+	if err != nil {
+		return
 	}
 	defer gr.Close() // nolint:errcheck
 
-	// Archive is a normal tar archive.
 	tr := tar.NewReader(gr)
-
-	// We're expecting 1 and only 1 file in the archive, so read just the
-	// first entry.
-	if _, err := tr.Next(); err != nil {
-		if err == io.EOF {
-			return fmt.Errorf("unexpected EOF reading artifact %q", artifact.Name)
-		}
-		return err
+	hdr, err := tr.Next()
+	if err == io.EOF {
+		return // empty .tgz
+	}
+	if err != nil {
+		return
 	}
 
-	// Copy the entirety of the archive artifact to its final destination on
-	// disk.
-	if _, err := io.Copy(file, tr); err != nil {
-		return err
+	if hdr.Typeflag != tar.TypeReg {
+		// Not a tar with just a single file
+		return
 	}
 
-	return nil
+	singleFilename := filepath.Join(downloadDir, artifact.Name)
+	singleFile, err := os.Create(singleFilename)
+	if err != nil {
+		return
+	}
+	if _, err := io.Copy(singleFile, tr); err != nil {
+		singleFile.Close()
+		os.Remove(singleFilename)
+		return
+	}
+	singleFile.Close()
+
+	hdr, err = tr.Next()
+	if err != nil && err == io.EOF {
+		// The tar is a single file and now unpacked to the artifact name
+		file.Close()
+		os.Remove(tgzFilename)
+		return
+	}
+
+	// The .tgz is more than just a single artifact
+	os.Remove(singleFilename)
 }
