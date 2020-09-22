@@ -32,9 +32,15 @@ spec:
       outputs:
         artifacts:
           - name: kubeconfig
-            path: /data/eks-kube.yaml    
+            path: /data/eks-kube.yaml
+            archive:
+              none: {}
+          - name: data
+            path: /data
+            archive:
+              tar: {}
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/eks:0.0.6
+        image: gcr.io/stackrox-infra/automation-flavors/eks:0.0.8
         imagePullPolicy: Always
         args:
           - create
@@ -70,7 +76,7 @@ spec:
 
     - name: destroy
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/eks:0.0.6
+        image: gcr.io/stackrox-infra/automation-flavors/eks:0.0.8
         imagePullPolicy: Always
         args:
           - destroy
