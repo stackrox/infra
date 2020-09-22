@@ -121,18 +121,19 @@ func download(downloadDir string, artifact v1.Artifact) (filename string, err er
 // Unpack single file .tgz's. Workflows that specify single file artifacts
 // without indicating compression are tar'd and gzip'd. Note: errors are largely
 // ignored here as the artifact is already saved.
+// nolint:errcheck
 func unpackSingleArtifact(tgzFilename string, downloadDir string, artifact v1.Artifact) {
 	file, err := os.Open(tgzFilename)
 	if err != nil {
 		return
 	}
-	defer file.Close() // nolint:errcheck
+	defer file.Close()
 
 	gr, err := gzip.NewReader(file)
 	if err != nil {
 		return
 	}
-	defer gr.Close() // nolint:errcheck
+	defer gr.Close()
 
 	tr := tar.NewReader(gr)
 	hdr, err := tr.Next()
