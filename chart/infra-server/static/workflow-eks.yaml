@@ -40,7 +40,7 @@ spec:
             archive:
               tar: {}
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/eks:0.0.6-0-g416c138f3a-dirty-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/eks:0.0.8
         imagePullPolicy: Always
         args:
           - create
@@ -76,7 +76,7 @@ spec:
 
     - name: destroy
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/eks:0.0.6-0-g416c138f3a-dirty-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/eks:0.0.8
         imagePullPolicy: Always
         args:
           - destroy
