@@ -48,7 +48,7 @@ const schemasByParameterName: { [key: string]: yup.Schema<any> } = {
     .transform((v) => (Number.isNaN(v) ? 0.1 : v)) // workaround https://github.com/jquense/yup/issues/66
     .integer('Must be an integer')
     .min(1, 'Must be at least 1')
-    .max(10, 'Be cost effective, please'),
+    .max(50, 'Be cost effective, please'),
 };
 
 type FlavorParameters = { [key: string]: V1Parameter };
