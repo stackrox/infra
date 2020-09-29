@@ -85,7 +85,7 @@ function createInitialParameterValues(parameters: FlavorParameters): object {
 // backend expects every parameter value to be a string, i.e. instead of 3 to be "3"
 function adjustParametersBeforeSubmit(parameterValues: FormikValues): { [key: string]: string } {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return mapValues(parameterValues, (value: any) => `${value}`);
+  return mapValues(parameterValues, (value: any) => `${value}`.trim());
 }
 
 /**
