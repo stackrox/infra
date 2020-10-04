@@ -24,7 +24,7 @@
   "dependencies": {
     "@stackrox/ui-components": "^0.1.0",
     "axios": "^0.20.0",
-    "formik": "^2.1.5",
+    "formik": "^2.1.7",
     "history": "^5.0.0",
     "lodash": "^4.17.20",
     "moment": "^2.29.0",
