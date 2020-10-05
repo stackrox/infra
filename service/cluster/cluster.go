@@ -50,8 +50,6 @@ const (
 	// updates to send Slack messages.
 	slackCheckInterval = 1 * time.Minute
 
-	workflowDeleteCheckInterval = 5 * time.Minute
-
 	artifactTagURL = "url"
 
 	artifactTagInternal = "internal"
@@ -95,7 +93,6 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSo
 	go impl.startSlackCheck()
 	go impl.cleanupExpiredClusters()
 	go impl.startCalendarCheck()
-	go impl.startDeleteWorkflowCheck()
 
 	return impl, nil
 }
@@ -278,6 +275,44 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		workflow.ObjectMeta.Name = name
 	}
 
+	// Make sure there is no running workflow with the same name
+	workflowList, err := s.clientWorkflows.List(metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, existing := range workflowList.Items {
+		if workflow.ObjectMeta.Name == existing.ObjectMeta.Name {
+
+			switch workflowStatus(existing.Status) {
+			case v1.Status_FAILED, v1.Status_FINISHED:
+				var gracePeriod int64 = 0
+				deletePolicy := metav1.DeletePropagationForeground
+				if err := s.clientWorkflows.Delete(workflow.Name, &metav1.DeleteOptions{
+					GracePeriodSeconds: &gracePeriod,
+					PropagationPolicy:  &deletePolicy,
+				}); err == nil {
+					log.Printf("[INFO] deleted workflow %q", workflow.Name)
+					time.Sleep(5 * time.Second)
+					break
+				}
+				log.Printf("[ERROR] failed to delete workflow %q: %v", workflow.Name, err)
+				fallthrough
+
+			default:
+				log.Printf(
+					"[WARN] Create failed, cannot use the name of a running workflow (%v)",
+					existing.ObjectMeta.Name,
+				)
+				return nil, status.Errorf(
+					codes.AlreadyExists,
+					"An infra workflow named %v already exists.",
+					existing.ObjectMeta.Name,
+				)
+			}
+		}
+	}
+
 	// Determine the lifespan for this cluster. Apply some sanity/bounds
 	// checking on provided lifespans.
 	lifespan, _ := ptypes.Duration(req.Lifespan)
@@ -302,6 +337,7 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 
 	created, err := s.clientWorkflows.Create(&workflow)
 	if err != nil {
+		log.Printf("[WARN] Create failed, %v", err)
 		return nil, err
 	}
 
@@ -620,56 +656,6 @@ func (s *clusterImpl) startSlackCheck() {
 					log.Printf("failed to patch Slack annotation for cluster %s: %v", metacluster.Cluster.ID, err)
 					continue
 				}
-			}
-		}
-	}
-}
-
-func (s *clusterImpl) startDeleteWorkflowCheck() {
-	// workflowMaxAgeGracePeriod is the time duration after a workflow finishes
-	// before it becomes eligible for deletion. This is so that cluster
-	// logs/artifacts can still be retrieved from dead clusters for forensic
-	// purposes.
-	//
-	// E.g. a workflow must have finished more than 24 hours ago before it is
-	// considered for deletion.
-	const workflowMaxAgeGracePeriod = 24 * time.Hour
-
-	for ; ; time.Sleep(workflowDeleteCheckInterval) {
-		workflowList, err := s.clientWorkflows.List(metav1.ListOptions{})
-		if err != nil {
-			log.Printf("[ERROR] failed to list workflows: %v", err)
-			continue
-		}
-
-		for _, workflow := range workflowList.Items {
-			metacluster, err := s.metaClusterFromWorkflow(workflow)
-			if err != nil {
-				log.Printf("failed to convert workflow to meta-cluster: %v", err)
-				continue
-			}
-
-			// If this workflow is not finished or failed (aka still running)
-			// reject it.
-			status := metacluster.Status
-			if status != v1.Status_FAILED && status != v1.Status_FINISHED {
-				continue
-			}
-
-			// If this workflow isn't old enough, reject it.
-			cutoff := time.Now().Add(-workflowMaxAgeGracePeriod)
-			if time.Unix(metacluster.DestroyedOn.Seconds, 0).After(cutoff) {
-				continue
-			}
-
-			// Perform the actual deletion via the Kube API.
-			var gracePeriod int64 = 0
-			if err := s.clientWorkflows.Delete(metacluster.ID, &metav1.DeleteOptions{
-				GracePeriodSeconds: &gracePeriod,
-			}); err != nil {
-				log.Printf("[ERROR] failed to delete workflow %q: %v", metacluster.ID, err)
-			} else {
-				log.Printf("[INFO] deleted workflow %q", metacluster.ID)
 			}
 		}
 	}
