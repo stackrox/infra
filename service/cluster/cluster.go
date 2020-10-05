@@ -293,6 +293,8 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 					PropagationPolicy:  &deletePolicy,
 				}); err == nil {
 					log.Printf("[INFO] deleted workflow %q", workflow.Name)
+					// The delete is not entirely synchronous w.r.t. PVCs - give
+					// it 5 seconds to complete before trying the create.
 					time.Sleep(5 * time.Second)
 					break
 				}
