@@ -283,7 +283,6 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 
 	for _, existing := range workflowList.Items {
 		if workflow.ObjectMeta.Name == existing.ObjectMeta.Name {
-
 			switch workflowStatus(existing.Status) {
 			case v1.Status_FAILED, v1.Status_FINISHED:
 				var gracePeriod int64 = 0
