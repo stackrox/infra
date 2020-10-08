@@ -16,6 +16,8 @@ spec:
       - name: main-image
       - name: scanner-image
       - name: scanner-db-image
+      - name: k8s-version
+        value: ""
 
   volumes:
     - name: credentials
@@ -27,23 +29,10 @@ spec:
       steps:
         - - name: roxctl
             template: roxctl
-            arguments:
-              parameters:
-                - name: main-image
-                  value: "{{workflow.parameters.main-image}}"
 
         - - name: create
             template: create
             arguments:
-              parameters:
-                - name: name
-                  value: "{{workflow.parameters.name}}"
-                - name: main-image
-                  value: "{{workflow.parameters.main-image}}"
-                - name: scanner-image
-                  value: "{{workflow.parameters.scanner-image}}"
-                - name: scanner-db-image
-                  value: "{{workflow.parameters.scanner-db-image}}"
               artifacts:
                 - name: roxctl
                   from: "{{steps.roxctl.outputs.artifacts.roxctl}}"
@@ -56,9 +45,6 @@ spec:
         - - name: destroy
             template: destroy
             arguments:
-              parameters:
-                - name: name
-                  value: "{{workflow.parameters.name}}"
               artifacts:
                 - name: tfstate
                   from: "{{workflow.outputs.artifacts.global-tfstate}}"
@@ -74,7 +60,7 @@ spec:
           - name: roxctl
             path: /assets/downloads/cli/roxctl-linux
       container:
-        image: "{{inputs.parameters.main-image}}"
+        image: "{{workflow.parameters.main-image}}"
         imagePullPolicy: Always
         args:
           - version
@@ -82,11 +68,6 @@ spec:
 
     - name: create
       inputs:
-        parameters:
-          - name: name
-          - name: main-image
-          - name: scanner-image
-          - name: scanner-db-image
         artifacts:
           - name: roxctl
             path: /usr/bin/roxctl
@@ -116,13 +97,14 @@ spec:
         imagePullPolicy: Always
         args:
           - create
-          - "--name={{inputs.parameters.name}}"
-          - "--main-image={{inputs.parameters.main-image}}"
-          - "--scanner-image={{inputs.parameters.scanner-image}}"
-          - "--scanner-db-image={{inputs.parameters.scanner-db-image}}"
+          - "--name={{workflow.parameters.name}}"
+          - "--main-image={{workflow.parameters.main-image}}"
+          - "--scanner-image={{workflow.parameters.scanner-image}}"
+          - "--scanner-db-image={{workflow.parameters.scanner-db-image}}"
           - --gcp-project=srox-temp-sales-demos
           - --dns-gcp-project=ultra-current-825
           - --creation-source=infra
+          - --k8s-version="{{workflow.parameters.k8s-version}}"
         volumeMounts:
           - name: credentials
             mountPath: /tmp/google-credentials.json
@@ -177,8 +159,6 @@ spec:
 
     - name: destroy
       inputs:
-        parameters:
-          - name: name
         artifacts:
           - name: tfstate
             path: /data/terraform.tfstate
