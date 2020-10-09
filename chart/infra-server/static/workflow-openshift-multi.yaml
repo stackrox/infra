@@ -55,10 +55,12 @@ spec:
           - "--name={{inputs.parameters.name}}"
           - "--crio={{inputs.parameters.crio}}"
           - --creation-source=infra
-        volumeMounts:
-          - name: credentials
-            mountPath: /tmp/google-credentials.json
-            subPath: google-credentials.json
+        env:
+          - name: GOOGLE_CREDENTIALS
+            valueFrom:
+              secretKeyRef:
+                name: google-credentials-openshift
+                key: google-credentials.json
 
     - name: wait
       suspend: {}
@@ -74,7 +76,9 @@ spec:
         image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:0.0.7
         args:
           - destroy
-        volumeMounts:
-          - name: credentials
-            mountPath: /tmp/google-credentials.json
-            subPath: google-credentials.json
+        env:
+          - name: GOOGLE_CREDENTIALS
+            valueFrom:
+              secretKeyRef:
+                name: google-credentials-openshift
+                key: google-credentials.json
