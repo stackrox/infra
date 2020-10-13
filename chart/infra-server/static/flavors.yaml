@@ -67,6 +67,11 @@
       description: StackRox Scanner DB image Docker name
       value: stackrox.io/scanner-db:2.5.0
 
+    - name: k8s-version
+      description: kubernetes version
+      value: default
+      kind: optional
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to cluster
