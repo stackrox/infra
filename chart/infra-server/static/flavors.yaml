@@ -109,6 +109,21 @@
       value: e2-standard-4
       kind: optional
 
+    - name: k8s-version
+      description: kubernetes version
+      value: latest
+      kind: optional
+
+    - name: pod-security-policy
+      description: Enables the pod security policy admission controller for the cluster
+      value: false
+      kind: optional
+
+    - name: gcp-image-type
+      description: The GCP image type to use for the cluster
+      value: ubuntu
+      kind: optional
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to cluster
