@@ -29,7 +29,7 @@
     "lodash": "^4.17.20",
     "moment": "^2.29.1",
     "prop-types": "^15.7.2",
-    "react": "^16.13.1",
+    "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "react-feather": "^2.0.8",
     "react-modal": "^3.11.2",
