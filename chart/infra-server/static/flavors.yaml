@@ -24,9 +24,8 @@
       kind: hardcoded
 
     - name: k8s-version
-      description: kubernetes version
       value: default
-      kind: optional
+      kind: hardcoded
 
   artifacts:
     - name: kubeconfig

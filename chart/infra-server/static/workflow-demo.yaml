@@ -17,7 +17,6 @@ spec:
       - name: scanner-image
       - name: scanner-db-image
       - name: k8s-version
-        value: ""
 
   volumes:
     - name: credentials
