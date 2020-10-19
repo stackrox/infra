@@ -9,6 +9,13 @@ spec:
       - name: name
       - name: nodes
       - name: machine-type
+      - name: k8s-version
+        value: ""
+      - name: pod-security-policy
+        value: ""
+      - name: gcp-image-type
+        value: ""
+
   volumes:
     - name: credentials
       secret:
@@ -19,15 +26,6 @@ spec:
       steps:
         - - name: create
             template: create
-            arguments:
-              parameters:
-                - name: name
-                  value: "{{workflow.parameters.name}}"
-                - name: nodes
-                  value: "{{workflow.parameters.nodes}}"
-                - name: machine-type
-                  value: "{{workflow.parameters.machine-type}}"
-
         - - name: wait
             template: wait
         - - name: destroy
@@ -38,11 +36,6 @@ spec:
                   value: "{{steps.create.outputs.parameters.cluster_name}}"
 
     - name: create
-      inputs:
-        parameters:
-          - name: name
-          - name: nodes
-          - name: machine-type
       outputs:
         artifacts:
           - name: kubeconfig
@@ -54,14 +47,18 @@ spec:
             valueFrom:
               path: /outputs/cluster_name
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.0.9
+        image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.1.2
+        imagePullPolicy: Always
         args:
           - create
-          - "--name={{inputs.parameters.name}}"
-          - "--nodes={{inputs.parameters.nodes}}"
-          - "--machine-type={{inputs.parameters.machine-type}}"
+          - "--name={{workflow.parameters.name}}"
+          - "--nodes={{workflow.parameters.nodes}}"
+          - "--machine-type={{workflow.parameters.machine-type}}"
           - --gcp-project=srox-temp-dev-test
           - --creation-source=infra
+          - --k8s-version={{workflow.parameters.k8s-version}}
+          - --pod-security-policy={{workflow.parameters.pod-security-policy}}
+          - --gcp-image-type={{workflow.parameters.gcp-image-type}}
         volumeMounts:
           - name: credentials
             mountPath: /tmp
@@ -70,14 +67,12 @@ spec:
       suspend: {}
 
     - name: destroy
-      inputs:
-        parameters:
-          - name: name
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.0.9
+        image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.1.2
+        imagePullPolicy: Always
         args:
           - destroy
-          - "--name={{inputs.parameters.name}}"
+          - "--name={{workflow.parameters.name}}"
           - --gcp-project=srox-temp-dev-test
         volumeMounts:
           - name: credentials
