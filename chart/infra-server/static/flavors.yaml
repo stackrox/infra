@@ -60,11 +60,11 @@
 
     - name: scanner-image
       description: StackRox Scanner image Docker name
-      value: stackrox.io/scanner:2.5.0
+      kind: optional
 
     - name: scanner-db-image
       description: StackRox Scanner DB image Docker name
-      value: stackrox.io/scanner-db:2.5.0
+      kind: optional
 
     - name: k8s-version
       description: kubernetes version

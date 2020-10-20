@@ -15,7 +15,9 @@ spec:
       - name: name
       - name: main-image
       - name: scanner-image
+        value: ""
       - name: scanner-db-image
+        value: ""
       - name: k8s-version
         value: ""
 
