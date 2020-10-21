@@ -57,14 +57,17 @@
     - name: main-image
       description: StackRox Central image Docker name
       value: stackrox.io/main:3.0.50.0
+      help: This must be a fully qualified image e.g. stackrox.io/main:3.0.50.0
 
     - name: scanner-image
       description: StackRox Scanner image Docker name
       kind: optional
+      help: If unspecified, this will be derived from the central image
 
     - name: scanner-db-image
       description: StackRox Scanner DB image Docker name
       kind: optional
+      help: If unspecified, this will be derived from the central image
 
     - name: k8s-version
       description: kubernetes version
