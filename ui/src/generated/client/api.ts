@@ -382,6 +382,12 @@ export interface V1Parameter {
    * @memberof V1Parameter
    */
   Order?: number;
+  /**
+   *
+   * @type {string}
+   * @memberof V1Parameter
+   */
+  Help?: string;
 }
 /**
  * ResourceByID represents a generic reference to a named/unique resource.

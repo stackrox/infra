@@ -28,5 +28,8 @@ func (p prettyFlavor) PrettyPrint() {
 		} else {
 			fmt.Printf("    Example:     %q\n", parameter.GetValue())
 		}
+		if parameter.GetHelp() != "" {
+			fmt.Printf("    %s\n", parameter.GetHelp())
+		}
 	}
 }

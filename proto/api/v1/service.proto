@@ -133,6 +133,8 @@ message Parameter {
     // The relative order of importance of this parameter for when presenting in
     // a UI for example.
     int32 Order = 6;
+
+    string Help = 7;
 }
 
 // FlavorArtifact represents a single artifact that is produced by a flavor.

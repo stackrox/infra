@@ -117,6 +117,9 @@ type parameter struct {
 	// hardcoded - The user may not specify a value. The configured value is
 	// used as the only value.
 	Kind parameterKind `json:"kind"`
+
+	// For parameters that can use more explicit help
+	Help string `json:"help"`
 }
 
 // artifact represents a single artifact that is produced by this flavor.
