@@ -130,6 +130,7 @@ func NewFromConfig(filename string) (*Registry, error) {
 				Name:        parameter.Name,
 				Description: parameter.Description,
 				Value:       parameter.Value,
+				Help:        parameter.Help,
 				Order:       int32(order) + 1,
 			}
 

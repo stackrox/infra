@@ -128,7 +128,7 @@ function ParameterFormField(props: {
         <TextFormField
           name={`Parameters.${parameter.Name}`}
           label={getFormLabelFromParameter(parameter)}
-          helperText={helpByParameterName(parameter.Name)}
+          helperText={parameter.Help || helpByParameterName(parameter.Name)}
           required={required}
         />
       );

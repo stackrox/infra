@@ -15,7 +15,9 @@ spec:
       - name: name
       - name: main-image
       - name: scanner-image
+        value: ""
       - name: scanner-db-image
+        value: ""
       - name: k8s-version
         value: ""
 
@@ -90,7 +92,7 @@ spec:
             optional: true
 
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/demo:0.1.3
+        image: gcr.io/stackrox-infra/automation-flavors/demo:0.1.4
         imagePullPolicy: Always
         args:
           - create
@@ -164,7 +166,7 @@ spec:
             path: /data/tfvars
             optional: true
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/demo:0.1.3
+        image: gcr.io/stackrox-infra/automation-flavors/demo:0.1.4
         imagePullPolicy: Always
         args:
           - destroy
