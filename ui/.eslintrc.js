@@ -20,6 +20,13 @@ module.exports = {
 
     // will rely on TypeScript compile time checks instead
     'react/prop-types': 'off',
+    // allow hierarchical declaration of components
+    '@typescript-eslint/no-use-before-define': 'off',
+    // function component default props are OK
+    'react/require-default-props': 'off',
+    // proto definitions mean that we have typed undefined attributes that are always defined
+    // e.g. cluster.ID
+    '@typescript-eslint/restrict-template-expressions': 'off',
 
     'import/no-extraneous-dependencies': [
       'error',

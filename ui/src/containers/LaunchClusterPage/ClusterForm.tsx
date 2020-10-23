@@ -45,7 +45,7 @@ const schemasByParameterName: { [key: string]: yup.Schema<any> } = {
     ),
   nodes: yup
     .number()
-    .transform((v) => (Number.isNaN(v) ? 0.1 : v)) // workaround https://github.com/jquense/yup/issues/66
+    .transform((v) => (Number.isNaN(v) ? 0.1 : (v as number))) // workaround https://github.com/jquense/yup/issues/66
     .integer('Must be an integer')
     .min(1, 'Must be at least 1')
     .max(50, 'Be cost effective, please'),

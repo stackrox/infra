@@ -25,6 +25,8 @@ type Props = {
   onModify?: (notation: string, incOrDec: string) => void;
 };
 
+const nullModify = () => {};
+
 export default function Lifespan({ cluster, onModify }: Props): ReactElement {
   let expirationDate: Date | null = null;
   try {
@@ -37,8 +39,12 @@ export default function Lifespan({ cluster, onModify }: Props): ReactElement {
   }
 
   return expirationDate ? (
-    <Countdown targetDate={expirationDate} onModify={onModify} />
+    <Countdown targetDate={expirationDate} onModify={onModify || nullModify} />
   ) : (
     <>Expiration: N/A</>
   );
 }
+
+Lifespan.defaultProps = {
+  onModify: () => {},
+};

@@ -57,6 +57,7 @@ export default function useApiQuery<T>(
       })
       .catch((error) => {
         if (!isCancelled) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           setRequestState({ called: true, loading: false, error, data: undefined });
         }
       })

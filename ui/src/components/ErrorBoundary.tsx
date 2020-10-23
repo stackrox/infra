@@ -4,7 +4,7 @@ import { Location } from 'history';
 import { XSquare } from 'react-feather';
 
 type Props = {
-  message?: string | null;
+  message: string;
   children: ReactNode;
 };
 
@@ -38,17 +38,20 @@ class ErrorBoundary extends Component<PropsWithLocation, State> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   componentDidCatch(error: any): void {
     const { location } = this.props;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.setState({ error, errorLocation: location });
   }
 
   render(): ReactElement {
     const { message, children } = this.props;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const { error } = this.state;
 
     if (error) {
       return (
         <div className="flex h-full items-center justify-center text-base-600">
           <XSquare size="48" />
+          {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access */}
           <p className="ml-2 text-lg">{message || error.message || 'Unexpected error occurred'}</p>
         </div>
       );

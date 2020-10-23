@@ -37,6 +37,7 @@ export default function useApiOperation<T>(requester: ApiCaller<T>): [() => void
       })
       .catch((error) => {
         if (isMounted.current) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           setRequestState({ called: true, loading: false, error, data: undefined });
         }
       });
