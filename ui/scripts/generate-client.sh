@@ -3,7 +3,7 @@
 # Generates TypeScript client based on the Swagger 2.0 definitions
 # Should be invoked from infra/ui (grandparent) directory
 
-OPENAPI_GENERATOR_CLI_IMAGE_TAG="v4.3.0"
+OPENAPI_GENERATOR_CLI_IMAGE_TAG="v4.3.1"
 OPENAPI_GENERATOR_CLI_IMAGE="openapitools/openapi-generator-cli:${OPENAPI_GENERATOR_CLI_IMAGE_TAG}"
 
 CLIENT_DIR="src/generated/client"

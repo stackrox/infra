@@ -10,7 +10,7 @@ function calcDuration(targetDate: Date): moment.Duration {
 type Props = {
   targetDate: Date;
   className?: string;
-  onModify: (notation: string, incOrDec: string) => void;
+  onModify?: (notation: string, incOrDec: string) => void;
 };
 
 export default function Countdown({ targetDate, className = '', onModify }: Props): ReactElement {
@@ -30,7 +30,7 @@ export default function Countdown({ targetDate, className = '', onModify }: Prop
 
 type FormatDurationProps = {
   duration: moment.Duration;
-  onModify: (notation: string, incOrDec: string) => void;
+  onModify?: (notation: string, incOrDec: string) => void;
 };
 
 function FormatDuration({ duration, onModify }: FormatDurationProps): ReactElement {
@@ -68,7 +68,7 @@ function FormatDuration({ duration, onModify }: FormatDurationProps): ReactEleme
 type ModifiableTimeUnitProps = {
   notation: string;
   value: number;
-  onChange: (notation: string, incOrDec: string) => void;
+  onChange?: (notation: string, incOrDec: string) => void;
 };
 
 function ModifiableTimeUnit({

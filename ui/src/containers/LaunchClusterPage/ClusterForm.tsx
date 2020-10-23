@@ -56,7 +56,7 @@ type FlavorParameters = { [key: string]: V1Parameter };
 type ParameterSchemas = { [key: string]: yup.Schema<any> };
 
 function createParameterSchemas(parameters: FlavorParameters): ParameterSchemas {
-  return Object.keys(parameters).reduce<object>((fields, param) => {
+  return Object.keys(parameters).reduce<Record<string, unknown>>((fields, param) => {
     let thisParamSchema;
     if (schemasByParameterName[param]) {
       thisParamSchema = schemasByParameterName[param];
@@ -73,8 +73,8 @@ function createParameterSchemas(parameters: FlavorParameters): ParameterSchemas 
   }, {}) as ParameterSchemas;
 }
 
-function createInitialParameterValues(parameters: FlavorParameters): object {
-  return Object.keys(parameters).reduce<object>((fields, param) => {
+function createInitialParameterValues(parameters: FlavorParameters): Record<string, unknown> {
+  return Object.keys(parameters).reduce<Record<string, unknown>>((fields, param) => {
     return {
       ...fields,
       [param]: parameters[param].Optional && parameters[param].Value ? parameters[param].Value : '',
@@ -213,7 +213,7 @@ export default function ClusterForm({
   const schema = yup.object().shape({
     ID: yup.string().required(),
     Description: yup.string().default(''),
-    Parameters: yup.object().shape<object>(parameterSchemas),
+    Parameters: yup.object().shape<Record<string, unknown>>(parameterSchemas),
   });
   const initialValues: FormikValues = {
     ID: flavorId,
@@ -221,7 +221,7 @@ export default function ClusterForm({
     Parameters: createInitialParameterValues(flavorParameters),
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
   const [error, setError] = useState<any>();
 
   const onSubmit = async (
@@ -249,7 +249,9 @@ export default function ClusterForm({
       <Form className="md:w-1/3">
         {error && (
           <div className="p-2 mb-2 bg-alert-200">
+            {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access */}
             {`[Server Error] ${error.message || 'Cluster creation request failed'}`}
+            {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access */}
             {error.response?.data?.error && ` (${error.response.data.error})`}
           </div>
         )}

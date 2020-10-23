@@ -8,12 +8,14 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
+    "strictNullChecks": false, // allow delete in gen-srcs (delete localVarUrlObj.search)
     "forceConsistentCasingInFileNames": true,
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
+    "noFallthroughCasesInSwitch": true,
     "jsx": "react"
   },
   "include": ["src"]
