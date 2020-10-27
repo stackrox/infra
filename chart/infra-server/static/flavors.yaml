@@ -222,8 +222,8 @@
 
     - name: k8s-version
       description: kubernetes version
-      value: 1.17
       kind: optional
+      help: Use this to override the default version used by EKS
 
 #####################
 #  AWS KOPS         #
