@@ -49,8 +49,14 @@ func args(_ *cobra.Command, args []string) error {
 
 func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []string) (common.PrettyPrinter, error) {
 	downloadDir, _ := cmd.Flags().GetString("download-dir")
+	client := v1.NewClusterServiceClient(conn)
 
-	resp, err := v1.NewClusterServiceClient(conn).Artifacts(ctx, &v1.ResourceByID{Id: args[0]})
+	return DownloadArtifacts(ctx, client, args[0], downloadDir)
+}
+
+// DownloadArtifacts grabs all artifacts
+func DownloadArtifacts(ctx context.Context, client v1.ClusterServiceClient, id string, downloadDir string) (common.PrettyPrinter, error) {
+	resp, err := client.Artifacts(ctx, &v1.ResourceByID{Id: id})
 	if err != nil {
 		return nil, err
 	}
