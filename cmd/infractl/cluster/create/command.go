@@ -11,6 +11,7 @@ import (
 
 	"github.com/golang/protobuf/ptypes"
 	"github.com/spf13/cobra"
+	"github.com/stackrox/infra/cmd/infractl/cluster/artifacts"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"google.golang.org/grpc"
@@ -39,6 +40,7 @@ func Command() *cobra.Command {
 	cmd.Flags().Duration("lifespan", 3*time.Hour, "initial lifespan of the cluster")
 	cmd.Flags().Bool("wait", false, "wait for cluster to be ready")
 	cmd.Flags().Bool("no-slack", false, "skip sending Slack messages for lifecycle events")
+	cmd.Flags().String("download-dir", "", "wait for readiness and download artifacts to this dir")
 	return cmd
 }
 
@@ -58,6 +60,10 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 	lifespan, _ := cmd.Flags().GetDuration("lifespan")
 	wait, _ := cmd.Flags().GetBool("wait")
 	noSlack, _ := cmd.Flags().GetBool("no-slack")
+	downloadDir, _ := cmd.Flags().GetString("download-dir")
+	if downloadDir != "" {
+		wait = true
+	}
 	client := v1.NewClusterServiceClient(conn)
 
 	req := v1.CreateClusterRequest{
@@ -85,6 +91,9 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 	if wait {
 		if err := waitForCluster(client, clusterID); err != nil {
 			return nil, err
+		}
+		if downloadDir != "" {
+			return artifacts.DownloadArtifacts(context.Background(), client, args[1], downloadDir)
 		}
 	}
 
