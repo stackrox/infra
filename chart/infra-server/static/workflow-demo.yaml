@@ -14,8 +14,6 @@ spec:
     parameters:
       - name: name
       - name: main-image
-      - name: scanner-image
-      - name: scanner-db-image
       - name: k8s-version
 
   volumes:
@@ -95,8 +93,6 @@ spec:
           - create
           - "--name={{workflow.parameters.name}}"
           - "--main-image={{workflow.parameters.main-image}}"
-          - "--scanner-image={{workflow.parameters.scanner-image}}"
-          - "--scanner-db-image={{workflow.parameters.scanner-db-image}}"
           - --gcp-project=srox-temp-sales-demos
           - --dns-gcp-project=ultra-current-825
           - --creation-source=infra
