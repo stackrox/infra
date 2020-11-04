@@ -450,9 +450,7 @@ func (s *clusterImpl) Logs(_ context.Context, clusterID *v1.ResourceByID) (*v1.L
 		go func(node v1alpha1.NodeStatus) {
 			defer wg.Done()
 
-			if log, err := s.getLogs(node); err == nil {
-				logChan <- log
-			}
+			logChan <- s.getLogs(node)
 		}(node)
 	}
 
@@ -591,7 +589,7 @@ func (s *clusterImpl) createFromEvent(event calendar.Event) (*v1.ResourceByID, e
 	return s.create(req, event.Email, event.ID)
 }
 
-func (s *clusterImpl) getLogs(node v1alpha1.NodeStatus) (*v1.Log, error) {
+func (s *clusterImpl) getLogs(node v1alpha1.NodeStatus) *v1.Log {
 	var body []byte
 	started, _ := ptypes.TimestampProto(node.StartedAt.UTC())
 	log := &v1.Log{
@@ -608,17 +606,17 @@ func (s *clusterImpl) getLogs(node v1alpha1.NodeStatus) (*v1.Log, error) {
 	}).Stream()
 	if err != nil {
 		log.Body = []byte(err.Error())
-		return log, nil
+		return log
 	}
 
 	logBody, err := ioutil.ReadAll(stream)
 	if err != nil {
 		log.Body = []byte(err.Error())
-		return log, nil
+		return log
 	}
 	log.Body = logBody
 
-	return log, nil
+	return log
 }
 
 func (s *clusterImpl) startSlackCheck() {
