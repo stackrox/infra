@@ -437,7 +437,7 @@ func (s *clusterImpl) Logs(_ context.Context, clusterID *v1.ResourceByID) (*v1.L
 
 	var podNodes []v1alpha1.NodeStatus
 	for _, node := range workflow.Status.Nodes {
-		if node.Type == v1alpha1.NodeTypePod && node.Phase != v1alpha1.NodeError {
+		if node.Type == v1alpha1.NodeTypePod {
 			podNodes = append(podNodes, node)
 		}
 	}
@@ -450,9 +450,7 @@ func (s *clusterImpl) Logs(_ context.Context, clusterID *v1.ResourceByID) (*v1.L
 		go func(node v1alpha1.NodeStatus) {
 			defer wg.Done()
 
-			if log, err := s.getLogs(node); err == nil {
-				logChan <- log
-			}
+			logChan <- s.getLogs(node)
 		}(node)
 	}
 
@@ -591,27 +589,34 @@ func (s *clusterImpl) createFromEvent(event calendar.Event) (*v1.ResourceByID, e
 	return s.create(req, event.Email, event.ID)
 }
 
-func (s *clusterImpl) getLogs(node v1alpha1.NodeStatus) (*v1.Log, error) {
+func (s *clusterImpl) getLogs(node v1alpha1.NodeStatus) *v1.Log {
+	var body []byte
+	started, _ := ptypes.TimestampProto(node.StartedAt.UTC())
+	log := &v1.Log{
+		Name:    node.DisplayName,
+		Body:    body,
+		Started: started,
+		Message: node.Message,
+	}
+
 	stream, err := s.clientPods.GetLogs(node.ID, &corev1.PodLogOptions{
 		Container:  "main",
 		Follow:     false,
 		Timestamps: true,
 	}).Stream()
 	if err != nil {
-		return nil, err
+		log.Body = []byte(err.Error())
+		return log
 	}
 
-	body, err := ioutil.ReadAll(stream)
+	logBody, err := ioutil.ReadAll(stream)
 	if err != nil {
-		return nil, err
+		log.Body = []byte(err.Error())
+		return log
 	}
+	log.Body = logBody
 
-	started, _ := ptypes.TimestampProto(node.StartedAt.UTC())
-	return &v1.Log{
-		Name:    node.DisplayName,
-		Body:    body,
-		Started: started,
-	}, nil
+	return log
 }
 
 func (s *clusterImpl) startSlackCheck() {

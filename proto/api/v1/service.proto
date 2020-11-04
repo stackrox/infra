@@ -346,6 +346,9 @@ message Log {
 
     // Body is the raw pod logs.
     bytes Body = 3;
+
+    // Message surfaces step state from Argo.
+    string Message = 4;
 }
 
 // LogsResponse represents a collection of logs.

@@ -326,6 +326,12 @@ export interface V1Log {
    * @memberof V1Log
    */
   Body?: string;
+  /**
+   * Message surfaces step state from Argo.
+   * @type {string}
+   * @memberof V1Log
+   */
+  Message?: string;
 }
 /**
  * LogsResponse represents a collection of logs.
