@@ -40,6 +40,9 @@ const (
 	// StatusReady is for when a cluster is ready.
 	StatusReady Status = "ready"
 
+	// StatusNearingExpiry is for when a cluster is close to expiry.
+	StatusNearingExpiry Status = "nearing_expiry"
+
 	// StatusCreating is for when a cluster is being created.
 	StatusCreating Status = "creating"
 )
@@ -66,6 +69,13 @@ var (
 		"<@{{.OwnerID}}> - Your {{if .Scheduled}}scheduled {{end}}{{if .Description}}*{{.Description}}* {{else}}*{{.ID}}* {{end}}cluster is being created. :rocket:",
 		":clock2: This cluster has about *{{.Remaining}}* before it is destroyed.",
 		":thinking_face: To view cluster *info*, you can run:\n ```$ infractl get {{.ID}}```",
+		":link: Or go to: https://infra.rox.systems/cluster/{{.ID}}",
+	}
+
+	templatesNearingExpiry = []string{ // nolint:gochecknoglobals
+		"<@{{.OwnerID}}> - Your {{if .Scheduled}}scheduled {{end}}{{if .Description}}*{{.Description}}* {{else}}*{{.ID}}* {{end}}cluster has about *{{.Remaining}}*. :skull_and_crossbones:",
+		":clock2: To buy more time, you can run:\n```$ infractl lifespan {{.ID}} '+1h'```",
+		":link: Or go to: https://infra.rox.systems/cluster/{{.ID}}",
 	}
 )
 
@@ -104,7 +114,7 @@ func templateBlocks(context TemplateData, templates []string) []slack.MsgOption 
 }
 
 // FormatSlackMessage formats the correct Slack message given the current cluster state.
-func FormatSlackMessage(wfStatus v1.Status, slackStatus Status, contextData TemplateData) (Status, []slack.MsgOption) {
+func FormatSlackMessage(wfStatus v1.Status, clusterIsNearingExpiry bool, slackStatus Status, contextData TemplateData) (Status, []slack.MsgOption) {
 	switch {
 	case slackStatus == StatusSkip:
 		return StatusSkip, nil
@@ -115,8 +125,14 @@ func FormatSlackMessage(wfStatus v1.Status, slackStatus Status, contextData Temp
 	case (wfStatus == v1.Status_DESTROYING || wfStatus == v1.Status_FINISHED) && slackStatus != StatusDestroyed:
 		return StatusDestroyed, templateBlocks(contextData, templatesDestroyed)
 
-	case wfStatus == v1.Status_READY && slackStatus != StatusReady:
+	case wfStatus == v1.Status_READY && slackStatus != StatusReady && slackStatus != StatusNearingExpiry:
 		return StatusReady, templateBlocks(contextData, templatesReady)
+
+	case wfStatus == v1.Status_READY && slackStatus == StatusReady && clusterIsNearingExpiry:
+		return StatusNearingExpiry, templateBlocks(contextData, templatesNearingExpiry)
+
+	case wfStatus == v1.Status_READY && slackStatus == StatusNearingExpiry && !clusterIsNearingExpiry:
+		return StatusReady, nil
 
 	case wfStatus == v1.Status_CREATING && slackStatus != StatusCreating:
 		return StatusCreating, templateBlocks(contextData, templatesCreating)

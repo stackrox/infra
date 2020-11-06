@@ -37,13 +37,21 @@ func isWorkflowExpired(workflow v1alpha1.Workflow) bool {
 	return time.Now().After(workflowExpiryTime)
 }
 
+func isNearingExpiry(workflow v1alpha1.Workflow) bool {
+	lifespan, _ := ptypes.Duration(GetLifespan(&workflow))
+
+	workflowExpiryTime := workflow.Status.StartedAt.Time.Add(lifespan)
+	return time.Now().Add(nearExpiry).After(workflowExpiryTime)
+}
+
 type metaCluster struct {
 	v1.Cluster
 
-	Artifacts map[string]artifactData
-	EventID   string
-	Expired   bool
-	Slack     slack.Status
+	Artifacts     map[string]artifactData
+	EventID       string
+	Expired       bool
+	NearingExpiry bool
+	Slack         slack.Status
 }
 
 type artifactData struct {
@@ -58,6 +66,7 @@ type artifactData struct {
 func (s *clusterImpl) metaClusterFromWorkflow(workflow v1alpha1.Workflow) (*metaCluster, error) {
 	cluster := clusterFromWorkflow(workflow)
 	expired := isWorkflowExpired(workflow)
+	nearingExpiry := isNearingExpiry(workflow)
 
 	flavorMetadata := make(map[string]*v1.FlavorArtifact)
 
@@ -103,10 +112,11 @@ func (s *clusterImpl) metaClusterFromWorkflow(workflow v1alpha1.Workflow) (*meta
 	}
 
 	return &metaCluster{
-		Cluster:   *cluster,
-		Slack:     slack.Status(GetSlack(&workflow)),
-		Expired:   expired,
-		Artifacts: artifacts,
-		EventID:   GetEventID(&workflow),
+		Cluster:       *cluster,
+		Slack:         slack.Status(GetSlack(&workflow)),
+		Expired:       expired,
+		NearingExpiry: nearingExpiry,
+		Artifacts:     artifacts,
+		EventID:       GetEventID(&workflow),
 	}, nil
 }
