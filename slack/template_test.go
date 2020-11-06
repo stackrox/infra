@@ -127,7 +127,7 @@ func Test(t *testing.T) {
 			expectedNoMessages:     false,
 		},
 		{
-			title:                  "nearing expiry -> destroyed (time is irrelevent)",
+			title:                  "nearing expiry -> destroyed (time is irrelevant)",
 			clusterStatus:          v1.Status_DESTROYING,
 			clusterIsNearingExpiry: false,
 			slackStatus:            StatusNearingExpiry,
