@@ -81,8 +81,5 @@ func GetSlack(a Annotated) string {
 
 // GetSlackDM returns the Slack DM setting for the cluster.
 func GetSlackDM(a Annotated) bool {
-	if a.GetAnnotations()[annotationSlackDMKey] == "yes" {
-		return true
-	}
-	return false
+	return a.GetAnnotations()[annotationSlackDMKey] == "yes"
 }
