@@ -28,6 +28,9 @@ const (
 	// annotationSlackKey is the k8s annotation that contains the Slack
 	// notification phase.
 	annotationSlackKey = "infra.stackrox.com/slack"
+
+	// use slack direct messages instead of a channel
+	annotationSlackDMKey = "infra.stackrox.com/slackdm"
 )
 
 // Annotated represents a type that has annotations.
@@ -74,4 +77,12 @@ func GetDescription(a Annotated) string {
 // GetSlack returns the Slack notification phase if it exists.
 func GetSlack(a Annotated) string {
 	return a.GetAnnotations()[annotationSlackKey]
+}
+
+// GetSlackDM returns the Slack DM setting for the cluster.
+func GetSlackDM(a Annotated) bool {
+	if a.GetAnnotations()[annotationSlackDMKey] == "yes" {
+		return true
+	}
+	return false
 }

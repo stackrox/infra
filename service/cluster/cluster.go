@@ -326,6 +326,11 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		slackStatus = slack.StatusSkip
 	}
 
+	slackDM := "no"
+	if req.SlackDM {
+		slackDM = "yes"
+	}
+
 	// Set workflow metadata annotations.
 	workflow.SetAnnotations(map[string]string{
 		annotationDescriptionKey: req.Description,
@@ -334,6 +339,7 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		annotationLifespanKey:    fmt.Sprint(lifespan),
 		annotationOwnerKey:       owner,
 		annotationSlackKey:       string(slackStatus),
+		annotationSlackDMKey:     slackDM,
 	})
 
 	created, err := s.clientWorkflows.Create(&workflow)
@@ -640,9 +646,20 @@ func (s *clusterImpl) startSlackCheck() {
 
 			// Only bother to send a message if there is one to send.
 			if message != nil {
-				if err := s.slackClient.PostMessage(message...); err != nil {
-					log.Printf("failed to send Slack message: %v", err)
-					continue
+				sent := false
+				user, found := s.slackClient.LookupUser(metacluster.Owner)
+				if found && metacluster.SlackDM {
+					if err := s.slackClient.PostMessageToUser(user, message...); err != nil {
+						log.Printf("failed to send Slack message directly to user %s: %v", user.Profile.Email, err)
+					} else {
+						sent = true
+					}
+				}
+				if !sent {
+					if err := s.slackClient.PostMessage(message...); err != nil {
+						log.Printf("failed to send Slack message: %v", err)
+						continue
+					}
 				}
 			}
 

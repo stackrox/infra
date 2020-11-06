@@ -321,6 +321,10 @@ message CreateClusterRequest {
     // NoSlack is used to skip sending Slack messages for cluster lifecycle
     // events.
     bool NoSlack = 5;
+
+    // SlackDM is used to choose direct messages for cluster lifecycle
+    // events.
+    bool SlackDM = 6;
 }
 
 message Artifact {
