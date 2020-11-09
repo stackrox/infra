@@ -19,6 +19,7 @@ const (
 // Slacker represents a type that can interact with the Slack API.
 type Slacker interface {
 	PostMessage(options ...slack.MsgOption) error
+	PostMessageToUser(user slack.User, options ...slack.MsgOption) error
 	LookupUser(email string) (slack.User, bool)
 }
 
@@ -38,6 +39,9 @@ func (s disabledSlack) PostMessage(options ...slack.MsgOption) error {
 	return nil
 }
 
+func (s disabledSlack) PostMessageToUser(user slack.User, options ...slack.MsgOption) error {
+	return nil
+}
 func (s disabledSlack) LookupUser(email string) (slack.User, bool) {
 	return slack.User{}, false
 }
@@ -83,6 +87,11 @@ func (s *slackClient) LookupUser(email string) (slack.User, bool) {
 
 func (s *slackClient) PostMessage(options ...slack.MsgOption) error {
 	_, _, err := s.client.PostMessage(s.channelID, options...)
+	return err
+}
+
+func (s *slackClient) PostMessageToUser(user slack.User, options ...slack.MsgOption) error {
+	_, _, err := s.client.PostMessage(user.ID, options...)
 	return err
 }
 
