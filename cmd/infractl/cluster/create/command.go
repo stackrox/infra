@@ -40,6 +40,7 @@ func Command() *cobra.Command {
 	cmd.Flags().Duration("lifespan", 3*time.Hour, "initial lifespan of the cluster")
 	cmd.Flags().Bool("wait", false, "wait for cluster to be ready")
 	cmd.Flags().Bool("no-slack", false, "skip sending Slack messages for lifecycle events")
+	cmd.Flags().Bool("slack-me", false, "send slack messages directly and not to the #infra_notifications channel")
 	cmd.Flags().String("download-dir", "", "wait for readiness and download artifacts to this dir")
 	return cmd
 }
@@ -60,6 +61,7 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 	lifespan, _ := cmd.Flags().GetDuration("lifespan")
 	wait, _ := cmd.Flags().GetBool("wait")
 	noSlack, _ := cmd.Flags().GetBool("no-slack")
+	slackDM, _ := cmd.Flags().GetBool("slack-me")
 	downloadDir, _ := cmd.Flags().GetString("download-dir")
 	if downloadDir != "" {
 		wait = true
@@ -72,6 +74,7 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 		Lifespan:    ptypes.DurationProto(lifespan),
 		Description: description,
 		NoSlack:     noSlack,
+		SlackDM:     slackDM,
 	}
 
 	for _, arg := range params {

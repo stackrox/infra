@@ -326,6 +326,11 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		slackStatus = slack.StatusSkip
 	}
 
+	slackDM := "no"
+	if req.SlackDM {
+		slackDM = "yes"
+	}
+
 	// Set workflow metadata annotations.
 	workflow.SetAnnotations(map[string]string{
 		annotationDescriptionKey: req.Description,
@@ -334,6 +339,7 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		annotationLifespanKey:    fmt.Sprint(lifespan),
 		annotationOwnerKey:       owner,
 		annotationSlackKey:       string(slackStatus),
+		annotationSlackDMKey:     slackDM,
 	})
 
 	created, err := s.clientWorkflows.Create(&workflow)
@@ -628,41 +634,56 @@ func (s *clusterImpl) startSlackCheck() {
 		}
 
 		for _, workflow := range workflowList.Items {
-			metacluster, err := s.metaClusterFromWorkflow(workflow)
-			if err != nil {
-				log.Printf("failed to convert workflow to meta-cluster: %v", err)
-				continue
+			s.slackCheckWorkflow(workflow)
+		}
+	}
+}
+
+func (s *clusterImpl) slackCheckWorkflow(workflow v1alpha1.Workflow) {
+	metacluster, err := s.metaClusterFromWorkflow(workflow)
+	if err != nil {
+		log.Printf("failed to convert workflow to meta-cluster: %v", err)
+		return
+	}
+
+	// Generate a Slack message for our current cluster state.
+	data := slackTemplateContext(s.slackClient, metacluster)
+	newSlackStatus, message := slack.FormatSlackMessage(metacluster.Status, metacluster.Slack, data)
+
+	// Only bother to send a message if there is one to send.
+	if message != nil {
+		sent := false
+		user, found := s.slackClient.LookupUser(metacluster.Owner)
+		if found && metacluster.SlackDM {
+			if err := s.slackClient.PostMessageToUser(user, message...); err != nil {
+				log.Printf("failed to send Slack message directly to user %s: %v", user.Profile.Email, err)
+			} else {
+				sent = true
 			}
-
-			// Generate a Slack message for our current cluster state.
-			data := slackTemplateContext(s.slackClient, metacluster)
-			newSlackStatus, message := slack.FormatSlackMessage(metacluster.Status, metacluster.Slack, data)
-
-			// Only bother to send a message if there is one to send.
-			if message != nil {
-				if err := s.slackClient.PostMessage(message...); err != nil {
-					log.Printf("failed to send Slack message: %v", err)
-					continue
-				}
+		}
+		if !sent {
+			if err := s.slackClient.PostMessage(message...); err != nil {
+				log.Printf("failed to send Slack message: %v", err)
+				return
 			}
+		}
+	}
 
-			// Only bother to update workflow annotation if our phase has
-			// transitioned.
-			if newSlackStatus != metacluster.Slack {
-				// Construct our replacement patch
-				payloadBytes, err := formatAnnotationPatch(annotationSlackKey, string(newSlackStatus))
-				if err != nil {
-					log.Printf("failed to format Slack annotation patch: %v", err)
-					continue
-				}
+	// Only bother to update workflow annotation if our phase has
+	// transitioned.
+	if newSlackStatus != metacluster.Slack {
+		// Construct our replacement patch
+		payloadBytes, err := formatAnnotationPatch(annotationSlackKey, string(newSlackStatus))
+		if err != nil {
+			log.Printf("failed to format Slack annotation patch: %v", err)
+			return
+		}
 
-				// Submit the patch.
-				_, err = s.clientWorkflows.Patch(metacluster.Cluster.ID, types.JSONPatchType, payloadBytes)
-				if err != nil {
-					log.Printf("failed to patch Slack annotation for cluster %s: %v", metacluster.Cluster.ID, err)
-					continue
-				}
-			}
+		// Submit the patch.
+		_, err = s.clientWorkflows.Patch(metacluster.Cluster.ID, types.JSONPatchType, payloadBytes)
+		if err != nil {
+			log.Printf("failed to patch Slack annotation for cluster %s: %v", metacluster.Cluster.ID, err)
+			return
 		}
 	}
 }

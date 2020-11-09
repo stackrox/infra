@@ -44,6 +44,7 @@ type metaCluster struct {
 	EventID   string
 	Expired   bool
 	Slack     slack.Status
+	SlackDM   bool
 }
 
 type artifactData struct {
@@ -105,6 +106,7 @@ func (s *clusterImpl) metaClusterFromWorkflow(workflow v1alpha1.Workflow) (*meta
 	return &metaCluster{
 		Cluster:   *cluster,
 		Slack:     slack.Status(GetSlack(&workflow)),
+		SlackDM:   GetSlackDM(&workflow),
 		Expired:   expired,
 		Artifacts: artifacts,
 		EventID:   GetEventID(&workflow),
