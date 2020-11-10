@@ -50,6 +50,9 @@ const (
 	// updates to send Slack messages.
 	slackCheckInterval = 1 * time.Minute
 
+	// when is a cluster considered near expiration
+	nearExpiry = 30 * time.Minute
+
 	artifactTagURL = "url"
 
 	artifactTagInternal = "internal"
@@ -648,7 +651,7 @@ func (s *clusterImpl) slackCheckWorkflow(workflow v1alpha1.Workflow) {
 
 	// Generate a Slack message for our current cluster state.
 	data := slackTemplateContext(s.slackClient, metacluster)
-	newSlackStatus, message := slack.FormatSlackMessage(metacluster.Status, metacluster.Slack, data)
+	newSlackStatus, message := slack.FormatSlackMessage(metacluster.Status, metacluster.NearingExpiry, metacluster.Slack, data)
 
 	// Only bother to send a message if there is one to send.
 	if message != nil {
