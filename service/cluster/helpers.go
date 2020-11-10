@@ -47,12 +47,12 @@ func isNearingExpiry(workflow v1alpha1.Workflow) bool {
 type metaCluster struct {
 	v1.Cluster
 
-	Artifacts map[string]artifactData
-	EventID   string
-	Expired   bool
-  NearingExpiry bool
-	Slack     slack.Status
-	SlackDM   bool
+	Artifacts     map[string]artifactData
+	EventID       string
+	Expired       bool
+	NearingExpiry bool
+	Slack         slack.Status
+	SlackDM       bool
 }
 
 type artifactData struct {
@@ -113,12 +113,12 @@ func (s *clusterImpl) metaClusterFromWorkflow(workflow v1alpha1.Workflow) (*meta
 	}
 
 	return &metaCluster{
-		Cluster:   *cluster,
-		Slack:     slack.Status(GetSlack(&workflow)),
-		SlackDM:   GetSlackDM(&workflow),
-		Expired:   expired,
- 		NearingExpiry: nearingExpiry,
-		Artifacts: artifacts,
-		EventID:   GetEventID(&workflow),
+		Cluster:       *cluster,
+		Slack:         slack.Status(GetSlack(&workflow)),
+		SlackDM:       GetSlackDM(&workflow),
+		Expired:       expired,
+		NearingExpiry: nearingExpiry,
+		Artifacts:     artifacts,
+		EventID:       GetEventID(&workflow),
 	}, nil
 }
