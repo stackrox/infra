@@ -3,7 +3,7 @@
 ##########
 - id: demo
   name: StackRox Demo
-  description: Demo running StackRox 3.0.51.0
+  description: Demo running StackRox 3.0.52.0
   availability: default
   workflow: configuration/workflow-demo.yaml
   parameters:
@@ -12,7 +12,7 @@
       value: example1
 
     - name: main-image
-      value: stackrox.io/main:3.0.51.0
+      value: stackrox.io/main:3.0.52.0
       kind: hardcoded
 
     - name: k8s-version
@@ -48,8 +48,8 @@
 
     - name: main-image
       description: StackRox Central image Docker name
-      value: stackrox.io/main:3.0.51.0
-      help: This must be a fully qualified image e.g. stackrox.io/main:3.0.51.0
+      value: stackrox.io/main:3.0.52.0
+      help: This must be a fully qualified image e.g. docker.io/stackrox/main:3.0.52.0
 
     - name: scanner-image
       description: StackRox Scanner image Docker name
