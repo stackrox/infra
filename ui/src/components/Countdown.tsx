@@ -13,18 +13,40 @@ type Props = {
   onModify?: (notation: string, incOrDec: string) => void;
 };
 
-export default function Countdown({ targetDate, className = '', onModify }: Props): ReactElement {
-  const duration = calcDuration(targetDate);
+type ModifiableTimeUnitProps = {
+  notation: string;
+  value: number;
+  onChange?: (notation: string, incOrDec: string) => void;
+};
 
+function ModifiableTimeUnit({
+  notation,
+  value,
+  onChange = (): void => {},
+}: ModifiableTimeUnitProps): ReactElement {
   return (
-    <Tooltip
-      placement="left"
-      content={<TooltipOverlay>{`Expiration: ${moment(targetDate).format('LLL')}`}</TooltipOverlay>}
-    >
-      <div className={className}>
-        <FormatDuration duration={duration} onModify={onModify} />
-      </div>
-    </Tooltip>
+    <span className="inline-flex flex-col items-center">
+      <span>
+        {`${value}`.padStart(2, '0')}
+        {notation}
+      </span>
+      <span className="inline-flex text-sm normal-case select-none">
+        <PlusCircle
+          className="cursor-pointer mr-2"
+          size={12}
+          onClick={(): void => {
+            onChange(notation, 'inc');
+          }}
+        />
+        <MinusCircle
+          className="cursor-pointer"
+          size={12}
+          onClick={(): void => {
+            onChange(notation, 'dec');
+          }}
+        />
+      </span>
+    </span>
   );
 }
 
@@ -65,39 +87,17 @@ function FormatDuration({ duration, onModify }: FormatDurationProps): ReactEleme
   );
 }
 
-type ModifiableTimeUnitProps = {
-  notation: string;
-  value: number;
-  onChange?: (notation: string, incOrDec: string) => void;
-};
+export default function Countdown({ targetDate, className = '', onModify }: Props): ReactElement {
+  const duration = calcDuration(targetDate);
 
-function ModifiableTimeUnit({
-  notation,
-  value,
-  onChange = (): void => {},
-}: ModifiableTimeUnitProps): ReactElement {
   return (
-    <span className="inline-flex flex-col items-center">
-      <span>
-        {`${value}`.padStart(2, '0')}
-        {notation}
-      </span>
-      <span className="inline-flex text-sm normal-case select-none">
-        <PlusCircle
-          className="cursor-pointer mr-2"
-          size={12}
-          onClick={(): void => {
-            onChange(notation, 'inc');
-          }}
-        />
-        <MinusCircle
-          className="cursor-pointer"
-          size={12}
-          onClick={(): void => {
-            onChange(notation, 'dec');
-          }}
-        />
-      </span>
-    </span>
+    <Tooltip
+      placement="left"
+      content={<TooltipOverlay>{`Expiration: ${moment(targetDate).format('LLL')}`}</TooltipOverlay>}
+    >
+      <div className={className}>
+        <FormatDuration duration={duration} onModify={onModify} />
+      </div>
+    </Tooltip>
   );
 }

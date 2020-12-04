@@ -8,6 +8,7 @@ import PageSection from 'components/PageSection';
 import LinkCard from 'components/LinkCard';
 import FullPageSpinner from 'components/FullPageSpinner';
 import FullPageError from 'components/FullPageError';
+import assertDefined from 'utils/assertDefined';
 
 const flavorService = new FlavorServiceApi(configuration);
 
@@ -24,17 +25,20 @@ function FlavorCards(): ReactElement {
     return <FullPageError message={error?.message || 'Unexpected server response'} />;
   }
 
-  const cards = data.Flavors.map((flavor) => (
-    <LinkCard
-      key={flavor.ID}
-      to={`launch/${flavor.ID}`}
-      header={flavor.Name || 'Unnamed'}
-      footer={<span className="capitalize">{flavor.Availability || 'Alpha'}</span>}
-      className="m-2"
-    >
-      <p className="text-lg">{flavor.Description}</p>
-    </LinkCard>
-  ));
+  const cards = data.Flavors.map((flavor) => {
+    assertDefined(flavor.ID); // swagger definitions are too permitting
+    return (
+      <LinkCard
+        key={flavor.ID}
+        to={`launch/${flavor.ID}`}
+        header={flavor.Name || 'Unnamed'}
+        footer={<span className="capitalize">{flavor.Availability || 'Alpha'}</span>}
+        className="m-2"
+      >
+        <p className="text-lg">{flavor.Description}</p>
+      </LinkCard>
+    );
+  });
   return <>{cards}</>;
 }
 

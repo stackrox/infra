@@ -18,6 +18,7 @@ import configuration from 'client/configuration';
 import TextFormField from 'components/forms/TextFormField';
 import NumberFormField from 'components/forms/NumberFormField';
 import { UploadCloud } from 'react-feather';
+import assertDefined from 'utils/assertDefined';
 
 const clusterService = new ClusterServiceApi(configuration);
 
@@ -33,8 +34,7 @@ function helpByParameterName(name?: string): string {
   return '';
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const schemasByParameterName: { [key: string]: yup.Schema<any> } = {
+const schemasByParameterName: { [key: string]: yup.Schema<unknown> } = {
   name: yup
     .string()
     .min(3, 'Too short')
@@ -45,18 +45,17 @@ const schemasByParameterName: { [key: string]: yup.Schema<any> } = {
     ),
   nodes: yup
     .number()
-    .transform((v) => (Number.isNaN(v) ? 0.1 : v)) // workaround https://github.com/jquense/yup/issues/66
+    .transform((v: unknown) => (Number.isNaN(v) ? 0.1 : v)) // workaround https://github.com/jquense/yup/issues/66
     .integer('Must be an integer')
     .min(1, 'Must be at least 1')
     .max(50, 'Be cost effective, please'),
 };
 
 type FlavorParameters = { [key: string]: V1Parameter };
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ParameterSchemas = { [key: string]: yup.Schema<any> };
+type ParameterSchemas = { [key: string]: yup.Schema<unknown> };
 
 function createParameterSchemas(parameters: FlavorParameters): ParameterSchemas {
-  return Object.keys(parameters).reduce<object>((fields, param) => {
+  return Object.keys(parameters).reduce<Record<string, unknown>>((fields, param) => {
     let thisParamSchema;
     if (schemasByParameterName[param]) {
       thisParamSchema = schemasByParameterName[param];
@@ -73,8 +72,8 @@ function createParameterSchemas(parameters: FlavorParameters): ParameterSchemas 
   }, {}) as ParameterSchemas;
 }
 
-function createInitialParameterValues(parameters: FlavorParameters): object {
-  return Object.keys(parameters).reduce<object>((fields, param) => {
+function createInitialParameterValues(parameters: FlavorParameters): Record<string, unknown> {
+  return Object.keys(parameters).reduce<Record<string, unknown>>((fields, param) => {
     return {
       ...fields,
       [param]: parameters[param].Optional && parameters[param].Value ? parameters[param].Value : '',
@@ -84,8 +83,7 @@ function createInitialParameterValues(parameters: FlavorParameters): object {
 
 // backend expects every parameter value to be a string, i.e. instead of 3 to be "3"
 function adjustParametersBeforeSubmit(parameterValues: FormikValues): { [key: string]: string } {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return mapValues(parameterValues, (value: any) => `${value}`.trim());
+  return mapValues(parameterValues, (value: unknown) => String(value).trim());
 }
 
 /**
@@ -98,8 +96,7 @@ function adjustParametersBeforeSubmit(parameterValues: FormikValues): { [key: st
  * @param {string} testName name of the test in the schema
  * @param {string} [testParamName=testName] name of the test parameter to return value of
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getSchemaTestParamValue<T = any, V = any>(
+function getSchemaTestParamValue<T = unknown, V = unknown>(
   schema: yup.Schema<T>,
   testName: string,
   testParamName: string = testName
@@ -115,10 +112,10 @@ function getFormLabelFromParameter(parameter: V1Parameter): string {
 
 function ParameterFormField(props: {
   parameter: V1Parameter;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  schema: yup.Schema<any>;
+  schema: yup.Schema<unknown>;
 }): ReactElement {
   const { parameter, schema } = props;
+  assertDefined(parameter.Name); // swagger def is too permissive, it must be defined
 
   const required = !parameter.Optional;
 
@@ -154,8 +151,7 @@ function getOrderFromParameter(parameter: V1Parameter): number {
 function getSchemaForParameter(
   parameterSchemas: ParameterSchemas,
   parameter: V1Parameter
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): yup.Schema<any> {
+): yup.Schema<unknown> {
   if (parameter.Name && parameter.Name in parameterSchemas) {
     return parameterSchemas[parameter.Name];
   }
@@ -213,7 +209,7 @@ export default function ClusterForm({
   const schema = yup.object().shape({
     ID: yup.string().required(),
     Description: yup.string().default(''),
-    Parameters: yup.object().shape<object>(parameterSchemas),
+    Parameters: yup.object().shape<Record<string, unknown>>(parameterSchemas),
   });
   const initialValues: FormikValues = {
     ID: flavorId,
@@ -221,8 +217,14 @@ export default function ClusterForm({
     Parameters: createInitialParameterValues(flavorParameters),
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [error, setError] = useState<any>();
+  const [error, setError] = useState<{
+    message?: string;
+    response?: {
+      data?: {
+        error?: string;
+      };
+    };
+  }>();
 
   const onSubmit = async (
     values: FormikValues,

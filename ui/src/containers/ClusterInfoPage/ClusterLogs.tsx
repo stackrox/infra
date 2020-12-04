@@ -30,7 +30,7 @@ export default function ClusterLogs({ clusterId }: Props): ReactElement {
 
     const logEntryHeaderBorder = '-'.repeat(logEntry.Name.length);
     const logText = atob(logEntry.Body);
-    return `${logEntry.Name}\n${logEntryHeaderBorder}\n${logEntry.Message}\n${logText}`;
+    return `${logEntry.Name}\n${logEntryHeaderBorder}\n${logEntry.Message || ''}\n${logText}`;
   }).join('\n\n');
 
   return (
