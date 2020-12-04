@@ -11,6 +11,7 @@ import LinkCard from 'components/LinkCard';
 import Lifespan from 'components/Lifespan';
 import FullPageSpinner from 'components/FullPageSpinner';
 import FullPageError from 'components/FullPageError';
+import assertDefined from 'utils/assertDefined';
 
 const clusterService = new ClusterServiceApi(configuration);
 
@@ -50,6 +51,7 @@ function ClusterCards(): ReactElement {
   }
 
   const cards = clusters.map((cluster) => {
+    assertDefined(cluster.ID);
     return (
       <LinkCard
         key={cluster.ID}

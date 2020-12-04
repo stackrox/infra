@@ -5,30 +5,26 @@ import configuration from 'client/configuration';
 import Modal from 'components/Modal';
 import useApiQuery from 'client/useApiQuery';
 import { X } from 'react-feather';
+import assertDefined from 'utils/assertDefined';
 
 const clusterService = new ClusterServiceApi(configuration);
 
-type Props = {
-  cluster: V1Cluster;
-  onClose: () => void;
+type ArtifactsListProps = {
+  artifacts: V1Artifact[];
 };
 
-export default function DownloadArtifactsModal({ cluster, onClose }: Props): ReactElement {
-  const closeButton = (
-    <button type="button" className="btn btn-base" onClick={onClose}>
-      <X size={16} className="mr-2" /> Close
-    </button>
-  );
-
+function ArtifactsList({ artifacts }: ArtifactsListProps): ReactElement {
   return (
-    <Modal
-      isOpen
-      onRequestClose={onClose}
-      header={`Artifacts for ${cluster.ID}`}
-      buttons={closeButton}
-    >
-      <Artifacts cluster={cluster} />
-    </Modal>
+    <ul className="list-disc ml-5">
+      {artifacts.map((artifact) => (
+        <li key={artifact.Name}>
+          <a href={artifact.URL} className="underline text-blue-500">
+            {artifact.Name}
+          </a>{' '}
+          - {artifact.Description}
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -63,21 +59,28 @@ function Artifacts({ cluster }: ArtifactsProps): ReactElement {
   return <p>There are no artifacts for this cluster.</p>;
 }
 
-type ArtifactsListProps = {
-  artifacts: V1Artifact[];
+type Props = {
+  cluster: V1Cluster;
+  onClose: () => void;
 };
 
-function ArtifactsList({ artifacts }: ArtifactsListProps): ReactElement {
+export default function DownloadArtifactsModal({ cluster, onClose }: Props): ReactElement {
+  assertDefined(cluster.ID);
+
+  const closeButton = (
+    <button type="button" className="btn btn-base" onClick={onClose}>
+      <X size={16} className="mr-2" /> Close
+    </button>
+  );
+
   return (
-    <ul className="list-disc ml-5">
-      {artifacts.map((artifact) => (
-        <li key={artifact.Name}>
-          <a href={artifact.URL} className="underline text-blue-500">
-            {artifact.Name}
-          </a>{' '}
-          - {artifact.Description}
-        </li>
-      ))}
-    </ul>
+    <Modal
+      isOpen
+      onRequestClose={onClose}
+      header={`Artifacts for ${cluster.ID}`}
+      buttons={closeButton}
+    >
+      <Artifacts cluster={cluster} />
+    </Modal>
   );
 }

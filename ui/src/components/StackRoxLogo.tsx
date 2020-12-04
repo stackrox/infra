@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 
-const StackRoxLogo = forwardRef<SVGSVGElement, {}>((_, ref) => (
+const StackRoxLogo = forwardRef<SVGSVGElement, never>((_, ref) => (
   <svg
     className="logo fill-current text-primary"
     xmlns="http://www.w3.org/2000/svg"

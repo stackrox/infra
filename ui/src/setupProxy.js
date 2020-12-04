@@ -8,11 +8,16 @@ const defaultOptions = {
   secure: false,
 };
 
+/**
+ * @param {Object} app - Express.js application
+ */
 module.exports = function main(app) {
+  /* eslint-disable @typescript-eslint/no-unsafe-call */
   const proxy = createProxyMiddleware(defaultOptions);
   app.use('/v1', proxy);
   app.use('/login', proxy);
   app.use('/callback', proxy);
   app.use('/logout', proxy);
   app.use('/downloads/infractl-*', proxy);
+  /* eslint-enable @typescript-eslint/no-unsafe-call */
 };

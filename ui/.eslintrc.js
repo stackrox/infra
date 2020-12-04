@@ -18,8 +18,9 @@ module.exports = {
   rules: {
     'prettier/prettier': 'error',
 
-    // will rely on TypeScript compile time checks instead
+    // rely on TypeScript compile time definitions & checks instead of propTypes and defaultProps
     'react/prop-types': 'off',
+    'react/require-default-props': 'off',
 
     'import/no-extraneous-dependencies': [
       'error',

@@ -55,7 +55,7 @@ export default function useApiQuery<T>(
           setRequestState({ called: true, loading: false, error: undefined, data: response.data });
         }
       })
-      .catch((error) => {
+      .catch((error: AxiosError<T>) => {
         if (!isCancelled) {
           setRequestState({ called: true, loading: false, error, data: undefined });
         }

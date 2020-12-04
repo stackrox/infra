@@ -7,6 +7,7 @@ import configuration from 'client/configuration';
 import useApiOperation from 'client/useApiOperation';
 import Modal from 'components/Modal';
 import InformationalModal from 'components/InformationalModal';
+import assertDefined from 'utils/assertDefined';
 
 const clusterService = new ClusterServiceApi(configuration);
 
@@ -18,9 +19,11 @@ type Props = {
 
 export default function DeleteClusterModal({ cluster, onCancel, onDeleted }: Props): ReactElement {
   const [deleteCluster, { called, loading, error }] = useApiOperation(() => {
-    if (!cluster.ID) throw new Error('Invalid state'); // should never happen, swagger definitions are too allowing
+    assertDefined(cluster.ID); // swagger definitions are too permitting
     return clusterService._delete(cluster.ID); // eslint-disable-line no-underscore-dangle
   });
+
+  assertDefined(cluster.ID); // swagger definitions are too permitting
 
   if (!called) {
     // waiting for user confirmation

@@ -1,4 +1,5 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
+import { AxiosError } from 'axios';
 
 import { ApiCaller, RequestState } from './useApiQuery';
 
@@ -35,7 +36,7 @@ export default function useApiOperation<T>(requester: ApiCaller<T>): [() => void
           setRequestState({ called: true, loading: false, error: undefined, data: response.data });
         }
       })
-      .catch((error) => {
+      .catch((error: AxiosError<T>) => {
         if (isMounted.current) {
           setRequestState({ called: true, loading: false, error, data: undefined });
         }

@@ -13,8 +13,7 @@ type PropsWithLocation = Props & {
 };
 
 type State = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  error: any;
+  error: Error | null;
   errorLocation: Location | null;
 };
 
@@ -35,8 +34,7 @@ class ErrorBoundary extends Component<PropsWithLocation, State> {
     return null;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  componentDidCatch(error: any): void {
+  componentDidCatch(error: Error): void {
     const { location } = this.props;
     this.setState({ error, errorLocation: location });
   }
