@@ -49,7 +49,7 @@
     "@types/react": "^16.9.56",
     "@types/react-dom": "^16.9.9",
     "@types/react-modal": "^3.10.6",
-    "@types/yup": "^0.29.9",
+    "@types/yup": "^0.29.10",
     "eslint-config-airbnb-typescript": "^7.2.1",
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-eslint-comments": "^3.2.0",
