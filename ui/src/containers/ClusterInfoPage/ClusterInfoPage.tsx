@@ -11,7 +11,6 @@ import FullPageError from 'components/FullPageError';
 import ClusterLogs from './ClusterLogs';
 import DeleteClusterModal from './DeleteClusterModal';
 import DownloadArtifactsModal from './DownloadArtifactsModal';
-// eslint-disable import/no-named-as-default
 import MutableLifespan from './MutableLifespan';
 
 const clusterService = new ClusterServiceApi(configuration);
@@ -37,14 +36,14 @@ export default function ClusterInfoPage(): ReactElement {
       <div>
         <span className="lowercase">{cluster.ID}</span>
         <span>
-          {cluster.Description && ` (${cluster.Description})`} - {cluster.Status || 'FAILED'}
+          {cluster.Description && ` (${cluster.Description})`} - {cluster.Status || V1Status.Failed}
         </span>
       </div>
       {!!cluster && <MutableLifespan cluster={cluster} />}
     </div>
   );
 
-  const clusterIsReady = cluster.Status === V1Status.READY;
+  const clusterIsReady = cluster.Status === V1Status.Ready;
 
   return (
     <>
