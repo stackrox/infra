@@ -34,7 +34,7 @@ function helpByParameterName(name?: string): string {
   return '';
 }
 
-const schemasByParameterName: { [key: string]: yup.Schema<unknown> } = {
+const schemasByParameterName: { [key: string]: yup.MixedSchema } = {
   name: yup
     .string()
     .min(3, 'Too short')
@@ -52,7 +52,7 @@ const schemasByParameterName: { [key: string]: yup.Schema<unknown> } = {
 };
 
 type FlavorParameters = { [key: string]: V1Parameter };
-type ParameterSchemas = { [key: string]: yup.Schema<unknown> };
+type ParameterSchemas = { [key: string]: yup.MixedSchema };
 
 function createParameterSchemas(parameters: FlavorParameters): ParameterSchemas {
   return Object.keys(parameters).reduce<Record<string, unknown>>((fields, param) => {
@@ -92,18 +92,18 @@ function adjustParametersBeforeSubmit(parameterValues: FormikValues): { [key: st
  *
  * @template T type the schema describes
  * @template V test param value type
- * @param {yup.Schema<T>} schema Yup schema
+ * @param {yup.MixedSchema<T>} schema Yup schema
  * @param {string} testName name of the test in the schema
  * @param {string} [testParamName=testName] name of the test parameter to return value of
  */
 function getSchemaTestParamValue<T = unknown, V = unknown>(
-  schema: yup.Schema<T>,
+  schema: yup.MixedSchema<T>,
   testName: string,
   testParamName: string = testName
-): V {
+): V | undefined {
   const { tests } = schema.describe();
   const test = tests.find((t) => t.name === testName);
-  return test?.params[testParamName] as V;
+  return test?.params && (test?.params[testParamName] as V);
 }
 
 function getFormLabelFromParameter(parameter: V1Parameter): string {
@@ -112,7 +112,7 @@ function getFormLabelFromParameter(parameter: V1Parameter): string {
 
 function ParameterFormField(props: {
   parameter: V1Parameter;
-  schema: yup.Schema<unknown>;
+  schema: yup.MixedSchema;
 }): ReactElement {
   const { parameter, schema } = props;
   assertDefined(parameter.Name); // swagger def is too permissive, it must be defined
@@ -151,7 +151,7 @@ function getOrderFromParameter(parameter: V1Parameter): number {
 function getSchemaForParameter(
   parameterSchemas: ParameterSchemas,
   parameter: V1Parameter
-): yup.Schema<unknown> {
+): yup.MixedSchema {
   if (parameter.Name && parameter.Name in parameterSchemas) {
     return parameterSchemas[parameter.Name];
   }
@@ -209,7 +209,7 @@ export default function ClusterForm({
   const schema = yup.object().shape({
     ID: yup.string().required(),
     Description: yup.string().default(''),
-    Parameters: yup.object().shape<Record<string, unknown>>(parameterSchemas),
+    Parameters: yup.object().shape(parameterSchemas),
   });
   const initialValues: FormikValues = {
     ID: flavorId,
