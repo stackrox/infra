@@ -9,7 +9,7 @@ storeGitHubPackageRegistryNpmToken: &storeGitHubPackageRegistryNpmToken
 executors:
   custom:
     docker:
-      - image: docker.io/stackrox/apollo-ci:0.3.5
+      - image: docker.io/stackrox/apollo-ci:0.3.3
         auth:
           username: $DOCKER_IO_PULL_USERNAME
           password: $DOCKER_IO_PULL_PASSWORD
