@@ -73,12 +73,13 @@ function createParameterSchemas(parameters: FlavorParameters): ParameterSchemas 
 }
 
 function createInitialParameterValues(parameters: FlavorParameters): Record<string, unknown> {
-  return Object.keys(parameters).reduce<Record<string, unknown>>((fields, param) => {
-    return {
+  return Object.keys(parameters).reduce<Record<string, unknown>>(
+    (fields, param) => ({
       ...fields,
       [param]: parameters[param].Optional && parameters[param].Value ? parameters[param].Value : '',
-    };
-  }, {});
+    }),
+    {}
+  );
 }
 
 // backend expects every parameter value to be a string, i.e. instead of 3 to be "3"
