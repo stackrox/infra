@@ -21,11 +21,12 @@ export default function useApiOperation<T>(requester: ApiCaller<T>): [() => void
     loading: false,
   });
 
-  useEffect(() => {
-    return (): void => {
+  useEffect(
+    () => (): void => {
       isMounted.current = false;
-    };
-  }, [isMounted]);
+    },
+    [isMounted]
+  );
 
   const operation = useCallback(() => {
     setRequestState({ called: true, loading: true });
