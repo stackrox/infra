@@ -95,7 +95,7 @@
 
     - name: nodes
       description: number of nodes
-      value: "2"
+      value: "3"
       kind: optional
 
     - name: machine-type
