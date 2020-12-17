@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/name: infra-server
   annotations:
     kubernetes.io/ingress.global-static-ip-name: {{ .Values.reservedAddressName }}
-    networking.gke.io/managed-certificates: "infra-server-certificate-primary,infra-server-certificate-secondary"
+    networking.gke.io/managed-certificates: "infra-server-certificate"
 
 spec:
   backend:
