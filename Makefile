@@ -53,10 +53,10 @@ clean-image:
 ## Protobuf ##
 ##############
 # Tool versions.
-protoc-version = 3.11.2
-protoc-gen-go-version = 1.3.2
-protoc-gen-grpc-gateway-version = 1.12.1
-protoc-gen-swagger-version = 1.12.1
+protoc-version = 3.14.0
+protoc-gen-go-version = 1.4.3
+protoc-gen-grpc-gateway-version = 1.16.0
+protoc-gen-swagger-version = 1.16.0
 
 # Tool binary paths
 protoc = $(GOPATH)/bin/protoc
