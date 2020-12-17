@@ -17,12 +17,14 @@ tag:
 # When run in CI, a Darwin and Linux binary is built.
 .PHONY: server
 server: proto-generated-srcs
+	@echo "+ $@"
 	GOARCH=amd64 GOOS=linux ./scripts/go-build -o bin/infra-server-linux-amd64 ./cmd/infra-server
 
 # cli - Builds the infractl client binary
 # When run in CI or when preparing an image, a Darwin and Linux binary is built.
 .PHONY: cli
 cli: proto-generated-srcs
+	@echo "+ $@"
 	GOARCH=amd64 GOOS=darwin ./scripts/go-build -o bin/infractl-darwin-amd64 ./cmd/infractl
 	GOARCH=amd64 GOOS=linux  ./scripts/go-build -o bin/infractl-linux-amd64  ./cmd/infractl
 
@@ -30,14 +32,17 @@ cli: proto-generated-srcs
 # When run locally, a Darwin binary is built and installed into the user's GOPATH bin.
 .PHONY: cli-local
 cli-local: proto-generated-srcs
+	@echo "+ $@"
 	./scripts/go-build -o $(GOPATH)/bin/infractl  ./cmd/infractl
 
 .PHONY: ui
 ui:
+	@echo "+ $@"
 	@make -C ui all
 
 .PHONY: image
 image: server cli ui clean-image
+	@echo "+ $@"
 	@cp -f bin/infra-server-linux-amd64 image/infra-server
 	@mkdir -p image/static/downloads
 	@ cp -R ui/build/* image/static/
@@ -47,6 +52,7 @@ image: server cli ui clean-image
 
 .PHONY: clean-image
 clean-image:
+	@echo "+ $@"
 	@rm -rf image/infra-server image/static
 
 ##############
@@ -74,6 +80,7 @@ endif
 
 # This target installs the protoc binary.
 $(protoc):
+	@echo "+ $@"
 	@echo "Installing protoc $(protoc-version) to $(protoc)"
 	@wget -q $(PROTOC_ZIP) -O /tmp/protoc.zip
 	@unzip -o -q -d /tmp /tmp/protoc.zip bin/protoc
@@ -81,16 +88,19 @@ $(protoc):
 
 # This target installs the protoc-gen-go binary.
 $(protoc-gen-go):
+	@echo "+ $@"
 	@echo "Installing protoc-gen-go $(protoc-gen-go-version) to $(protoc-gen-go)"
 	@cd /tmp; go get -u github.com/golang/protobuf/protoc-gen-go@v$(protoc-gen-go-version)
 
 # This target installs the protoc-gen-grpc-gateway binary.
 $(protoc-gen-grpc-gateway):
+	@echo "+ $@"
 	@echo "Installing protoc-gen-grpc-gateway $(protoc-gen-grpc-gateway-version) to $(protoc-gen-grpc-gateway)"
 	@cd /tmp; go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway@v$(protoc-gen-grpc-gateway-version)
 
 # This target installs the protoc-gen-swagger binary.
 $(protoc-gen-swagger):
+	@echo "+ $@"
 	@echo "Installing protoc-gen-swagger $(protoc-gen-swagger-version) to $(protoc-gen-swagger)"
 	@cd /tmp; go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger@v$(protoc-gen-swagger-version)
 
@@ -108,6 +118,7 @@ PROTO_OUTPUT_DIR  = generated/api/v1
 # - JSON Swagger definitions file
 .PHONY: proto-generated-srcs
 proto-generated-srcs: protoc-tools
+	@echo "+ $@"
 	GO111MODULE=off go get github.com/gogo/protobuf/protobuf || true
 	GO111MODULE=off go get github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis || true
 	GO111MODULE=off go get github.com/protocolbuffers/protobuf || true
