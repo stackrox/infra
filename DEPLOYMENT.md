@@ -22,6 +22,17 @@ gcloud container clusters get-credentials infra-production \
     --region us-west2
 ```
 
+## Ingress
+
+Infra uses GKE `Ingress` and `ManagedCertificate` CRDs to handle ingress. Plus two global static IPs:
+
+```
+$ gcloud compute addresses list --project stackrox-infra
+NAME                       ADDRESS/RANGE   TYPE      PURPOSE  NETWORK  REGION  SUBNET  STATUS
+infra-address-development  35.227.221.195  EXTERNAL                                    IN_USE
+infra-address-production   35.227.207.252  EXTERNAL                                    IN_USE
+```
+
 ## Configuration
 
 Service configuration is [stored in a GCS bucket](https://console.cloud.google.com/storage/browser/infra-configuration?organizationId=847401270788&project=stackrox-infra).
