@@ -169,11 +169,21 @@ push: image
 clean-render:
 	@rm -rf chart-rendered
 
+.PHONY: render-local
+render-local: clean-render
+	@mkdir -p chart-rendered
+	helm template chart/infra-server \
+	    --output-dir chart-rendered \
+		--set deployment="local" \
+		--set tag="$(TAG)" \
+		--values chart/infra-server/configuration/development-values.yaml
+
 .PHONY: render-development
 render-development: clean-render
 	@mkdir -p chart-rendered
 	helm template chart/infra-server \
 	    --output-dir chart-rendered \
+		--set deployment="development" \
 		--set tag="$(TAG)" \
 		--values chart/infra-server/configuration/development-values.yaml
 
@@ -182,39 +192,74 @@ render-production: clean-render
 	@mkdir -p chart-rendered
 	helm template chart/infra-server \
 	    --output-dir chart-rendered \
+		--set deployment="production" \
 		--set tag="$(TAG)" \
 		--values chart/infra-server/configuration/production-values.yaml
 
-.PHONY: install-development
-install-development:
-	kubectl config current-context | grep development
+dev_context = gke_stackrox-infra_us-west2_infra-development
+prod_context = gke_stackrox-infra_us-west2_infra-production
+this_context = $(shell kubectl config current-context)
+
+.PHONY: install-local
+install-local: render-local
+	@if [[ "$(this_context)" == "$(dev_context)" ]]; then \
+		echo Your kube context is set to development infra, should be a local cluster; \
+		exit 1; \
+	fi
+	@if [[ "$(this_context)" == "$(prod_context)" ]]; then \
+		echo Your kube context is set to production infra, should be a local cluster; \
+		exit 1; \
+	fi
 	helm upgrade --install \
-	    --kube-context gke_stackrox-infra_us-west2_infra-development \
+		--repo https://argoproj.github.io/argo-helm \
+		--create-namespace \
+		--namespace argo \
+		argo argo
+	@if ! kubectl get crd applications.app.k8s.io; then \
+		kubectl apply \
+			-f chart-rendered/infra-server/templates/application-crd.yaml; \
+		sleep 10; \
+	fi
+	@if ! kubectl get ns infra; then \
+		kubectl apply \
+			-f chart-rendered/infra-server/templates/namespace.yaml; \
+		sleep 10; \
+	fi
+	kubectl apply -R \
+	    -f chart-rendered/infra-server
+
+.PHONY: install-development
+install-development: render-development
+	helm upgrade --install \
+	    --kube-context $(dev_context) \
 		--repo https://argoproj.github.io/argo-helm \
 		--create-namespace \
 		--namespace argo \
 		argo argo
 	kubectl apply -R \
-	    --context gke_stackrox-infra_us-west2_infra-development \
+	    --context $(dev_context) \
 	    -f chart-rendered/infra-server
 
 .PHONY: install-production
-install-production:
-	kubectl config current-context | grep production
+install-production: render-production
 	helm upgrade --install \
-	    --kube-context gke_stackrox-infra_us-west2_infra-production \
+	    --kube-context $(prod_context) \
 		--repo https://argoproj.github.io/argo-helm \
 		--create-namespace \
 		--namespace argo \
 		argo argo
 	kubectl apply -R \
-	    --context gke_stackrox-infra_us-west2_infra-production \
+	    --context $(prod_context) \
 	    -f chart-rendered/infra-server
 
+.PHONY: deploy-local
+deploy-local: push install-local
+	@echo "All done!"
+
 .PHONY: deploy-development
-deploy-development: push render-development install-development
+deploy-development: push install-development
 	@echo "All done!"
 
 .PHONY: deploy-production
-deploy-production: push render-production install-production
+deploy-production: push install-production
 	@echo "All done!"

@@ -1,8 +1,70 @@
 # Infra Deployment
 
-## Clusters
+## Deply to an adhoc development cluster
 
-### [Development](https://console.cloud.google.com/kubernetes/clusters/details/us-west2/infra-development?project=stackrox-infra&organizationId=847401270788)
+For example one created with `infractl create gke-default`.
+
+To deploy to such a cluster simply:
+
+```
+make deploy-local
+```
+
+The infra server should start and argo should deploy.
+
+```
+$ kubectl -n infra get pods
+NAME                                      READY   STATUS    RESTARTS   AGE
+infra-server-deployment-5c6cfb69c-54k6x   1/1     Running   0          11s
+$ kubectl -n argo get pods
+NAME                                        READY   STATUS    RESTARTS   AGE
+argo-server-58bf6d4f79-cc96j                1/1     Running   1          95s
+argo-workflow-controller-6487cc4688-cdbfz   1/1     Running   0          95s
+```
+
+To connect to the infra-server run a proxy:
+
+```
+kubectl -n infra port-forward svc/infra-server-service 8443:8443
+```
+
+Then use *safari* to connect to the UI if needed. (note: chrome will not accept
+the infra self-signed cert).
+
+Or the locally compiled infractl binary:
+
+```
+bin/infractl-darwin-amd64 -k -e localhost:8443 whoami
+```
+
+### Notes
+
+For clusters created in the `srox-temp-dev-test` to be able to pull images from
+the `stackrox-infra` `us.gcr.io` and `gcr.io` registries, the
+`srox-temp-dev-test` default compute service account requires *Storage Object Viewer* access to
+`artifacts.stackrox-infra.appspot.com` and
+`us.artifacts.stackrox-infra.appspot.com`.
+
+For other clusters e.g. `docker-desktop` image pull secrets will work after the
+deployment has created the namespaces. e.g.
+
+```
+kubectl create secret docker-registry infra-us-gcr-access --docker-server=us.gcr.io --docker-username=_json_key \
+    --docker-password="$(cat chart/infra-server/configuration/production/gke/gke-credentials.json)" --docker-email=infra@stackrox.com
+kubectl create secret docker-registry infra-gcr-access --docker-server=gcr.io --docker-username=_json_key \
+    --docker-password="$(cat chart/infra-server/configuration/production/gke/gke-credentials.json)" --docker-email=infra@stackrox.com
+kubectl patch serviceaccount default -p '{"imagePullSecrets": [{"name": "infra-gcr-access"},{"name": "infra-us-gcr-access"}]}'
+
+kubectl -n infra create secret docker-registry infra-us-gcr-access --docker-server=us.gcr.io --docker-username=_json_key \
+    --docker-password="$(cat chart/infra-server/configuration/production/gke/gke-credentials.json)" --docker-email=infra@stackrox.com
+kubectl -n infra create secret docker-registry infra-gcr-access --docker-server=gcr.io --docker-username=_json_key \
+    --docker-password="$(cat chart/infra-server/configuration/production/gke/gke-credentials.json)" --docker-email=infra@stackrox.com
+kubectl -n infra patch serviceaccount default -p '{"imagePullSecrets": [{"name": "infra-gcr-access"},{"name": "infra-us-gcr-access"}]}'
+```
+
+## Production and Staging Clusters
+
+### [Development (Staging)](https://console.cloud.google.com/kubernetes/clusters/details/us-west2/infra-development?project=stackrox-infra&organizationId=847401270788)
 
 To connect to this cluster using kubectl, run: 
 
