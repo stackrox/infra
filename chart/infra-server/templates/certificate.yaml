@@ -1,3 +1,4 @@
+{{ if ne .Values.deployment "local" -}}
 ---
 
 apiVersion: networking.gke.io/v1
@@ -11,3 +12,4 @@ spec:
   domains:
     - {{ .Values.hosts.primary }}
     - {{ .Values.hosts.secondary }}
+{{ end }}
