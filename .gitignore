@@ -15,3 +15,6 @@ chart/infra-server/secrets
 chart/argo/configs
 chart/argo/secrets
 configuration/
+.idea/
+**/*.swp
+tags

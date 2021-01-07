@@ -40,7 +40,7 @@ import (
 const (
 	// resumeExpiredClusterInterval is how often to periodically check for
 	// expired workflows.
-	resumeExpiredClusterInterval = 5 * time.Minute
+	resumeExpiredClusterInterval = 1 * time.Minute
 
 	// calendarCheckInterval is how often to periodically check the calendar
 	// for scheduled demos.
@@ -288,19 +288,9 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		if workflow.ObjectMeta.Name == existing.ObjectMeta.Name {
 			switch workflowStatus(existing.Status) {
 			case v1.Status_FAILED, v1.Status_FINISHED:
-				var gracePeriod int64 = 0
-				deletePolicy := metav1.DeletePropagationForeground
-				if err := s.clientWorkflows.Delete(workflow.Name, &metav1.DeleteOptions{
-					GracePeriodSeconds: &gracePeriod,
-					PropagationPolicy:  &deletePolicy,
-				}); err == nil {
-					log.Printf("[INFO] deleted workflow %q", workflow.Name)
-					// The delete is not entirely synchronous w.r.t. PVCs - give
-					// it 5 seconds to complete before trying the create.
-					time.Sleep(5 * time.Second)
+				if err := s.ForceDeleteWorkflow(workflow); err == nil {
 					break
 				}
-				log.Printf("[ERROR] failed to delete workflow %q: %v", workflow.Name, err)
 				fallthrough
 
 			default:
@@ -493,6 +483,23 @@ func (s *clusterImpl) RegisterServiceHandler(ctx context.Context, mux *runtime.S
 	return v1.RegisterClusterServiceHandler(ctx, mux, conn)
 }
 
+func (s *clusterImpl) ForceDeleteWorkflow(workflow v1alpha1.Workflow) error {
+	var gracePeriod int64 = 0
+	deletePolicy := metav1.DeletePropagationForeground
+	if err := s.clientWorkflows.Delete(workflow.Name, &metav1.DeleteOptions{
+		GracePeriodSeconds: &gracePeriod,
+		PropagationPolicy:  &deletePolicy,
+	}); err != nil {
+		log.Printf("[ERROR] failed to delete workflow %q: %v", workflow.Name, err)
+		return err
+	}
+
+	log.Printf("[INFO] deleted workflow %q", workflow.Name)
+	// The delete is not entirely synchronous WRT PVCs so give it 5 seconds
+	time.Sleep(5 * time.Second)
+	return nil
+}
+
 func (s *clusterImpl) cleanupExpiredClusters() {
 	for ; ; time.Sleep(resumeExpiredClusterInterval) {
 		workflowList, err := s.clientWorkflows.List(metav1.ListOptions{})
@@ -508,6 +515,10 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 				continue
 			}
 
+			if metacluster.Status == v1.Status_FAILED {
+				s.ForceDeleteWorkflow(workflow)
+			}
+
 			if metacluster.Status != v1.Status_READY {
 				continue
 			}
@@ -516,6 +527,7 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 				continue
 			}
 
+			// ResumeWorkflow: https://github.com/argoproj/argo/blob/master/workflow/util/util.go#L348
 			log.Printf("resuming workflow %q", metacluster.ID)
 			if err := util.ResumeWorkflow(s.clientWorkflows, nil, metacluster.ID, ""); err != nil {
 				log.Printf("[ERROR] failed to resume workflow %q: %v", metacluster.ID, err)
@@ -650,7 +662,8 @@ func (s *clusterImpl) slackCheckWorkflow(workflow v1alpha1.Workflow) {
 	}
 
 	// Generate a Slack message for our current cluster state.
-	data := slackTemplateContext(s.slackClient, metacluster)
+	failureDetails := workflowFailureDetails(workflow.Status).Error()
+	data := slackTemplateContext(s.slackClient, metacluster, failureDetails)
 	newSlackStatus, message := slack.FormatSlackMessage(metacluster.Status, metacluster.NearingExpiry, metacluster.Slack, data)
 
 	// Only bother to send a message if there is one to send.
@@ -691,19 +704,20 @@ func (s *clusterImpl) slackCheckWorkflow(workflow v1alpha1.Workflow) {
 	}
 }
 
-func slackTemplateContext(client slack.Slacker, cluster *metaCluster) slack.TemplateData {
+func slackTemplateContext(client slack.Slacker, cluster *metaCluster, failureDetails string) slack.TemplateData {
 	createdOn, _ := ptypes.Timestamp(cluster.CreatedOn)
 	lifespan, _ := ptypes.Duration(cluster.Lifespan)
 	remaining := time.Until(createdOn.Add(lifespan))
 
 	data := slack.TemplateData{
-		Description: cluster.Description,
-		Flavor:      cluster.Flavor,
-		ID:          cluster.ID,
-		OwnerEmail:  cluster.Owner,
-		Remaining:   common.FormatExpiration(remaining),
-		Scheduled:   cluster.EventID != "",
-		URL:         cluster.URL,
+		Description:    cluster.Description,
+		Flavor:         cluster.Flavor,
+		ID:             cluster.ID,
+		OwnerEmail:     cluster.Owner,
+		Remaining:      common.FormatExpiration(remaining),
+		Scheduled:      cluster.EventID != "",
+		URL:            cluster.URL,
+		FailureDetails: failureDetails,
 	}
 
 	if user, found := client.LookupUser(cluster.Owner); found {

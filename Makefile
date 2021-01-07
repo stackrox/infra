@@ -263,3 +263,8 @@ deploy-development: push install-development
 .PHONY: deploy-production
 deploy-production: push install-production
 	@echo "All done!"
+
+.PHONY: gotags
+gotags:
+	@gotags -R . > tags
+	@echo "GoTags written to $(PWD)/tags"

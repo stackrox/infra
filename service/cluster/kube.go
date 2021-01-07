@@ -1,8 +1,11 @@
 package cluster
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
 	"github.com/argoproj/argo/pkg/client/clientset/versioned"
@@ -61,6 +64,7 @@ func podsClient() (k8sv1.PodInterface, error) {
 }
 
 func workflowStatus(workflowStatus v1alpha1.WorkflowStatus) v1.Status {
+	// https://godoc.org/github.com/argoproj/argo/pkg/apis/workflow/v1alpha1#WorkflowStatus
 	switch workflowStatus.Phase {
 	case v1alpha1.NodeFailed, v1alpha1.NodeError, v1alpha1.NodeSkipped:
 		return v1.Status_FAILED
@@ -72,8 +76,20 @@ func workflowStatus(workflowStatus v1alpha1.WorkflowStatus) v1.Status {
 		return v1.Status_CREATING
 
 	case v1alpha1.NodeRunning:
+		// https://godoc.org/github.com/argoproj/argo/pkg/apis/workflow/v1alpha1#Nodes
 		for _, node := range workflowStatus.Nodes {
-			if node.Type == v1alpha1.NodeTypeSuspend {
+			// https://godoc.org/github.com/argoproj/argo/pkg/apis/workflow/v1alpha1#NodeType
+			if node.Type == v1alpha1.NodeTypePod {
+				if strings.Contains(node.Message, "ImagePullBackOff") {
+					return v1.Status_FAILED
+				}
+				if strings.Contains(node.Message, "ErrImagePull") {
+					return v1.Status_FAILED
+				}
+				if strings.Contains(node.Message, "Pod was active on the node longer than the specified deadline") {
+					return v1.Status_FAILED
+				}
+			} else if node.Type == v1alpha1.NodeTypeSuspend {
 				switch node.Phase {
 				case v1alpha1.NodeSucceeded:
 					return v1.Status_DESTROYING
@@ -93,4 +109,29 @@ func workflowStatus(workflowStatus v1alpha1.WorkflowStatus) v1.Status {
 	}
 
 	panic("unknown situation")
+}
+
+// Returns an error with details of an aberrant condition if detected, nil otherwise.
+// Intended to provide failure details to a user via slack post.
+func workflowFailureDetails(workflowStatus v1alpha1.WorkflowStatus) error {
+	switch workflowStatus.Phase {
+	case v1alpha1.NodeRunning, v1alpha1.NodeFailed:
+		for _, node := range workflowStatus.Nodes {
+			if node.Type == v1alpha1.NodeTypePod {
+				if strings.Contains(node.Message, "ImagePullBackOff") {
+					msg := fmt.Sprintf("Workflow node `%s` has encountered an image pull back-off.", node.Name)
+					return errors.New(msg)
+				}
+				if strings.Contains(node.Message, "ErrImagePull") {
+					msg := fmt.Sprintf("Workflow node `%s` has encountered an image pull error.", node.Name)
+					return errors.New(msg)
+				}
+				if strings.Contains(node.Message, "Pod was active on the node longer than the specified deadline") {
+					msg := fmt.Sprintf("Workflow node `%s` has timed out.", node.Name)
+					return errors.New(msg)
+				}
+			}
+		}
+	}
+	return errors.New("")
 }
