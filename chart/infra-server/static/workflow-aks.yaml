@@ -1,0 +1,104 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: aks-
+spec:
+  entrypoint: start
+  arguments:
+    parameters:
+      - name: name
+      - name: nodes
+        value: ""
+      - name: machine-type
+        value: ""
+      - name: k8s-version
+        value: ""
+
+  templates:
+    - name: start
+      steps:
+        - - name: create
+            template: create
+
+        - - name: wait
+            template: wait
+
+        - - name: destroy
+            template: destroy
+
+    - name: create
+      outputs:
+        artifacts:
+          - name: kubeconfig
+            path: /data/kubeconfig
+            archive:
+              none: {}
+          - name: data
+            path: /data
+            archive:
+              tar: {}
+      container:
+        image: gcr.io/stackrox-infra/automation-flavors/aks:0.1.7
+        imagePullPolicy: Always
+        args:
+          - create
+          - "{{workflow.parameters.name}}"
+          - srox-temp-dev-test
+        env:
+          - name: AZURE_SP_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: azure-secrets
+                key: AZURE_SP_USERNAME
+          - name: AZURE_SP_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: azure-secrets
+                key: AZURE_SP_PASSWORD
+          - name: AZURE_SP_TENANT
+            valueFrom:
+              secretKeyRef:
+                name: azure-secrets
+                key: AZURE_SP_TENANT
+          - name: NODE_COUNT
+            value: "{{workflow.parameters.nodes}}"
+          - name: INSTANCE_TYPE
+            value: "{{workflow.parameters.machine-type}}"
+          - name: K8S_VERSION
+            value: "{{workflow.parameters.k8s-version}}"
+          - name: CREATION_SOURCE
+            value: "infra"
+        volumeMounts:
+          - name: data
+            mountPath: /data
+      volumes:
+        - name: data
+          emptyDir: {}
+
+    - name: wait
+      suspend: {}
+
+    - name: destroy
+      container:
+        image: gcr.io/stackrox-infra/automation-flavors/aks:0.1.7
+        imagePullPolicy: Always
+        args:
+          - destroy
+          - "{{workflow.parameters.name}}"
+          - srox-temp-dev-test
+        env:
+          - name: AZURE_SP_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: azure-secrets
+                key: AZURE_SP_USERNAME
+          - name: AZURE_SP_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: azure-secrets
+                key: AZURE_SP_PASSWORD
+          - name: AZURE_SP_TENANT
+            valueFrom:
+              secretKeyRef:
+                name: azure-secrets
+                key: AZURE_SP_TENANT

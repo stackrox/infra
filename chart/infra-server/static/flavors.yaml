@@ -270,3 +270,30 @@
       value: us-east-1
       kind: optional
 
+#####################
+#  Azure AKS        #
+#####################
+- id: aks
+  name: AKS
+  description: Azure AKS cluster
+  availability: alpha
+  workflow: configuration/workflow-aks.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      value: example1
+
+    - name: nodes
+      description: number of nodes
+      value: "3"
+      kind: optional
+
+    - name: machine-type
+      description: node machine type
+      value: standard_d4s_v3
+      kind: optional
+
+    - name: k8s-version
+      description: kubernetes version
+      kind: optional
+      help: Use this to override the default version used by AKS
