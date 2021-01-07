@@ -517,6 +517,7 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 
 			if metacluster.Status == v1.Status_FAILED {
 				s.ForceDeleteWorkflow(workflow)
+				continue
 			}
 
 			if metacluster.Status != v1.Status_READY {
@@ -527,7 +528,15 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 				continue
 			}
 
-			// ResumeWorkflow: https://github.com/argoproj/argo/blob/master/workflow/util/util.go#L348
+			if  metacluster.Status == v1.Status_CREATING {
+				log.Printf("[ERROR] workflow %q in state CREATING but lifespan expired", metacluster.ID)
+				s.ForceDeleteWorkflow(workflow)
+				continue
+			}
+
+			// ResumeWorkflow resumes a workflow by setting spec.suspend to nil and any suspended
+			// nodes to Successful. Retries conflict errors.
+			// https://github.com/argoproj/argo/blob/master/workflow/util/util.go#L348
 			log.Printf("resuming workflow %q", metacluster.ID)
 			if err := util.ResumeWorkflow(s.clientWorkflows, nil, metacluster.ID, ""); err != nil {
 				log.Printf("[ERROR] failed to resume workflow %q: %v", metacluster.ID, err)
