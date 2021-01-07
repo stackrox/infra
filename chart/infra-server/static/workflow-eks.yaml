@@ -40,7 +40,7 @@ spec:
             archive:
               tar: {}
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/eks:0.1.5
+        image: gcr.io/stackrox-infra/automation-flavors/eks:0.1.7
         imagePullPolicy: Always
         args:
           - create
@@ -64,6 +64,9 @@ spec:
             value: "{{workflow.parameters.k8s-version}}"
           - name: USER_ARNS
             value: "{{workflow.parameters.user-arns}}"
+          - name: CREATION_SOURCE
+            value: "infra"
+
         volumeMounts:
           - name: data
             mountPath: /data
@@ -76,7 +79,7 @@ spec:
 
     - name: destroy
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/eks:0.1.5
+        image: gcr.io/stackrox-infra/automation-flavors/eks:0.1.7
         imagePullPolicy: Always
         args:
           - destroy
