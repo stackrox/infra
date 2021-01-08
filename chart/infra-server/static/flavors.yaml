@@ -297,3 +297,16 @@
       description: kubernetes version
       kind: optional
       help: Use this to override the default version used by AKS
+
+    - name: network-plugin
+      description: The Kubernetes network plugin to use.
+      kind: optional
+      help: 'Allowed values: azure, kubenet. Specify "azure" for advanced networking configurations. Defaults to "kubenet".'
+
+    - name: network-policy
+      description: The Kubernetes network policy to use.
+      kind: optional
+      help: |
+        Using together with "azure" network plugin.
+        Specify "azure" for Azure network policy manager and "calico" for calico network policy controller.
+        Defaults to "" (network policy disabled).

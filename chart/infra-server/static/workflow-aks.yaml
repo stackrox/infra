@@ -13,6 +13,10 @@ spec:
         value: ""
       - name: k8s-version
         value: ""
+      - name: network-plugin
+        value: ""
+      - name: network-policy
+        value: ""
 
   templates:
     - name: start
@@ -38,7 +42,7 @@ spec:
             archive:
               tar: {}
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/aks:0.1.7
+        image: gcr.io/stackrox-infra/automation-flavors/aks:0.1.8
         imagePullPolicy: Always
         args:
           - create
@@ -66,6 +70,10 @@ spec:
             value: "{{workflow.parameters.machine-type}}"
           - name: K8S_VERSION
             value: "{{workflow.parameters.k8s-version}}"
+          - name: NETWORK_PLUGIN
+            value: "{{workflow.parameters.network-plugin}}"
+          - name: NETWORK_POLICY
+            value: "{{workflow.parameters.network-policy}}"
           - name: CREATION_SOURCE
             value: "infra"
         volumeMounts:
@@ -80,7 +88,7 @@ spec:
 
     - name: destroy
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/aks:0.1.7
+        image: gcr.io/stackrox-infra/automation-flavors/aks:0.1.8
         imagePullPolicy: Always
         args:
           - destroy
