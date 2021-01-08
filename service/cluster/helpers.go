@@ -1,10 +1,10 @@
 package cluster
 
 import (
+	"encoding/json"
 	"log"
 	"strings"
 	"time"
-	"encoding/json"
 
 	"github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
 	"github.com/golang/protobuf/ptypes"
