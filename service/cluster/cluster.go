@@ -521,6 +521,12 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 				continue
 			}
 
+			if (metacluster.Status == v1.Status_FINISHED) && metacluster.Expired {
+				log.Printf("[DEBUG] workflow %q in state FINISHED and lifespan expired", metacluster.ID)
+				s.ForceDeleteWorkflow(workflow)
+				continue
+			}
+
 			if metacluster.Status == v1.Status_FAILED {
 				log.Printf("[DEBUG] deleting workflow %q due to failed state", metacluster.ID)
 				s.ForceDeleteWorkflow(workflow)
