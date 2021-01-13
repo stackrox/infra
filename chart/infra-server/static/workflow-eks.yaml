@@ -4,6 +4,7 @@ metadata:
   generateName: eks-
 spec:
   entrypoint: start
+  onExit: stop
   arguments:
     parameters:
       - name: name
@@ -25,6 +26,8 @@ spec:
         - - name: wait
             template: wait
 
+    - name: stop
+      steps:
         - - name: destroy
             template: destroy
 
@@ -95,4 +98,3 @@ spec:
               secretKeyRef:
                 name: aws-access-secrets
                 key: AWS_SECRET_ACCESS_KEY
-  

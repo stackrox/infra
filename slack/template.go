@@ -12,15 +12,15 @@ import (
 // TemplateData represents the available context that is passed when executing
 // Slack message templates.
 type TemplateData struct {
-	Description string
-	Flavor      string
-	ID          string
-	Remaining   string
-	Scheduled   bool
-	URL         string
-
-	OwnerEmail string
-	OwnerID    string
+	Description    string
+	Flavor         string
+	ID             string
+	Remaining      string
+	Scheduled      bool
+	URL            string
+	OwnerEmail     string
+	OwnerID        string
+	FailureDetails string
 }
 
 // Status represents which lifecycle stage a cluster has most recently sent a
@@ -49,7 +49,7 @@ const (
 
 var (
 	templatesFailed = []string{ // nolint:gochecknoglobals
-		"<@{{.OwnerID}}> - Your {{if .Scheduled}}scheduled {{end}}{{if .Description}}*{{.Description}}* {{else}}*{{.ID}}* {{end}}cluster has failed! :fire:",
+		"<@{{.OwnerID}}> - Your {{if .Scheduled}}scheduled {{end}}{{if .Description}}*{{.Description}}* {{else}}*{{.ID}}* {{end}}cluster has failed!{{if .FailureDetails}} {{.FailureDetails}}{{end}} :fire:",
 	}
 
 	templatesDestroyed = []string{ // nolint:gochecknoglobals

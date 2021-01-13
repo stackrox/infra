@@ -59,6 +59,7 @@ spec:
         args:
           - version
           - "--json"
+      activeDeadlineSeconds: 120
 
     - name: create
       inputs:

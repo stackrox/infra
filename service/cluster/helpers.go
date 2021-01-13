@@ -1,6 +1,8 @@
 package cluster
 
 import (
+	"encoding/json"
+	"log"
 	"strings"
 	"time"
 
@@ -121,4 +123,12 @@ func (s *clusterImpl) metaClusterFromWorkflow(workflow v1alpha1.Workflow) (*meta
 		Artifacts:     artifacts,
 		EventID:       GetEventID(&workflow),
 	}, nil
+}
+
+func prettyPrint(x interface{}) {
+	pretty, err := json.MarshalIndent(x, "", "  ")
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+	log.Printf("[INFO] %s\n", pretty)
 }
