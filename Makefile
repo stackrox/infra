@@ -269,7 +269,6 @@ gotags:
 	@gotags -R . > tags
 	@echo "GoTags written to $(PWD)/tags"
 
-
 .PHONY: argo-workflow-lint
 argo-workflow-lint:
 	@argo lint ./chart/infra-server/static/workflow*.yaml
