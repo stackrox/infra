@@ -41,7 +41,7 @@ ui:
 	@make -C ui all
 
 .PHONY: image
-image: server cli ui clean-image
+image: argo-workflow-lint server cli ui clean-image
 	@echo "+ $@"
 	@cp -f bin/infra-server-linux-amd64 image/infra-server
 	@mkdir -p image/static/downloads
@@ -268,3 +268,8 @@ deploy-production: push install-production
 gotags:
 	@gotags -R . > tags
 	@echo "GoTags written to $(PWD)/tags"
+
+
+.PHONY: argo-workflow-lint
+argo-workflow-lint:
+	@argo lint ./chart/infra-server/static/workflow*.yaml
