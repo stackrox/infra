@@ -4,7 +4,6 @@ metadata:
   generateName: aks-
 spec:
   entrypoint: start
-  onExit: stop
   arguments:
     parameters:
       - name: name
@@ -28,8 +27,6 @@ spec:
         - - name: wait
             template: wait
 
-    - name: stop
-      steps:
         - - name: destroy
             template: destroy
 
