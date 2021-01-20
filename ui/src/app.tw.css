@@ -25,16 +25,16 @@
 [multiple],
 textarea,
 select {
-    font-size: 100%;
+  font-size: 100%;
 }
 
 [type='checkbox'],
 [type='checkbox'] {
-    @apply w-3 h-3 rounded-sm;
+  @apply w-3 h-3 rounded-sm;
 }
 
 /* end reset of the Tailwind forms reset */
-   
+
 .sticky {
   position: sticky !important;
 }
