@@ -7,6 +7,34 @@
 @tailwind components;
 @tailwind utilities;
 
+/* reset the unthinking hardcoded resets of Tailwind Forms in v2 plugin,
+   https://github.com/tailwindlabs/tailwindcss-forms/blob/master/src/index.js */
+
+[type='text'],
+[type='email'],
+[type='url'],
+[type='password'],
+[type='number'],
+[type='date'],
+[type='datetime-local'],
+[type='month'],
+[type='search'],
+[type='tel'],
+[type='time'],
+[type='week'],
+[multiple],
+textarea,
+select {
+    font-size: 100%;
+}
+
+[type='checkbox'],
+[type='checkbox'] {
+    @apply w-3 h-3 rounded-sm;
+}
+
+/* end reset of the Tailwind forms reset */
+   
 .sticky {
   position: sticky !important;
 }
@@ -44,7 +72,7 @@
 }
 
 .btn-success:hover {
-  @apply btn-success bg-success-300 text-success-800 !important;
+  @apply border-success-500 bg-success-300 text-success-800 !important;
 }
 
 .btn-alert {
@@ -52,7 +80,7 @@
 }
 
 .btn-alert:hover {
-  @apply btn-alert border-alert-700 bg-alert-700 !important;
+  @apply text-alert-100 border-alert-700 bg-alert-700 !important;
 }
 
 .btn-primary {
@@ -60,7 +88,7 @@
 }
 
 .btn-primary:hover {
-  @apply btn-primary bg-primary-100 bg-base-200 border-primary-400 !important;
+  @apply text-primary-600 bg-primary-100 bg-base-200 border-primary-400 !important;
 }
 
 .btn-tertiary {
@@ -68,7 +96,7 @@
 }
 
 .btn-tertiary:hover {
-  @apply btn-tertiary bg-tertiary-700 bg-base-200 border-tertiary-600 !important;
+  @apply text-tertiary-700 bg-tertiary-700 bg-base-200 border-tertiary-600 !important;
 }
 
 .btn-base {
@@ -76,7 +104,7 @@
 }
 
 .btn-base:hover {
-  @apply btn-base bg-base-200 text-base-700 !important;
+  @apply border-base-400 bg-base-200 text-base-700 !important;
 }
 /** End of Button styles */
 
