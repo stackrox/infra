@@ -1816,26 +1816,25 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
-"@stackrox/tailwind-config@^0.1.0":
-  version "0.1.0"
-  resolved "https://npm.pkg.github.com/download/@stackrox/tailwind-config/0.1.0/e429937d6934eb6bf17bbf18a54e8c5598c1d993675442d0a9b78895f6e76193#adb69225dd136eb4a107099a4177380093fb7cb7"
-  integrity sha512-QZ986lkWBtyBHYJHSzDZjQABvtdwONqICIJ4/usZSQqrIRZoph/6LcasH11lx6+bDgrG6GCpc/xeglYg5RD0Zw==
-  dependencies:
-    "@tailwindcss/custom-forms" "^0.2.1"
-
-"@stackrox/ui-components@^0.2.0":
+"@stackrox/tailwind-config@^0.2.0":
   version "0.2.0"
-  resolved "https://npm.pkg.github.com/download/@stackrox/ui-components/0.2.0/ac2a439bb5dabe66ff11500de398a46cf99cd068db4195611c43af3e02cbc68c#0678b90507b77fa88d26bb3252c6fb8b75a4b58a"
-  integrity sha512-F3IKVOHGDmtJyUBY9fdLk6nOfuQDwEI+uCT1mrZHmU730lsexzHbbRyqPQZGY1AbSpbOmCthnapsNtJ+30AmUw==
+  resolved "https://npm.pkg.github.com/download/@stackrox/tailwind-config/0.2.0/0a531486128241736a2360cdfa3b1564a5828edb628e86aab1b375fce2897fef#2a0588d986b442fd529e4146070052f0b65340a7"
+  integrity sha512-UdvcuGf/MKryLH7f0VG5pxcITVBpfMJsxKxxhVFR3M8hivyLheNP2SFjNbaFKDTpy/rGVrnNwHhbltOSY8MoIA==
   dependencies:
-    "@tippyjs/react" "^4.1.0"
-    formik "^2.1.5"
+    "@tailwindcss/forms" "^0.2.1"
+
+"@stackrox/ui-components@^0.3.0":
+  version "0.3.0"
+  resolved "https://npm.pkg.github.com/download/@stackrox/ui-components/0.3.0/57667df4135a679a782a94c2b3e2b954729e9d2314b611db1fb5b81d6eb98bbe#fdd6c41b8470ea6ce56f5c3d05431fd70499d76c"
+  integrity sha512-T713QYiq1JwFeJYU/WIUNdyQ1aSALE5r18bKI6XtzyNzu2QK3E65SdPzx5uFLINEA8GpiRE8mnwi8+gl3CFJxQ==
+  dependencies:
+    "@tippyjs/react" "^4.2.0"
+    formik "^2.2.6"
     initials "^3.1.1"
     lodash.get "^4.4.2"
-    prop-types "^15.7.2"
     react-feather "^2.0.9"
-    tippy.js "^6.2.6"
-    yup "^0.29.3"
+    tippy.js "^6.2.7"
+    yup "^0.32.8"
 
 "@surma/rollup-plugin-off-main-thread@^1.1.1":
   version "1.4.2"
@@ -1948,14 +1947,12 @@
     "@svgr/plugin-svgo" "^5.4.0"
     loader-utils "^2.0.0"
 
-"@tailwindcss/custom-forms@^0.2.1":
+"@tailwindcss/forms@^0.2.1":
   version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@tailwindcss/custom-forms/-/custom-forms-0.2.1.tgz#40e5ed1fff6d29d8ed1c508a0b2aaf8da96962e0"
-  integrity sha512-XdP5XY6kxo3x5o50mWUyoYWxOPV16baagLoZ5uM41gh6IhXzhz/vJYzqrTb/lN58maGIKlpkxgVsQUNSsbAS3Q==
+  resolved "https://registry.yarnpkg.com/@tailwindcss/forms/-/forms-0.2.1.tgz#3244b185854fae1a7cbe8d2456314d8b2d98cf43"
+  integrity sha512-czfvEdY+J2Ogfd6RUSr/ZSUmDxTujr34M++YLnp2cCPC3oJ4kFvFMaRXA6cEXKw7F1hJuapdjXRjsXIEXGgORg==
   dependencies:
-    lodash "^4.17.11"
-    mini-svg-data-uri "^1.0.3"
-    traverse "^0.6.6"
+    mini-svg-data-uri "^1.2.3"
 
 "@testing-library/dom@^7.28.1":
   version "7.28.1"
@@ -2000,7 +1997,7 @@
   dependencies:
     "@babel/runtime" "^7.12.5"
 
-"@tippyjs/react@^4.1.0":
+"@tippyjs/react@^4.2.0":
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/@tippyjs/react/-/react-4.2.0.tgz#a1cb369d0051099e8a7e4ceb59f809abd9955283"
   integrity sha512-T6UcHtwtGkvgsBQ4bNp8BtXGxa2ujfOkWUogYkRtN4UVJ2QRgDdFoJeaPxdndnVYFEa2uTVxSFxs8QkSkZ2Gdw==
@@ -5753,11 +5750,6 @@ flush-write-stream@^1.0.0:
     inherits "^2.0.3"
     readable-stream "^2.3.6"
 
-fn-name@~3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/fn-name/-/fn-name-3.0.0.tgz#0596707f635929634d791f452309ab41558e3c5c"
-  integrity sha512-eNMNr5exLoavuAMhIUVsOKF79SWd/zG104ef6sxBTSw+cZc6BXdQXDvYcGvp0VbxVVSp1XDUNoz7mg1xMtSznA==
-
 follow-redirects@^1.0.0, follow-redirects@^1.10.0:
   version "1.13.0"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.13.0.tgz#b42e8d93a2a7eea5ed88633676d6597bc8e384db"
@@ -5795,7 +5787,7 @@ form-data@~2.3.2:
     combined-stream "^1.0.6"
     mime-types "^2.1.12"
 
-formik@^2.1.5, formik@^2.2.6:
+formik@^2.2.6:
   version "2.2.6"
   resolved "https://registry.yarnpkg.com/formik/-/formik-2.2.6.tgz#378a4bafe4b95caf6acf6db01f81f3fe5147559d"
   integrity sha512-Kxk2zQRafy56zhLmrzcbryUpMBvT0tal5IvcifK5+4YNGelKsnrODFJ0sZQRMQboblWNym4lAW3bt+tf2vApSA==
@@ -8042,10 +8034,10 @@ mini-css-extract-plugin@0.11.3:
     schema-utils "^1.0.0"
     webpack-sources "^1.1.0"
 
-mini-svg-data-uri@^1.0.3:
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/mini-svg-data-uri/-/mini-svg-data-uri-1.1.3.tgz#9759ee5f4d89a4b724d089ce52eab4b623bfbc88"
-  integrity sha512-EeKOmdzekjdPe53/GdxmUpNgDQFkNeSte6XkJmOBt4BfWL6FQ9G9RtLNh+JMjFS3LhdpSICMIkZdznjiecASHQ==
+mini-svg-data-uri@^1.2.3:
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/mini-svg-data-uri/-/mini-svg-data-uri-1.2.3.tgz#e16baa92ad55ddaa1c2c135759129f41910bc39f"
+  integrity sha512-zd6KCAyXgmq6FV1mR10oKXYtvmA9vRoB6xPSTUJTbFApCtkefDnYueVR1gkof3KcdLZo1Y8mjF2DFmQMIxsHNQ==
 
 minimalistic-assert@^1.0.0, minimalistic-assert@^1.0.1:
   version "1.0.1"
@@ -9742,7 +9734,7 @@ postcss@^7, postcss@^7.0.0, postcss@^7.0.1, postcss@^7.0.14, postcss@^7.0.17, po
     source-map "^0.6.1"
     supports-color "^6.1.0"
 
-postcss@^8.1.0, postcss@^8.2.4:
+postcss@^8.1.0, postcss@^8.2.1, postcss@^8.2.4:
   version "8.2.4"
   resolved "https://registry.yarnpkg.com/postcss/-/postcss-8.2.4.tgz#20a98a39cf303d15129c2865a9ec37eda0031d04"
   integrity sha512-kRFftRoExRVXZlwUuay9iC824qmXPcQQVzAjbCCgjpXnkdMCJYBu2gTwAaFBzv8ewND6O8xFb3aELmEkh9zTzg==
@@ -9872,7 +9864,7 @@ prop-types@^15.5.10, prop-types@^15.7.2:
     object-assign "^4.1.1"
     react-is "^16.8.1"
 
-property-expr@^2.0.2, property-expr@^2.0.4:
+property-expr@^2.0.4:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/property-expr/-/property-expr-2.0.4.tgz#37b925478e58965031bb612ec5b3260f8241e910"
   integrity sha512-sFPkHQjVKheDNnPvotjQmm3KD3uk1fWKUN7CrpdbwmUx3CrG3QiM8QpTSimvig5vTXmTvjz7+TDvXOI9+4rkcg==
@@ -11574,11 +11566,6 @@ symbol-tree@^3.2.4:
   resolved "https://registry.yarnpkg.com/symbol-tree/-/symbol-tree-3.2.4.tgz#430637d248ba77e078883951fb9aa0eed7c63fa2"
   integrity sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==
 
-synchronous-promise@^2.0.13:
-  version "2.0.15"
-  resolved "https://registry.yarnpkg.com/synchronous-promise/-/synchronous-promise-2.0.15.tgz#07ca1822b9de0001f5ff73595f3d08c4f720eb8e"
-  integrity sha512-k8uzYIkIVwmT+TcglpdN50pS2y1BDcUnBPK9iJeGu0Pl1lOI8pD6wtzgw91Pjpe+RxtTncw32tLxs/R0yNL2Mg==
-
 table@^5.2.3:
   version "5.4.6"
   resolved "https://registry.yarnpkg.com/table/-/table-5.4.6.tgz#1292d19500ce3f86053b05f0e8e7e4a3bb21079e"
@@ -11760,7 +11747,7 @@ tiny-warning@^1.0.2:
   resolved "https://registry.yarnpkg.com/tiny-warning/-/tiny-warning-1.0.3.tgz#94a30db453df4c643d0fd566060d60a875d84754"
   integrity sha512-lBN9zLN/oAf68o3zNXYrdCt1kP8WsiGW8Oo2ka41b2IM5JL/S1CTyX1rW0mb/zSuJun0ZUrDxx4sqvYS2FWzPA==
 
-tippy.js@^6.2.0, tippy.js@^6.2.6:
+tippy.js@^6.2.0, tippy.js@^6.2.7:
   version "6.2.7"
   resolved "https://registry.yarnpkg.com/tippy.js/-/tippy.js-6.2.7.tgz#62fb34eda23f7d78151ddca922b62818c1ab9869"
   integrity sha512-k+kWF9AJz5xLQHBi3K/XlmJiyu+p9gsCyc5qZhxxGaJWIW8SMjw1R+C7saUnP33IM8gUhDA2xX//ejRSwqR0tA==
@@ -11847,11 +11834,6 @@ tr46@^2.0.2:
   integrity sha512-3n1qG+/5kg+jrbTzwAykB5yRYtQCTqOGKq5U5PE3b0a1/mzo6snDhjGS0zJVJunO0NrT3Dg1MLy5TjWP/UJppg==
   dependencies:
     punycode "^2.1.1"
-
-traverse@^0.6.6:
-  version "0.6.6"
-  resolved "https://registry.yarnpkg.com/traverse/-/traverse-0.6.6.tgz#cbdf560fd7b9af632502fed40f918c157ea97137"
-  integrity sha1-y99WD9e5r2MlAv7UD5GMFX6pcTc=
 
 tryer@^1.0.1:
   version "1.0.1"
@@ -12826,19 +12808,6 @@ yocto-queue@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
-
-yup@^0.29.3:
-  version "0.29.3"
-  resolved "https://registry.yarnpkg.com/yup/-/yup-0.29.3.tgz#69a30fd3f1c19f5d9e31b1cf1c2b851ce8045fea"
-  integrity sha512-RNUGiZ/sQ37CkhzKFoedkeMfJM0vNQyaz+wRZJzxdKE7VfDeVKH8bb4rr7XhRLbHJz5hSjoDNwMEIaKhuMZ8gQ==
-  dependencies:
-    "@babel/runtime" "^7.10.5"
-    fn-name "~3.0.0"
-    lodash "^4.17.15"
-    lodash-es "^4.17.11"
-    property-expr "^2.0.2"
-    synchronous-promise "^2.0.13"
-    toposort "^2.0.2"
 
 yup@^0.32.8:
   version "0.32.8"
