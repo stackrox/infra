@@ -4,7 +4,6 @@ metadata:
   generateName: gke-default-
 spec:
   entrypoint: start
-  onExit: stop
   arguments:
     parameters:
       - name: name
@@ -29,9 +28,6 @@ spec:
             template: create
         - - name: wait
             template: wait
-
-    - name: stop
-      steps:
         - - name: destroy
             template: destroy
             arguments:

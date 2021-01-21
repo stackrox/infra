@@ -78,8 +78,6 @@ STEP                    PODNAME                DURATION  ARTIFACTS  MESSAGE
 
 To get logs from a step, run:
 
-(it's just a pod, so `kubectl logs ...` would also work)
-
 ```
 argo logs demo-mxgf9-3875809567 | head -n 20
 [PASS] /tmp/google-credentials.json (GCP service account credential file)
@@ -89,6 +87,15 @@ argo logs demo-mxgf9-3875809567 | head -n 20
 [PASS] AUTH_DOMAIN (Auth0 tenant)
 [PASS] DOCKER_IO_PASSWORD (password for Docker Hub)
 [PASS] DOCKER_IO_USERNAME (username for Docker Hub)
+```
+
+The workflow steps are just pod executions, so `kubectl logs ...` also works:
+```
+MY_CLUSTER_NAME=demo-mxgf9
+WORKFLOW_STEP_POD_ID=$(argo get oc-init-bundle-test -o json | jq -r '.status.nodes[] | select(.type=="Pod") | select(.displayName=="create") | .id')
+kubectl logs $WORKFLOW_STEP_POD_ID -c 'main'
+# Retrieving logs via argo cli obviates the need to specify the container
+argo logs $MY_CLUSTER_NAME $WORKFLOW_STEP_POD_ID --follow
 ```
 
 If a step is stuck in a pending state (e.x. a referenced secret doesn't exist),
@@ -129,4 +136,11 @@ eks-2h8gb   Running (Suspended)   24m   24m        0
 
 # and can be resumed to test steps after that i.e. delete
 $ argo resume eks-2h8gb
+```
+
+## View the Argo Workflows web interface
+
+```
+kubectl -n argo port-forward deployment/argo-server 2746:2746
+open http://localhost:2746/workflows/
 ```
