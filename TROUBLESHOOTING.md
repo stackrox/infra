@@ -137,3 +137,10 @@ eks-2h8gb   Running (Suspended)   24m   24m        0
 # and can be resumed to test steps after that i.e. delete
 $ argo resume eks-2h8gb
 ```
+
+## View the Argo Workflows web interface
+
+```
+kubectl -n argo port-forward deployment/argo-server 2746:2746
+open http://localhost:2746/workflows/
+```
