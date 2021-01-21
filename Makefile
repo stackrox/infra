@@ -41,7 +41,7 @@ ui:
 	@make -C ui all
 
 .PHONY: image
-image: argo-workflow-lint server cli ui clean-image
+image: server cli ui clean-image
 	@echo "+ $@"
 	@cp -f bin/infra-server-linux-amd64 image/infra-server
 	@mkdir -p image/static/downloads
