@@ -528,8 +528,7 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 			}
 
 			if metacluster.Status == v1.Status_FAILED {
-				log.Printf("[DEBUG] deleting workflow %q due to failed state", metacluster.ID)
-				s.ForceDeleteWorkflow(workflow)
+				log.Printf("[DEBUG] observed workflow %q failed state, cleanup deferred to Argo", metacluster.ID)
 				continue
 			}
 
