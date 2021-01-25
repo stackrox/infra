@@ -156,6 +156,31 @@
       description: should CRI-O be used as the container runtime
       value: true
 
+####################
+#  openshift-4     #
+####################
+- id: openshift-4
+  name: OpenShift 4.x
+  description: OpenShift 4.x OKD open source cluster
+  availability: alpha
+  workflow: configuration/workflow-openshift-4.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      value: example1
+
+    - name: openshift-version
+      description: openshift release tag (https://github.com/openshift/okd/tags)
+      kind: optional
+
+    - name: master-node-count
+      description: number of master nodes
+      kind: optional
+
+    - name: worker-node-count
+      description: number of worker nodes
+      kind: optional
+
 #############
 #  example  #
 #############
