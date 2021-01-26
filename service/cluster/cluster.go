@@ -516,19 +516,20 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 			}
 
 			if (metacluster.Status == v1.Status_CREATING) && metacluster.Expired {
-				log.Printf("[DEBUG] workflow %q in state CREATING but lifespan expired", metacluster.ID)
+				log.Printf("[DEBUG] workflow %q CREATING but lifespan expired", metacluster.ID)
 				s.ForceDeleteWorkflow(workflow)
 				continue
 			}
 
 			if (metacluster.Status == v1.Status_FINISHED) && metacluster.Expired {
-				log.Printf("[DEBUG] workflow %q in state FINISHED and lifespan expired", metacluster.ID)
+				log.Printf("[DEBUG] workflow %q FINISHED and lifespan expired", metacluster.ID)
 				s.ForceDeleteWorkflow(workflow)
 				continue
 			}
 
-			if metacluster.Status == v1.Status_FAILED {
-				log.Printf("[DEBUG] observed workflow %q failed state, cleanup deferred to Argo", metacluster.ID)
+			if (metacluster.Status == v1.Status_FAILED) && metacluster.Expired {
+				log.Printf("[DEBUG] workflow %q FAILED and lifespan expired", metacluster.ID)
+				s.ForceDeleteWorkflow(workflow)
 				continue
 			}
 
