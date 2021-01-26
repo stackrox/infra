@@ -171,14 +171,17 @@
 
     - name: openshift-version
       description: openshift release tag (https://github.com/openshift/okd/tags)
+      value: 4.6.0-0.okd-2021-01-17-185703
       kind: optional
 
     - name: master-node-count
       description: number of master nodes
+      value: 3
       kind: optional
 
     - name: worker-node-count
       description: number of worker nodes
+      value: 3
       kind: optional
 
 #############
