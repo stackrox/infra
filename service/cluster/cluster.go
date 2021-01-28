@@ -58,6 +58,13 @@ const (
 	artifactTagInternal = "internal"
 )
 
+// patchStringValue specifies a k8s resource patch operation
+type patchStringValue struct {
+	Op    string `json:"op"`
+	Path  string `json:"path"`
+	Value string `json:"value"`
+}
+
 type clusterImpl struct {
 	clientWorkflows workflowv1.WorkflowInterface
 	clientPods      k8sv1.PodInterface
@@ -180,17 +187,46 @@ func formatAnnotationPatch(annotationKey string, annotationValue string) ([]byte
 	path := "/metadata/annotations/" + annotationKey
 
 	//  patch specifies a patch operation for a string.
-	payload := []struct {
-		Op    string `json:"op"`
-		Path  string `json:"path"`
-		Value string `json:"value"`
-	}{{
+	payload := []patchStringValue{{
 		Op:    "replace",
 		Path:  path,
 		Value: annotationValue,
 	}}
 
 	return json.Marshal(payload)
+}
+
+// Set Workflow phase to FAILED by patching the resource to the effect:
+//
+// kubectl patch workflow $name --type=json \
+//   --patch='[{"op": "replace", "path": "/status/phase", "value": "Failed"}]'
+//
+// DEBUGx: Also need to patch metadata.labels.workflows.argoproj.io/phase?
+// DEBUGx: https://godoc.org/github.com/argoproj/argo/pkg/apis/workflow/v1alpha1#WorkflowPhase
+// DEBUGx: https://github.com/argoproj/argo/commit/957ef677cccf8d49a1049201c541a0574a31dbc8
+func (s *clusterImpl) MarkWorkflowAsFailed(workflow v1alpha1.Workflow) error {
+	workflowName := workflow.ObjectMeta.Name
+	log.Printf("[INFO] marking workflow %s as FAILED", workflowName)
+
+	// Construct the patch
+	payload := []patchStringValue{{
+		Op:    "replace",
+		Path:  "/status/phase",
+		Value: v1alpha1.NodeFailed,
+	}}
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		log.Printf("[ERROR] failed to construct patch for workflow %s: %v", workflowName, err)
+		return err
+	}
+
+	// Apply the patch
+	if _, err = s.clientWorkflows.Patch(workflowName, types.JSONPatchType, payloadBytes); err != nil {
+		log.Printf("[ERROR] failed to patch workflow %s: %v", workflowName, err)
+		return err
+	}
+
+	return nil
 }
 
 // Lifespan implements ClusterService.Lifespan.
@@ -515,21 +551,13 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 				continue
 			}
 
+			// DEBUGx: maybe use workflow timeout instead of trying to patch the workflow CRD?
 			if (metacluster.Status == v1.Status_CREATING) && metacluster.Expired {
 				log.Printf("[DEBUG] workflow %q CREATING but lifespan expired", metacluster.ID)
-				s.ForceDeleteWorkflow(workflow)
-				continue
-			}
-
-			if (metacluster.Status == v1.Status_FINISHED) && metacluster.Expired {
-				log.Printf("[DEBUG] workflow %q FINISHED and lifespan expired", metacluster.ID)
-				s.ForceDeleteWorkflow(workflow)
-				continue
-			}
-
-			if (metacluster.Status == v1.Status_FAILED) && metacluster.Expired {
-				log.Printf("[DEBUG] workflow %q FAILED and lifespan expired", metacluster.ID)
-				s.ForceDeleteWorkflow(workflow)
+				// DEBUGx: Causes argo-workflow-controller to crash until the workflow is manually deleted.
+				// DEBUGx: Cluster was torn down fine but workflow resource had to be manually deleted.
+				// DEBUGx: Not sure where the controller crashed... log gone, stream closed
+				// s.MarkWorkflowAsFailed(workflow)
 				continue
 			}
 
