@@ -212,7 +212,7 @@ func (s *clusterImpl) MarkWorkflowAsFailed(workflow v1alpha1.Workflow) error {
 	payload := []patchStringValue{{
 		Op:    "replace",
 		Path:  "/status/phase",
-		Value: v1alpha1.NodeFailed,
+		Value: string(v1alpha1.NodeFailed),
 	}}
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
