@@ -12,7 +12,7 @@
       value: example1
 
     - name: main-image
-      value: stackrox.io/main:bogus
+      value: stackrox.io/main:3.0.54.0
       kind: hardcoded
 
     - name: k8s-version

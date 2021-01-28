@@ -519,6 +519,8 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 			}
 
 			// DEBUGx: testing...
+			log.Printf("[DEBUG] checking workflow %q", metacluster.ID)
+			prettyPrint(metacluster)
 			if (metacluster.Status == v1.Status_CREATING) && metacluster.Expired {
 				log.Printf("[DEBUG] workflow %q CREATING but lifespan expired", metacluster.ID)
 				log.Printf("[DEBUG] stopping workflow %q", metacluster.ID)
