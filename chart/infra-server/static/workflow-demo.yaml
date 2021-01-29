@@ -49,6 +49,7 @@ spec:
                   from: "{{workflow.outputs.artifacts.global-tfvars}}"
 
     - name: roxctl
+      activeDeadlineSeconds: 120
       outputs:
         artifacts:
           - name: roxctl
@@ -59,9 +60,9 @@ spec:
         args:
           - version
           - "--json"
-      activeDeadlineSeconds: 120
 
     - name: create
+      activeDeadlineSeconds: 3600
       inputs:
         artifacts:
           - name: roxctl
@@ -151,6 +152,7 @@ spec:
       suspend: {}
 
     - name: destroy
+      activeDeadlineSeconds: 3600
       inputs:
         artifacts:
           - name: tfstate

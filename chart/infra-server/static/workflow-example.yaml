@@ -41,6 +41,7 @@ spec:
                   value: "{{workflow.parameters.destroy-success}}"
 
     - name: create
+      activeDeadlineSeconds: 3600
       inputs:
         parameters:
           - name: sleep
@@ -57,6 +58,7 @@ spec:
       suspend: {}
 
     - name: destroy
+      activeDeadlineSeconds: 3600
       inputs:
         parameters:
           - name: sleep
