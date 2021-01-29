@@ -518,17 +518,16 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 				continue
 			}
 
-			// DEBUGx: testing...
-			log.Printf("[DEBUG] checking workflow %q", metacluster.ID)
-			prettyPrint(metacluster)
+			// TODO(sbostick): verified that stopping the workflow for a demo cluster with a 10m
+			// expiration successfully runs the destroy step and cleans up the cluster. Observed
+			// that with expiration time of 2m the destroy step was not run, so the cluster resources
+			// had to be manually deleted. Should we forego handling this condition manually, and
+			// instead use a timeout (i.e. 'activeDeadlineSeconds') on the workflow "create" step?
+			// Perhaps all steps except for the 'wait' suspend state should have a timeout.
 			if (metacluster.Status == v1.Status_CREATING) && metacluster.Expired {
-				log.Printf("[DEBUG] workflow %q CREATING but lifespan expired", metacluster.ID)
-				log.Printf("[DEBUG] stopping workflow %q", metacluster.ID)
-				msg := "stopping due to creating but lifespan expired"
-				//nodeFieldSelector := "displayName=create"
-				nodeFieldSelector := ""
+				log.Printf("stopping workflow %q (CREATING but lifespan expired)", metacluster.ID)
 				// https://github.com/argoproj/argo/blob/54154c61/workflow/util/util.go#L761
-				if err := util.StopWorkflow(s.clientWorkflows, metacluster.ID, nodeFieldSelector, msg); err != nil {
+				if err := util.StopWorkflow(s.clientWorkflows, metacluster.ID, "", ""); err != nil {
 					log.Printf("[ERROR] failed to stop workflow %q: %v", metacluster.ID, err)
 				}
 				continue
