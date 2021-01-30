@@ -66,7 +66,14 @@ spec:
         artifacts:
           - name: roxctl
             path: /usr/bin/roxctl
-
+          - name: dns-cert
+            path: /certs/cert.pem
+            gcs:
+              bucket: sr-demo-files
+              key: certs/demo.stackrox.com/privkey-plus-fullchain.pem
+              serviceAccountKeySecret:
+                name: google-credentials-demo
+                key: google-credentials.json
       outputs:
         artifacts:
           - name: kubeconfig
@@ -88,7 +95,7 @@ spec:
             optional: true
 
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/demo:0.1.9
+        image: gcr.io/stackrox-infra/automation-flavors/demo:0.2.0-1-gb6031167b8-snapshot
         imagePullPolicy: Always
         args:
           - create
@@ -160,7 +167,7 @@ spec:
             path: /data/tfvars
             optional: true
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/demo:0.1.9
+        image: gcr.io/stackrox-infra/automation-flavors/demo:0.2.0-1-gb6031167b8-snapshot
         imagePullPolicy: Always
         args:
           - destroy
