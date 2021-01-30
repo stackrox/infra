@@ -58,13 +58,6 @@ const (
 	artifactTagInternal = "internal"
 )
 
-// patchStringValue specifies a k8s resource patch operation
-type patchStringValue struct {
-	Op    string `json:"op"`
-	Path  string `json:"path"`
-	Value string `json:"value"`
-}
-
 type clusterImpl struct {
 	clientWorkflows workflowv1.WorkflowInterface
 	clientPods      k8sv1.PodInterface
@@ -187,7 +180,11 @@ func formatAnnotationPatch(annotationKey string, annotationValue string) ([]byte
 	path := "/metadata/annotations/" + annotationKey
 
 	//  patch specifies a patch operation for a string.
-	payload := []patchStringValue{{
+	payload := []struct {
+		Op    string `json:"op"`
+		Path  string `json:"path"`
+		Value string `json:"value"`
+	}{{
 		Op:    "replace",
 		Path:  path,
 		Value: annotationValue,
