@@ -8,6 +8,7 @@ certs/
 sessions/
 image/infra-server
 image/static
+certifier/certifier
 chart-rendered
 chart/infra-server/configuration
 chart/infra-server/configs
