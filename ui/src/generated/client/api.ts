@@ -969,7 +969,7 @@ export const ClusterServiceApiFp = function (configuration?: Configuration) {
       return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
         const axiosRequestArgs = {
           ...localVarAxiosArgs.options,
-          url: basePath + localVarAxiosArgs.url,
+          url: (configuration?.basePath || basePath) + localVarAxiosArgs.url,
         };
         return axios.request(axiosRequestArgs);
       };
@@ -992,7 +992,7 @@ export const ClusterServiceApiFp = function (configuration?: Configuration) {
       return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
         const axiosRequestArgs = {
           ...localVarAxiosArgs.options,
-          url: basePath + localVarAxiosArgs.url,
+          url: (configuration?.basePath || basePath) + localVarAxiosArgs.url,
         };
         return axios.request(axiosRequestArgs);
       };
@@ -1015,7 +1015,7 @@ export const ClusterServiceApiFp = function (configuration?: Configuration) {
       return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
         const axiosRequestArgs = {
           ...localVarAxiosArgs.options,
-          url: basePath + localVarAxiosArgs.url,
+          url: (configuration?.basePath || basePath) + localVarAxiosArgs.url,
         };
         return axios.request(axiosRequestArgs);
       };
@@ -1037,7 +1037,7 @@ export const ClusterServiceApiFp = function (configuration?: Configuration) {
       return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
         const axiosRequestArgs = {
           ...localVarAxiosArgs.options,
-          url: basePath + localVarAxiosArgs.url,
+          url: (configuration?.basePath || basePath) + localVarAxiosArgs.url,
         };
         return axios.request(axiosRequestArgs);
       };
@@ -1063,7 +1063,7 @@ export const ClusterServiceApiFp = function (configuration?: Configuration) {
       return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
         const axiosRequestArgs = {
           ...localVarAxiosArgs.options,
-          url: basePath + localVarAxiosArgs.url,
+          url: (configuration?.basePath || basePath) + localVarAxiosArgs.url,
         };
         return axios.request(axiosRequestArgs);
       };
@@ -1089,7 +1089,7 @@ export const ClusterServiceApiFp = function (configuration?: Configuration) {
       return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
         const axiosRequestArgs = {
           ...localVarAxiosArgs.options,
-          url: basePath + localVarAxiosArgs.url,
+          url: (configuration?.basePath || basePath) + localVarAxiosArgs.url,
         };
         return axios.request(axiosRequestArgs);
       };
@@ -1112,7 +1112,7 @@ export const ClusterServiceApiFp = function (configuration?: Configuration) {
       return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
         const axiosRequestArgs = {
           ...localVarAxiosArgs.options,
-          url: basePath + localVarAxiosArgs.url,
+          url: (configuration?.basePath || basePath) + localVarAxiosArgs.url,
         };
         return axios.request(axiosRequestArgs);
       };
@@ -1443,7 +1443,7 @@ export const FlavorServiceApiFp = function (configuration?: Configuration) {
       return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
         const axiosRequestArgs = {
           ...localVarAxiosArgs.options,
-          url: basePath + localVarAxiosArgs.url,
+          url: (configuration?.basePath || basePath) + localVarAxiosArgs.url,
         };
         return axios.request(axiosRequestArgs);
       };
@@ -1462,7 +1462,7 @@ export const FlavorServiceApiFp = function (configuration?: Configuration) {
       return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
         const axiosRequestArgs = {
           ...localVarAxiosArgs.options,
-          url: basePath + localVarAxiosArgs.url,
+          url: (configuration?.basePath || basePath) + localVarAxiosArgs.url,
         };
         return axios.request(axiosRequestArgs);
       };
@@ -1724,7 +1724,7 @@ export const UserServiceApiFp = function (configuration?: Configuration) {
       return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
         const axiosRequestArgs = {
           ...localVarAxiosArgs.options,
-          url: basePath + localVarAxiosArgs.url,
+          url: (configuration?.basePath || basePath) + localVarAxiosArgs.url,
         };
         return axios.request(axiosRequestArgs);
       };
@@ -1747,7 +1747,7 @@ export const UserServiceApiFp = function (configuration?: Configuration) {
       return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
         const axiosRequestArgs = {
           ...localVarAxiosArgs.options,
-          url: basePath + localVarAxiosArgs.url,
+          url: (configuration?.basePath || basePath) + localVarAxiosArgs.url,
         };
         return axios.request(axiosRequestArgs);
       };
@@ -1766,7 +1766,7 @@ export const UserServiceApiFp = function (configuration?: Configuration) {
       return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
         const axiosRequestArgs = {
           ...localVarAxiosArgs.options,
-          url: basePath + localVarAxiosArgs.url,
+          url: (configuration?.basePath || basePath) + localVarAxiosArgs.url,
         };
         return axios.request(axiosRequestArgs);
       };
@@ -1936,7 +1936,7 @@ export const VersionServiceApiFp = function (configuration?: Configuration) {
       return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
         const axiosRequestArgs = {
           ...localVarAxiosArgs.options,
-          url: basePath + localVarAxiosArgs.url,
+          url: (configuration?.basePath || basePath) + localVarAxiosArgs.url,
         };
         return axios.request(axiosRequestArgs);
       };
