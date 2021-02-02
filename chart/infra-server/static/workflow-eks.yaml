@@ -29,6 +29,7 @@ spec:
             template: destroy
 
     - name: create
+      activeDeadlineSeconds: 3600
       outputs:
         artifacts:
           - name: kubeconfig
@@ -78,6 +79,7 @@ spec:
       suspend: {}
 
     - name: destroy
+      activeDeadlineSeconds: 3600
       container:
         image: gcr.io/stackrox-infra/automation-flavors/eks:0.1.7
         imagePullPolicy: Always

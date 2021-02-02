@@ -49,6 +49,7 @@ spec:
                   from: "{{workflow.outputs.artifacts.global-tfvars}}"
 
     - name: roxctl
+      activeDeadlineSeconds: 120
       outputs:
         artifacts:
           - name: roxctl
@@ -59,9 +60,9 @@ spec:
         args:
           - version
           - "--json"
-      activeDeadlineSeconds: 120
 
     - name: create
+      activeDeadlineSeconds: 3600
       inputs:
         artifacts:
           - name: roxctl
@@ -95,7 +96,7 @@ spec:
             optional: true
 
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/demo:0.2.0-1-gb6031167b8-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/demo:0.2.1
         imagePullPolicy: Always
         args:
           - create
@@ -158,6 +159,7 @@ spec:
       suspend: {}
 
     - name: destroy
+      activeDeadlineSeconds: 3600
       inputs:
         artifacts:
           - name: tfstate
@@ -167,7 +169,7 @@ spec:
             path: /data/tfvars
             optional: true
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/demo:0.2.0-1-gb6031167b8-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/demo:0.2.1
         imagePullPolicy: Always
         args:
           - destroy

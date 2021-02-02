@@ -36,6 +36,7 @@ spec:
                   value: "{{steps.create.outputs.parameters.cluster_name}}"
 
     - name: create
+      activeDeadlineSeconds: 3600
       outputs:
         artifacts:
           - name: kubeconfig
@@ -67,6 +68,7 @@ spec:
       suspend: {}
 
     - name: destroy
+      activeDeadlineSeconds: 3600
       container:
         image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.1.2
         imagePullPolicy: Always
