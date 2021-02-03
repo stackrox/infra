@@ -7,6 +7,8 @@ spec:
   arguments:
     parameters:
       - name: name
+      - name: zone
+        value: ""
   volumes:
     - name: credentials
       secret:
@@ -51,6 +53,7 @@ spec:
           - create
           - "--name={{inputs.parameters.name}}"
           - --creation-source=infra
+          - "--zone={{inputs.parameters.zone}}"
         volumeMounts:
           - name: credentials
             mountPath: /tmp/google-credentials.json

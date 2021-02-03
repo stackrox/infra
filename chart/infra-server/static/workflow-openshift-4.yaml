@@ -13,6 +13,8 @@ spec:
         value: ""
       - name: worker-node-count
         value: ""
+      - name: region
+        value: ""
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -69,6 +71,8 @@ spec:
             value: "{{workflow.parameters.master-node-count}}"
           - name: WORKER_NODE_COUNT
             value: "{{workflow.parameters.worker-node-count}}"
+          - name: REGION
+            value: "{{workflow.parameters.region}}"
         volumeMounts:
           - name: data
             mountPath: /data

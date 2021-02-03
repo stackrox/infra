@@ -118,6 +118,11 @@
       value: ubuntu
       kind: optional
 
+    - name: gcp-zone
+      description: The zone in GCP to delete the cluster from
+      value: us-central1-a
+      kind: optional
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to cluster
@@ -139,6 +144,11 @@
       description: cluster name
       value: example1
 
+    - name: zone
+      description: Google Cloud zone to deploy infrastructure into.
+      value: us-east1-d
+      kind: optional
+
 #####################
 #  openshift-multi  #
 #####################
@@ -155,6 +165,11 @@
     - name: crio
       description: should CRI-O be used as the container runtime
       value: true
+
+    - name: zone
+      description: Google Cloud zone to deploy infrastructure into.
+      value: us-east1-d
+      kind: optional
 
 ####################
 #  openshift-4     #
@@ -182,6 +197,11 @@
     - name: worker-node-count
       description: number of worker nodes
       value: 3
+      kind: optional
+
+    - name: region
+      description: Google Cloud zone to deploy infrastructure into.
+      value: us-east1
       kind: optional
 
 #############
@@ -244,6 +264,11 @@
       description: kubernetes version
       kind: optional
       help: Use this to override the default version used by EKS
+
+    - name: region
+      description: AWS region
+      value: us-west-2
+      kind: optional
 
 #####################
 #  AWS KOPS         #

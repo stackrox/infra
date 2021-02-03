@@ -8,6 +8,8 @@ spec:
     parameters:
       - name: name
       - name: crio
+      - name: zone
+        value: ""
   volumes:
     - name: credentials
       secret:
@@ -56,6 +58,7 @@ spec:
           - "--name={{inputs.parameters.name}}"
           - "--crio={{inputs.parameters.crio}}"
           - --creation-source=infra
+          - "--zone={{inputs.parameters.zone}}"
         env:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
