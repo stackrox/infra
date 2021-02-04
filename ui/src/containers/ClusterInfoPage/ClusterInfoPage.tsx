@@ -46,8 +46,11 @@ export default function ClusterInfoPage(): ReactElement {
       </div>
       {cluster.Connect && <ClusterConnect connect={cluster.Connect} />}
       {cluster.URL && (
-        <span>
-          URL: <a href={cluster.URL}>{cluster.URL}</a>
+        <span className="text-base normal-case">
+          URL:{' '}
+          <a href={cluster.URL} className="underline text-blue-500">
+            {cluster.URL}
+          </a>
         </span>
       )}
     </div>
