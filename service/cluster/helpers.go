@@ -110,6 +110,9 @@ func (s *clusterImpl) metaClusterFromWorkflow(workflow v1alpha1.Workflow) (*meta
 				if _, found := meta.Tags[artifactTagURL]; found {
 					cluster.URL = strings.TrimSpace(string(contents))
 				}
+				if _, found := meta.Tags[artifactTagConnect]; found {
+					cluster.Connect = string(contents)
+				}
 			}
 		}
 	}

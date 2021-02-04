@@ -126,6 +126,12 @@ export interface V1Cluster {
    * @memberof V1Cluster
    */
   URL?: string;
+  /**
+   * Connect is a command to add kube connection information to kubeconfig.
+   * @type {string}
+   * @memberof V1Cluster
+   */
+  Connect?: string;
 }
 /**
  *

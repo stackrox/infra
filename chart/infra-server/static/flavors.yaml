@@ -120,11 +120,11 @@
 
   artifacts:
     - name: kubeconfig
-      description: Kube config for connecting to cluster
+      description: Kube config for connecting to this cluster
 
     - name: connect
-      description: Shell script for connecting to clusters
-
+      description: Shell script for adding this clusters connect information to your kubeconfig
+      tags: [connect]
 
 ####################
 #  openshift-lite  #
@@ -338,3 +338,11 @@
         Using together with "azure" network plugin.
         Specify "azure" for Azure network policy manager and "calico" for calico network policy controller.
         Defaults to "" (network policy disabled).
+
+  artifacts:
+    - name: kubeconfig
+      description: Kube config for connecting to this cluster
+
+    - name: connect
+      description: Shell script for adding this clusters connect information to your kubeconfig
+      tags: [connect]
