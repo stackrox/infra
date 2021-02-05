@@ -15,7 +15,7 @@ type ArtifactsListProps = {
 
 function ArtifactsList({ artifacts }: ArtifactsListProps): ReactElement {
   return (
-    <ul className="list-disc ml-5">
+    <ul className="list-disc ml-5 pb-5">
       {artifacts.map((artifact) => (
         <li key={artifact.Name}>
           <a href={artifact.URL} className="underline text-blue-500">
@@ -48,11 +48,11 @@ function Artifacts({ cluster }: ArtifactsProps): ReactElement {
 
   if (artifacts?.Artifacts?.length) {
     return (
-      <>
+      <div>
         <ArtifactsList artifacts={artifacts.Artifacts} />
         <p>Note: You can download all artifacts at the command line with:</p>
         <code>infractl artifacts --download-dir=&lt;some dir&gt; {cluster.ID}</code>
-      </>
+      </div>
     );
   }
 
