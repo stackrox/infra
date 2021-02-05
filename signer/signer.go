@@ -91,27 +91,27 @@ func (s Signer) Contents(gcsBucketName, gcsBucketKey string) ([]byte, error) {
 		return nil, err
 	}
 
-	if strings.Contains(attrs.ContentType, "gzip") {
-		gr, err := gzip.NewReader(br)
-		if err != nil {
-			return nil, err
-		}
-		defer gr.Close() // nolint:errcheck
-
-		// Archive is a normal tar archive.
-		tr := tar.NewReader(gr)
-
-		// We're expecting 1 and only 1 file in the archive, so read just the
-		// first entry.
-		if _, err := tr.Next(); err != nil {
-			if err == io.EOF {
-				return nil, fmt.Errorf("unexpected EOF reading artifact")
-			}
-			return nil, err
-		}
-
-		return ioutil.ReadAll(tr)
-	} else {
+	if !strings.Contains(attrs.ContentType, "gzip") {
 		return ioutil.ReadAll(br)
 	}
+
+	gr, err := gzip.NewReader(br)
+	if err != nil {
+		return nil, err
+	}
+	defer gr.Close() // nolint:errcheck
+
+	// Archive is a normal tar archive.
+	tr := tar.NewReader(gr)
+
+	// We're expecting 1 and only 1 file in the archive, so read just the
+	// first entry.
+	if _, err := tr.Next(); err != nil {
+		if err == io.EOF {
+			return nil, fmt.Errorf("unexpected EOF reading artifact")
+		}
+		return nil, err
+	}
+
+	return ioutil.ReadAll(tr)
 }
