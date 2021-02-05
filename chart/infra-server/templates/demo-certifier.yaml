@@ -1,0 +1,49 @@
+{{ if eq .Values.deployment "production" -}}
+
+apiVersion: v1
+kind: Secret
+type: Opaque
+
+metadata:
+  name: demo-certifier-credentials
+  namespace: infra
+
+data:
+  google-credentials.json: |-
+    {{- include "require-file" (list "demo/demo-cert-bot.json" .) | b64enc | nindent 4 }}
+
+---
+
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: demo-certifier
+  namespace: infra
+spec:
+  schedule: "@weekly"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: certifier
+            image: us.gcr.io/stackrox-infra/certifier:0.0.0-5
+            imagePullPolicy: IfNotPresent
+            args:
+              - --common-name=*.demo.stackrox.com
+              - --cert-name=demo.stackrox.com
+              - --gcs-bucket=sr-demo-files
+              - --gcs-prefix=certs
+            env:
+              - name: GOOGLE_APPLICATION_CREDENTIALS
+                value: /configuration/google-credentials.json
+            volumeMounts:
+              - mountPath: /configuration
+                name: configuration
+                readOnly: true
+          restartPolicy: Never
+          volumes:
+            - name: configuration
+              secret:
+                secretName: demo-certifier-credentials
+{{ end }}

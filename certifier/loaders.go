@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"cloud.google.com/go/storage"
+	"google.golang.org/api/iterator"
 )
 
 type gcs struct {
@@ -23,6 +24,27 @@ func (live *live) load(path string) ([]byte, error) {
 	path = filepath.Join(live.liveDir, path)
 
 	return ioutil.ReadFile(path)
+}
+
+func (gcs *gcs) test(ctx context.Context) error {
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+
+	bkt := client.Bucket(gcs.bucket)
+	it := bkt.Objects(ctx, &storage.Query{Prefix: ""})
+	for {
+		_, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (gcs *gcs) load(ctx context.Context, path string) ([]byte, error) {
