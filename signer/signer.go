@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -76,31 +77,41 @@ func (s Signer) Generate(gcsBucketName, gcsBucketKey string) (string, error) {
 	})
 }
 
-// Contents returns the raw contents of the named GCS object.
+// Contents returns the raw contents of the named GCS object. It is expected
+// that these are argo workflow artifacts either single files tar gzip'd or
+// plain files.
 func (s Signer) Contents(gcsBucketName, gcsBucketKey string) ([]byte, error) {
 	br, err := s.client.Bucket(gcsBucketName).Object(gcsBucketKey).NewReader(context.Background())
 	if err != nil {
 		return nil, err
 	}
 
-	// Archive is gzipped, so we need to strip that away.
-	gr, err := gzip.NewReader(br)
+	attrs, err := s.client.Bucket(gcsBucketName).Object(gcsBucketKey).Attrs(context.Background())
 	if err != nil {
 		return nil, err
 	}
-	defer gr.Close() // nolint:errcheck
 
-	// Archive is a normal tar archive.
-	tr := tar.NewReader(gr)
-
-	// We're expecting 1 and only 1 file in the archive, so read just the
-	// first entry.
-	if _, err := tr.Next(); err != nil {
-		if err == io.EOF {
-			return nil, fmt.Errorf("unexpected EOF reading artifact")
+	if strings.Contains(attrs.ContentType, "gzip") {
+		gr, err := gzip.NewReader(br)
+		if err != nil {
+			return nil, err
 		}
-		return nil, err
-	}
+		defer gr.Close() // nolint:errcheck
 
-	return ioutil.ReadAll(tr)
+		// Archive is a normal tar archive.
+		tr := tar.NewReader(gr)
+
+		// We're expecting 1 and only 1 file in the archive, so read just the
+		// first entry.
+		if _, err := tr.Next(); err != nil {
+			if err == io.EOF {
+				return nil, fmt.Errorf("unexpected EOF reading artifact")
+			}
+			return nil, err
+		}
+
+		return ioutil.ReadAll(tr)
+	} else {
+		return ioutil.ReadAll(br)
+	}
 }

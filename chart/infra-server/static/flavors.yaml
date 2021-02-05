@@ -346,3 +346,6 @@
     - name: connect
       description: Shell script for adding this clusters connect information to your kubeconfig
       tags: [connect]
+
+    - name: data
+      description: An archive that includes ssh keys to connect to cluster nodes

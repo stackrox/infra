@@ -49,7 +49,6 @@ func isNearingExpiry(workflow v1alpha1.Workflow) bool {
 type metaCluster struct {
 	v1.Cluster
 
-	Artifacts     map[string]artifactData
 	EventID       string
 	Expired       bool
 	NearingExpiry bool
@@ -71,6 +70,24 @@ func (s *clusterImpl) metaClusterFromWorkflow(workflow v1alpha1.Workflow) (*meta
 	expired := isWorkflowExpired(workflow)
 	nearingExpiry := isNearingExpiry(workflow)
 
+	cluster, err := s.getClusterDetailsFromArtifacts(cluster, workflow)
+	if err != nil {
+		return nil, err
+	}
+
+	return &metaCluster{
+		Cluster:       *cluster,
+		Slack:         slack.Status(GetSlack(&workflow)),
+		SlackDM:       GetSlackDM(&workflow),
+		Expired:       expired,
+		NearingExpiry: nearingExpiry,
+		EventID:       GetEventID(&workflow),
+	}, nil
+}
+
+// getClusterDetailsFromArtifacts - get those cluster details that are stored by workflow artifacts.
+func (s *clusterImpl) getClusterDetailsFromArtifacts(cluster *v1.Cluster, workflow v1alpha1.Workflow) (*v1.Cluster, error) {
+
 	flavorMetadata := make(map[string]*v1.FlavorArtifact)
 
 	flavor, _, found := s.registry.Get(cluster.Flavor)
@@ -78,7 +95,6 @@ func (s *clusterImpl) metaClusterFromWorkflow(workflow v1alpha1.Workflow) (*meta
 		flavorMetadata = flavor.Artifacts
 	}
 
-	artifacts := make(map[string]artifactData, len(flavorMetadata))
 	for _, nodeStatus := range workflow.Status.Nodes {
 		if nodeStatus.Outputs == nil {
 			continue
@@ -89,22 +105,20 @@ func (s *clusterImpl) metaClusterFromWorkflow(workflow v1alpha1.Workflow) (*meta
 				continue
 			}
 
+			// The only artifact of concern are those explicity defined in
+			// flavors.yaml artifacts section.
 			if meta, found := flavorMetadata[artifact.Name]; found {
+
+				// And only artifacts that are tagged with url or connect.
+				if _, foundURL := meta.Tags[artifactTagURL]; !foundURL {
+					if _, foundConnect := meta.Tags[artifactTagConnect]; !foundConnect {
+						continue
+					}
+				}
+
 				contents, err := s.signer.Contents(artifact.GCS.Bucket, artifact.GCS.Key)
 				if err != nil {
 					return nil, err
-				}
-
-				tagSet := make(map[string]struct{}, len(meta.Tags))
-				for tag := range meta.Tags {
-					tagSet[tag] = struct{}{}
-				}
-
-				artifacts[meta.Name] = artifactData{
-					Name:        meta.Name,
-					Description: meta.Description,
-					Tags:        tagSet,
-					Data:        contents,
 				}
 
 				if _, found := meta.Tags[artifactTagURL]; found {
@@ -117,15 +131,7 @@ func (s *clusterImpl) metaClusterFromWorkflow(workflow v1alpha1.Workflow) (*meta
 		}
 	}
 
-	return &metaCluster{
-		Cluster:       *cluster,
-		Slack:         slack.Status(GetSlack(&workflow)),
-		SlackDM:       GetSlackDM(&workflow),
-		Expired:       expired,
-		NearingExpiry: nearingExpiry,
-		Artifacts:     artifacts,
-		EventID:       GetEventID(&workflow),
-	}, nil
+	return cluster, nil
 }
 
 func prettyPrint(x interface{}) {
