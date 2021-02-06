@@ -9,6 +9,7 @@ import PageSection from 'components/PageSection';
 import FullPageSpinner from 'components/FullPageSpinner';
 import FullPageError from 'components/FullPageError';
 import ClusterLogs from './ClusterLogs';
+import ClusterConnect from './ClusterConnect';
 import DeleteClusterModal from './DeleteClusterModal';
 import DownloadArtifactsModal from './DownloadArtifactsModal';
 import MutableLifespan from './MutableLifespan';
@@ -32,14 +33,26 @@ export default function ClusterInfoPage(): ReactElement {
   }
 
   const sectionHeader = (
-    <div className="flex justify-between">
-      <div>
-        <span className="lowercase">{cluster.ID}</span>
-        <span>
-          {cluster.Description && ` (${cluster.Description})`} - {cluster.Status || V1Status.Failed}
-        </span>
+    <div className="flex flex-col space-y-2">
+      <div className="flex justify-between">
+        <div>
+          <span className="lowercase">{cluster.ID}</span>
+          <span>
+            {cluster.Description && ` (${cluster.Description})`} -{' '}
+            {cluster.Status || V1Status.Failed}
+          </span>
+        </div>
+        {!!cluster && <MutableLifespan cluster={cluster} />}
       </div>
-      {!!cluster && <MutableLifespan cluster={cluster} />}
+      {cluster.Connect && <ClusterConnect connect={cluster.Connect} />}
+      {cluster.URL && (
+        <span className="text-base normal-case">
+          URL:{' '}
+          <a href={cluster.URL} className="underline text-blue-500">
+            {cluster.URL}
+          </a>
+        </span>
+      )}
     </div>
   );
 

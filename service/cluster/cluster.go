@@ -53,7 +53,8 @@ const (
 	// when is a cluster considered near expiration
 	nearExpiry = 30 * time.Minute
 
-	artifactTagURL = "url"
+	artifactTagURL     = "url"
+	artifactTagConnect = "connect"
 
 	artifactTagInternal = "internal"
 )

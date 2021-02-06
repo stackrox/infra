@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -76,14 +77,24 @@ func (s Signer) Generate(gcsBucketName, gcsBucketKey string) (string, error) {
 	})
 }
 
-// Contents returns the raw contents of the named GCS object.
+// Contents returns the raw contents of the named GCS object. It is expected
+// that these are argo workflow artifacts either single files tar gzip'd or
+// plain files.
 func (s Signer) Contents(gcsBucketName, gcsBucketKey string) ([]byte, error) {
 	br, err := s.client.Bucket(gcsBucketName).Object(gcsBucketKey).NewReader(context.Background())
 	if err != nil {
 		return nil, err
 	}
 
-	// Archive is gzipped, so we need to strip that away.
+	attrs, err := s.client.Bucket(gcsBucketName).Object(gcsBucketKey).Attrs(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	if !strings.Contains(attrs.ContentType, "gzip") {
+		return ioutil.ReadAll(br)
+	}
+
 	gr, err := gzip.NewReader(br)
 	if err != nil {
 		return nil, err

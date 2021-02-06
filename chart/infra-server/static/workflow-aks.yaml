@@ -37,12 +37,16 @@ spec:
             path: /data/kubeconfig
             archive:
               none: {}
+          - name: connect
+            path: /data/connect.sh
+            archive:
+              none: {}
           - name: data
             path: /data
             archive:
               tar: {}
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/aks:0.1.8
+        image: gcr.io/stackrox-infra/automation-flavors/aks:0.2.2
         imagePullPolicy: Always
         args:
           - create
@@ -88,7 +92,7 @@ spec:
 
     - name: destroy
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/aks:0.1.8
+        image: gcr.io/stackrox-infra/automation-flavors/aks:0.2.2
         imagePullPolicy: Always
         args:
           - destroy

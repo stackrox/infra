@@ -260,6 +260,9 @@ message Cluster {
 
     // URL is an optional URL for this cluster.
     string URL = 9;
+
+    // Connect is a command to add kube connection information to kubeconfig.
+    string Connect = 10;
 }
 
 // ClusterListRequest represents a request to ClusterService.List.
