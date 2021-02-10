@@ -1,4 +1,5 @@
-import React, { ReactElement } from 'react';
+/* eslint-disable jsx-a11y/label-has-associated-control */
+import React, { useState, ReactElement } from 'react';
 import { AxiosPromise } from 'axios';
 import moment from 'moment';
 
@@ -15,7 +16,9 @@ import assertDefined from 'utils/assertDefined';
 
 const clusterService = new ClusterServiceApi(configuration);
 
-const fetchClusters = (): AxiosPromise<V1ClusterListResponse> => clusterService.list();
+const FETCH_ALL_CLUSTERS = true;
+const fetchClusters = (): AxiosPromise<V1ClusterListResponse> =>
+  clusterService.list(FETCH_ALL_CLUSTERS);
 
 function NoClustersMessage(): ReactElement {
   return (
@@ -25,7 +28,11 @@ function NoClustersMessage(): ReactElement {
   );
 }
 
-function ClusterCards(): ReactElement {
+type ClusterCardsProps = {
+  showAllClusters: boolean;
+};
+
+function ClusterCards({ showAllClusters = false }: ClusterCardsProps): ReactElement {
   const { user } = useUserAuth();
   const { loading, error, data } = useApiQuery(fetchClusters);
 
@@ -41,16 +48,20 @@ function ClusterCards(): ReactElement {
     return <NoClustersMessage />;
   }
 
-  // only this user clusters sorted in descending order by creation date
-  const clusters = data.Clusters.filter((cluster) => cluster.Owner === user?.Email).sort((c1, c2) =>
-    moment(c1.CreatedOn).isBefore(c2.CreatedOn) ? 1 : -1
-  );
+  // choose whether to show all or just this user's clusters
+  const clustersToShow = showAllClusters
+    ? data.Clusters
+    : data.Clusters.filter((cluster) => cluster.Owner === user?.Email);
+  // sorted in descending order by creation date
+  const sortedClusters = clustersToShow
+    .filter((cluster) => cluster.Owner === user?.Email)
+    .sort((c1, c2) => (moment(c1.CreatedOn).isBefore(c2.CreatedOn) ? 1 : -1));
 
-  if (clusters.length === 0) {
+  if (sortedClusters.length === 0) {
     return <NoClustersMessage />;
   }
 
-  const cards = clusters.map((cluster) => {
+  const cards = sortedClusters.map((cluster) => {
     assertDefined(cluster.ID);
     return (
       <LinkCard
@@ -71,11 +82,33 @@ function ClusterCards(): ReactElement {
 }
 
 export default function LaunchPageSection(): ReactElement {
+  const [showAllClusters, setShowAllClusters] = useState(false);
+
+  function toggleClusterFilter() {
+    setShowAllClusters(!showAllClusters);
+  }
+
+  const clusterFilterToggle = (
+    <span className="flex items-center">
+      <label htmlFor="cluster-filter-toggle" className="mr-2">
+        Show All Clusters
+      </label>
+      <input
+        type="checkbox"
+        id="cluster-filter-toggle"
+        checked={showAllClusters}
+        onChange={toggleClusterFilter}
+      />
+    </span>
+  );
+
   return (
-    <PageSection header="My Clusters">
+    <PageSection header="My Clusters" headerComponents={clusterFilterToggle}>
       <div className="flex flex-wrap -m-2">
-        <ClusterCards />
+        <ClusterCards showAllClusters={showAllClusters} />
       </div>
     </PageSection>
   );
 }
+
+/* eslint-enable jsx-a11y/label-has-associated-control */
