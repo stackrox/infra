@@ -12,6 +12,7 @@ import { Formik, Form, FormikValues, FormikHelpers, useFormikContext } from 'for
 import * as yup from 'yup';
 import { mapValues } from 'lodash';
 import { ClipLoader } from 'react-spinners';
+import namor from 'namor';
 
 import { ClusterServiceApi, V1Parameter } from 'generated/client';
 import configuration from 'client/configuration';
@@ -25,7 +26,7 @@ const clusterService = new ClusterServiceApi(configuration);
 function helpByParameterName(name?: string): string {
   const help: { [key: string]: string } = {
     name:
-      "Only lowercase letters, numbers, and '-' allowed, must start with a letter and end with a letter or number",
+      "You can use the generated name, or type in your own. Only lowercase letters, numbers, and '-' allowed, must start with a letter and end with a letter or number.",
   };
 
   if (name && name in help) {
@@ -212,10 +213,13 @@ export default function ClusterForm({
     Description: yup.string().default(''),
     Parameters: yup.object().shape(parameterSchemas),
   });
+
+  const initialParameterValues = createInitialParameterValues(flavorParameters);
+  initialParameterValues.name = namor.generate({ words: 3, saltLength: 0 });
   const initialValues: FormikValues = {
     ID: flavorId,
     Description: '',
-    Parameters: createInitialParameterValues(flavorParameters),
+    Parameters: initialParameterValues,
   };
 
   const [error, setError] = useState<{
