@@ -16,8 +16,9 @@ export function generateClusterName(username = ''): string {
   // finally, get a random 3-part string of real words
   const randomPart = namor.generate({ words: 3, saltLength: 0 });
 
-  const nameArray = [userPart, '-', datePart, '-', randomPart].filter(Boolean);
+  // prepare to combine, but filter any empty part (only one that should ever be empty is user string)
+  const nameArray = [userPart, datePart, randomPart].filter(Boolean);
 
-  // combine the 3 parts, and truncate it at 40 characters, to keep it within the GCP limit
-  return nameArray.join('').slice(0, 40);
+  // combine the 3 parts,, and truncate it at 40 characters, to keep it within the GCP limit
+  return nameArray.join('-').slice(0, 40);
 }
