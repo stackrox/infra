@@ -215,7 +215,10 @@ export default function ClusterForm({
   });
 
   const initialParameterValues = createInitialParameterValues(flavorParameters);
-  initialParameterValues.name = namor.generate({ words: 3, saltLength: 0 });
+
+  // The following generates a random 3-part name, and truncates it at 40 characters, to keep it within the GCP limit.
+  initialParameterValues.name = namor.generate({ words: 3, saltLength: 0 }).slice(0, 40);
+
   const initialValues: FormikValues = {
     ID: flavorId,
     Description: '',
