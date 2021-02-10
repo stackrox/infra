@@ -34,6 +34,7 @@ type ClusterCardsProps = {
 
 function ClusterCards({ showAllClusters = false }: ClusterCardsProps): ReactElement {
   const { user } = useUserAuth();
+
   const { loading, error, data } = useApiQuery(fetchClusters);
 
   if (loading) {
@@ -53,9 +54,9 @@ function ClusterCards({ showAllClusters = false }: ClusterCardsProps): ReactElem
     ? data.Clusters
     : data.Clusters.filter((cluster) => cluster.Owner === user?.Email);
   // sorted in descending order by creation date
-  const sortedClusters = clustersToShow
-    .filter((cluster) => cluster.Owner === user?.Email)
-    .sort((c1, c2) => (moment(c1.CreatedOn).isBefore(c2.CreatedOn) ? 1 : -1));
+  const sortedClusters = clustersToShow.sort((c1, c2) =>
+    moment(c1.CreatedOn).isBefore(c2.CreatedOn) ? 1 : -1
+  );
 
   if (sortedClusters.length === 0) {
     return <NoClustersMessage />;
@@ -63,13 +64,15 @@ function ClusterCards({ showAllClusters = false }: ClusterCardsProps): ReactElem
 
   const cards = sortedClusters.map((cluster) => {
     assertDefined(cluster.ID);
+
+    const extraCardClass = showAllClusters && cluster.Owner === user?.Email ? 'bg-base-200' : '';
     return (
       <LinkCard
         key={cluster.ID}
         to={`cluster/${cluster.ID}`}
         header={cluster.ID || 'No ID'}
         footer={cluster.Status && <Lifespan cluster={cluster} />}
-        className="m-2"
+        className={`m-2 ${extraCardClass}`}
       >
         {cluster.Description && (
           <span className="mb-2 text-lg">Description: {cluster.Description}</span>
@@ -88,9 +91,10 @@ export default function LaunchPageSection(): ReactElement {
     setShowAllClusters(!showAllClusters);
   }
 
+  const headerText = showAllClusters ? 'All Clusters' : 'My Clusters';
   const clusterFilterToggle = (
     <span className="flex items-center">
-      <label htmlFor="cluster-filter-toggle" className="mr-2">
+      <label htmlFor="cluster-filter-toggle" className="mr-2 text-lg">
         Show All Clusters
       </label>
       <input
@@ -98,12 +102,19 @@ export default function LaunchPageSection(): ReactElement {
         id="cluster-filter-toggle"
         checked={showAllClusters}
         onChange={toggleClusterFilter}
+        className="w-4 h-4 rounded-sm"
       />
     </span>
   );
 
+  const header = (
+    <div className="flex justify-between items-center ">
+      <span>{headerText}</span>
+      {clusterFilterToggle}
+    </div>
+  );
   return (
-    <PageSection header="My Clusters" headerComponents={clusterFilterToggle}>
+    <PageSection header={header}>
       <div className="flex flex-wrap -m-2">
         <ClusterCards showAllClusters={showAllClusters} />
       </div>
