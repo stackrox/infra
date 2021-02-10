@@ -12,14 +12,15 @@ import { Formik, Form, FormikValues, FormikHelpers, useFormikContext } from 'for
 import * as yup from 'yup';
 import { mapValues } from 'lodash';
 import { ClipLoader } from 'react-spinners';
-import namor from 'namor';
+import { UploadCloud } from 'react-feather';
 
 import { ClusterServiceApi, V1Parameter } from 'generated/client';
 import configuration from 'client/configuration';
 import TextFormField from 'components/forms/TextFormField';
 import NumberFormField from 'components/forms/NumberFormField';
-import { UploadCloud } from 'react-feather';
+import { useUserAuth } from 'containers/UserAuthProvider';
 import assertDefined from 'utils/assertDefined';
+import { generateClusterName } from 'utils/cluster.utils';
 
 const clusterService = new ClusterServiceApi(configuration);
 
@@ -216,8 +217,8 @@ export default function ClusterForm({
 
   const initialParameterValues = createInitialParameterValues(flavorParameters);
 
-  // The following generates a random 3-part name, and truncates it at 40 characters, to keep it within the GCP limit.
-  initialParameterValues.name = namor.generate({ words: 3, saltLength: 0 }).slice(0, 40);
+  const { user } = useUserAuth();
+  initialParameterValues.name = generateClusterName(user?.Name || '');
 
   const initialValues: FormikValues = {
     ID: flavorId,
