@@ -8,8 +8,8 @@ import PageSection from 'components/PageSection';
 import ErrorBoundary from 'components/ErrorBoundary';
 import FullPageSpinner from 'components/FullPageSpinner';
 import FullPageError from 'components/FullPageError';
+import { getOneClickFlavor } from 'utils/poc.utils';
 import ClusterForm from './ClusterForm';
-import { getOneClickFlavor } from '../poc.utils';
 
 const flavorService = new FlavorServiceApi(configuration);
 

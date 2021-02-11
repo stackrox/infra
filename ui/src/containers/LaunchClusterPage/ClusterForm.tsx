@@ -21,7 +21,7 @@ import NumberFormField from 'components/forms/NumberFormField';
 import { useUserAuth } from 'containers/UserAuthProvider';
 import assertDefined from 'utils/assertDefined';
 import { generateClusterName } from 'utils/cluster.utils';
-import { releaseMainImageTag } from '../poc.utils';
+import { releaseMainImageTag } from 'utils/poc.utils';
 
 const clusterService = new ClusterServiceApi(configuration);
 

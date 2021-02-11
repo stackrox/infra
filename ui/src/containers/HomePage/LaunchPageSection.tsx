@@ -9,8 +9,7 @@ import LinkCard from 'components/LinkCard';
 import FullPageSpinner from 'components/FullPageSpinner';
 import FullPageError from 'components/FullPageError';
 import assertDefined from 'utils/assertDefined';
-
-import { getOneClickFlavor } from '../poc.utils';
+import { getOneClickFlavor } from 'utils/poc.utils';
 
 const flavorService = new FlavorServiceApi(configuration);
 
