@@ -10,6 +10,8 @@ import FullPageSpinner from 'components/FullPageSpinner';
 import FullPageError from 'components/FullPageError';
 import assertDefined from 'utils/assertDefined';
 
+import { getOneClickFlavor } from '../poc.utils';
+
 const flavorService = new FlavorServiceApi(configuration);
 
 const fetchFlavors = (): AxiosPromise<V1FlavorListResponse> => flavorService.list();
@@ -25,7 +27,11 @@ function FlavorCards(): ReactElement {
     return <FullPageError message={error?.message || 'Unexpected server response'} />;
   }
 
-  const cards = data.Flavors.map((flavor) => {
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
+  const oneClickFlavor = getOneClickFlavor();
+  const extraFlavors = [...data.Flavors, oneClickFlavor];
+
+  const cards = extraFlavors.map((flavor) => {
     assertDefined(flavor.ID); // swagger definitions are too permitting
     return (
       <LinkCard

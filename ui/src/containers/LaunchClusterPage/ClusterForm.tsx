@@ -130,6 +130,7 @@ function ParameterFormField(props: {
           label={getFormLabelFromParameter(parameter)}
           helperText={parameter.Help || helpByParameterName(parameter.Name)}
           required={required}
+          disabled={parameter.Value === 'docker.io/stackrox/main:3.0.55.0-rc.7'}
         />
       );
     case 'number':
@@ -240,8 +241,13 @@ export default function ClusterForm({
     actions: FormikHelpers<FormikValues>
   ): Promise<void> => {
     try {
+      const pocValues = { ...values };
+      if (pocValues.ID === 'one-click-release-demo') {
+        pocValues.ID = 'qa-demo';
+      }
+
       const response = await clusterService.create({
-        ...values,
+        ...pocValues,
         Parameters: adjustParametersBeforeSubmit(values.Parameters),
       });
 
