@@ -21,6 +21,7 @@ import NumberFormField from 'components/forms/NumberFormField';
 import { useUserAuth } from 'containers/UserAuthProvider';
 import assertDefined from 'utils/assertDefined';
 import { generateClusterName } from 'utils/cluster.utils';
+import { releaseMainImageTag } from '../poc.utils';
 
 const clusterService = new ClusterServiceApi(configuration);
 
@@ -130,7 +131,7 @@ function ParameterFormField(props: {
           label={getFormLabelFromParameter(parameter)}
           helperText={parameter.Help || helpByParameterName(parameter.Name)}
           required={required}
-          disabled={parameter.Value === 'docker.io/stackrox/main:3.0.55.0-rc.7'}
+          disabled={parameter.Value === releaseMainImageTag}
         />
       );
     case 'number':

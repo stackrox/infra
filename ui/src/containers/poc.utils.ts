@@ -1,4 +1,5 @@
-// eslint-disable-next-line import/prefer-default-export
+export const releaseMainImageTag = 'docker.io/stackrox/main:3.0.55.0-rc.7';
+
 export function getOneClickFlavor(): {
   ID: string;
   Name: string;
@@ -59,7 +60,7 @@ export function getOneClickFlavor(): {
       'main-image': {
         Name: 'main-image',
         Description: 'StackRox Central image Docker name',
-        Value: 'docker.io/stackrox/main:3.0.55.0-rc.7',
+        Value: releaseMainImageTag,
         Order: 2,
         Optional: true,
         Help: '',
