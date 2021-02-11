@@ -2,6 +2,10 @@
 set -eu
 exit 1
 
+export INFRA_TOKEN=$(pass show INFRA_TOKEN)
+export PROD_INFRA_ENDPOINT="infra.rox.systems:443"
+export DEV_INFRA_ENDPOINT="dev.infra.rox.systems:443"
+
 ###############################################################################
 #                           Helper functions                                  #
 ###############################################################################
@@ -89,7 +93,7 @@ function build_and_deploy_local {
 # Deploy to development cluster (dev.infra.rox.systems)
 function build_and_deploy_development {
   export INFRA_TOKEN=$(pass show INFRA_TOKEN)
-  export PROD_INFRA_ENDPOINT="dev.infra.rox.systems:443"
+  export DEV_INFRA_ENDPOINT="dev.infra.rox.systems:443"
   gcloud container clusters get-credentials "infra-development" --project stackrox-infra --region us-west2
   kubectl config use-context gke_stackrox-infra_us-west2_infra-development
   cd ~/source/infra

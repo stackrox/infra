@@ -6,6 +6,11 @@ exit 1
 #                           Troubleshoting Examples                           #
 ###############################################################################
 
+export INFRA_TOKEN=$(pass show INFRA_TOKEN)
+export PROD_INFRA_ENDPOINT="infra.rox.systems:443"
+export DEV_INFRA_ENDPOINT="dev.infra.rox.systems:443"
+
+
 # infra-server auth check
 infractl -e $PROD_INFRA_ENDPOINT whoami
 
