@@ -35,7 +35,7 @@
     "react-feather": "^2.0.9",
     "react-modal": "^3.12.1",
     "react-router-dom": "^6.0.0-beta.0",
-    "react-spinners": "^0.10.4",
+    "react-spinners": "^0.10.6",
     "use-clipboard-copy": "^0.1.2",
     "yup": "^0.32.8"
   },
