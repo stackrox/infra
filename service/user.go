@@ -32,7 +32,7 @@ func (s *userImpl) CreateToken(_ context.Context, req *v1.ServiceAccount) (*v1.T
 	// Generate the service account token.
 	token, err := s.generate(*req)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to generate user token")
+		return nil, errors.Wrap(err, "failed to generate token")
 	}
 
 	return &v1.TokenResponse{
