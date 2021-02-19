@@ -109,6 +109,7 @@ $(protoc-gen-swagger):
 protoc-tools: $(protoc) $(protoc-gen-go) $(protoc-gen-grpc-gateway) $(protoc-gen-swagger)
 
 PROTO_INPUT_DIR   = proto/api/v1
+PROTO_THIRD_PARTY = proto/third_party
 PROTO_FILES       = service.proto
 PROTO_OUTPUT_DIR  = generated/api/v1
 
@@ -119,31 +120,22 @@ PROTO_OUTPUT_DIR  = generated/api/v1
 .PHONY: proto-generated-srcs
 proto-generated-srcs: protoc-tools
 	@echo "+ $@"
-	GO111MODULE=off go get github.com/gogo/protobuf/protobuf || true
-	GO111MODULE=off go get github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis || true
-	GO111MODULE=off go get github.com/protocolbuffers/protobuf || true
 	@mkdir -p $(PROTO_OUTPUT_DIR)
 	# Generate gRPC bindings
 	$(protoc) -I$(PROTO_INPUT_DIR) \
-		-I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
-		-I${GOPATH}/src/github.com/protocolbuffers/protobuf/src \
-		-I${GOPATH}/src/github.com/gogo/protobuf/protobuf \
+		-I$(PROTO_THIRD_PARTY) \
 		--go_out=plugins=grpc:$(PROTO_OUTPUT_DIR) \
 		$(PROTO_FILES)
 
 	# Generate gRPC-Gateway bindings
 	$(protoc) -I$(PROTO_INPUT_DIR) \
-		-I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
-		-I${GOPATH}/src/github.com/protocolbuffers/protobuf/src \
-		-I${GOPATH}/src/github.com/gogo/protobuf/protobuf \
+		-I$(PROTO_THIRD_PARTY) \
 		--grpc-gateway_out=logtostderr=true:$(PROTO_OUTPUT_DIR) \
 		$(PROTO_FILES)
 
 	# Generate JSON Swagger manifest
 	$(protoc) -I$(PROTO_INPUT_DIR) \
-		-I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
-		-I${GOPATH}/src/github.com/protocolbuffers/protobuf/src \
-		-I${GOPATH}/src/github.com/gogo/protobuf/protobuf \
+		-I$(PROTO_THIRD_PARTY) \
 		--swagger_out=logtostderr=true:$(PROTO_OUTPUT_DIR) \
 		$(PROTO_FILES)
 
