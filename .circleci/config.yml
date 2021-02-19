@@ -53,7 +53,7 @@ jobs:
       - checkout
       - run:
           name: Generate code
-          command: make proto-generated-srcs
+          command: make break-it-proto-generated-srcs
       - run:
           name: Lint code
           command: golangci-lint run
