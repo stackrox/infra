@@ -37,7 +37,7 @@
     "react-router-dom": "^6.0.0-beta.0",
     "react-spinners": "^0.10.6",
     "use-clipboard-copy": "^0.1.2",
-    "yup": "^0.32.8"
+    "yup": "^0.32.9"
   },
   "devDependencies": {
     "@stackrox/tailwind-config": "^0.2.0",
