@@ -45,12 +45,16 @@ spec:
             path: /outputs/kubeconfig
           - name: connect
             path: /outputs/connect.sh
+          - name: SSH_ACCESS.md
+            path: /outputs/SSH_ACCESS.md
+            archive:
+              none: {}
         parameters:
           - name: cluster_name
             valueFrom:
               path: /outputs/cluster_name
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.2.2
+        image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.2.4-6-g5eb20cf23f-snapshot
         imagePullPolicy: Always
         args:
           - create
@@ -73,7 +77,7 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.2.2
+        image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.2.4-6-g5eb20cf23f-snapshot
         imagePullPolicy: Always
         args:
           - destroy

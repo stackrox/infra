@@ -47,12 +47,16 @@ spec:
             path: /data/auth/kubeconfig
             archive:
               none: {}
+          - name: SSH_ACCESS.md
+            path: /data/SSH_ACCESS.md
+            archive:
+              none: {}
           - name: data
             path: /data
             archive:
               tar: {}
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.1
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.4-6-g5eb20cf23f-snapshot
         imagePullPolicy: Always
         args:
           - create
@@ -82,7 +86,7 @@ spec:
 
     - name: destroy
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.1
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.4-6-g5eb20cf23f-snapshot
         imagePullPolicy: Always
         args:
           - destroy
