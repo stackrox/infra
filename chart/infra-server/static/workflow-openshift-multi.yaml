@@ -26,6 +26,8 @@ spec:
                   value: "{{workflow.parameters.name}}"
                 - name: crio
                   value: "{{workflow.parameters.crio}}"
+                - name: zone
+                  value: "{{workflow.parameters.zone}}"
 
         - - name: wait
             template: wait
@@ -45,18 +47,19 @@ spec:
         parameters:
           - name: name
           - name: crio
+          - name: zone
       outputs:
         artifacts:
           - name: kubeconfig
             path: /well-known/artifacts/config
           - name: terraform-destroy-plan
             path: /well-known/artifacts/terraform-destroy.tfplan
-          - name: SSH_ACCESS.md
+          - name: SSH_ACCESS
             path: /well-known/artifacts/SSH_ACCESS.md
             archive:
               none: {}
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:0.2.4-6-g5eb20cf23f-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:0.2.4-12-g9c62743d72-snapshot
         args:
           - create
           - "--name={{inputs.parameters.name}}"
@@ -82,7 +85,7 @@ spec:
           - name: terraform-destroy-plan
             path: /well-known/artifacts/terraform-destroy.tfplan
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:0.2.4-6-g5eb20cf23f-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:0.2.4-12-g9c62743d72-snapshot
         args:
           - destroy
         env:

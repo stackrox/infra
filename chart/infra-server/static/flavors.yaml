@@ -23,7 +23,7 @@
     - name: kubeconfig
       description: Kube config for connecting to cluster
 
-    - name: SSH_ACCESS.md
+    - name: SSH_ACCESS
       description: Instructions for obtaining SSH access to instances in your cluster
 
     - name: tfstate
@@ -73,7 +73,7 @@
     - name: kubeconfig
       description: Kube config for connecting to cluster
 
-    - name: SSH_ACCESS.md
+    - name: SSH_ACCESS
       description: Instructions for obtaining SSH access to instances in your cluster
 
     - name: tfstate
@@ -137,7 +137,7 @@
       description: Shell script for adding this clusters connect information to your kubeconfig
       tags: [connect]
 
-    - name: SSH_ACCESS.md
+    - name: SSH_ACCESS
       description: Instructions for obtaining SSH access to instances in your cluster
 
 ####################
@@ -162,7 +162,7 @@
     - name: kubeconfig
       description: Kube config for connecting to this cluster
 
-    - name: SSH_ACCESS.md
+    - name: SSH_ACCESS
       description: Instructions for obtaining SSH access to instances in your cluster
 
 #####################
@@ -191,7 +191,7 @@
     - name: kubeconfig
       description: Kube config for connecting to this cluster
 
-    - name: SSH_ACCESS.md
+    - name: SSH_ACCESS
       description: Instructions for obtaining SSH access to instances in your cluster
 
 ####################
@@ -231,7 +231,7 @@
     - name: kubeconfig
       description: Kube config for connecting to this cluster
 
-    - name: SSH_ACCESS.md
+    - name: SSH_ACCESS
       description: Instructions for obtaining SSH access to instances in your cluster
 
 #############
