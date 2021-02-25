@@ -23,6 +23,9 @@
     - name: kubeconfig
       description: Kube config for connecting to cluster
 
+    - name: SSH_ACCESS
+      description: Instructions for obtaining SSH access to instances in your cluster
+
     - name: tfstate
       description: Terraform state file
 
@@ -69,6 +72,9 @@
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to cluster
+
+    - name: SSH_ACCESS
+      description: Instructions for obtaining SSH access to instances in your cluster
 
     - name: tfstate
       description: Terraform state file
@@ -131,6 +137,9 @@
       description: Shell script for adding this clusters connect information to your kubeconfig
       tags: [connect]
 
+    - name: SSH_ACCESS
+      description: Instructions for obtaining SSH access to instances in your cluster
+
 ####################
 #  openshift-lite  #
 ####################
@@ -148,6 +157,13 @@
       description: Google Cloud zone to deploy infrastructure into.
       value: us-east1-d
       kind: optional
+
+  artifacts:
+    - name: kubeconfig
+      description: Kube config for connecting to this cluster
+
+    - name: SSH_ACCESS
+      description: Instructions for obtaining SSH access to instances in your cluster
 
 #####################
 #  openshift-multi  #
@@ -170,6 +186,13 @@
       description: Google Cloud zone to deploy infrastructure into.
       value: us-east1-d
       kind: optional
+
+  artifacts:
+    - name: kubeconfig
+      description: Kube config for connecting to this cluster
+
+    - name: SSH_ACCESS
+      description: Instructions for obtaining SSH access to instances in your cluster
 
 ####################
 #  openshift-4     #
@@ -203,6 +226,13 @@
       description: Google Cloud zone to deploy infrastructure into.
       value: us-east1
       kind: optional
+
+  artifacts:
+    - name: kubeconfig
+      description: Kube config for connecting to this cluster
+
+    - name: SSH_ACCESS
+      description: Instructions for obtaining SSH access to instances in your cluster
 
 #############
 #  example  #

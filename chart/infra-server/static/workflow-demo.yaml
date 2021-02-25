@@ -95,8 +95,13 @@ spec:
             path: /data/url
             optional: true
 
+          - name: SSH_ACCESS
+            path: /data/SSH_ACCESS.md
+            archive:
+              none: {}
+
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/demo:0.2.1
+        image: gcr.io/stackrox-infra/automation-flavors/demo:0.2.5
         imagePullPolicy: Always
         args:
           - create
@@ -169,7 +174,7 @@ spec:
             path: /data/tfvars
             optional: true
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/demo:0.2.1
+        image: gcr.io/stackrox-infra/automation-flavors/demo:0.2.5
         imagePullPolicy: Always
         args:
           - destroy
