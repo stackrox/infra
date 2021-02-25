@@ -54,7 +54,7 @@ spec:
             valueFrom:
               path: /outputs/cluster_name
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.2.4-12-g9c62743d72-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.2.5
         imagePullPolicy: Always
         args:
           - create
@@ -77,7 +77,7 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.2.4-12-g9c62743d72-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.2.5
         imagePullPolicy: Always
         args:
           - destroy
