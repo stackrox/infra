@@ -57,7 +57,7 @@ var (
 	}
 
 	templatesReady = []string{ // nolint:gochecknoglobals
-		"<@{{.OwnerID}}> - Your {{if .Scheduled}}scheduled {{end}}{{if .Description}}*{{.Description}}* {{else}}*{{.ID}}* {{end}}cluster is now ready! :parrot:",
+		"<@{{.OwnerID}}> - Your {{if .Scheduled}}scheduled {{end}}{{if .Description}}*{{.Description}}* {{else}}*{{.ID}}* {{end}}cluster is now ready! :party-parrot:",
 		"{{if .URL}}:earth_americas: Browse to *{{.URL}}* to login.{{end}}",
 		":clock2: This cluster has about *{{.Remaining}}* before it is destroyed.",
 		":thinking_face: To view cluster *info*, you can run:\n```$ infractl get {{.ID}}```",
