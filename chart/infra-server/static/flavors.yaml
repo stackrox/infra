@@ -199,7 +199,7 @@
 ####################
 - id: openshift-4
   name: OpenShift 4.x
-  description: OpenShift 4.x OKD open source cluster
+  description: OpenShift 4.x OCP or OKD cluster
   availability: alpha
   workflow: configuration/workflow-openshift-4.yaml
   parameters:
