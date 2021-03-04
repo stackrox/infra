@@ -1,7 +1,7 @@
 {{ if ne .Values.deployment "local" -}}
 ---
 
-apiVersion: networking.gke.io/v1
+apiVersion: networking.gke.io/v1beta2
 kind: ManagedCertificate
 
 metadata:
