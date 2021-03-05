@@ -43,7 +43,7 @@
     "@stackrox/tailwind-config": "^0.2.0",
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/react": "^11.2.5",
-    "@testing-library/user-event": "^12.8.0",
+    "@testing-library/user-event": "^12.8.1",
     "@types/jest": "^26.0.20",
     "@types/lodash": "^4.14.168",
     "@types/node": "^14.14.31",
@@ -57,12 +57,12 @@
     "eslint-plugin-prettier": "^3.3.1",
     "http-proxy-middleware": "^1.0.6",
     "npm-run-all": "^4.1.5",
-    "postcss": "^8.2.6",
+    "postcss": "^8.2.7",
     "postcss-cli": "^8.3.1",
     "prettier": "^2.2.1",
     "react-scripts": "^4.0.1",
     "tailwindcss": "^2.0.3",
-    "typescript": "~4.2.2",
+    "typescript": "~4.2.3",
     "wait-on": "^5.2.1"
   },
   "browserslist": {
