@@ -91,11 +91,7 @@ spec:
 
     - name: destroy
       container:
-<<<<<<< HEAD
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.5-0-g905de71dee-dirty-snapshot
-=======
         image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.6
->>>>>>> master
         imagePullPolicy: Always
         args:
           - destroy
