@@ -239,6 +239,51 @@
     - name: SSH_ACCESS
       description: Instructions for obtaining SSH access to instances in your cluster
 
+####################
+#  openshift-4-demo  #
+####################
+- id: openshift-4-demo
+  name: OpenShift 4.x Demo
+  description: OpenShift 4.x Demo
+  availability: alpha
+  workflow: configuration/workflow-openshift-4-demo.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      value: example1
+
+    - name: openshift-version
+      description: openshift release from OCP or OKD
+      value: ocp/stable-4.7
+      kind: optional
+      help: |
+        The latest RedHat enterprise OCP releases can be found at https://mirror.openshift.com/pub/openshift-v4/clients/ocp/.
+        For OCP use the path to one of the stable releases e.g. ocp/stable-4.
+        Opensource OKD releases are at https://github.com/openshift/okd/releases.
+        For OKD use the release tag e.g. 4.7.0-0.okd-2021-02-25-144700.
+
+    - name: master-node-count
+      description: number of master nodes
+      value: 3
+      kind: optional
+
+    - name: worker-node-count
+      description: number of worker nodes
+      value: 3
+      kind: optional
+
+    - name: region
+      description: Google Cloud zone to deploy infrastructure into.
+      value: us-east1
+      kind: optional
+
+  artifacts:
+    - name: kubeconfig
+      description: Kube config for connecting to this cluster
+
+    - name: SSH_ACCESS
+      description: Instructions for obtaining SSH access to instances in your cluster
+
 #############
 #  example  #
 #############
