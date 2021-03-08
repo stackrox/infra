@@ -181,6 +181,7 @@
     - name: crio
       description: should CRI-O be used as the container runtime
       value: true
+      kind: optional
 
     - name: zone
       description: Google Cloud zone to deploy infrastructure into.
