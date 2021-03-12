@@ -16,7 +16,7 @@ type Props = {
 
 export default function FileUploadFormField({
   name,
-  id = `text-input-${name}`,
+  id = `file-input-${name}`,
   required = false,
   label,
   placeholder = '',

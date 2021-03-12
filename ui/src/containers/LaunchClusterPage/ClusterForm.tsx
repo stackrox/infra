@@ -128,7 +128,7 @@ function ParameterFormField(props: {
       <FileUploadFormField
         name={`Parameters.${parameter.Name}`}
         label={getFormLabelFromParameter(parameter)}
-        helperText={parameter.Help || helpByParameterName(parameter.Name)}
+        helperText={parameter.Help}
         required={required}
       />
     );
