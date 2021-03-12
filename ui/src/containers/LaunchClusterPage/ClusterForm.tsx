@@ -16,6 +16,7 @@ import { UploadCloud } from 'react-feather';
 
 import { ClusterServiceApi, V1Parameter } from 'generated/client';
 import configuration from 'client/configuration';
+import FileUploadFormField from 'components/forms/FileUploadFormField';
 import TextFormField from 'components/forms/TextFormField';
 import NumberFormField from 'components/forms/NumberFormField';
 import { useUserAuth } from 'containers/UserAuthProvider';
@@ -121,6 +122,17 @@ function ParameterFormField(props: {
   assertDefined(parameter.Name); // swagger def is too permissive, it must be defined
 
   const required = !parameter.Optional;
+
+  if (parameter.FromFile) {
+    return (
+      <FileUploadFormField
+        name={`Parameters.${parameter.Name}`}
+        label={getFormLabelFromParameter(parameter)}
+        helperText={parameter.Help}
+        required={required}
+      />
+    );
+  }
 
   switch (schema.type) {
     case 'string':

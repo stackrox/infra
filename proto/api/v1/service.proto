@@ -135,6 +135,10 @@ message Parameter {
     int32 Order = 6;
 
     string Help = 7;
+
+    // Indicates that the value for this parameter can be provided from the
+    // contents of a file.
+    bool FromFile = 8;
 }
 
 // FlavorArtifact represents a single artifact that is produced by a flavor.

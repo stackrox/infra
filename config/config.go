@@ -120,6 +120,10 @@ type parameter struct {
 
 	// For parameters that can use more explicit help
 	Help string `json:"help"`
+
+	// Indicates that the value for this parameter can be provided from the
+	// contents of a file.
+	FromFile bool `json:"fromFile"`
 }
 
 // artifact represents a single artifact that is produced by this flavor.
