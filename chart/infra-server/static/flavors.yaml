@@ -222,6 +222,11 @@
       description: A cloud.redhat.com pull secret
       kind: optional
       fromFile: true
+      help: |
+        Use this if you want to associate this cluster with a particular cloud.redhat.com account.
+        Get the pull secret from: https://cloud.redhat.com/openshift/install/pull-secret
+        You might do this for access to OpenShift Cluster Manager for example.
+        By default an infra automation account is used.
 
     - name: master-node-count
       description: number of master nodes
