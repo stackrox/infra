@@ -406,6 +406,12 @@ export interface V1Parameter {
    * @memberof V1Parameter
    */
   Help?: string;
+  /**
+   * Indicates that the value for this parameter can be provided from the contents of a file.
+   * @type {boolean}
+   * @memberof V1Parameter
+   */
+  FromFile?: boolean;
 }
 /**
  * ResourceByID represents a generic reference to a named/unique resource.

@@ -62,16 +62,7 @@ func scrubInternalParameters(flavor *v1.Flavor) {
 		if paramValue.Internal {
 			continue
 		}
-
-		// Clone parameter
-		newParams[paramName] = &v1.Parameter{
-			Name:        paramValue.Name,
-			Description: paramValue.Description,
-			Value:       paramValue.Value,
-			Help:        paramValue.Help,
-			Optional:    paramValue.Optional,
-			Order:       paramValue.Order,
-		}
+		newParams[paramName] = paramValue
 	}
 
 	flavor.Parameters = newParams

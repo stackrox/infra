@@ -181,6 +181,7 @@
     - name: crio
       description: should CRI-O be used as the container runtime
       value: true
+      kind: optional
 
     - name: zone
       description: Google Cloud zone to deploy infrastructure into.
@@ -217,6 +218,16 @@
         Opensource OKD releases are at https://github.com/openshift/okd/releases.
         For OKD use the release tag e.g. 4.7.0-0.okd-2021-02-25-144700.
 
+    - name: pull-secret
+      description: A cloud.redhat.com pull secret
+      kind: optional
+      fromFile: true
+      help: |
+        Use this if you want to associate this cluster with a particular cloud.redhat.com account.
+        Get the pull secret from: https://cloud.redhat.com/openshift/install/pull-secret
+        You might do this for access to OpenShift Cluster Manager for example.
+        By default an infra automation account is used.
+
     - name: master-node-count
       description: number of master nodes
       value: 3
@@ -235,6 +246,13 @@
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
+
+    - name: kubeadmin-password
+      description: The kubeadmin user password for the openshift console
+
+    - name: url
+      description: The URL for the openshift console
+      tags: [url]
 
     - name: SSH_ACCESS
       description: Instructions for obtaining SSH access to instances in your cluster
