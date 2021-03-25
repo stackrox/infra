@@ -56,7 +56,7 @@ spec:
             archive:
               tar: {}
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.6
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.7-3-g8962dfcc7b-snapshot
         imagePullPolicy: Always
         args:
           - create
