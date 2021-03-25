@@ -257,9 +257,9 @@
     - name: SSH_ACCESS
       description: Instructions for obtaining SSH access to instances in your cluster
 
-####################
+######################
 #  openshift-4-demo  #
-####################
+######################
 - id: openshift-4-demo
   name: OpenShift 4.x Demo
   description: OpenShift 4.x Demo
