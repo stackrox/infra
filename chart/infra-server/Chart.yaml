@@ -2,7 +2,7 @@ apiVersion: v1
 appVersion: latest
 description: A Helm chart for infra-server
 name: infra-server
-version: latest
+version: 0.2.8-prerelease
 home: https://github.com/stackrox/infra
 sources:
   - https://github.com/stackrox/infra
