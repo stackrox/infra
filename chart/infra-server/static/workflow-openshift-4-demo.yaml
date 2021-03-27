@@ -15,6 +15,8 @@ spec:
         value: ""
       - name: region
         value: ""
+      - name: pull-secret
+        value: ""
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -34,6 +36,9 @@ spec:
         - - name: create
             template: create
 
+        - - name: run-ansible-demo
+            template: run-ansible-demo
+
         - - name: wait
             template: wait
 
@@ -41,22 +46,8 @@ spec:
             template: destroy
 
     - name: create
-      outputs:
-        artifacts:
-          - name: kubeconfig
-            path: /data/auth/kubeconfig
-            archive:
-              none: {}
-          - name: SSH_ACCESS
-            path: /data/SSH_ACCESS.md
-            archive:
-              none: {}
-          - name: data
-            path: /data
-            archive:
-              tar: {}
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.7-3-g8962dfcc7b-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.7-4-g7262019629-snapshot
         imagePullPolicy: Always
         args:
           - create
@@ -74,6 +65,8 @@ spec:
               secretKeyRef:
                 name: redhat-pull-secret
                 key: REDHAT_PULL_SECRET
+          - name: USER_PULL_SECRET
+            value: "{{workflow.parameters.pull-secret}}"
           - name: OPENSHIFT_VERSION
             value: "{{workflow.parameters.openshift-version}}"
           - name: MASTER_NODE_COUNT
@@ -85,13 +78,76 @@ spec:
         volumeMounts:
           - name: data
             mountPath: /data
+      outputs:
+        artifacts:
+          - name: kubeconfig
+            path: /data/auth/kubeconfig
+            archive:
+              none: {}
+          - name: kubeadmin-password
+            path: /data/auth/kubeadmin-password
+            archive:
+              none: {}
+          - name: url
+            path: /data/url
+            archive:
+              none: {}
+          - name: SSH_ACCESS
+            path: /data/SSH_ACCESS.md
+            archive:
+              none: {}
+          - name: data
+            path: /data
+            archive:
+              tar: {}
+
+    - name: run-ansible-demo
+      container:
+        image: us.gcr.io/rox-se/ansible-demo:latest
+        imagePullPolicy: Always
+        args:
+          - pwd
+        env:
+          # TODO(sbostick): these env vars will need to be present in the runtime environment.
+          # Maybe can exclude STACKROX_LICENSE (if not required to run latest ansible-demo).
+          #
+          # KUBECONFIG_BASE64=$(cat /data/auth/kubeconfig | base64)
+          # DOCKERCONFIG_BASE64=""
+          # ADMIN_PASSWORD=$(openssl rand -base64 32 | cut -c 1-20)
+          # CENTRAL_PORT=443
+          # ORCHESTRATOR=openshift
+          # STACKROX_LICENSE=
+          # IMAGE_PULL_USER=
+          # IMAGE_PULL_PASSWORD=
+          - name: GOOGLE_CREDENTIALS
+            valueFrom:
+              secretKeyRef:
+                name: google-credentials-openshift-4
+                key: google-credentials.json
+        volumeMounts:
+          - name: data
+            mountPath: /data
+      outputs:
+        artifacts:
+          - name: hello
+            path: /data/hello
+            archive:
+              none: {}
+          - name: goodbye
+            path: /data/goodbye
+            archive:
+              none: {}
+          - name: data
+            path: /data
+            archive:
+              tar: {}
 
     - name: wait
       suspend: {}
 
     - name: destroy
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.6
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.7-4-g7262019629-snapshot
         imagePullPolicy: Always
         args:
           - destroy
