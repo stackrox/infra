@@ -29,6 +29,9 @@ spec:
     - name: credentials
       secret:
         secretName: google-credentials-openshift-4
+    - name: demo-secrets
+      secret:
+        secretName: demo-secrets
 
   templates:
     - name: start
@@ -36,19 +39,31 @@ spec:
         - - name: create
             template: create
 
+        - - name: gen-creds
+            template: gen-creds
+
         - - name: run-ansible-demo
             template: run-ansible-demo
+            arguments:
+              artifacts:
+                - name: mypassword
+                  from: "{{steps.gen-creds.outputs.artifacts.stackrox-admin-password}}"
+#               - name: kubeconfig
+#                 from: "{{steps.create.outputs.artifacts.kubeconfig}}"
 
-        - - name: wait
-            template: wait
+        #- - name: wait
+        #template: wait
 
         - - name: destroy
             template: destroy
 
     - name: create
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.7-4-g7262019629-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.7-5-ga00dce9a61-snapshot
         imagePullPolicy: Always
+        volumeMounts:
+          - name: data
+            mountPath: /data
         args:
           - create
           - "{{workflow.parameters.name}}"
@@ -75,9 +90,6 @@ spec:
             value: "{{workflow.parameters.worker-node-count}}"
           - name: REGION
             value: "{{workflow.parameters.region}}"
-        volumeMounts:
-          - name: data
-            mountPath: /data
       outputs:
         artifacts:
           - name: kubeconfig
@@ -101,53 +113,89 @@ spec:
             archive:
               tar: {}
 
-    - name: run-ansible-demo
+    - name: gen-creds
       container:
-        image: us.gcr.io/rox-se/ansible-demo:latest
+        image: rnix/openssl-gost
         imagePullPolicy: Always
-        args:
-          - pwd
-        env:
-          # TODO(sbostick): these env vars will need to be present in the runtime environment.
-          # Maybe can exclude STACKROX_LICENSE (if not required to run latest ansible-demo).
-          #
-          # KUBECONFIG_BASE64=$(cat /data/auth/kubeconfig | base64)
-          # DOCKERCONFIG_BASE64=""
-          # ADMIN_PASSWORD=$(openssl rand -base64 32 | cut -c 1-20)
-          # CENTRAL_PORT=443
-          # ORCHESTRATOR=openshift
-          # STACKROX_LICENSE=
-          # IMAGE_PULL_USER=
-          # IMAGE_PULL_PASSWORD=
-          - name: GOOGLE_CREDENTIALS
-            valueFrom:
-              secretKeyRef:
-                name: google-credentials-openshift-4
-                key: google-credentials.json
+        command: [sh, -c,
+          'openssl rand -base64 32 | tr "+/" "_#"  | cut -c 1-20 > /data/stackrox-admin-password']
         volumeMounts:
           - name: data
             mountPath: /data
       outputs:
         artifacts:
-          - name: hello
-            path: /data/hello
+          - name: stackrox-admin-password
+            path: /data/stackrox-admin-password
             archive:
               none: {}
-          - name: goodbye
-            path: /data/goodbye
-            archive:
-              none: {}
-          - name: data
-            path: /data
-            archive:
-              tar: {}
 
-    - name: wait
-      suspend: {}
+    - name: run-ansible-demo
+      inputs:
+        artifacts:
+#          - name: kubeconfig
+#            path: /tmp/kubeconfig
+          - name: mypassword
+            path: /tmp/stackrox-admin-password
+      container:
+        image: us.gcr.io/rox-se/ansible-demo:latest
+        imagePullPolicy: Always
+        env:
+          - name: ADMIN_PASSWORD
+            value: "TODO(sbostick)"
+          - name: KUBECONFIG_BASE64
+            value: "TODO(sbostick)"
+          - name: CENTRAL_PORT
+            value: 443
+          - name: DOCKERCONFIG_BASE64
+            value:
+          - name: ORCHESTRATOR
+            value: "openshift"
+          - name: STACKROX_LICENSE
+            valueFrom:
+              secretKeyRef:
+                name: demo-secrets
+                key: STACKROX_LICENSE
+          - name: IMAGE_PULL_USER
+            valueFrom:
+              secretKeyRef:
+                name: demo-secrets
+                key: STACKROX_IO_PASSWORD
+          - name: IMAGE_PULL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: demo-secrets
+                key: STACKROX_IO_USERNAME
+          - name: GOOGLE_CREDENTIALS
+            valueFrom:
+              secretKeyRef:
+                name: google-credentials-openshift-4
+                key: google-credentials.json
+        command: [sh, -c, '
+          # ADMIN_PASSWORD=$(cat /tmp/stackrox-admin-password);
+          # KUBECONFIG_BASE64=$(cat /tmp/kubeconfig | base64);
+
+          echo "ADMIN_PASSWORD      => $ADMIN_PASSWORD";
+          echo "CENTRAL_PORT        => $CENTRAL_PORT";
+          echo "DOCKERCONFIG_BASE64 => $DOCKERCONFIG_BASE64";
+          echo "GOOGLE_CREDENTIALS  => $GOOGLE_CREDENTIALS";
+          echo "IMAGE_PULL_PASSWORD => $IMAGE_PULL_PASSWORD";
+          echo "IMAGE_PULL_USER     => $IMAGE_PULL_USER";
+          echo "KUBECONFIG_BASE64   => $KUBECONFIG_BASE64";
+          echo "ORCHESTRATOR        => $ORCHESTRATOR";
+          echo "STACKROX_LICENSE    => $STACKROX_LICENSE";
+
+          ansible-playbook --version;
+        ']
+        volumeMounts:
+          - name: data
+            mountPath: /data
+
+    #- name: wait
+    #suspend: {}
 
     - name: destroy
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.7-4-g7262019629-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.7-7-ge8956a2f69-snapshot
         imagePullPolicy: Always
         args:
           - destroy
