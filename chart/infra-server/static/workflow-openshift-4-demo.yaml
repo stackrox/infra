@@ -36,20 +36,20 @@ spec:
   templates:
     - name: start
       steps:
-        - - name: create
-            template: create
-
         - - name: gen-creds
             template: gen-creds
+
+        - - name: create
+            template: create
 
         - - name: run-ansible-demo
             template: run-ansible-demo
             arguments:
               artifacts:
-                - name: mykubeconfig
-                  from: "{{steps.create.outputs.artifacts.kubeconfig}}"
-                - name: mypassword
-                  from: "{{steps.gen-creds.outputs.artifacts.stackrox-admin-password}}"
+                - name: foo
+                  from: "{{ steps.create.outputs.artifacts.kubeconfig }}"
+                - name: bar
+                  from: "{{ steps.gen-creds.outputs.artifacts.stackrox-admin-password }}"
 
         #- - name: wait
         #template: wait
@@ -132,10 +132,10 @@ spec:
     - name: run-ansible-demo
       inputs:
         artifacts:
-          - name: mykubeconfig
-            path: /tmp/kubeconfig
-          - name: mypassword
-            path: /tmp/stackrox-admin-password
+          - name: foo
+            path: /tmp/foo
+          - name: bar
+            path: /tmp/bar
       container:
         image: us.gcr.io/rox-se/ansible-demo:latest
         imagePullPolicy: Always
