@@ -36,30 +36,27 @@ spec:
   templates:
     - name: start
       steps:
-        - - name: gen-creds
-            template: gen-creds
-
         - - name: create
             template: create
 
+        - - name: gen-creds
+            template: gen-creds
+
         - - name: run-ansible-demo
             template: run-ansible-demo
-            arguments:
-              artifacts:
-                - name: foo
-                  from: "{{ steps.create.outputs.artifacts.kubeconfig }}"
-                - name: bar
-                  from: "{{ steps.gen-creds.outputs.artifacts.stackrox-admin-password }}"
 
-        #- - name: wait
-        #template: wait
+        - - name: gather
+            template: gather
+
+        - - name: wait
+            template: wait
 
         - - name: destroy
             template: destroy
 
     - name: create
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.7-5-ga00dce9a61-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.7-8-ge8798aa4fa-snapshot
         imagePullPolicy: Always
         volumeMounts:
           - name: data
@@ -90,28 +87,6 @@ spec:
             value: "{{workflow.parameters.worker-node-count}}"
           - name: REGION
             value: "{{workflow.parameters.region}}"
-      outputs:
-        artifacts:
-          - name: kubeconfig
-            path: /data/auth/kubeconfig
-            archive:
-              none: {}
-          - name: kubeadmin-password
-            path: /data/auth/kubeadmin-password
-            archive:
-              none: {}
-          - name: url
-            path: /data/url
-            archive:
-              none: {}
-          - name: SSH_ACCESS
-            path: /data/SSH_ACCESS.md
-            archive:
-              none: {}
-          - name: data
-            path: /data
-            archive:
-              tar: {}
 
     - name: gen-creds
       container:
@@ -122,28 +97,12 @@ spec:
         volumeMounts:
           - name: data
             mountPath: /data
-      outputs:
-        artifacts:
-          - name: stackrox-admin-password
-            path: /data/stackrox-admin-password
-            archive:
-              none: {}
 
     - name: run-ansible-demo
-      inputs:
-        artifacts:
-          - name: foo
-            path: /tmp/foo
-          - name: bar
-            path: /tmp/bar
       container:
         image: us.gcr.io/rox-se/ansible-demo:latest
         imagePullPolicy: Always
         env:
-          - name: ADMIN_PASSWORD
-            value: "TODO(sbostick)"
-          - name: KUBECONFIG_BASE64
-            value: "TODO(sbostick)"
           - name: CENTRAL_PORT
             value: 443
           - name: DOCKERCONFIG_BASE64
@@ -171,8 +130,8 @@ spec:
                 name: google-credentials-openshift-4
                 key: google-credentials.json
         command: [sh, -c, '
-          # ADMIN_PASSWORD=$(cat /tmp/stackrox-admin-password);
-          # KUBECONFIG_BASE64=$(cat /tmp/kubeconfig | base64);
+          ADMIN_PASSWORD=$(cat /data/stackrox-admin-password);
+          KUBECONFIG_BASE64=$(cat /data/auth/kubeconfig | base64);
 
           echo "ADMIN_PASSWORD      => $ADMIN_PASSWORD";
           echo "CENTRAL_PORT        => $CENTRAL_PORT";
@@ -190,12 +149,47 @@ spec:
           - name: data
             mountPath: /data
 
-    #- name: wait
-    #suspend: {}
+    - name: gather
+      container:
+        image: busybox
+        imagePullPolicy: Always
+        command: [echo, "gathering artifacts"]
+        volumeMounts:
+          - name: data
+            mountPath: /data
+      outputs:
+        artifacts:
+          - name: kubeconfig
+            path: /data/auth/kubeconfig
+            archive:
+              none: {}
+          - name: kubeadmin-password
+            path: /data/auth/kubeadmin-password
+            archive:
+              none: {}
+          - name: url
+            path: /data/url
+            archive:
+              none: {}
+          - name: SSH_ACCESS
+            path: /data/SSH_ACCESS.md
+            archive:
+              none: {}
+          - name: stackrox-admin-password
+            path: /data/stackrox-admin-password
+            archive:
+              none: {}
+          - name: data
+            path: /data
+            archive:
+              tar: {}
+
+    - name: wait
+      suspend: {}
 
     - name: destroy
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.7-7-ge8956a2f69-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.7-8-ge8798aa4fa-snapshot
         imagePullPolicy: Always
         args:
           - destroy
