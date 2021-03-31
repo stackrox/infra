@@ -44,6 +44,8 @@ spec:
 
         - - name: run-ansible-demo
             template: run-ansible-demo
+            continueOn:
+              failed: true
 
         - - name: gather
             template: gather
@@ -56,7 +58,7 @@ spec:
 
     - name: create
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.7-8-ge8798aa4fa-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.7-10-gd51bc372d7-snapshot
         imagePullPolicy: Always
         volumeMounts:
           - name: data
@@ -105,8 +107,6 @@ spec:
         env:
           - name: CENTRAL_PORT
             value: 443
-          - name: DOCKERCONFIG_BASE64
-            value:
           - name: ORCHESTRATOR
             value: "openshift"
           - name: STACKROX_LICENSE
@@ -118,30 +118,37 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: demo-secrets
-                key: STACKROX_IO_PASSWORD
+                key: STACKROX_IO_USERNAME
           - name: IMAGE_PULL_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: demo-secrets
-                key: STACKROX_IO_USERNAME
+                key: STACKROX_IO_PASSWORD
           - name: GOOGLE_CREDENTIALS
             valueFrom:
               secretKeyRef:
                 name: google-credentials-openshift-4
                 key: google-credentials.json
         command: [sh, -c, '
-          ADMIN_PASSWORD=$(cat /data/stackrox-admin-password);
-          KUBECONFIG_BASE64=$(cat /data/auth/kubeconfig | base64);
+          base64 /data/auth/kubeconfig | tr -d "\n" > /data/auth/kubeconfig_base64
 
-          echo "ADMIN_PASSWORD      => $ADMIN_PASSWORD";
-          echo "CENTRAL_PORT        => $CENTRAL_PORT";
-          echo "DOCKERCONFIG_BASE64 => $DOCKERCONFIG_BASE64";
-          echo "GOOGLE_CREDENTIALS  => $GOOGLE_CREDENTIALS";
-          echo "IMAGE_PULL_PASSWORD => $IMAGE_PULL_PASSWORD";
-          echo "IMAGE_PULL_USER     => $IMAGE_PULL_USER";
-          echo "KUBECONFIG_BASE64   => $KUBECONFIG_BASE64";
-          echo "ORCHESTRATOR        => $ORCHESTRATOR";
-          echo "STACKROX_LICENSE    => $STACKROX_LICENSE";
+          ADMIN_PASSWORD=$(cat /data/stackrox-admin-password);
+          KUBECONFIG_BASE64=$(cat /data/auth/kubeconfig_base64)
+
+          echo "ADMIN_PASSWORD      => [$ADMIN_PASSWORD]";
+          echo "CENTRAL_ADDR        => [$CENTRAL_ADDR]";
+          echo "CENTRAL_PORT        => [$CENTRAL_PORT]";
+          echo "GOOGLE_CREDENTIALS  => [$GOOGLE_CREDENTIALS]";
+          echo "IMAGE_PULL_PASSWORD => [$IMAGE_PULL_PASSWORD]";
+          echo "IMAGE_PULL_USER     => [$IMAGE_PULL_USER]";
+          echo "IMAGE_REGISTRY      => [$IMAGE_REGISTRY]";
+          echo "KUBECONFIG_BASE64   => [$KUBECONFIG_BASE64]";
+          echo "ORCHESTRATOR        => [$ORCHESTRATOR]";
+          echo "STACKROX_LICENSE    => [$STACKROX_LICENSE]";
+
+          export ADMIN_PASSWORD KUBECONFIG_BASE64 CENTRAL_PORT GOOGLE_CREDENTIALS;
+          export IMAGE_PULL_PASSWORD IMAGE_PULL_USER KUBECONFIG_BASE64 ORCHESTRATOR;
+          export STACKROX_LICENSE;
 
           ansible-playbook -i inventory.yml main.yml
         ']
@@ -161,6 +168,10 @@ spec:
         artifacts:
           - name: kubeconfig
             path: /data/auth/kubeconfig
+            archive:
+              none: {}
+          - name: kubeconfig_base64
+            path: /data/auth/kubeconfig_base64
             archive:
               none: {}
           - name: kubeadmin-password
@@ -189,7 +200,7 @@ spec:
 
     - name: destroy
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.7-8-ge8798aa4fa-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.7-10-gd51bc372d7-snapshot
         imagePullPolicy: Always
         args:
           - destroy
