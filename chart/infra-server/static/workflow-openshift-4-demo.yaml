@@ -130,27 +130,22 @@ spec:
                 name: google-credentials-openshift-4
                 key: google-credentials.json
         command: [sh, -c, '
-          base64 /data/auth/kubeconfig | tr -d "\n" > /data/auth/kubeconfig_base64
+          base64 /data/auth/kubeconfig | tr -d "\n" > /data/auth/kubeconfig_base64;
 
           ADMIN_PASSWORD=$(cat /data/stackrox-admin-password);
-          KUBECONFIG_BASE64=$(cat /data/auth/kubeconfig_base64)
+          KUBECONFIG_BASE64=$(cat /data/auth/kubeconfig_base64);
 
           echo "ADMIN_PASSWORD      => [$ADMIN_PASSWORD]";
           echo "CENTRAL_ADDR        => [$CENTRAL_ADDR]";
           echo "CENTRAL_PORT        => [$CENTRAL_PORT]";
-          echo "GOOGLE_CREDENTIALS  => [$GOOGLE_CREDENTIALS]";
-          echo "IMAGE_PULL_PASSWORD => [$IMAGE_PULL_PASSWORD]";
-          echo "IMAGE_PULL_USER     => [$IMAGE_PULL_USER]";
           echo "IMAGE_REGISTRY      => [$IMAGE_REGISTRY]";
-          echo "KUBECONFIG_BASE64   => [$KUBECONFIG_BASE64]";
           echo "ORCHESTRATOR        => [$ORCHESTRATOR]";
-          echo "STACKROX_LICENSE    => [$STACKROX_LICENSE]";
 
           export ADMIN_PASSWORD KUBECONFIG_BASE64 CENTRAL_PORT GOOGLE_CREDENTIALS;
           export IMAGE_PULL_PASSWORD IMAGE_PULL_USER KUBECONFIG_BASE64 ORCHESTRATOR;
           export STACKROX_LICENSE;
 
-          ansible-playbook -i inventory.yml main.yml
+          ansible-playbook -i inventory.yml main.yml;
         ']
         volumeMounts:
           - name: data
