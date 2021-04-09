@@ -149,19 +149,21 @@ spec:
           - name: ORCHESTRATOR
             value: openshift
           - name: IMAGE_REGISTRY
-            value: docker.io
+            value: docker.io/stackrox
           - name: ADMIN_PASSWORD
             value: "{{ inputs.parameters.admin-password }}"
           - name: KUBECONFIG_BASE64
             value: "{{ inputs.parameters.kubeconfig-base64 }}"
+          - name: ANSIBLE_STDOUT_CALLBACK
+            value: debug
         command: [sh]
         source: |
           set -x
           pwd
-          ansible-playbook -i inventory.yml \
-            -e "scanner_image=docker.io/stackrox/scanner:2.11.2" \
-            -e "scanner_db_image=docker.io/stackrox/scanner-db:2.11.2" \
-            -e "stackrox_image=docker.io/stackrox/main:3.0.58.0-rc.2" \
+          ansible-playbook -i inventory.yml -v \
+            -e "scanner_image=docker.io/stackrox/scanner:2.12.1" \
+            -e "scanner_db_image=docker.io/stackrox/scanner-db:2.12.1" \
+            -e "stackrox_image=docker.io/stackrox/main:3.0.58.0" \
             -e "orchestrator=openshift" \
             main.yml
           touch ./stay-running
