@@ -46,6 +46,12 @@ spec:
             template: run-ansible-demo
             continueOn:
               failed: true
+            arguments:
+              parameters:
+              - name: admin-password
+                value: "{{steps.gen-creds.outputs.parameters.admin-password}}"
+              - name: kubeconfig-base64
+                value: "{{steps.gen-creds.outputs.parameters.kubeconfig-base64}}"
 
         - - name: gather
             template: gather
@@ -91,24 +97,33 @@ spec:
             value: "{{workflow.parameters.region}}"
 
     - name: gen-creds
-      container:
+      script:
         image: rnix/openssl-gost
-        imagePullPolicy: Always
-        command: [sh, -c,
-          'openssl rand -base64 32 | tr "+/" "_#"  | cut -c 1-20 > /data/stackrox-admin-password']
         volumeMounts:
           - name: data
             mountPath: /data
+        command: [sh]
+        source: |
+          openssl rand -base64 32 | tr "+/" "_#"  | cut -c 1-20 > /data/admin_password
+          base64 /data/auth/kubeconfig | tr -d "\n" > /data/auth/kubeconfig_base64
+      outputs:
+        parameters:
+          - name: admin-password
+            valueFrom:
+              path: /data/admin_password
+          - name: kubeconfig-base64
+            valueFrom:
+              path: /data/auth/kubeconfig_base64
 
     - name: run-ansible-demo
-      container:
+      inputs:
+        parameters:
+          - name: admin-password
+          - name: kubeconfig-base64
+      script:
         image: us.gcr.io/rox-se/ansible-demo:latest
         imagePullPolicy: Always
         env:
-          - name: CENTRAL_PORT
-            value: 443
-          - name: ORCHESTRATOR
-            value: "openshift"
           - name: STACKROX_LICENSE
             valueFrom:
               secretKeyRef:
@@ -118,35 +133,38 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: demo-secrets
-                key: STACKROX_IO_USERNAME
+                key: DOCKER_IO_USERNAME
           - name: IMAGE_PULL_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: demo-secrets
-                key: STACKROX_IO_PASSWORD
+                key: DOCKER_IO_PASSWORD
           - name: GOOGLE_CREDENTIALS
             valueFrom:
               secretKeyRef:
                 name: google-credentials-openshift-4
                 key: google-credentials.json
-        command: [sh, -c, '
-          base64 /data/auth/kubeconfig | tr -d "\n" > /data/auth/kubeconfig_base64;
-
-          ADMIN_PASSWORD=$(cat /data/stackrox-admin-password);
-          KUBECONFIG_BASE64=$(cat /data/auth/kubeconfig_base64);
-
-          echo "ADMIN_PASSWORD      => [$ADMIN_PASSWORD]";
-          echo "CENTRAL_ADDR        => [$CENTRAL_ADDR]";
-          echo "CENTRAL_PORT        => [$CENTRAL_PORT]";
-          echo "IMAGE_REGISTRY      => [$IMAGE_REGISTRY]";
-          echo "ORCHESTRATOR        => [$ORCHESTRATOR]";
-
-          export ADMIN_PASSWORD KUBECONFIG_BASE64 CENTRAL_PORT GOOGLE_CREDENTIALS;
-          export IMAGE_PULL_PASSWORD IMAGE_PULL_USER KUBECONFIG_BASE64 ORCHESTRATOR;
-          export STACKROX_LICENSE;
-
-          ansible-playbook -i inventory.yml main.yml;
-        ']
+          - name: CENTRAL_PORT
+            value: "443"
+          - name: ORCHESTRATOR
+            value: openshift
+          - name: IMAGE_REGISTRY
+            value: docker.io
+          - name: ADMIN_PASSWORD
+            value: "{{ inputs.parameters.admin-password }}"
+          - name: KUBECONFIG_BASE64
+            value: "{{ inputs.parameters.kubeconfig-base64 }}"
+        command: [sh]
+        source: |
+          set -x
+          ansible-playbook -i inventory.yml \
+            -e "scanner_image=docker.io/stackrox/scanner:2.11.2" \
+            -e "scanner_db_image=docker.io/stackrox/scanner-db:2.11.2" \
+            -e "stackrox_image=docker.io/stackrox/main:3.0.58.0-rc.2" \
+            -e "orchestrator=openshift" \
+            main.yml
+          echo "sleeping two hours to enable manual troubleshooting in this container"
+          sleep 7200
         volumeMounts:
           - name: data
             mountPath: /data
@@ -170,7 +188,7 @@ spec:
             archive:
               none: {}
           - name: kubeadmin-password
-            path: /data/auth/kubeadmin-password
+            path: /data/auth/kubeadmin_password
             archive:
               none: {}
           - name: url
@@ -181,8 +199,8 @@ spec:
             path: /data/SSH_ACCESS.md
             archive:
               none: {}
-          - name: stackrox-admin-password
-            path: /data/stackrox-admin-password
+          - name: admin-password
+            path: /data/admin_password
             archive:
               none: {}
           - name: data
