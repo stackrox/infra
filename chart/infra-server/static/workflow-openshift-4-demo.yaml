@@ -157,14 +157,19 @@ spec:
         command: [sh]
         source: |
           set -x
+          pwd
           ansible-playbook -i inventory.yml \
             -e "scanner_image=docker.io/stackrox/scanner:2.11.2" \
             -e "scanner_db_image=docker.io/stackrox/scanner-db:2.11.2" \
             -e "stackrox_image=docker.io/stackrox/main:3.0.58.0-rc.2" \
             -e "orchestrator=openshift" \
             main.yml
-          echo "sleeping two hours to enable manual troubleshooting in this container"
-          sleep 7200
+          touch ./stay-running
+          while [[ -f ./stay-running ]]; do
+            echo "Found ./stay-running -- sleeping 60s"
+            sleep 60
+          done
+
         volumeMounts:
           - name: data
             mountPath: /data
