@@ -121,14 +121,9 @@ spec:
           - name: admin-password
           - name: kubeconfig-base64
       script:
-        image: us.gcr.io/rox-se/ansible-demo:latest
+        image: us.gcr.io/rox-se/ansible-demo:shane-RS-156-openshift-demo-env-52
         imagePullPolicy: Always
         env:
-          - name: STACKROX_LICENSE
-            valueFrom:
-              secretKeyRef:
-                name: demo-secrets
-                key: STACKROX_LICENSE
           - name: IMAGE_PULL_USER
             valueFrom:
               secretKeyRef:
