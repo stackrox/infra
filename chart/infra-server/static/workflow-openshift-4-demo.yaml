@@ -189,10 +189,6 @@ spec:
             path: /data/auth/kubeconfig_base64
             archive:
               none: {}
-          - name: kubeadmin-password
-            path: /data/auth/kubeadmin_password
-            archive:
-              none: {}
           - name: url
             path: /data/url
             archive:
