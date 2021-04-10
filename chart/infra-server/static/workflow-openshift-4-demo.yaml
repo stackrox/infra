@@ -120,7 +120,7 @@ spec:
         parameters:
           - name: admin-password
           - name: kubeconfig-base64
-      script:
+      container:
         image: us.gcr.io/rox-se/ansible-demo:shane-RS-156-openshift-demo-env-52
         imagePullPolicy: Always
         env:
@@ -151,22 +151,6 @@ spec:
             value: "{{ inputs.parameters.kubeconfig-base64 }}"
           - name: ANSIBLE_STDOUT_CALLBACK
             value: debug
-        command: [sh]
-        source: |
-          set -x
-          pwd
-          ansible-playbook -i inventory.yml -v \
-            -e "scanner_image=docker.io/stackrox/scanner:2.12.1" \
-            -e "scanner_db_image=docker.io/stackrox/scanner-db:2.12.1" \
-            -e "stackrox_image=docker.io/stackrox/main:3.0.58.0" \
-            -e "orchestrator=openshift" \
-            main.yml
-          touch ./stay-running
-          while [[ -f ./stay-running ]]; do
-            echo "Found ./stay-running -- sleeping 60s"
-            sleep 60
-          done
-
         volumeMounts:
           - name: data
             mountPath: /data
