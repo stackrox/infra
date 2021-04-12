@@ -306,14 +306,23 @@
       kind: optional
 
   artifacts:
+    - name: admin-password
+      description: Admin password for StackRox console
+
     - name: kubeconfig
       description: Kube config for connecting to this cluster
 
     - name: SSH_ACCESS
       description: Instructions for obtaining SSH access to instances in your cluster
 
-    - name: stackrox-admin-password
-      description: The admin password needed to login to the StackRox console.
+    - name: url-openshift
+      description: The URL for the OpenShift console
+
+    - name: url-stackrox
+      description: The URL for the StackRox console
+
+    - name: data
+      description: An archive that includes ssh keys to connect to cluster nodes
 
 #############
 #  example  #

@@ -39,8 +39,8 @@ spec:
         - - name: create
             template: create
 
-        - - name: gen-creds
-            template: gen-creds
+        - - name: pre-install
+            template: pre-install
 
         - - name: run-ansible-demo
             template: run-ansible-demo
@@ -49,9 +49,9 @@ spec:
             arguments:
               parameters:
               - name: admin-password
-                value: "{{steps.gen-creds.outputs.parameters.admin-password}}"
+                value: "{{steps.pre-install.outputs.parameters.admin-password}}"
               - name: kubeconfig-base64
-                value: "{{steps.gen-creds.outputs.parameters.kubeconfig-base64}}"
+                value: "{{steps.pre-install.outputs.parameters.kubeconfig-base64}}"
 
         - - name: gather
             template: gather
@@ -96,7 +96,7 @@ spec:
           - name: REGION
             value: "{{workflow.parameters.region}}"
 
-    - name: gen-creds
+    - name: pre-install
       script:
         image: rnix/openssl-gost
         volumeMounts:
@@ -106,6 +106,9 @@ spec:
         source: |
           openssl rand -base64 32 | tr "+/" "_#"  | cut -c 1-20 > /data/admin_password
           base64 /data/auth/kubeconfig | tr -d "\n" > /data/auth/kubeconfig_base64
+          subdomain="apps.{{workflow.parameters.name}}.openshift.infra.rox.systems"
+          echo "https://console-openshift-console.${subdomain}" > /data/url-openshift
+          echo "https://central-stackrox.${subdomain}" > /data/url-stackrox
       outputs:
         parameters:
           - name: admin-password
@@ -121,7 +124,7 @@ spec:
           - name: admin-password
           - name: kubeconfig-base64
       container:
-        image: us.gcr.io/rox-se/ansible-demo:shane-RS-156-openshift-demo-env-52
+        image: us.gcr.io/rox-se/ansible-demo:latest
         imagePullPolicy: Always
         env:
           - name: IMAGE_PULL_USER
@@ -165,24 +168,24 @@ spec:
             mountPath: /data
       outputs:
         artifacts:
+          - name: admin-password
+            path: /data/admin_password
+            archive:
+              none: {}
           - name: kubeconfig
             path: /data/auth/kubeconfig
-            archive:
-              none: {}
-          - name: kubeconfig_base64
-            path: /data/auth/kubeconfig_base64
-            archive:
-              none: {}
-          - name: url
-            path: /data/url
             archive:
               none: {}
           - name: SSH_ACCESS
             path: /data/SSH_ACCESS.md
             archive:
               none: {}
-          - name: admin-password
-            path: /data/admin_password
+          - name: url-openshift
+            path: /data/url-openshift
+            archive:
+              none: {}
+          - name: url-stackrox
+            path: /data/url-stackrox
             archive:
               none: {}
           - name: data
