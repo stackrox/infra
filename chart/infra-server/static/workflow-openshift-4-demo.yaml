@@ -85,8 +85,6 @@ spec:
               secretKeyRef:
                 name: redhat-pull-secret
                 key: REDHAT_PULL_SECRET
-          - name: USER_PULL_SECRET
-            value: "{{workflow.parameters.pull-secret}}"
           - name: OPENSHIFT_VERSION
             value: "{{workflow.parameters.openshift-version}}"
           - name: MASTER_NODE_COUNT
