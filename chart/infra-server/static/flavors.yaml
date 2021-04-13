@@ -280,6 +280,13 @@
         Opensource OKD releases are at https://github.com/openshift/okd/releases.
         For OKD use the release tag e.g. 4.7.0-0.okd-2021-02-25-144700.
 
+    - name: ansible-demo-tag
+      description: Ansible-demo image tag
+      value: latest
+      kind: optional
+      help: |
+        The image tag to use for the ansible-demo provisioner. This should generally be 'latest' but is parameterized to support testing and emergency use-cases. See https://github.com/stackrox/ansible-demo for details.
+
   artifacts:
     - name: admin-password
       description: Admin password for StackRox console

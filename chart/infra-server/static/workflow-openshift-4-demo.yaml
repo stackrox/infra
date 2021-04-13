@@ -9,6 +9,8 @@ spec:
       - name: name
       - name: openshift-version
         value: ""
+      - name: ansible-demo-tag
+        value: ""
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -114,7 +116,7 @@ spec:
           - name: admin-password
           - name: kubeconfig-base64
       container:
-        image: us.gcr.io/rox-se/ansible-demo:latest
+        image: "us.gcr.io/rox-se/ansible-demo:{{ansible-demo-tag}}"
         imagePullPolicy: Always
         env:
           - name: IMAGE_PULL_USER
