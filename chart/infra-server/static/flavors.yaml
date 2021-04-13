@@ -280,31 +280,6 @@
         Opensource OKD releases are at https://github.com/openshift/okd/releases.
         For OKD use the release tag e.g. 4.7.0-0.okd-2021-02-25-144700.
 
-    - name: pull-secret
-      description: A cloud.redhat.com pull secret
-      kind: optional
-      fromFile: true
-      help: |
-        Use this if you want to associate this cluster with a particular cloud.redhat.com account.
-        Get the pull secret from: https://cloud.redhat.com/openshift/install/pull-secret
-        You might do this for access to OpenShift Cluster Manager for example.
-        By default an infra automation account is used.
-
-    - name: master-node-count
-      description: number of master nodes
-      value: 3
-      kind: optional
-
-    - name: worker-node-count
-      description: number of worker nodes
-      value: 3
-      kind: optional
-
-    - name: region
-      description: Google Cloud zone to deploy infrastructure into.
-      value: us-east1
-      kind: optional
-
   artifacts:
     - name: admin-password
       description: Admin password for StackRox console

@@ -10,11 +10,11 @@ spec:
       - name: openshift-version
         value: ""
       - name: master-node-count
-        value: ""
+        value: "3"
       - name: worker-node-count
-        value: ""
+        value: "3"
       - name: region
-        value: ""
+        value: "us-east1"
       - name: pull-secret
         value: ""
   volumeClaimTemplates:
@@ -24,7 +24,7 @@ spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
-            storage: 1Mi
+            storage: 10Mi
   volumes:
     - name: credentials
       secret:
@@ -64,7 +64,7 @@ spec:
 
     - name: create
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.7-10-gd51bc372d7-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.9
         imagePullPolicy: Always
         volumeMounts:
           - name: data
