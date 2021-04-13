@@ -9,14 +9,6 @@ spec:
       - name: name
       - name: openshift-version
         value: ""
-      - name: master-node-count
-        value: "3"
-      - name: worker-node-count
-        value: "3"
-      - name: region
-        value: "us-east1"
-      - name: pull-secret
-        value: ""
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -88,11 +80,11 @@ spec:
           - name: OPENSHIFT_VERSION
             value: "{{workflow.parameters.openshift-version}}"
           - name: MASTER_NODE_COUNT
-            value: "{{workflow.parameters.master-node-count}}"
+            value: "3"
           - name: WORKER_NODE_COUNT
-            value: "{{workflow.parameters.worker-node-count}}"
+            value: "3"
           - name: REGION
-            value: "{{workflow.parameters.region}}"
+            value: "us-east1"
 
     - name: pre-install
       script:
