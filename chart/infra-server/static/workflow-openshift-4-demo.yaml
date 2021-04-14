@@ -116,7 +116,7 @@ spec:
           - name: admin-password
           - name: kubeconfig-base64
       container:
-        image: "us.gcr.io/rox-se/ansible-demo:{{ansible-demo-tag}}"
+        image: "us.gcr.io/rox-se/ansible-demo:{{ workflow.parameters.ansible-demo-tag }}"
         imagePullPolicy: Always
         env:
           - name: IMAGE_PULL_USER
