@@ -270,16 +270,6 @@
       description: cluster name
       value: example1
 
-    - name: openshift-version
-      description: openshift release from OCP or OKD
-      value: ocp/stable-4.7
-      kind: optional
-      help: |
-        The latest RedHat enterprise OCP releases can be found at https://mirror.openshift.com/pub/openshift-v4/clients/ocp/.
-        For OCP use the path to one of the stable releases e.g. ocp/stable-4.
-        Opensource OKD releases are at https://github.com/openshift/okd/releases.
-        For OKD use the release tag e.g. 4.7.0-0.okd-2021-02-25-144700.
-
     - name: ansible-demo-tag
       description: Ansible-demo image tag
       value: latest

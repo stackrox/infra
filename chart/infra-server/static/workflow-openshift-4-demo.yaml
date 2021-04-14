@@ -7,8 +7,6 @@ spec:
   arguments:
     parameters:
       - name: name
-      - name: openshift-version
-        value: ""
       - name: ansible-demo-tag
         value: ""
   volumeClaimTemplates:
@@ -80,7 +78,7 @@ spec:
                 name: redhat-pull-secret
                 key: REDHAT_PULL_SECRET
           - name: OPENSHIFT_VERSION
-            value: "{{workflow.parameters.openshift-version}}"
+            value: ocp/stable-4.7
           - name: MASTER_NODE_COUNT
             value: "3"
           - name: WORKER_NODE_COUNT
