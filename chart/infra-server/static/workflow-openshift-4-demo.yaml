@@ -1,0 +1,203 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: openshift-4-demo-
+spec:
+  entrypoint: start
+  arguments:
+    parameters:
+      - name: name
+      - name: ansible-demo-tag
+        value: ""
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 10Mi
+  volumes:
+    - name: credentials
+      secret:
+        secretName: google-credentials-openshift-4
+    - name: demo-secrets
+      secret:
+        secretName: demo-secrets
+
+  templates:
+    - name: start
+      steps:
+        - - name: create
+            template: create
+
+        - - name: pre-install
+            template: pre-install
+
+        - - name: run-ansible-demo
+            template: run-ansible-demo
+            continueOn:
+              failed: true
+            arguments:
+              parameters:
+              - name: admin-password
+                value: "{{steps.pre-install.outputs.parameters.admin-password}}"
+              - name: kubeconfig-base64
+                value: "{{steps.pre-install.outputs.parameters.kubeconfig-base64}}"
+
+        - - name: gather
+            template: gather
+
+        - - name: wait
+            template: wait
+
+        - - name: destroy
+            template: destroy
+
+    - name: create
+      container:
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.10
+        imagePullPolicy: Always
+        volumeMounts:
+          - name: data
+            mountPath: /data
+        args:
+          - create
+          - "{{workflow.parameters.name}}"
+          - srox-temp-dev-test
+          - openshift.infra.rox.systems
+        env:
+          - name: GOOGLE_CREDENTIALS
+            valueFrom:
+              secretKeyRef:
+                name: google-credentials-openshift-4
+                key: google-credentials.json
+          - name: PULL_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: redhat-pull-secret
+                key: REDHAT_PULL_SECRET
+          - name: OPENSHIFT_VERSION
+            value: ocp/stable-4.7
+          - name: MASTER_NODE_COUNT
+            value: "3"
+          - name: WORKER_NODE_COUNT
+            value: "3"
+          - name: REGION
+            value: "us-east1"
+
+    - name: pre-install
+      script:
+        image: rnix/openssl-gost
+        volumeMounts:
+          - name: data
+            mountPath: /data
+        command: [sh]
+        source: |
+          openssl rand -base64 32 | tr "+/" "_#"  | cut -c 1-20 > /data/admin_password
+          base64 /data/auth/kubeconfig | tr -d "\n" > /data/auth/kubeconfig_base64
+          subdomain="apps.{{workflow.parameters.name}}.openshift.infra.rox.systems"
+          echo "https://console-openshift-console.${subdomain}" > /data/url-openshift
+          echo "https://central-stackrox.${subdomain}" > /data/url-stackrox
+      outputs:
+        parameters:
+          - name: admin-password
+            valueFrom:
+              path: /data/admin_password
+          - name: kubeconfig-base64
+            valueFrom:
+              path: /data/auth/kubeconfig_base64
+
+    - name: run-ansible-demo
+      inputs:
+        parameters:
+          - name: admin-password
+          - name: kubeconfig-base64
+      container:
+        image: "us.gcr.io/rox-se/ansible-demo:{{ workflow.parameters.ansible-demo-tag }}"
+        imagePullPolicy: Always
+        env:
+          - name: IMAGE_PULL_USER
+            valueFrom:
+              secretKeyRef:
+                name: demo-secrets
+                key: DOCKER_IO_USERNAME
+          - name: IMAGE_PULL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: demo-secrets
+                key: DOCKER_IO_PASSWORD
+          - name: GOOGLE_CREDENTIALS
+            valueFrom:
+              secretKeyRef:
+                name: google-credentials-openshift-4
+                key: google-credentials.json
+          - name: CENTRAL_PORT
+            value: "443"
+          - name: ORCHESTRATOR
+            value: openshift
+          - name: IMAGE_REGISTRY
+            value: docker.io/stackrox
+          - name: ADMIN_PASSWORD
+            value: "{{ inputs.parameters.admin-password }}"
+          - name: KUBECONFIG_BASE64
+            value: "{{ inputs.parameters.kubeconfig-base64 }}"
+          - name: ANSIBLE_STDOUT_CALLBACK
+            value: debug
+        volumeMounts:
+          - name: data
+            mountPath: /data
+
+    - name: gather
+      container:
+        image: busybox
+        imagePullPolicy: Always
+        command: [echo, "gathering artifacts"]
+        volumeMounts:
+          - name: data
+            mountPath: /data
+      outputs:
+        artifacts:
+          - name: admin-password
+            path: /data/admin_password
+            archive:
+              none: {}
+          - name: kubeconfig
+            path: /data/auth/kubeconfig
+            archive:
+              none: {}
+          - name: SSH_ACCESS
+            path: /data/SSH_ACCESS.md
+            archive:
+              none: {}
+          - name: url-openshift
+            path: /data/url-openshift
+            archive:
+              none: {}
+          - name: url-stackrox
+            path: /data/url-stackrox
+            archive:
+              none: {}
+          - name: data
+            path: /data
+            archive:
+              tar: {}
+
+    - name: wait
+      suspend: {}
+
+    - name: destroy
+      container:
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.10
+        imagePullPolicy: Always
+        args:
+          - destroy
+        env:
+          - name: GOOGLE_CREDENTIALS
+            valueFrom:
+              secretKeyRef:
+                name: google-credentials-openshift-4
+                key: google-credentials.json
+        volumeMounts:
+          - name: data
+            mountPath: /data

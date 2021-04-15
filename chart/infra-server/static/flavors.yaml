@@ -257,6 +257,45 @@
     - name: SSH_ACCESS
       description: Instructions for obtaining SSH access to instances in your cluster
 
+######################
+#  openshift-4-demo  #
+######################
+- id: openshift-4-demo
+  name: OpenShift 4.x Demo
+  description: OpenShift 4.x Demo
+  availability: alpha
+  workflow: configuration/workflow-openshift-4-demo.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      value: example1
+
+    - name: ansible-demo-tag
+      description: Ansible-demo image tag
+      value: latest
+      kind: optional
+      help: |
+        The image tag to use for the ansible-demo provisioner. This should generally be 'latest' but is parameterized to support testing and emergency use-cases. See https://github.com/stackrox/ansible-demo for details.
+
+  artifacts:
+    - name: admin-password
+      description: Admin password for StackRox console
+
+    - name: kubeconfig
+      description: Kube config for connecting to this cluster
+
+    - name: SSH_ACCESS
+      description: Instructions for obtaining SSH access to instances in your cluster
+
+    - name: url-openshift
+      description: The URL for the OpenShift console
+
+    - name: url-stackrox
+      description: The URL for the StackRox console
+
+    - name: data
+      description: An archive that includes ssh keys to connect to cluster nodes
+
 #############
 #  example  #
 #############
