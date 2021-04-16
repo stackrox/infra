@@ -325,7 +325,7 @@
 
     - name: user-arns
       description: AWS user ARNs that will get access to the cluster
-      value: arn:aws:iam::393282794030:user/joey@stackrox.com
+      value: "arn:aws:iam::051999192406:user/automation/setup_automation"
 
     - name: nodes
       description: number of nodes
