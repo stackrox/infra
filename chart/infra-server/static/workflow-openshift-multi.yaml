@@ -52,14 +52,34 @@ spec:
         artifacts:
           - name: kubeconfig
             path: /well-known/artifacts/config
-          - name: terraform-destroy-plan
-            path: /well-known/artifacts/terraform-destroy.tfplan
+            archive:
+              none: {}
+          - name: console_url
+            path: /well-known/artifacts/console_url
+            archive:
+              none: {}
+          - name: console_password
+            path: /well-known/artifacts/console_passwd
+            archive:
+              none: {}
+          - name: grafana_url
+            path: /well-known/artifacts/grafana_url
+            archive:
+              none: {}
+          - name: prometheus_url
+            path: /well-known/artifacts/prometheus_url
+            archive:
+              none: {}
           - name: SSH_ACCESS
             path: /well-known/artifacts/SSH_ACCESS.md
             archive:
               none: {}
+          - name: data
+            path: /well-known
+            archive:
+              tar: {}
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:0.2.8
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:0.2.11
         args:
           - create
           - "--name={{inputs.parameters.name}}"
@@ -85,7 +105,7 @@ spec:
           - name: terraform-destroy-plan
             path: /well-known/artifacts/terraform-destroy.tfplan
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:0.2.8
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:0.2.11
         args:
           - destroy
         env:
