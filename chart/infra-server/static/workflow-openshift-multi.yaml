@@ -95,7 +95,7 @@ spec:
             path: /well-known/artifacts/terraform-destroy.tfplan
 
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:0.2.11
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:0.2.11-1-geb3414898d
         args:
           - create
           - "--name={{inputs.parameters.name}}"
@@ -121,7 +121,7 @@ spec:
           - name: terraform-destroy-plan
             path: /well-known/artifacts/terraform-destroy.tfplan
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:0.2.11
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:0.2.11-1-geb3414898d
         args:
           - destroy
         env:
