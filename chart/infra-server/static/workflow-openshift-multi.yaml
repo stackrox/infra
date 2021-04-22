@@ -8,8 +8,12 @@ spec:
     parameters:
       - name: name
       - name: crio
+      - name: nodes
+      - name: machine-type
       - name: zone
         value: ""
+      - name: install-monitoring
+      - name: install-metrics
   volumes:
     - name: credentials
       secret:
@@ -26,8 +30,16 @@ spec:
                   value: "{{workflow.parameters.name}}"
                 - name: crio
                   value: "{{workflow.parameters.crio}}"
+                - name: nodes
+                  value: "{{workflow.parameters.nodes}}"
+                - name: machine-type
+                  value: "{{workflow.parameters.machine-type}}"
                 - name: zone
                   value: "{{workflow.parameters.zone}}"
+                - name: install-monitoring
+                  value: "{{workflow.parameters.install-monitoring}}"
+                - name: install-metrics
+                  value: "{{workflow.parameters.install-metrics}}"
 
         - - name: wait
             template: wait
@@ -78,6 +90,10 @@ spec:
             path: /well-known
             archive:
               tar: {}
+          # internal use
+          - name: terraform-destroy-plan
+            path: /well-known/artifacts/terraform-destroy.tfplan
+
       container:
         image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:0.2.11
         args:
