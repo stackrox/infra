@@ -8,8 +8,12 @@ spec:
     parameters:
       - name: name
       - name: crio
+      - name: nodes
+      - name: machine-type
       - name: zone
         value: ""
+      - name: install-monitoring
+      - name: install-metrics
   volumes:
     - name: credentials
       secret:
@@ -26,8 +30,16 @@ spec:
                   value: "{{workflow.parameters.name}}"
                 - name: crio
                   value: "{{workflow.parameters.crio}}"
+                - name: nodes
+                  value: "{{workflow.parameters.nodes}}"
+                - name: machine-type
+                  value: "{{workflow.parameters.machine-type}}"
                 - name: zone
                   value: "{{workflow.parameters.zone}}"
+                - name: install-monitoring
+                  value: "{{workflow.parameters.install-monitoring}}"
+                - name: install-metrics
+                  value: "{{workflow.parameters.install-metrics}}"
 
         - - name: wait
             template: wait
@@ -52,14 +64,38 @@ spec:
         artifacts:
           - name: kubeconfig
             path: /well-known/artifacts/config
-          - name: terraform-destroy-plan
-            path: /well-known/artifacts/terraform-destroy.tfplan
+            archive:
+              none: {}
+          - name: console_url
+            path: /well-known/artifacts/console_url
+            archive:
+              none: {}
+          - name: console_password
+            path: /well-known/artifacts/console_passwd
+            archive:
+              none: {}
+          - name: grafana_url
+            path: /well-known/artifacts/grafana_url
+            archive:
+              none: {}
+          - name: prometheus_url
+            path: /well-known/artifacts/prometheus_url
+            archive:
+              none: {}
           - name: SSH_ACCESS
             path: /well-known/artifacts/SSH_ACCESS.md
             archive:
               none: {}
+          - name: data
+            path: /well-known
+            archive:
+              tar: {}
+          # internal use
+          - name: terraform-destroy-plan
+            path: /well-known/artifacts/terraform-destroy.tfplan
+
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:0.2.8
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:0.2.11-1-geb3414898d
         args:
           - create
           - "--name={{inputs.parameters.name}}"
@@ -85,7 +121,7 @@ spec:
           - name: terraform-destroy-plan
             path: /well-known/artifacts/terraform-destroy.tfplan
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:0.2.8
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:0.2.11-1-geb3414898d
         args:
           - destroy
         env:

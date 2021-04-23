@@ -3,7 +3,7 @@
 ##########
 - id: demo
   name: StackRox Demo
-  description: Demo running StackRox 3.0.56.0
+  description: Demo running StackRox 3.0.58.1
   availability: default
   workflow: configuration/workflow-demo.yaml
   parameters:
@@ -12,7 +12,7 @@
       value: example1
 
     - name: main-image
-      value: stackrox.io/main:3.0.56.0
+      value: stackrox.io/main:3.0.58.1
       kind: hardcoded
 
     - name: k8s-version
@@ -51,8 +51,8 @@
 
     - name: main-image
       description: StackRox Central image Docker name
-      value: stackrox.io/main:3.0.56.0
-      help: This must be a fully qualified image e.g. docker.io/stackrox/main:3.0.56.0
+      value: stackrox.io/main:3.0.58.1
+      help: This must be a fully qualified image e.g. docker.io/stackrox/main:3.0.58.1
 
     - name: scanner-image
       description: StackRox Scanner image Docker name
@@ -183,17 +183,55 @@
       value: true
       kind: optional
 
+    - name: nodes
+      description: number of worker nodes
+      value: "2"
+      kind: optional
+
+    - name: machine-type
+      description: node machine type
+      value: e2-standard-4
+      kind: optional
+
     - name: zone
       description: Google Cloud zone to deploy infrastructure into.
       value: us-east1-d
+      kind: optional
+
+    - name: install-monitoring
+      description: Install the OpenShift monitoring stack
+      help: This is a prometheus/grafana/alertmanager stack. See the logs/artifacts for access info.
+      value: true
+      kind: optional
+
+    - name: install-metrics
+      description: Install metrics
+      help: For example to get the output of `oc adm top pods`
+      value: false
       kind: optional
 
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
 
+    - name: console_url
+      description: The URL for the openshift console
+      tags: [url]
+
+    - name: console_password
+      description: The password for the console admin account
+
+    - name: grafana_url
+      description: The URL for the grafana instance (if monitoring is enabled)
+
+    - name: prometheus_url
+      description: The URL for the prometheus instance (if monitoring is enabled)
+
     - name: SSH_ACCESS
       description: Instructions for obtaining SSH access to instances in your cluster
+
+    - name: data
+      description: An archive with various bits
 
 ####################
 #  openshift-4     #
@@ -292,6 +330,7 @@
 
     - name: url-stackrox
       description: The URL for the StackRox console
+      tags: [url]
 
     - name: data
       description: An archive that includes ssh keys to connect to cluster nodes
