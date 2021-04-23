@@ -59,7 +59,11 @@ spec:
         parameters:
           - name: name
           - name: crio
+          - name: nodes
+          - name: machine-type
           - name: zone
+          - name: install-monitoring
+          - name: install-metrics
       outputs:
         artifacts:
           - name: kubeconfig
@@ -102,6 +106,10 @@ spec:
           - "--crio={{inputs.parameters.crio}}"
           - --creation-source=infra
           - "--zone={{inputs.parameters.zone}}"
+          - "--nodes={{inputs.parameters.nodes}}"
+          - "--machine-type={{inputs.parameters.machine-type}}"
+          - "--install-metrics={{inputs.parameters.install-metrics}}"
+          - "--install-monitoring={{inputs.parameters.install-monitoring}}"
         env:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
