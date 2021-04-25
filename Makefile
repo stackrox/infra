@@ -219,6 +219,7 @@ install-local: render-local
 	fi
 	kubectl apply -R \
 	    -f chart-rendered/infra-server
+	kubectl rollout restart deployment/infra-server-deployment -n infra
 
 .PHONY: install-development
 install-development: render-development
@@ -231,6 +232,7 @@ install-development: render-development
 	kubectl apply -R \
 	    --context $(dev_context) \
 	    -f chart-rendered/infra-server
+	kubectl rollout restart deployment/infra-server-deployment -n infra
 
 .PHONY: install-production
 install-production: render-production
@@ -243,6 +245,7 @@ install-production: render-production
 	kubectl apply -R \
 	    --context $(prod_context) \
 	    -f chart-rendered/infra-server
+	kubectl rollout restart deployment/infra-server-deployment -n infra
 
 .PHONY: deploy-local
 deploy-local: push install-local
