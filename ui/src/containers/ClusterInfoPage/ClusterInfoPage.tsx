@@ -48,7 +48,12 @@ export default function ClusterInfoPage(): ReactElement {
       {cluster.URL && (
         <span className="text-base normal-case">
           URL:{' '}
-          <a href={cluster.URL} className="underline text-blue-500">
+          <a
+            href={cluster.URL}
+            className="underline text-blue-500"
+            target="_blank"
+            rel="noreferrer"
+          >
             {cluster.URL}
           </a>
         </span>
