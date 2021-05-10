@@ -140,31 +140,6 @@
     - name: SSH_ACCESS
       description: Instructions for obtaining SSH access to instances in your cluster
 
-####################
-#  openshift-lite  #
-####################
-- id: openshift-lite
-  name: OpenShift Single Node
-  description: Single-node OpenShift cluster
-  availability: alpha
-  workflow: configuration/workflow-openshift-lite.yaml
-  parameters:
-    - name: name
-      description: cluster name
-      value: example1
-
-    - name: zone
-      description: Google Cloud zone to deploy infrastructure into.
-      value: us-east1-d
-      kind: optional
-
-  artifacts:
-    - name: kubeconfig
-      description: Kube config for connecting to this cluster
-
-    - name: SSH_ACCESS
-      description: Instructions for obtaining SSH access to instances in your cluster
-
 #####################
 #  openshift-multi  #
 #####################
@@ -334,35 +309,6 @@
 
     - name: data
       description: An archive that includes ssh keys to connect to cluster nodes
-
-#############
-#  example  #
-#############
-- id: example
-  name: Example
-  description: Example flavor for testing
-  availability: alpha
-  workflow: configuration/workflow-example.yaml
-  parameters:
-    - name: create-sleep
-      description: time in seconds for create to take
-      value: 30
-      kind: optional
-
-    - name: create-success
-      description: should create succeed or fail
-      value: true
-      kind: optional
-
-    - name: destroy-sleep
-      description: time in seconds for destroy to take
-      value: 30
-      kind: optional
-
-    - name: destroy-success
-      description: should destroy succeed or fail
-      value: true
-      kind: optional
 
 #####################
 #  AWS EKS          #
