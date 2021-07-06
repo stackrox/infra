@@ -3,7 +3,7 @@
 ##########
 - id: demo
   name: StackRox Demo
-  description: Demo running StackRox 3.0.58.1
+  description: Demo running StackRox 3.0.62.0
   availability: default
   workflow: configuration/workflow-demo.yaml
   parameters:
@@ -12,7 +12,7 @@
       value: example1
 
     - name: main-image
-      value: stackrox.io/main:3.0.58.1
+      value: stackrox.io/main:3.0.62.0
       kind: hardcoded
 
     - name: k8s-version
@@ -51,8 +51,8 @@
 
     - name: main-image
       description: StackRox Central image Docker name
-      value: stackrox.io/main:3.0.58.1
-      help: This must be a fully qualified image e.g. docker.io/stackrox/main:3.0.58.1
+      value: stackrox.io/main:3.0.62.0
+      help: This must be a fully qualified image e.g. docker.io/stackrox/main:3.0.62.0
 
     - name: scanner-image
       description: StackRox Scanner image Docker name
@@ -241,9 +241,19 @@
         You might do this for access to OpenShift Cluster Manager for example.
         By default an infra automation account is used.
 
+    - name: master-node-type
+      description: the type of master nodes
+      value: n1-standard-4
+      kind: optional
+
     - name: master-node-count
       description: number of master nodes
       value: 3
+      kind: optional
+
+    - name: worker-node-type
+      description: the type of worker nodes
+      value: n1-standard-4
       kind: optional
 
     - name: worker-node-count

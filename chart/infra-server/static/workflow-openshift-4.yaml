@@ -9,7 +9,11 @@ spec:
       - name: name
       - name: openshift-version
         value: ""
+      - name: master-node-type
+        value: ""
       - name: master-node-count
+        value: ""
+      - name: worker-node-type
         value: ""
       - name: worker-node-count
         value: ""
@@ -66,7 +70,7 @@ spec:
             archive:
               tar: {}
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.10
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.12
         imagePullPolicy: Always
         args:
           - create
@@ -92,6 +96,10 @@ spec:
             value: "{{workflow.parameters.master-node-count}}"
           - name: WORKER_NODE_COUNT
             value: "{{workflow.parameters.worker-node-count}}"
+          - name: MASTER_NODE_TYPE
+            value: "{{workflow.parameters.master-node-type}}"
+          - name: WORKER_NODE_TYPE
+            value: "{{workflow.parameters.worker-node-type}}"
           - name: REGION
             value: "{{workflow.parameters.region}}"
         volumeMounts:
@@ -103,7 +111,7 @@ spec:
 
     - name: destroy
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.10
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.12
         imagePullPolicy: Always
         args:
           - destroy
