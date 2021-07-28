@@ -144,8 +144,8 @@
 #  openshift-multi  #
 #####################
 - id: openshift-multi
-  name: OpenShift Multi Node
-  description: Multi-node CRI-O OpenShift cluster
+  name: OpenShift 3.11
+  description: OpenShift 3.11 cluster
   availability: alpha
   workflow: configuration/workflow-openshift-multi.yaml
   parameters:
