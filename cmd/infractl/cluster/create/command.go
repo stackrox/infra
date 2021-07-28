@@ -41,7 +41,7 @@ func Command() *cobra.Command {
 	cmd.Flags().Bool("wait", false, "wait for cluster to be ready")
 	cmd.Flags().Bool("no-slack", false, "skip sending Slack messages for lifecycle events")
 	cmd.Flags().Bool("slack-me", false, "send slack messages directly and not to the #infra_notifications channel")
-	cmd.Flags().String("download-dir", "", "wait for readiness and download artifacts to this dir")
+	cmd.Flags().StringP("download-dir", "d", "", "wait for readiness and download artifacts to this dir")
 	return cmd
 }
 

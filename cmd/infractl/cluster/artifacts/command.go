@@ -22,7 +22,7 @@ const examples = `# List the artifacts for cluster "example-s3maj".
 $ infractl artifacts example-s3maj
 
 # Download the artifacts for cluster "example-s3maj" into the "artifacts" directory.
-$ infractl artifacts example-s3maj --download-dir=artifacts`
+$ infractl artifacts example-s3maj -d artifacts`
 
 // Command defines the handler for infractl artifacts.
 func Command() *cobra.Command {
@@ -36,7 +36,7 @@ func Command() *cobra.Command {
 		RunE:    common.WithGRPCHandler(run),
 	}
 
-	cmd.Flags().String("download-dir", "", "artifact download directory")
+	cmd.Flags().StringP("download-dir", "d", "", "artifact download directory")
 	return cmd
 }
 
