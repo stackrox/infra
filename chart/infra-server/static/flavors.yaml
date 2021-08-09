@@ -110,9 +110,11 @@
       kind: optional
 
     - name: k8s-version
-      description: kubernetes version
-      value: latest
+      description: GKE kubernetes version
+      value: ""
       kind: optional
+      help: |
+        e.g. 1.19.12-gke.2100. Use 'gcloud container get-server-config --zone=us-central1' to see all versions.
 
     - name: pod-security-policy
       description: Enables the pod security policy admission controller for the cluster
