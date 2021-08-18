@@ -9,10 +9,10 @@ storeGitHubPackageRegistryNpmToken: &storeGitHubPackageRegistryNpmToken
 executors:
   custom:
     docker:
-      - image: docker.io/stackrox/apollo-ci:0.3.5
+      - image: quay.io/cgorman1/apollo-ci:0.3.13
         auth:
-          username: $DOCKER_IO_PULL_USERNAME
-          password: $DOCKER_IO_PULL_PASSWORD
+          username: $QUAY_CGORMAN1_RO_USER
+          password: $QUAY_CGORMAN1_RO_PASSWORD
     working_directory: /go/src/github.com/stackrox/infra
 
 jobs:
@@ -63,8 +63,8 @@ workflows:
   build:
     jobs:
     - build-infra-server:
-        context: docker-io-pull
+        context: custom-executor-pull
     - build-infractl:
-        context: docker-io-pull
+        context: custom-executor-pull
     - lint:
-        context: docker-io-pull
+        context: custom-executor-pull
