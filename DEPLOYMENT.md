@@ -1,6 +1,6 @@
 # Infra Deployment
 
-## Deply to an adhoc development cluster
+## Deploy to an adhoc development cluster
 
 For example one created with `infractl create gke-default`.
 
