@@ -116,8 +116,12 @@ Edit the release to include a summary of key features, changes, deprecations,
 etc since the last full release.
 
 ```bash
-# set commit range [prev-rel-tag, master]
-git log --decorate --graph --abbrev-commit --date=relative 0.2.14..master
+# find the next tag
+git fetch --tags
+git tag -l
+
+# review commits between last release tag and head of mainline branch
+git log --decorate --graph --abbrev-commit --date=relative 0.2.13..master
 ```
 
 We often deploy Infra from a tag without creating a full GitHub release.
@@ -125,8 +129,6 @@ To create a tag for deployment under this scenario:
 
 ```bash
 cd $GOPATH/src/github.com/stackrox/infra
-git pull
-git tag -n
 git tag 0.2.14  # for example
 git push origin --tags
 ```
@@ -134,11 +136,11 @@ git push origin --tags
 Prior to deployment make note of the current version of infra in case a rollback is needed.
 A rollback consists of checking out the previously deployed tag and redeploying.
 
-    https://infra.rox.systems/      => version 0.2.14
-    https://dev.infra.rox.systems/  => version 0.2.14
+    https://infra.rox.systems/      => version 0.2.13
+    https://dev.infra.rox.systems/  => version 0.2.13
 
-Once the tag is ready for deployment -- via full release or manually pushing a new one --
-the next step is to deploy to target environments.
+Once the tag is ready for deployment &mdash; via full release or manually pushing a
+new tag &mdash; the next step is to deploy to target environments.
 
 ## Deployment
 
