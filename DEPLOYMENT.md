@@ -1,6 +1,6 @@
 # Infra Deployment
 
-## Deply to an adhoc development cluster
+## Deploy to an adhoc development cluster
 
 For example one created with `infractl create gke-default`.
 
@@ -66,7 +66,7 @@ kubectl -n infra patch serviceaccount default -p '{"imagePullSecrets": [{"name":
 
 ### [Development (Staging)](https://console.cloud.google.com/kubernetes/clusters/details/us-west2/infra-development?project=stackrox-infra&organizationId=847401270788)
 
-To connect to this cluster using kubectl, run: 
+To connect to this cluster using kubectl, run:
 
 ```
 gcloud container clusters get-credentials infra-development \
@@ -76,7 +76,7 @@ gcloud container clusters get-credentials infra-development \
 
 ### [Production](https://console.cloud.google.com/kubernetes/clusters/details/us-west2/infra-production?project=stackrox-infra&organizationId=847401270788)
 
-To connect to this cluster using kubectl, run: 
+To connect to this cluster using kubectl, run:
 
 ```
 gcloud container clusters get-credentials infra-production \
@@ -99,7 +99,7 @@ infra-address-production   35.227.207.252  EXTERNAL                             
 
 Service configuration is [stored in a GCS bucket](https://console.cloud.google.com/storage/browser/infra-configuration?organizationId=847401270788&project=stackrox-infra).
 
-You will need to download this configuration if you plan to make a change to infra. Configuration changes are baked in to the `infra-server` image at build time. 
+You will need to download this configuration if you plan to make a change to infra. Configuration changes are baked in to the `infra-server` image at build time.
 
 To download the configuration locally to `chart/infra-server/configuration`, run:
 
@@ -109,11 +109,44 @@ To upload the local configuration back to the bucket, run:
 
 `make configuration-upload`
 
+## Creating a Tag for Release
+
+To create a full GitHub release, draft a new release from the console.
+Edit the release to include a summary of key features, changes, deprecations,
+etc since the last full release.
+
+```bash
+# find the next tag
+git fetch --tags
+git tag -l
+
+# review commits between last release tag and head of mainline branch
+git log --decorate --graph --abbrev-commit --date=relative 0.2.13..master
+```
+
+We often deploy Infra from a tag without creating a full GitHub release.
+To create a tag for deployment under this scenario:
+
+```bash
+cd $GOPATH/src/github.com/stackrox/infra
+git tag 0.2.14  # for example
+git push origin --tags
+```
+
+Prior to deployment make note of the current version of infra in case a rollback is needed.
+A rollback consists of checking out the previously deployed tag and redeploying.
+
+    https://infra.rox.systems/      => version 0.2.13
+    https://dev.infra.rox.systems/  => version 0.2.13
+
+Once the tag is ready for deployment &mdash; via full release or manually pushing a
+new tag &mdash; the next step is to deploy to target environments.
+
 ## Deployment
 
 Deployments consist of an installation of Argo, as well as the various service/flavor components.
 
-to build and push an image, run:
+To build and push an image, run:
 
 `make push`
 
@@ -131,7 +164,7 @@ To do everything in one command, run:
 
 `make deploy-development`
 
-Note: If the development server version does not change then `make deploy-development` 
+Note: If the development server version does not change then `make deploy-development`
 will not result in a running `infra-server` that reflects
 your local changes. A brute force way to ensure an update is to delete the
 `infra-server-deployment` deployment in the `infra` namespace. It will be recreated by
@@ -153,7 +186,7 @@ To do everything in one command, run:
 
 ## Verification
 
-After deploying the service, browse to the appropriate endpoint to verify that you  can login and view the UI.
+After deploying the service, browse to the appropriate endpoint to verify that you can login and view the UI.
 
 | Environment | URL |
 | --- | --- |
