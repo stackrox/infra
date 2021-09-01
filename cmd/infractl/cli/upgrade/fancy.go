@@ -5,10 +5,9 @@ import (
 )
 
 type prettyCliUpgrade struct {
-	bytes []byte
+	updatedFilename string
 }
 
 func (r prettyCliUpgrade) PrettyPrint() {
-	fmt.Printf("woot! %v\n", len(r.bytes))
+	fmt.Printf("Updated %s to match the infra server version\n", r.updatedFilename)
 }
-

@@ -61,12 +61,12 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []str
 		return nil, err
 	}
 
-	err = moveIntoPlace(tempFilename)
+	infractlFilename, err := moveIntoPlace(tempFilename)
 	if err != nil {
 		return nil, err
 	}
 
-	return prettyCliUpgrade{bytes}, err
+	return prettyCliUpgrade{ infractlFilename }, err
 }
 
 func guessOSIfNotSet(os string) (string, error) {
@@ -133,16 +133,16 @@ func writeToTempFileAndTest(bytes []byte) (string, error) {
 	return tempFile.Name(), nil
 }
 
-func moveIntoPlace(tempFilename string) error {
+func moveIntoPlace(tempFilename string) (string, error) {
 	infractlFilename, err := filepath.Abs(os.Args[0])
 	if err != nil {
-		return errors.Wrap(err, "Cannot determine infractl path")
+		return "", errors.Wrap(err, "Cannot determine infractl path")
 	}
 
 	err = os.Rename(tempFilename, infractlFilename)
 	if err != nil {
-		return errors.Wrap(err, "Cannot move the download into place")
+		return "", errors.Wrap(err, "Cannot move the download into place")
 	}
 
-	return nil
+	return infractlFilename, nil
 }

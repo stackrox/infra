@@ -33,6 +33,8 @@ func WithGRPCHandler(handler GRPCHandler) func(cmd *cobra.Command, args []string
 		}
 		defer cancel()
 
+		checkForVersionDiff(ctx, conn, cmd)
+
 		// Invoke the given callback.
 		result, err := handler(ctx, conn, cmd, args)
 		if err != nil {

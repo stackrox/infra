@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/stackrox/infra/cmd/infractl/cli"
 	"github.com/stackrox/infra/cmd/infractl/cluster/artifacts"
 	"github.com/stackrox/infra/cmd/infractl/cluster/create"
 	"github.com/stackrox/infra/cmd/infractl/cluster/delete"
@@ -11,7 +12,6 @@ import (
 	"github.com/stackrox/infra/cmd/infractl/cluster/lifespan"
 	"github.com/stackrox/infra/cmd/infractl/cluster/list"
 	"github.com/stackrox/infra/cmd/infractl/cluster/logs"
-	"github.com/stackrox/infra/cmd/infractl/cli"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	"github.com/stackrox/infra/cmd/infractl/flavor"
 	"github.com/stackrox/infra/cmd/infractl/token"
