@@ -11,6 +11,7 @@ import (
 	"github.com/stackrox/infra/cmd/infractl/cluster/lifespan"
 	"github.com/stackrox/infra/cmd/infractl/cluster/list"
 	"github.com/stackrox/infra/cmd/infractl/cluster/logs"
+	"github.com/stackrox/infra/cmd/infractl/cli"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	"github.com/stackrox/infra/cmd/infractl/flavor"
 	"github.com/stackrox/infra/cmd/infractl/token"
@@ -62,6 +63,9 @@ func main() {
 
 		// $ infractl whoami
 		whoami.Command(),
+
+		// $ infractl cli
+		cli.Command(),
 	)
 
 	if err := cmd.Execute(); err != nil {

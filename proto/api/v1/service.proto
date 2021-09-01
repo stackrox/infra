@@ -421,3 +421,21 @@ service ClusterService {
         };
     }
 }
+
+message CliUpgradeRequest {
+    string os = 1;
+}
+
+message CliUpgradeResponse {
+    bytes fileChunk = 1;
+}
+
+// CliService provides an upgrade path for the command line interface.
+service CliService {
+    // Upgrade - gets an updated binary if it exists.
+    rpc Upgrade (CliUpgradeRequest) returns (stream CliUpgradeResponse) {
+        option (google.api.http) = {
+            get: "/v1/cli/{os}/upgrade"
+        };
+    }
+}
