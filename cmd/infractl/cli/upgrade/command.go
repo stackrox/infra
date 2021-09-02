@@ -66,7 +66,7 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []str
 		return nil, err
 	}
 
-	return prettyCliUpgrade{ infractlFilename }, err
+	return prettyCliUpgrade{infractlFilename}, err
 }
 
 func guessOSIfNotSet(os string) (string, error) {
