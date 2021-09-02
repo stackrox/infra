@@ -3,9 +3,9 @@ package common
 import (
 	"context"
 	"fmt"
-	"github.com/spf13/cobra"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/spf13/cobra"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/buildinfo"
 	"google.golang.org/grpc"
