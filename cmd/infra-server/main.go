@@ -89,9 +89,7 @@ func mainCmd() error {
 		func() (middleware.APIService, error) {
 			return service.NewUserService(auth0.GenerateServiceAccountToken)
 		},
-		func() (middleware.APIService, error) {
-			return service.NewCliService()
-		},
+		service.NewCliService,
 		service.NewVersionService,
 		func() (middleware.APIService, error) {
 			return cluster.NewClusterService(registry, signer, eventSource, slackClient)

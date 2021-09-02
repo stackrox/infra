@@ -17,10 +17,10 @@ import (
 	"google.golang.org/grpc"
 )
 
-const examples = `# Upgrade infractl in place (with OS from uname -a)
+const examples = `# Upgrade infractl in place
 $ infractl cli upgrade
 
-# Upgrade infractl in place with a specified OS
+# If infractl cannot determine your OS you can specify linux or darwin
 $ infractl cli upgrade --os linux`
 
 // Command defines the handler for infractl cli upgrade.
@@ -35,7 +35,7 @@ func Command() *cobra.Command {
 		RunE:    common.WithGRPCHandler(run),
 	}
 
-	cmd.Flags().String("os", "", "Choose an OS, darwin or linux")
+	cmd.Flags().String("os", "", "Optionally choose an OS: darwin or linux")
 
 	return cmd
 }
@@ -66,7 +66,7 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []str
 		return nil, err
 	}
 
-	return prettyCliUpgrade{infractlFilename}, err
+	return prettyCliUpgrade{infractlFilename}, nil
 }
 
 func guessOSIfNotSet(os string) (string, error) {

@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -23,31 +22,33 @@ var (
 
 // NewCliService creates a new CliUpgradeService.
 func NewCliService() (middleware.APIService, error) {
-	impl := cliImpl{}
-	return &impl, nil
+	return &cliImpl{}, nil
 }
 
 // Upgrade provides the a binary for the requested os.
 func (s *cliImpl) Upgrade(request *v1.CliUpgradeRequest, stream v1.CliService_UpgradeServer) error {
 	bufferSize := 1000 * 1024
 	if request.Os != "linux" && request.Os != "darwin" {
-		return errors.New(request.Os + " is not a supported OS")
+		err := errors.New(request.Os + " is not a supported OS")
+		log.Println("infractl cli upgrade:", err)
+		return err
 	}
 	filename := "/etc/infra/static/downloads/infractl-" + request.Os + "-amd64"
 	file, err := os.Open(filename)
 	if err != nil {
-		fmt.Println(err)
+		log.Println("Failed to open infractl binary:", err)
 		return err
 	}
 	defer file.Close()
 	buff := make([]byte, bufferSize)
 	for {
 		bytesRead, err := file.Read(buff)
-		if err != nil {
-			if err != io.EOF {
-				fmt.Println(err)
-			}
+		if err == io.EOF {
 			break
+		}
+		if err != nil {
+			log.Println("error while reading chunk:", err)
+			return err
 		}
 		resp := &v1.CliUpgradeResponse{FileChunk: buff[:bytesRead]}
 		err = stream.Send(resp)
