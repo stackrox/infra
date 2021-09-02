@@ -34,11 +34,17 @@ func main() {
 		// $ infractl artifacts
 		artifacts.Command(),
 
+		// $ infractl cli
+		cli.Command(),
+
 		// $ infractl create
 		create.Command(),
 
 		// $ infractl delete
 		delete.Command(),
+
+		// $ infractl flavor
+		flavor.Command(),
 
 		// $ infractl get
 		get.Command(),
@@ -52,9 +58,6 @@ func main() {
 		// $ infractl logs
 		logs.Command(),
 
-		// $ infractl flavor
-		flavor.Command(),
-
 		// $ infractl token
 		token.Command(),
 
@@ -63,9 +66,6 @@ func main() {
 
 		// $ infractl whoami
 		whoami.Command(),
-
-		// $ infractl cli
-		cli.Command(),
 	)
 
 	if err := cmd.Execute(); err != nil {

@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"errors"
+	"github.com/pkg/errors"
 	"io"
 	"log"
 	"os"
@@ -12,6 +12,8 @@ import (
 	"github.com/stackrox/infra/service/middleware"
 	"google.golang.org/grpc"
 )
+
+const bufferSize = 1000 * 1024
 
 type cliImpl struct{}
 
@@ -27,13 +29,12 @@ func NewCliService() (middleware.APIService, error) {
 
 // Upgrade provides the a binary for the requested os.
 func (s *cliImpl) Upgrade(request *v1.CliUpgradeRequest, stream v1.CliService_UpgradeServer) error {
-	bufferSize := 1000 * 1024
 	if request.Os != "linux" && request.Os != "darwin" {
-		err := errors.New(request.Os + " is not a supported OS")
+		err := errors.Errorf("%s is not a supported OS", request.Os)
 		log.Println("infractl cli upgrade:", err)
 		return err
 	}
-	filename := "/etc/infra/static/downloads/infractl-" + request.Os + "-amd64"
+	filename := webRoot + "/downloads/infractl-" + request.Os + "-amd64"
 	file, err := os.Open(filename)
 	if err != nil {
 		log.Println("Failed to open infractl binary:", err)
@@ -51,8 +52,7 @@ func (s *cliImpl) Upgrade(request *v1.CliUpgradeRequest, stream v1.CliService_Up
 			return err
 		}
 		resp := &v1.CliUpgradeResponse{FileChunk: buff[:bytesRead]}
-		err = stream.Send(resp)
-		if err != nil {
+		if err := stream.Send(resp); err != nil {
 			log.Println("error while sending chunk:", err)
 			return err
 		}
