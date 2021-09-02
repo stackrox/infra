@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-type cliImpl struct {}
+type cliImpl struct{}
 
 var (
 	_ middleware.APIService = (*cliImpl)(nil)
