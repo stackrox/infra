@@ -2,12 +2,12 @@ package service
 
 import (
 	"context"
-	"github.com/pkg/errors"
 	"io"
 	"log"
 	"os"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/pkg/errors"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/service/middleware"
 	"google.golang.org/grpc"
