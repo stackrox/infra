@@ -62,6 +62,11 @@ spec:
               secretKeyRef:
                 name: aro-cluster-manager
                 key: AZURE_SP_TENANT_ID
+          - name: REDHAT_PULL_SECRET_BASE64
+            valueFrom:
+              secretKeyRef:
+                name: aro-cluster-manager
+                key: REDHAT_PULL_SECRET_BASE64
           - name: NODE_COUNT
             value: "{{workflow.parameters.nodes}}"
           - name: INSTANCE_TYPE
