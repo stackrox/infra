@@ -62,6 +62,11 @@ spec:
               secretKeyRef:
                 name: aro-cluster-manager
                 key: AZURE_SP_TENANT_ID
+          - name: AZURE_SP_SECRET_VAL
+            valueFrom:
+              secretKeyRef:
+                name: aro-cluster-manager
+                key: AZURE_SP_SECRET_VAL
           - name: REDHAT_PULL_SECRET_BASE64
             valueFrom:
               secretKeyRef:
@@ -107,3 +112,8 @@ spec:
               secretKeyRef:
                 name: aro-cluster-manager
                 key: AZURE_SP_TENANT_ID
+          - name: AZURE_SP_SECRET_VAL
+            valueFrom:
+              secretKeyRef:
+                name: aro-cluster-manager
+                key: AZURE_SP_SECRET_VAL
