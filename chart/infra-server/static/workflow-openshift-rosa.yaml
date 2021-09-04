@@ -37,7 +37,7 @@ spec:
             archive:
               tar: {}
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.12-4-g05e508ee80-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.12-6-gc85296024e-snapshot
         imagePullPolicy: Always
         args:
           - create
@@ -73,7 +73,7 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.12-4-g05e508ee80-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.12-6-gc85296024e-snapshot
         imagePullPolicy: Always
         args:
           - destroy
