@@ -463,3 +463,63 @@
 
     - name: data
       description: An archive that includes ssh keys to connect to cluster nodes
+
+#####################
+#  Openshift ARO    #
+#####################
+- id: aro
+  name: ARO
+  description: Openshift ARO cluster
+  availability: alpha
+  workflow: configuration/workflow-openshift-aro.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      value: example1
+
+    - name: nodes
+      description: number of nodes
+      value: "4"
+      kind: optional
+
+    - name: machine-type
+      description: node machine type
+      value: standard_d4s_v3
+      kind: optional
+
+  artifacts:
+    - name: kubeconfig
+      description: Kube config for connecting to this cluster
+
+    - name: data
+      description: An archive that includes ssh keys to connect to cluster nodes
+
+#####################
+#  Openshift ROSA   #
+#####################
+- id: rosa
+  name: ROSA
+  description: Openshift ROSA cluster
+  availability: alpha
+  workflow: configuration/workflow-openshift-rosa.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      value: example1
+
+    - name: nodes
+      description: number of nodes
+      value: "4"
+      kind: optional
+
+    - name: machine-type
+      description: node machine type
+      value: m5.xlarge
+      kind: optional
+
+  artifacts:
+    - name: kubeconfig
+      description: Kube config for connecting to this cluster
+
+    - name: data
+      description: An archive that includes ssh keys to connect to cluster nodes
