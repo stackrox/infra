@@ -87,18 +87,18 @@ spec:
           - "{{workflow.parameters.name}}"
           - srox-temp-dev-test
         env:
-          - name: AZURE_SP_USERNAME
+          - name: AZURE_SUBSCRIPTION_ID
             valueFrom:
               secretKeyRef:
-                name: azure-secrets
-                key: AZURE_SP_USERNAME
-          - name: AZURE_SP_PASSWORD
+                name: aro-cluster-manager
+                key: AZURE_SUBSCRIPTION_ID
+          - name: AZURE_SP_CLIENT_ID
             valueFrom:
               secretKeyRef:
-                name: azure-secrets
-                key: AZURE_SP_PASSWORD
-          - name: AZURE_SP_TENANT
+                name: aro-cluster-manager
+                key: AZURE_SP_CLIENT_ID
+          - name: AZURE_SP_TENANT_ID
             valueFrom:
               secretKeyRef:
-                name: azure-secrets
-                key: AZURE_SP_TENANT
+                name: aro-cluster-manager
+                key: AZURE_SP_TENANT_ID
