@@ -37,7 +37,7 @@ spec:
 
     - name: create
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.12-17-g6e36f6083d-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.12-20-g230a0fa04c-snapshot
         imagePullPolicy: Always
         args:
           - create
@@ -106,7 +106,7 @@ spec:
 
     - name: destroy
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.12-17-g6e36f6083d-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.12-20-g230a0fa04c-snapshot
         imagePullPolicy: Always
         args:
           - destroy
