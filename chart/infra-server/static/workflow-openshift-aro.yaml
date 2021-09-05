@@ -37,7 +37,7 @@ spec:
 
     - name: create
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.12-15-gf677d4d617-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.12-17-g6e36f6083d-snapshot
         imagePullPolicy: Always
         args:
           - create
@@ -92,16 +92,8 @@ spec:
             path: /data/kubeconfig
             archive:
               none: {}
-          - name: admin-password
-            path: /data/admin_password
-            archive:
-              none: {}
-          - name: url-openshift
-            path: /data/url-openshift
-            archive:
-              none: {}
-          - name: url-stackrox
-            path: /data/url-stackrox
+          - name: dotenv
+            path: /data/dotenv
             archive:
               none: {}
           - name: data
@@ -114,7 +106,7 @@ spec:
 
     - name: destroy
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.12-15-gf677d4d617-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.12-17-g6e36f6083d-snapshot
         imagePullPolicy: Always
         args:
           - destroy

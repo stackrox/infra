@@ -38,7 +38,7 @@ spec:
     - name: create
       activeDeadlineSeconds: 3600
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.12-15-gf677d4d617-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.12-17-g6e36f6083d-snapshot
         imagePullPolicy: Always
         args:
           - create
@@ -59,6 +59,11 @@ spec:
               secretKeyRef:
                 name: aws-access-secrets
                 key: REDHAT_PULL_SECRET_BASE64
+          - name: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: aws-access-secrets
+                key: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
           - name: NODE_COUNT
             value: "{{workflow.parameters.nodes}}"
           - name: INSTANCE_TYPE
@@ -83,16 +88,8 @@ spec:
             path: /data/kubeconfig
             archive:
               none: {}
-          - name: admin-password
-            path: /data/admin_password
-            archive:
-              none: {}
-          - name: url-openshift
-            path: /data/url-openshift
-            archive:
-              none: {}
-          - name: url-stackrox
-            path: /data/url-stackrox
+          - name: dotenv
+            path: /data/dotenv
             archive:
               none: {}
           - name: data
@@ -106,7 +103,7 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.12-15-gf677d4d617-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.12-17-g6e36f6083d-snapshot
         imagePullPolicy: Always
         args:
           - destroy
