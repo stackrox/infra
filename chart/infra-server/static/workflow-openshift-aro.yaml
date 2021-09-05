@@ -40,7 +40,7 @@ spec:
             archive:
               tar: {}
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.12-8-gdb2b64ad4d-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.12-9-g624e07506a-snapshot
         imagePullPolicy: Always
         args:
           - create
@@ -89,7 +89,7 @@ spec:
 
     - name: destroy
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.12-8-gdb2b64ad4d-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.12-9-g624e07506a-snapshot
         imagePullPolicy: Always
         args:
           - destroy
