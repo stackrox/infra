@@ -11,6 +11,14 @@ spec:
         value: "4"
       - name: machine-type
         value: "m5.xlarge"
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 10Mi
 
   templates:
     - name: start
@@ -37,7 +45,7 @@ spec:
             archive:
               tar: {}
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.12-9-g624e07506a-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.12-12-gfe52b3acd1-snapshot
         imagePullPolicy: Always
         args:
           - create
@@ -64,13 +72,9 @@ spec:
             value: "{{workflow.parameters.machine-type}}"
           - name: CREATION_SOURCE
             value: "infra"
-
         volumeMounts:
           - name: data
             mountPath: /data
-      volumes:
-        - name: data
-          emptyDir: {}
 
     - name: wait
       suspend: {}
@@ -78,7 +82,7 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.12-9-g624e07506a-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.12-12-gfe52b3acd1-snapshot
         imagePullPolicy: Always
         args:
           - destroy
@@ -94,3 +98,6 @@ spec:
               secretKeyRef:
                 name: aws-access-secrets
                 key: AWS_SECRET_ACCESS_KEY
+        volumeMounts:
+          - name: data
+            mountPath: /data
