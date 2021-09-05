@@ -40,12 +40,11 @@ spec:
             archive:
               tar: {}
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.12-7-g465f06bbb4-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.12-8-gdb2b64ad4d-snapshot
         imagePullPolicy: Always
         args:
           - create
           - "{{workflow.parameters.name}}"
-          - srox-temp-dev-test
         env:
           - name: AZURE_SUBSCRIPTION_ID
             valueFrom:
@@ -90,7 +89,7 @@ spec:
 
     - name: destroy
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.12-7-g465f06bbb4-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.12-8-gdb2b64ad4d-snapshot
         imagePullPolicy: Always
         args:
           - destroy
