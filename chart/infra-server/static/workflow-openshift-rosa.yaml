@@ -26,6 +26,9 @@ spec:
         - - name: create
             template: create
 
+        - - name: gather
+            template: gather
+
         - - name: wait
             template: wait
 
@@ -34,18 +37,8 @@ spec:
 
     - name: create
       activeDeadlineSeconds: 3600
-      outputs:
-        artifacts:
-          - name: kubeconfig
-            path: /data/kubeconfig
-            archive:
-              none: {}
-          - name: data
-            path: /data
-            archive:
-              tar: {}
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.12-13-g6e781069b7-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.12-14-g4bb55ce715-snapshot
         imagePullPolicy: Always
         args:
           - create
@@ -76,13 +69,44 @@ spec:
           - name: data
             mountPath: /data
 
+    - name: gather
+      container:
+        image: busybox
+        imagePullPolicy: Always
+        command: [echo, "gathering artifacts"]
+        volumeMounts:
+          - name: data
+            mountPath: /data
+      outputs:
+        artifacts:
+          - name: kubeconfig
+            path: /data/kubeconfig
+            archive:
+              none: {}
+          - name: admin-password
+            path: /data/admin_password
+            archive:
+              none: {}
+          - name: url-openshift
+            path: /data/url-openshift
+            archive:
+              none: {}
+          - name: url-stackrox
+            path: /data/url-stackrox
+            archive:
+              none: {}
+          - name: data
+            path: /data
+            archive:
+              tar: {}
+
     - name: wait
       suspend: {}
 
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.12-13-g6e781069b7-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.12-14-g4bb55ce715-snapshot
         imagePullPolicy: Always
         args:
           - destroy

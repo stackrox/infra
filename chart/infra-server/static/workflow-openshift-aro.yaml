@@ -37,7 +37,8 @@ spec:
 
     - name: create
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.12-13-g6e781069b7-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.12-14-g4bb55ce715-snapshot
+          0.2.12-14-g4bb55ce715-snapshot
         imagePullPolicy: Always
         args:
           - create
@@ -77,20 +78,6 @@ spec:
         volumeMounts:
           - name: data
             mountPath: /data
-      outputs:
-        artifacts:
-          - name: kubeconfig
-            path: /data/kubeconfig
-            archive:
-              none: {}
-          - name: connect
-            path: /data/connect.sh
-            archive:
-              none: {}
-          - name: data
-            path: /data
-            archive:
-              tar: {}
 
     - name: gather
       container:
@@ -102,12 +89,12 @@ spec:
             mountPath: /data
       outputs:
         artifacts:
-          - name: admin-password
-            path: /data/admin_password
+          - name: kubeconfig
+            path: /data/kubeconfig
             archive:
               none: {}
-          - name: kubeconfig
-            path: /data/auth/kubeconfig
+          - name: admin-password
+            path: /data/admin_password
             archive:
               none: {}
           - name: url-openshift
@@ -128,7 +115,7 @@ spec:
 
     - name: destroy
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.12-13-g6e781069b7-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.12-14-g4bb55ce715-snapshot
         imagePullPolicy: Always
         args:
           - destroy
