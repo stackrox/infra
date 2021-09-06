@@ -491,6 +491,9 @@
     - name: kubeconfig
       description: Kube config for connecting to this cluster
 
+    - name: dotenv
+      description: Environment variables used to access the cluster and consoles
+
     - name: data
       description: An archive that includes ssh keys to connect to cluster nodes
 
@@ -520,6 +523,9 @@
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
+
+    - name: dotenv
+      description: Environment variables used to access the cluster and consoles
 
     - name: data
       description: An archive that includes ssh keys to connect to cluster nodes
