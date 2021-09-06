@@ -36,7 +36,7 @@ spec:
             template: destroy
 
     - name: create
-      activeDeadlineSeconds: 3600
+      activeDeadlineSeconds: 7200
       container:
         image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.12-28-g2298bb2d3b-snapshot
         imagePullPolicy: Always

@@ -36,6 +36,7 @@ spec:
             template: destroy
 
     - name: create
+      activeDeadlineSeconds: 7200
       container:
         image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.12-28-g2298bb2d3b-snapshot
         imagePullPolicy: Always
@@ -105,6 +106,7 @@ spec:
       suspend: {}
 
     - name: destroy
+      activeDeadlineSeconds: 3600
       container:
         image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.12-28-g2298bb2d3b-snapshot
         imagePullPolicy: Always
