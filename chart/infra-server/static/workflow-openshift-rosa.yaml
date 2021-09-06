@@ -38,7 +38,7 @@ spec:
     - name: create
       activeDeadlineSeconds: 3600
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.12-23-g072718f6d3-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.12-24-g27e2a40d7e-snapshot
         imagePullPolicy: Always
         args:
           - create
@@ -103,7 +103,7 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.12-23-g072718f6d3-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.12-24-g27e2a40d7e-snapshot
         imagePullPolicy: Always
         args:
           - destroy
@@ -119,6 +119,11 @@ spec:
               secretKeyRef:
                 name: aws-access-secrets
                 key: AWS_SECRET_ACCESS_KEY
+          - name: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: aws-access-secrets
+                key: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
         volumeMounts:
           - name: data
             mountPath: /data
