@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: aro-
+  generateName: rosa-
 spec:
   entrypoint: start
   arguments:
@@ -10,7 +10,7 @@ spec:
       - name: nodes
         value: "4"
       - name: machine-type
-        value: "Standard_D4s_v3"
+        value: "m5.xlarge"
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -38,37 +38,32 @@ spec:
     - name: create
       activeDeadlineSeconds: 7200
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.12-43-g03e82a8992-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.12-42-g0160424c98-snapshot
         imagePullPolicy: Always
         args:
           - create
           - "{{workflow.parameters.name}}"
         env:
-          - name: AZURE_SUBSCRIPTION_ID
+          - name: AWS_ACCESS_KEY_ID
             valueFrom:
               secretKeyRef:
-                name: aro-cluster-manager
-                key: AZURE_SUBSCRIPTION_ID
-          - name: AZURE_SP_CLIENT_ID
+                name: aws-access-secrets
+                key: AWS_ACCESS_KEY_ID
+          - name: AWS_SECRET_ACCESS_KEY
             valueFrom:
               secretKeyRef:
-                name: aro-cluster-manager
-                key: AZURE_SP_CLIENT_ID
-          - name: AZURE_SP_TENANT_ID
-            valueFrom:
-              secretKeyRef:
-                name: aro-cluster-manager
-                key: AZURE_SP_TENANT_ID
-          - name: AZURE_SP_SECRET_VAL
-            valueFrom:
-              secretKeyRef:
-                name: aro-cluster-manager
-                key: AZURE_SP_SECRET_VAL
+                name: aws-access-secrets
+                key: AWS_SECRET_ACCESS_KEY
           - name: REDHAT_PULL_SECRET_BASE64
             valueFrom:
               secretKeyRef:
-                name: aro-cluster-manager
+                name: aws-access-secrets
                 key: REDHAT_PULL_SECRET_BASE64
+          - name: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: aws-access-secrets
+                key: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
           - name: NODE_COUNT
             value: "{{workflow.parameters.nodes}}"
           - name: INSTANCE_TYPE
@@ -108,32 +103,27 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.12-43-g03e82a8992-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.12-42-g0160424c98-snapshot
         imagePullPolicy: Always
         args:
           - destroy
           - "{{workflow.parameters.name}}"
         env:
-          - name: AZURE_SUBSCRIPTION_ID
+          - name: AWS_ACCESS_KEY_ID
             valueFrom:
               secretKeyRef:
-                name: aro-cluster-manager
-                key: AZURE_SUBSCRIPTION_ID
-          - name: AZURE_SP_CLIENT_ID
+                name: aws-access-secrets
+                key: AWS_ACCESS_KEY_ID
+          - name: AWS_SECRET_ACCESS_KEY
             valueFrom:
               secretKeyRef:
-                name: aro-cluster-manager
-                key: AZURE_SP_CLIENT_ID
-          - name: AZURE_SP_TENANT_ID
+                name: aws-access-secrets
+                key: AWS_SECRET_ACCESS_KEY
+          - name: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
             valueFrom:
               secretKeyRef:
-                name: aro-cluster-manager
-                key: AZURE_SP_TENANT_ID
-          - name: AZURE_SP_SECRET_VAL
-            valueFrom:
-              secretKeyRef:
-                name: aro-cluster-manager
-                key: AZURE_SP_SECRET_VAL
+                name: aws-access-secrets
+                key: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
         volumeMounts:
           - name: data
             mountPath: /data

@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: demo-
+  generateName: qa-demo-
 
 spec:
   entrypoint: start
@@ -14,12 +14,17 @@ spec:
     parameters:
       - name: name
       - name: main-image
+      - name: scanner-image
+        value: ""
+      - name: scanner-db-image
+        value: ""
       - name: k8s-version
+        value: ""
 
   volumes:
     - name: credentials
       secret:
-        secretName: google-credentials-demo
+        secretName: google-credentials-qa-demo
 
   templates:
     - name: start
@@ -75,6 +80,7 @@ spec:
               serviceAccountKeySecret:
                 name: google-credentials-demo
                 key: google-credentials.json
+
       outputs:
         artifacts:
           - name: kubeconfig
@@ -101,13 +107,15 @@ spec:
               none: {}
 
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/demo:0.2.12-43-g03e82a8992-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/demo:0.2.5
         imagePullPolicy: Always
         args:
           - create
           - "--name={{workflow.parameters.name}}"
           - "--main-image={{workflow.parameters.main-image}}"
-          - --gcp-project=srox-temp-sales-demos
+          - "--scanner-image={{workflow.parameters.scanner-image}}"
+          - "--scanner-db-image={{workflow.parameters.scanner-db-image}}"
+          - --gcp-project=srox-temp-dev-test
           - --dns-gcp-project=ultra-current-825
           - --creation-source=infra
           - --k8s-version={{workflow.parameters.k8s-version}}
@@ -174,7 +182,7 @@ spec:
             path: /data/tfvars
             optional: true
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/demo:0.2.12-43-g03e82a8992-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/demo:0.2.5
         imagePullPolicy: Always
         args:
           - destroy

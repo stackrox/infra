@@ -1,36 +1,22 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: kops-
+  generateName: eks-
 spec:
   entrypoint: start
   arguments:
     parameters:
       - name: name
-      - name: kops-version
+      - name: nodes
+        value: ""
+      - name: machine-type
         value: ""
       - name: k8s-version
         value: ""
-      - name: master-count
-        value: ""
-      - name: master-instance-type
-        value: ""
-      - name: node-count
-        value: ""
-      - name: node-instance-type
-        value: ""
-      - name: cni
+      - name: user-arns
         value: ""
       - name: region
         value: ""
-  volumeClaimTemplates:
-    - metadata:
-        name: data
-      spec:
-        accessModes: [ "ReadWriteOnce" ]
-        resources:
-          requests:
-            storage: 1Mi
 
   templates:
     - name: start
@@ -49,7 +35,7 @@ spec:
       outputs:
         artifacts:
           - name: kubeconfig
-            path: /data/kube.yaml
+            path: /data/eks-kube.yaml
             archive:
               none: {}
           - name: data
@@ -57,7 +43,7 @@ spec:
             archive:
               tar: {}
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/kops:0.2.12-43-g03e82a8992-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/eks:0.2.12-42-g0160424c98-snapshot
         imagePullPolicy: Always
         args:
           - create
@@ -73,27 +59,25 @@ spec:
               secretKeyRef:
                 name: aws-access-secrets
                 key: AWS_SECRET_ACCESS_KEY
-          - name: DESIRED_KOPS_VERSION
-            value: "{{workflow.parameters.kops-version}}"
-          - name: TF_VAR_k8s_version
+          - name: NODE_COUNT
+            value: "{{workflow.parameters.nodes}}"
+          - name: INSTANCE_TYPE
+            value: "{{workflow.parameters.machine-type}}"
+          - name: K8S_VERSION
             value: "{{workflow.parameters.k8s-version}}"
-          - name: TF_VAR_master_count
-            value: "{{workflow.parameters.master-count}}"
-          - name: TF_VAR_master_instance_type
-            value: "{{workflow.parameters.master-instance-type}}"
-          - name: TF_VAR_node_count
-            value: "{{workflow.parameters.node-count}}"
-          - name: TF_VAR_node_instance_type
-            value: "{{workflow.parameters.node-instance-type}}"
-          - name: TF_VAR_cni
-            value: "{{workflow.parameters.cni}}"
-          - name: TF_VAR_region
-            value: "{{workflow.parameters.region}}"
-          - name: TF_VAR_creation_source
+          - name: USER_ARNS
+            value: "{{workflow.parameters.user-arns}}"
+          - name: CREATION_SOURCE
             value: "infra"
+          - name: REGION
+            value: "{{workflow.parameters.region}}"
+
         volumeMounts:
           - name: data
             mountPath: /data
+      volumes:
+        - name: data
+          emptyDir: {}
 
     - name: wait
       suspend: {}
@@ -101,7 +85,7 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/kops:0.2.12-43-g03e82a8992-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/eks:0.2.12-42-g0160424c98-snapshot
         imagePullPolicy: Always
         args:
           - destroy
@@ -117,6 +101,3 @@ spec:
               secretKeyRef:
                 name: aws-access-secrets
                 key: AWS_SECRET_ACCESS_KEY
-        volumeMounts:
-          - name: data
-            mountPath: /data
