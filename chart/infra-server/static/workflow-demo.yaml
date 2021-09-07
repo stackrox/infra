@@ -80,6 +80,8 @@ spec:
           - name: kubeconfig
             path: /data/kubeconfig.yaml
             optional: true
+            archive:
+              none: {}
 
           - name: tfstate
             globalName: global-tfstate
@@ -94,6 +96,8 @@ spec:
           - name: url
             path: /data/url
             optional: true
+            archive:
+              none: {}
 
           - name: SSH_ACCESS
             path: /data/SSH_ACCESS.md
