@@ -43,8 +43,12 @@ spec:
         artifacts:
           - name: kubeconfig
             path: /outputs/kubeconfig
+            archive:
+              none: {}
           - name: connect
             path: /outputs/connect.sh
+            archive:
+              none: {}
           - name: SSH_ACCESS
             path: /outputs/SSH_ACCESS.md
             archive:
