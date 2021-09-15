@@ -57,7 +57,7 @@ spec:
             archive:
               tar: {}
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/kops:0.2.13
+        image: gcr.io/stackrox-infra/automation-flavors/kops:0.2.13-1-g37af55b4d6-snapshot
         imagePullPolicy: Always
         args:
           - create
