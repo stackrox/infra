@@ -72,12 +72,13 @@ function ClusterCards({ showAllClusters = false }: ClusterCardsProps): ReactElem
         to={`cluster/${cluster.ID}`}
         header={cluster.ID || 'No ID'}
         footer={cluster.Status && <Lifespan cluster={cluster} />}
-        className={`m-2 ${extraCardClass}`}
+        className={`m-2 h-43 ${extraCardClass}`}
       >
         {cluster.Description && (
           <span className="mb-2 text-lg">Description: {cluster.Description}</span>
         )}
         <span className="text-lg">Status: {cluster.Status || 'FAILED'}</span>
+        <span className="text-lg">Flavor: {cluster.Flavor || 'Unknown'}</span>
       </LinkCard>
     );
   });
