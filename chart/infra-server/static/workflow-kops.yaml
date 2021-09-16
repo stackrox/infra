@@ -57,7 +57,7 @@ spec:
             archive:
               tar: {}
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/kops:0.2.13-17-g72e4cca4c5-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/kops:0.2.13-18-ga4092c50bd-snapshot
         imagePullPolicy: Always
         args:
           - create
@@ -101,7 +101,7 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/kops:0.2.13-17-g72e4cca4c5-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/kops:0.2.13-18-ga4092c50bd-snapshot
         imagePullPolicy: Always
         args:
           - destroy
