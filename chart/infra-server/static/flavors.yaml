@@ -374,12 +374,12 @@
 
     - name: kops-version
       description: KOPS version
-      value: 1.18.1
+      value: 1.21.1
       kind: optional
 
     - name: k8s-version
       description: kubernetes version (must be <= KOPS version)
-      value: 1.18.1
+      value: 1.21.4
       kind: optional
 
     - name: master-count
