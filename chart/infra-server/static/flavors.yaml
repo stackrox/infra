@@ -484,7 +484,7 @@
 
     - name: machine-type
       description: node machine type
-      value: standard_d4s_v3
+      value: Standard_D4s_v3
       kind: optional
 
   artifacts:
