@@ -43,7 +43,7 @@ spec:
             archive:
               tar: {}
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/eks:0.1.7
+        image: gcr.io/stackrox-infra/automation-flavors/eks:0.2.14
         imagePullPolicy: Always
         args:
           - create
@@ -85,7 +85,7 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/eks:0.1.7
+        image: gcr.io/stackrox-infra/automation-flavors/eks:0.2.14
         imagePullPolicy: Always
         args:
           - destroy

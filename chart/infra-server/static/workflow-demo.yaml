@@ -80,6 +80,8 @@ spec:
           - name: kubeconfig
             path: /data/kubeconfig.yaml
             optional: true
+            archive:
+              none: {}
 
           - name: tfstate
             globalName: global-tfstate
@@ -94,6 +96,8 @@ spec:
           - name: url
             path: /data/url
             optional: true
+            archive:
+              none: {}
 
           - name: SSH_ACCESS
             path: /data/SSH_ACCESS.md
@@ -101,7 +105,7 @@ spec:
               none: {}
 
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/demo:0.2.5
+        image: gcr.io/stackrox-infra/automation-flavors/demo:0.2.14
         imagePullPolicy: Always
         args:
           - create
@@ -174,7 +178,7 @@ spec:
             path: /data/tfvars
             optional: true
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/demo:0.2.5
+        image: gcr.io/stackrox-infra/automation-flavors/demo:0.2.14
         imagePullPolicy: Always
         args:
           - destroy

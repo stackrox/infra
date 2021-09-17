@@ -1,28 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: kops-
+  generateName: rosa-
 spec:
   entrypoint: start
   arguments:
     parameters:
       - name: name
-      - name: kops-version
-        value: ""
-      - name: k8s-version
-        value: ""
-      - name: master-count
-        value: ""
-      - name: master-instance-type
-        value: ""
-      - name: node-count
-        value: ""
-      - name: node-instance-type
-        value: ""
-      - name: cni
-        value: ""
-      - name: region
-        value: ""
+      - name: nodes
+        value: "4"
+      - name: machine-type
+        value: "m5.xlarge"
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -30,13 +18,16 @@ spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
-            storage: 1Mi
+            storage: 10Mi
 
   templates:
     - name: start
       steps:
         - - name: create
             template: create
+
+        - - name: gather
+            template: gather
 
         - - name: wait
             template: wait
@@ -45,19 +36,9 @@ spec:
             template: destroy
 
     - name: create
-      activeDeadlineSeconds: 3600
-      outputs:
-        artifacts:
-          - name: kubeconfig
-            path: /data/kube.yaml
-            archive:
-              none: {}
-          - name: data
-            path: /data
-            archive:
-              tar: {}
+      activeDeadlineSeconds: 7200
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/kops:0.2.14
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.14
         imagePullPolicy: Always
         args:
           - create
@@ -73,27 +54,48 @@ spec:
               secretKeyRef:
                 name: aws-access-secrets
                 key: AWS_SECRET_ACCESS_KEY
-          - name: DESIRED_KOPS_VERSION
-            value: "{{workflow.parameters.kops-version}}"
-          - name: TF_VAR_k8s_version
-            value: "{{workflow.parameters.k8s-version}}"
-          - name: TF_VAR_master_count
-            value: "{{workflow.parameters.master-count}}"
-          - name: TF_VAR_master_instance_type
-            value: "{{workflow.parameters.master-instance-type}}"
-          - name: TF_VAR_node_count
-            value: "{{workflow.parameters.node-count}}"
-          - name: TF_VAR_node_instance_type
-            value: "{{workflow.parameters.node-instance-type}}"
-          - name: TF_VAR_cni
-            value: "{{workflow.parameters.cni}}"
-          - name: TF_VAR_region
-            value: "{{workflow.parameters.region}}"
-          - name: TF_VAR_creation_source
+          - name: REDHAT_PULL_SECRET_BASE64
+            valueFrom:
+              secretKeyRef:
+                name: aws-access-secrets
+                key: REDHAT_PULL_SECRET_BASE64
+          - name: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: aws-access-secrets
+                key: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
+          - name: NODE_COUNT
+            value: "{{workflow.parameters.nodes}}"
+          - name: INSTANCE_TYPE
+            value: "{{workflow.parameters.machine-type}}"
+          - name: CREATION_SOURCE
             value: "infra"
         volumeMounts:
           - name: data
             mountPath: /data
+
+    - name: gather
+      container:
+        image: busybox
+        imagePullPolicy: Always
+        command: [echo, "gathering artifacts"]
+        volumeMounts:
+          - name: data
+            mountPath: /data
+      outputs:
+        artifacts:
+          - name: kubeconfig
+            path: /data/kubeconfig
+            archive:
+              none: {}
+          - name: dotenv
+            path: /data/dotenv
+            archive:
+              none: {}
+          - name: data
+            path: /data
+            archive:
+              tar: {}
 
     - name: wait
       suspend: {}
@@ -101,7 +103,7 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/kops:0.2.14
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.14
         imagePullPolicy: Always
         args:
           - destroy
@@ -117,6 +119,11 @@ spec:
               secretKeyRef:
                 name: aws-access-secrets
                 key: AWS_SECRET_ACCESS_KEY
+          - name: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: aws-access-secrets
+                key: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
         volumeMounts:
           - name: data
             mountPath: /data

@@ -43,8 +43,12 @@ spec:
         artifacts:
           - name: kubeconfig
             path: /outputs/kubeconfig
+            archive:
+              none: {}
           - name: connect
             path: /outputs/connect.sh
+            archive:
+              none: {}
           - name: SSH_ACCESS
             path: /outputs/SSH_ACCESS.md
             archive:
@@ -54,7 +58,7 @@ spec:
             valueFrom:
               path: /outputs/cluster_name
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.2.5
+        image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.2.14
         imagePullPolicy: Always
         args:
           - create
@@ -77,7 +81,7 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.2.5
+        image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.2.14
         imagePullPolicy: Always
         args:
           - destroy

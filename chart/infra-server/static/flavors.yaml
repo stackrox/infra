@@ -374,12 +374,12 @@
 
     - name: kops-version
       description: KOPS version
-      value: 1.18.1
+      value: 1.21.1
       kind: optional
 
     - name: k8s-version
       description: kubernetes version (must be <= KOPS version)
-      value: 1.18.1
+      value: 1.21.4
       kind: optional
 
     - name: master-count
@@ -460,6 +460,72 @@
     - name: connect
       description: Shell script for adding this clusters connect information to your kubeconfig
       tags: [connect]
+
+    - name: data
+      description: An archive that includes ssh keys to connect to cluster nodes
+
+#####################
+#  Openshift ARO    #
+#####################
+- id: aro
+  name: ARO
+  description: Openshift ARO cluster
+  availability: alpha
+  workflow: configuration/workflow-openshift-aro.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      value: example1
+
+    - name: nodes
+      description: number of nodes
+      value: "4"
+      kind: optional
+
+    - name: machine-type
+      description: node machine type
+      value: Standard_D4s_v3
+      kind: optional
+
+  artifacts:
+    - name: kubeconfig
+      description: Kube config for connecting to this cluster
+
+    - name: dotenv
+      description: Environment variables used to access the cluster and consoles
+
+    - name: data
+      description: An archive that includes ssh keys to connect to cluster nodes
+
+#####################
+#  Openshift ROSA   #
+#####################
+- id: rosa
+  name: ROSA
+  description: Openshift ROSA cluster
+  availability: alpha
+  workflow: configuration/workflow-openshift-rosa.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      value: example1
+
+    - name: nodes
+      description: number of nodes
+      value: "4"
+      kind: optional
+
+    - name: machine-type
+      description: node machine type
+      value: m5.xlarge
+      kind: optional
+
+  artifacts:
+    - name: kubeconfig
+      description: Kube config for connecting to this cluster
+
+    - name: dotenv
+      description: Environment variables used to access the cluster and consoles
 
     - name: data
       description: An archive that includes ssh keys to connect to cluster nodes
