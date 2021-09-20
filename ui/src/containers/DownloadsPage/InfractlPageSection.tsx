@@ -5,7 +5,8 @@ import UserServiceAccountToken from './UserServiceAccountToken';
 
 export default function InfractlPageSection(): ReactElement {
   const infractlDownloads = {
-    'Download for Mac': '/downloads/infractl-darwin-amd64',
+    'Download for Intel-Mac': '/downloads/infractl-darwin-amd64',
+    'Download for M1-Mac': '/downloads/infractl-darwin-arm64',
     'Download for Linux': '/downloads/infractl-linux-amd64',
   };
   const infractlLinks = Object.entries(infractlDownloads).map(([label, value]) => (

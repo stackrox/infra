@@ -48,6 +48,7 @@ image: server cli ui clean-image
 	@mkdir -p image/static/downloads
 	@ cp -R ui/build/* image/static/
 	@cp bin/infractl-darwin-amd64 image/static/downloads
+	@cp bin/infractl-darwin-arm64 image/static/downloads
 	@cp bin/infractl-linux-amd64 image/static/downloads
 	docker build -t us.gcr.io/stackrox-infra/infra-server:$(TAG) image
 
