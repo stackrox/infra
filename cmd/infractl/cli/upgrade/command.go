@@ -4,7 +4,6 @@ package upgrade
 import (
 	"context"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -106,7 +105,7 @@ func recvBytes(reader v1.CliService_UpgradeClient) ([]byte, error) {
 }
 
 func writeToTempFileAndTest(bytes []byte) (string, error) {
-	tempFile, err := ioutil.TempFile("", "infractl-download-")
+	tempFile, err := os.CreateTemp("", "infractl-download-")
 	if err != nil {
 		return "", err
 	}

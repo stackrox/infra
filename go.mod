@@ -1,6 +1,6 @@
 module github.com/stackrox/infra
 
-go 1.13
+go 1.16
 
 require (
 	cloud.google.com/go/storage v1.6.0

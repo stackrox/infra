@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -42,7 +41,7 @@ func NewFromEnv() (*Signer, error) {
 		return nil, fmt.Errorf("environment variable %q was not set", googleCredentialsEnvVar)
 	}
 
-	data, err := ioutil.ReadFile(credentialsFilename)
+	data, err := os.ReadFile(credentialsFilename)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +91,7 @@ func (s Signer) Contents(gcsBucketName, gcsBucketKey string) ([]byte, error) {
 	}
 
 	if !strings.Contains(attrs.ContentType, "gzip") {
-		return ioutil.ReadAll(br)
+		return io.ReadAll(br)
 	}
 
 	gr, err := gzip.NewReader(br)
@@ -113,5 +112,5 @@ func (s Signer) Contents(gcsBucketName, gcsBucketKey string) ([]byte, error) {
 		return nil, err
 	}
 
-	return ioutil.ReadAll(tr)
+	return io.ReadAll(tr)
 }

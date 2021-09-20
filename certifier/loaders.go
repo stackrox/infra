@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"io"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	"cloud.google.com/go/storage"
@@ -23,7 +23,7 @@ type live struct {
 func (live *live) load(path string) ([]byte, error) {
 	path = filepath.Join(live.liveDir, path)
 
-	return ioutil.ReadFile(path)
+	return os.ReadFile(path)
 }
 
 func (gcs *gcs) test(ctx context.Context) error {
@@ -65,7 +65,7 @@ func (gcs *gcs) load(ctx context.Context, path string) ([]byte, error) {
 
 	defer reader.Close() // nolint:errcheck
 
-	return ioutil.ReadAll(reader)
+	return io.ReadAll(reader)
 }
 
 func (gcs *gcs) save(ctx context.Context, path string, data []byte) error {

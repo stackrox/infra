@@ -4,8 +4,8 @@ package flavor
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 	"sort"
 
 	"github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
@@ -103,7 +103,7 @@ func (r *Registry) check() (*Registry, error) {
 // NewFromConfig parses the given flavor config file, along with all referenced
 // Argo workflows, and returns a registry containing all flavors.
 func NewFromConfig(filename string) (*Registry, error) {
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to read flavorCfg config file %q", filename)
 	}
@@ -175,7 +175,7 @@ func NewFromConfig(filename string) (*Registry, error) {
 		}
 
 		// Parse the references Argo workflow file.
-		data, err := ioutil.ReadFile(flavorCfg.WorkflowFile)
+		data, err := os.ReadFile(flavorCfg.WorkflowFile)
 		if err != nil {
 			return nil, err
 		}

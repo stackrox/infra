@@ -2,7 +2,7 @@ package auth
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -13,7 +13,7 @@ import (
 
 // NewFromConfig reads and parses the given Auth0 configuration file and public key.
 func NewFromConfig(auth0ConfigFile string, auth0PublicKeyPEMFile string) (*OAuth, error) {
-	cfgData, err := ioutil.ReadFile(auth0ConfigFile)
+	cfgData, err := os.ReadFile(auth0ConfigFile)
 	if err != nil {
 		return nil, err
 	}
@@ -23,7 +23,7 @@ func NewFromConfig(auth0ConfigFile string, auth0PublicKeyPEMFile string) (*OAuth
 		return nil, err
 	}
 
-	pemData, err := ioutil.ReadFile(auth0PublicKeyPEMFile)
+	pemData, err := os.ReadFile(auth0PublicKeyPEMFile)
 	if err != nil {
 		return nil, err
 	}
