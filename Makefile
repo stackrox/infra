@@ -250,13 +250,30 @@ install-production: render-production
 deploy-local: push install-local
 	@echo "All done!"
 
+.PHONY: clean-local
+clean-local:
+	kubectl delete -R \
+	   -f chart-rendered/infra-server
+
 .PHONY: deploy-development
 deploy-development: push install-development
 	@echo "All done!"
 
+.PHONY: clean-development
+clean-development:
+	kubectl delete -R \
+	    --context $(dev_context) \
+	    -f chart-rendered/infra-server
+
 .PHONY: deploy-production
 deploy-production: push install-production
 	@echo "All done!"
+
+.PHONY: clean-production
+clean-production:
+	kubectl delete -R \
+	    --context $(prod_context) \
+	    -f chart-rendered/infra-server
 
 .PHONY: gotags
 gotags:
