@@ -252,8 +252,8 @@ deploy-local: push install-local
 
 .PHONY: clean-local
 clean-local:
-	kubectl delete -R \
-	   -f chart-rendered/infra-server
+	kubectl delete namespace infra || true
+	kubectl delete namespace argo || true
 
 .PHONY: deploy-development
 deploy-development: push install-development
@@ -261,7 +261,7 @@ deploy-development: push install-development
 
 .PHONY: clean-development
 clean-development:
-	kubectl delete namespace infra
+	kubectl delete namespace infra || true
 
 .PHONY: deploy-production
 deploy-production: push install-production
