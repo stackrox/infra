@@ -261,19 +261,11 @@ deploy-development: push install-development
 
 .PHONY: clean-development
 clean-development:
-	kubectl delete -R \
-	    --context $(dev_context) \
-	    -f chart-rendered/infra-server
+	kubectl delete namespace infra
 
 .PHONY: deploy-production
 deploy-production: push install-production
 	@echo "All done!"
-
-.PHONY: clean-production
-clean-production:
-	kubectl delete -R \
-	    --context $(prod_context) \
-	    -f chart-rendered/infra-server
 
 .PHONY: gotags
 gotags:
