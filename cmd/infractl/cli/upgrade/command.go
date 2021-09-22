@@ -19,8 +19,12 @@ import (
 const examples = `# Upgrade infractl in place
 $ infractl cli upgrade
 
-# If infractl cannot determine your OS you can specify linux or darwin
-$ infractl cli upgrade --os linux`
+# If infractl cannot determine your OS and you can specify linux or darwin
+$ infractl cli upgrade --os linux
+
+# If infractl cannot determine your architecture and you can specify amd64 or arm64
+$ infractl cli upgrade --arch amd64
+`
 
 // Command defines the handler for infractl cli upgrade.
 func Command() *cobra.Command {
@@ -34,19 +38,21 @@ func Command() *cobra.Command {
 		RunE:    common.WithGRPCHandler(run),
 	}
 
-	cmd.Flags().String("os", "", "Optionally choose an OS: darwin or linux")
+	cmd.Flags().String("os", "", "Optionally choose an OS: darwin (macOS) or linux")
+	cmd.Flags().String("arch", "", "Optionally choose and arch: amd64 (Intel-based) or arm64 (Apple Silicon)")
 
 	return cmd
 }
 
 func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []string) (common.PrettyPrinter, error) {
 	argOS, _ := cmd.Flags().GetString("os")
-	OS, err := guessOSIfNotSet(argOS)
+	argArch, _ := cmd.Flags().GetString("arch")
+	OS, arch, err := guessOSAndArchIfNotSet(argOS, argArch)
 	if err != nil {
 		return nil, err
 	}
 
-	reader, err := v1.NewCliServiceClient(conn).Upgrade(ctx, &v1.CliUpgradeRequest{Os: OS})
+	reader, err := v1.NewCliServiceClient(conn).Upgrade(ctx, &v1.CliUpgradeRequest{Os: OS, Arch: arch})
 	if err != nil {
 		return nil, err
 	}
@@ -68,25 +74,39 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []str
 	return prettyCliUpgrade{infractlFilename}, nil
 }
 
-func guessOSIfNotSet(os string) (string, error) {
-	if os != "" {
-		return os, nil
+func guessOSAndArchIfNotSet(os, arch string) (string, string, error) {
+	if os != "" && arch != "" {
+		return os, arch, nil
 	}
 
-	uname, err := exec.Command("uname", "-a").Output()
+	uname, err := exec.Command("uname", "-sm").Output()
 	if err != nil {
-		return "", errors.Wrap(err, "Cannot run uname -a to determine OS")
+		return "", "", errors.Wrap(err, "Cannot run uname -sm to determine OS")
 	}
 
-	if strings.Contains(string(uname), "Darwin") {
-		os = "darwin"
-	} else if strings.Contains(string(uname), "Linux") {
-		os = "linux"
-	} else {
-		return "", errors.New("Cannot determine OS from: " + string(uname))
+	if os == "" {
+		switch {
+		case strings.Contains(string(uname), "Darwin"):
+			os = "darwin"
+		case strings.Contains(string(uname), "Linux"):
+			os = "linux"
+		default:
+			return "", "", errors.Errorf("uname returned invalid OS: %s; must be Darwin or Linux", string(uname))
+		}
 	}
 
-	return os, nil
+	if arch == "" {
+		switch {
+		case strings.Contains(string(uname), "x86_64"):
+			arch = "amd64"
+		case strings.Contains(string(uname), "arm64"):
+			arch = "arm64"
+		default:
+			return "", "", errors.Errorf("uname returned invalid arch: %s; must be x86_64 or arm64", string(uname))
+		}
+	}
+
+	return os, arch, nil
 }
 
 func recvBytes(reader v1.CliService_UpgradeClient) ([]byte, error) {

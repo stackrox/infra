@@ -423,7 +423,8 @@ service ClusterService {
 }
 
 message CliUpgradeRequest {
-    string os = 1;
+    string os   = 1;
+    string arch = 2;
 }
 
 message CliUpgradeResponse {
@@ -435,7 +436,7 @@ service CliService {
     // Upgrade - gets an updated binary if it exists.
     rpc Upgrade (CliUpgradeRequest) returns (stream CliUpgradeResponse) {
         option (google.api.http) = {
-            get: "/v1/cli/{os}/upgrade"
+            get: "/v1/cli/{os}/{arch}/upgrade"
         };
     }
 }
