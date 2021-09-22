@@ -51,8 +51,8 @@ export default function UserServiceAccountToken(): ReactElement {
           example, you may put it in your Go executable directory.
         </p>
         <p className="my-2">
-          Here are the commands to move the file, allow it to execute on an Intel-based Mac, confirm its
-          location, and help you learn about its features.
+          Here are the commands to move the file, allow it to execute on an Intel-based Mac, confirm
+          its location, and help you learn about its features.
         </p>
         <pre className="border border-base-400 p-4 text-lg whitespace-pre-wrap">
           $ install ~/Downloads/infractl-darwin-amd64 $GOPATH/bin/infractl
