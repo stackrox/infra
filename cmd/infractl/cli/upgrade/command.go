@@ -19,10 +19,10 @@ import (
 const examples = `# Upgrade infractl in place
 $ infractl cli upgrade
 
-# If infractl cannot determine your OS and you can specify linux or darwin
+# If infractl cannot determine your OS you can specify linux or darwin
 $ infractl cli upgrade --os linux
 
-# If infractl cannot determine your architecture and you can specify amd64 or arm64
+# If infractl cannot determine your architecture you can specify amd64 or arm64
 $ infractl cli upgrade --arch amd64
 `
 
