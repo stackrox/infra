@@ -46,7 +46,7 @@ image: server cli ui clean-image
 	@echo "+ $@"
 	@cp -f bin/infra-server-linux-amd64 image/infra-server
 	@mkdir -p image/static/downloads
-	@ cp -R ui/build/* image/static/
+	@cp -R ui/build/* image/static/
 	@cp bin/infractl-darwin-amd64 image/static/downloads
 	@cp bin/infractl-darwin-arm64 image/static/downloads
 	@cp bin/infractl-linux-amd64 image/static/downloads
@@ -56,6 +56,15 @@ image: server cli ui clean-image
 clean-image:
 	@echo "+ $@"
 	@rm -rf image/infra-server image/static
+
+#############
+## Testing ##
+#############
+
+.PHONY: unit-test
+unit-test: proto-generated-srcs
+	@echo "+ $@"
+	@go test ./...
 
 ##############
 ## Protobuf ##

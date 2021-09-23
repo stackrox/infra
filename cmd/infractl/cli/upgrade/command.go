@@ -51,6 +51,9 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []str
 	if err != nil {
 		return nil, err
 	}
+	if err := validateOSAndArch(OS, arch); err != nil {
+		return nil, err
+	}
 
 	reader, err := v1.NewCliServiceClient(conn).Upgrade(ctx, &v1.CliUpgradeRequest{Os: OS, Arch: arch})
 	if err != nil {
@@ -107,6 +110,22 @@ func guessOSAndArchIfNotSet(os, arch string) (string, string, error) {
 	}
 
 	return os, arch, nil
+}
+
+func validateOSAndArch(os, arch string) error {
+	switch os {
+	case "linux":
+		if arch == "amd64" {
+			return nil
+		}
+	case "darwin":
+		if arch == "amd64" || arch == "arm64" {
+			return nil
+		}
+	default:
+	}
+
+	return errors.Errorf("invalid OS and architecture combination: %s %s", os, arch)
 }
 
 func recvBytes(reader v1.CliService_UpgradeClient) ([]byte, error) {
