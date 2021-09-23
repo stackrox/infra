@@ -6,7 +6,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -172,7 +171,7 @@ func writeToTempFileAndTest(bytes []byte) (string, error) {
 }
 
 func moveIntoPlace(tempFilename string) (string, error) {
-	infractlFilename, err := filepath.Abs(os.Args[0])
+	infractlFilename, err := os.Executable()
 	if err != nil {
 		return "", errors.Wrap(err, "Cannot determine infractl path")
 	}

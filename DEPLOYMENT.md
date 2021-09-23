@@ -64,6 +64,8 @@ kubectl -n infra patch serviceaccount default -p '{"imagePullSecrets": [{"name":
 
 ## Production and Staging Clusters
 
+To work with either of the clusters in `project=stackrox-infra` you will need to either be a member of the `team-automation` group or have someone add you as a project owner.
+
 ### [Development (Staging)](https://console.cloud.google.com/kubernetes/clusters/details/us-west2/infra-development?project=stackrox-infra&organizationId=847401270788)
 
 To connect to this cluster using kubectl, run:
