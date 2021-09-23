@@ -6,9 +6,9 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -264,7 +264,7 @@ func wrapHealthCheck(wrapped http.Handler) http.Handler {
 
 func grpcLocalCredentials(certFile string) (grpc.DialOption, error) {
 	// Read the x509 PEM public certificate file
-	pem, err := ioutil.ReadFile(certFile)
+	pem, err := os.ReadFile(certFile)
 	if err != nil {
 		return nil, err
 	}

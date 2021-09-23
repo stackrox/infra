@@ -26,6 +26,7 @@ server: proto-generated-srcs
 cli: proto-generated-srcs
 	@echo "+ $@"
 	GOARCH=amd64 GOOS=darwin ./scripts/go-build -o bin/infractl-darwin-amd64 ./cmd/infractl
+	GOARCH=arm64 GOOS=darwin ./scripts/go-build -o bin/infractl-darwin-arm64 ./cmd/infractl
 	GOARCH=amd64 GOOS=linux  ./scripts/go-build -o bin/infractl-linux-amd64  ./cmd/infractl
 
 # cli-local - Builds the infractl client binary
@@ -45,8 +46,9 @@ image: server cli ui clean-image
 	@echo "+ $@"
 	@cp -f bin/infra-server-linux-amd64 image/infra-server
 	@mkdir -p image/static/downloads
-	@ cp -R ui/build/* image/static/
+	@cp -R ui/build/* image/static/
 	@cp bin/infractl-darwin-amd64 image/static/downloads
+	@cp bin/infractl-darwin-arm64 image/static/downloads
 	@cp bin/infractl-linux-amd64 image/static/downloads
 	docker build -t us.gcr.io/stackrox-infra/infra-server:$(TAG) image
 
@@ -54,6 +56,15 @@ image: server cli ui clean-image
 clean-image:
 	@echo "+ $@"
 	@rm -rf image/infra-server image/static
+
+#############
+## Testing ##
+#############
+
+.PHONY: unit-test
+unit-test: proto-generated-srcs
+	@echo "+ $@"
+	@go test ./...
 
 ##############
 ## Protobuf ##
@@ -248,9 +259,18 @@ install-production: render-production
 deploy-local: push install-local
 	@echo "All done!"
 
+.PHONY: clean-local
+clean-local:
+	kubectl delete namespace infra || true
+	kubectl delete namespace argo || true
+
 .PHONY: deploy-development
 deploy-development: push install-development
 	@echo "All done!"
+
+.PHONY: clean-development
+clean-development:
+	kubectl delete namespace infra || true
 
 .PHONY: deploy-production
 deploy-production: push install-production

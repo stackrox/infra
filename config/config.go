@@ -2,7 +2,7 @@
 package config
 
 import (
-	"io/ioutil"
+	"os"
 
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
@@ -140,7 +140,7 @@ type artifact struct {
 
 // Load reads and parses the given configuration file.
 func Load(filename string) (*Config, error) {
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to read config file %q", filename)
 	}

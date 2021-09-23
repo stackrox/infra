@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"sort"
 	"strings"
@@ -629,7 +629,7 @@ func (s *clusterImpl) getLogs(node v1alpha1.NodeStatus) *v1.Log {
 		return log
 	}
 
-	logBody, err := ioutil.ReadAll(stream)
+	logBody, err := io.ReadAll(stream)
 	if err != nil {
 		log.Body = []byte(err.Error())
 		return log

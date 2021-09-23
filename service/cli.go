@@ -27,14 +27,20 @@ func NewCliService() (middleware.APIService, error) {
 	return &cliImpl{}, nil
 }
 
-// Upgrade provides the a binary for the requested os.
+// Upgrade provides the binary for the requested OS and architecture.
 func (s *cliImpl) Upgrade(request *v1.CliUpgradeRequest, stream v1.CliService_UpgradeServer) error {
 	if request.Os != "linux" && request.Os != "darwin" {
 		err := errors.Errorf("%s is not a supported OS", request.Os)
 		log.Println("infractl cli upgrade:", err)
 		return err
 	}
-	filename := webRoot + "/downloads/infractl-" + request.Os + "-amd64"
+	if request.Arch != "amd64" && request.Arch != "arm64" {
+		err := errors.Errorf("%s is not a supported arch", request.Arch)
+		log.Println("infractl cli upgrade:", err)
+		return err
+	}
+
+	filename := webRoot + "/downloads/infractl-" + request.Os + "-" + request.Arch
 	file, err := os.Open(filename)
 	if err != nil {
 		log.Println("Failed to open infractl binary:", err)
