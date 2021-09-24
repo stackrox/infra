@@ -47,7 +47,7 @@
     "@types/jest": "^27.0.2",
     "@types/lodash": "^4.14.173",
     "@types/node": "^16.9.6",
-    "@types/react": "^17.0.20",
+    "@types/react": "^17.0.24",
     "@types/react-dom": "^17.0.9",
     "@types/react-modal": "^3.12.1",
     "autoprefixer": "^10.3.4",
