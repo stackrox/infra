@@ -38,7 +38,7 @@ spec:
     - name: create
       activeDeadlineSeconds: 7200
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.14-3-gd00e73f7f7-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.14-4-gfc75327c62-snapshot
         imagePullPolicy: Always
         args:
           - create
@@ -108,7 +108,7 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.14-3-gd00e73f7f7-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.14-4-gfc75327c62-snapshot
         imagePullPolicy: Always
         args:
           - destroy
