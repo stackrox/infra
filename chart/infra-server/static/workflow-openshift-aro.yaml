@@ -38,7 +38,7 @@ spec:
     - name: create
       activeDeadlineSeconds: 7200
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.14
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.15
         imagePullPolicy: Always
         args:
           - create
@@ -108,7 +108,7 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.14
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.15
         imagePullPolicy: Always
         args:
           - destroy
@@ -134,6 +134,11 @@ spec:
               secretKeyRef:
                 name: aro-cluster-manager
                 key: AZURE_SP_SECRET_VAL
+          - name: REDHAT_PULL_SECRET_BASE64
+            valueFrom:
+              secretKeyRef:
+                name: aro-cluster-manager
+                key: REDHAT_PULL_SECRET_BASE64
         volumeMounts:
           - name: data
             mountPath: /data
