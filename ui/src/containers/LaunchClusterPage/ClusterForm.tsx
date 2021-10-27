@@ -13,7 +13,7 @@ import * as yup from 'yup';
 import { mapValues } from 'lodash';
 import { ClipLoader } from 'react-spinners';
 import { UploadCloud } from 'react-feather';
-import { geolocated } from "react-geolocated";
+import { geolocated } from 'react-geolocated';
 import { getDistance } from 'geolib';
 
 import { ClusterServiceApi, V1Parameter } from 'generated/client';
@@ -77,32 +77,34 @@ function createParameterSchemas(parameters: FlavorParameters): ParameterSchemas 
   }, {}) as ParameterSchemas;
 }
 
-function createInitialParameterValues(parameters: FlavorParameters, coords: GeolocationCoordinates): Record<string, unknown> {
-  return Object.keys(parameters).reduce<Record<string, unknown>>(
-    (fields, paramName) => {
-      const param = parameters[paramName];
-      if (!param.Optional) {
-        return ({...fields, [paramName]: ''});
-      }
-      let bestValue = param.Value;
-      let bestDistance = Infinity;
-      if (param.LocationDependentValues && coords) {
-        for (const locVal of param.LocationDependentValues) {
-          const valCoords = {latitude: locVal.Latitude || 0.0, longitude: locVal.Longitude || 0.0};
-          const distance = getDistance(valCoords, coords);
-          if (distance < bestDistance) {
-            bestValue = locVal.Value;
-            bestDistance = distance;
-          }
+function createInitialParameterValues(
+  parameters: FlavorParameters,
+  coords: GeolocationCoordinates
+): Record<string, unknown> {
+  return Object.keys(parameters).reduce<Record<string, unknown>>((fields, paramName) => {
+    const param = parameters[paramName];
+    if (!param.Optional) {
+      return { ...fields, [paramName]: '' };
+    }
+    let bestValue = param.Value;
+    let bestDistance = Infinity;
+    if (param.LocationDependentValues && coords) {
+      param.LocationDependentValues.forEach((locVal) => {
+        const valCoords = { latitude: locVal.Latitude || 0.0, longitude: locVal.Longitude || 0.0 };
+        const distance = getDistance(valCoords, coords);
+        if (distance < bestDistance) {
+          bestValue = locVal.Value;
+          bestDistance = distance;
         }
-      }
-      return {...fields, [paramName]: bestValue || ''};
-    }, {});
+      });
+    }
+    return { ...fields, [paramName]: bestValue || '' };
+  }, {});
 
-    //   ...fields,
-    //   [param]: parameters[param].Optional && parameters[param].Value ? parameters[param].Value : '',
-    // }),
-    // {}
+  //   ...fields,
+  //   [param]: parameters[param].Optional && parameters[param].Value ? parameters[param].Value : '',
+  // }),
+  // {}
 }
 
 // backend expects every parameter value to be a string, i.e. instead of 3 to be "3"
