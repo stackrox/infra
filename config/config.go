@@ -2,6 +2,7 @@
 package config
 
 import (
+	v1 "github.com/stackrox/infra/generated/api/v1"
 	"os"
 
 	"github.com/ghodss/yaml"
@@ -124,6 +125,9 @@ type parameter struct {
 	// Indicates that the value for this parameter can be provided from the
 	// contents of a file.
 	FromFile bool `json:"fromFile"`
+
+	// ValuesByLocation contains location-dependent values.
+	ValuesByLocation []v1.Parameter_LocationDependentValue `json:"valuesByLocation,omitempty"`
 }
 
 // artifact represents a single artifact that is produced by this flavor.

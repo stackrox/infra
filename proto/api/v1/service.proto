@@ -109,6 +109,12 @@ service UserService {
 
 // Parameter represents a single parameter that is needed to launch a flavor.
 message Parameter {
+    message LocationDependentValue {
+        string Value    = 1;
+        float Latitude  = 2;
+        float Longitude = 3;
+    }
+
     // Name is the unique name of the parameter.
     string Name = 1;
 
@@ -139,6 +145,8 @@ message Parameter {
     // Indicates that the value for this parameter can be provided from the
     // contents of a file.
     bool FromFile = 8;
+
+    repeated LocationDependentValue LocationDependentValues = 9;
 }
 
 // FlavorArtifact represents a single artifact that is produced by a flavor.

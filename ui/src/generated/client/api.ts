@@ -44,6 +44,87 @@ export enum LifespanRequestMethod {
 /**
  *
  * @export
+ * @interface ParameterLocationDependentValue
+ */
+export interface ParameterLocationDependentValue {
+  /**
+   *
+   * @type {string}
+   * @memberof ParameterLocationDependentValue
+   */
+  Value?: string;
+  /**
+   *
+   * @type {number}
+   * @memberof ParameterLocationDependentValue
+   */
+  Latitude?: number;
+  /**
+   *
+   * @type {number}
+   * @memberof ParameterLocationDependentValue
+   */
+  Longitude?: number;
+}
+/**
+ *
+ * @export
+ * @interface ProtobufAny
+ */
+export interface ProtobufAny {
+  /**
+   *
+   * @type {string}
+   * @memberof ProtobufAny
+   */
+  type_url?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof ProtobufAny
+   */
+  value?: string;
+}
+/**
+ *
+ * @export
+ * @interface RuntimeStreamError
+ */
+export interface RuntimeStreamError {
+  /**
+   *
+   * @type {number}
+   * @memberof RuntimeStreamError
+   */
+  grpc_code?: number;
+  /**
+   *
+   * @type {number}
+   * @memberof RuntimeStreamError
+   */
+  http_code?: number;
+  /**
+   *
+   * @type {string}
+   * @memberof RuntimeStreamError
+   */
+  message?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof RuntimeStreamError
+   */
+  http_status?: string;
+  /**
+   *
+   * @type {Array<ProtobufAny>}
+   * @memberof RuntimeStreamError
+   */
+  details?: Array<ProtobufAny>;
+}
+/**
+ *
+ * @export
  * @interface V1Artifact
  */
 export interface V1Artifact {
@@ -65,6 +146,19 @@ export interface V1Artifact {
    * @memberof V1Artifact
    */
   URL?: string;
+}
+/**
+ *
+ * @export
+ * @interface V1CliUpgradeResponse
+ */
+export interface V1CliUpgradeResponse {
+  /**
+   *
+   * @type {string}
+   * @memberof V1CliUpgradeResponse
+   */
+  fileChunk?: string;
 }
 /**
  * Cluster represents a single cluster.
@@ -412,6 +506,12 @@ export interface V1Parameter {
    * @memberof V1Parameter
    */
   FromFile?: boolean;
+  /**
+   *
+   * @type {Array<ParameterLocationDependentValue>}
+   * @memberof V1Parameter
+   */
+  LocationDependentValues?: Array<ParameterLocationDependentValue>;
 }
 /**
  * ResourceByID represents a generic reference to a named/unique resource.
@@ -575,6 +675,152 @@ export interface V1WhoamiResponse {
    * @memberof V1WhoamiResponse
    */
   ServiceAccount?: V1ServiceAccount;
+}
+
+/**
+ * CliServiceApi - axios parameter creator
+ * @export
+ */
+export const CliServiceApiAxiosParamCreator = function (configuration?: Configuration) {
+  return {
+    /**
+     *
+     * @param {string} os
+     * @param {string} arch
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    upgrade: async (os: string, arch: string, options: any = {}): Promise<RequestArgs> => {
+      // verify required parameter 'os' is not null or undefined
+      if (os === null || os === undefined) {
+        throw new RequiredError(
+          'os',
+          'Required parameter os was null or undefined when calling upgrade.'
+        );
+      }
+      // verify required parameter 'arch' is not null or undefined
+      if (arch === null || arch === undefined) {
+        throw new RequiredError(
+          'arch',
+          'Required parameter arch was null or undefined when calling upgrade.'
+        );
+      }
+      const localVarPath = `/v1/cli/{os}/{arch}/upgrade`
+        .replace(`{${'os'}}`, encodeURIComponent(String(os)))
+        .replace(`{${'arch'}}`, encodeURIComponent(String(arch)));
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, 'https://example.com');
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      const queryParameters = new URLSearchParams(localVarUrlObj.search);
+      for (const key in localVarQueryParameter) {
+        queryParameters.set(key, localVarQueryParameter[key]);
+      }
+      for (const key in options.query) {
+        queryParameters.set(key, options.query[key]);
+      }
+      localVarUrlObj.search = new URLSearchParams(queryParameters).toString();
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      };
+
+      return {
+        url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
+        options: localVarRequestOptions,
+      };
+    },
+  };
+};
+
+/**
+ * CliServiceApi - functional programming interface
+ * @export
+ */
+export const CliServiceApiFp = function (configuration?: Configuration) {
+  return {
+    /**
+     *
+     * @param {string} os
+     * @param {string} arch
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async upgrade(
+      os: string,
+      arch: string,
+      options?: any
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<object>> {
+      const localVarAxiosArgs = await CliServiceApiAxiosParamCreator(configuration).upgrade(
+        os,
+        arch,
+        options
+      );
+      return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+        const axiosRequestArgs = {
+          ...localVarAxiosArgs.options,
+          url: (configuration?.basePath || basePath) + localVarAxiosArgs.url,
+        };
+        return axios.request(axiosRequestArgs);
+      };
+    },
+  };
+};
+
+/**
+ * CliServiceApi - factory interface
+ * @export
+ */
+export const CliServiceApiFactory = function (
+  configuration?: Configuration,
+  basePath?: string,
+  axios?: AxiosInstance
+) {
+  return {
+    /**
+     *
+     * @param {string} os
+     * @param {string} arch
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    upgrade(os: string, arch: string, options?: any): AxiosPromise<object> {
+      return CliServiceApiFp(configuration)
+        .upgrade(os, arch, options)
+        .then((request) => request(axios, basePath));
+    },
+  };
+};
+
+/**
+ * CliServiceApi - object-oriented interface
+ * @export
+ * @class CliServiceApi
+ * @extends {BaseAPI}
+ */
+export class CliServiceApi extends BaseAPI {
+  /**
+   *
+   * @param {string} os
+   * @param {string} arch
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof CliServiceApi
+   */
+  public upgrade(os: string, arch: string, options?: any) {
+    return CliServiceApiFp(this.configuration)
+      .upgrade(os, arch, options)
+      .then((request) => request(this.axios, this.basePath));
+  }
 }
 
 /**

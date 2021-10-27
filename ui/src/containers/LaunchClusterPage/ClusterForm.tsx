@@ -13,6 +13,8 @@ import * as yup from 'yup';
 import { mapValues } from 'lodash';
 import { ClipLoader } from 'react-spinners';
 import { UploadCloud } from 'react-feather';
+import { geolocated } from "react-geolocated";
+import { getDistance } from 'geolib';
 
 import { ClusterServiceApi, V1Parameter } from 'generated/client';
 import configuration from 'client/configuration';
@@ -75,14 +77,32 @@ function createParameterSchemas(parameters: FlavorParameters): ParameterSchemas 
   }, {}) as ParameterSchemas;
 }
 
-function createInitialParameterValues(parameters: FlavorParameters): Record<string, unknown> {
+function createInitialParameterValues(parameters: FlavorParameters, coords: GeolocationCoordinates): Record<string, unknown> {
   return Object.keys(parameters).reduce<Record<string, unknown>>(
-    (fields, param) => ({
-      ...fields,
-      [param]: parameters[param].Optional && parameters[param].Value ? parameters[param].Value : '',
-    }),
-    {}
-  );
+    (fields, paramName) => {
+      const param = parameters[paramName];
+      if (!param.Optional) {
+        return ({...fields, [paramName]: ''});
+      }
+      let bestValue = param.Value;
+      let bestDistance = Infinity;
+      if (param.LocationDependentValues && coords) {
+        for (const locVal of param.LocationDependentValues) {
+          const valCoords = {latitude: locVal.Latitude || 0.0, longitude: locVal.Longitude || 0.0};
+          const distance = getDistance(valCoords, coords);
+          if (distance < bestDistance) {
+            bestValue = locVal.Value;
+            bestDistance = distance;
+          }
+        }
+      }
+      return {...fields, [paramName]: bestValue || ''};
+    }, {});
+
+    //   ...fields,
+    //   [param]: parameters[param].Optional && parameters[param].Value ? parameters[param].Value : '',
+    // }),
+    // {}
 }
 
 // backend expects every parameter value to be a string, i.e. instead of 3 to be "3"
@@ -213,12 +233,14 @@ type Props = {
   flavorId: string;
   flavorParameters: FlavorParameters;
   onClusterCreated: (clusterId: string) => void;
+  coords: GeolocationCoordinates;
 };
 
-export default function ClusterForm({
+function ClusterForm({
   flavorId,
   flavorParameters,
   onClusterCreated,
+  coords,
 }: Props): ReactElement {
   const parameterSchemas = createParameterSchemas(flavorParameters);
   const schema = yup.object().shape({
@@ -227,7 +249,7 @@ export default function ClusterForm({
     Parameters: yup.object().shape(parameterSchemas),
   });
 
-  const initialParameterValues = createInitialParameterValues(flavorParameters);
+  const initialParameterValues = createInitialParameterValues(flavorParameters, coords);
 
   const { user } = useUserAuth();
   initialParameterValues.name = generateClusterName(user?.Name || '');
@@ -281,3 +303,10 @@ export default function ClusterForm({
     </Formik>
   );
 }
+
+export default geolocated({
+  positionOptions: {
+    enableHighAccuracy: false,
+  },
+  userDecisionTimeout: 5000,
+})(ClusterForm);

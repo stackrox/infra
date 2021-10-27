@@ -127,9 +127,18 @@
       kind: optional
 
     - name: gcp-zone
-      description: The zone in GCP to delete the cluster from
+      description: The zone in GCP to deploy the cluster to
       value: us-central1-a
       kind: optional
+      valuesByLocation:
+      - value: us-central1-a
+        # Coordinates of Council Bluffs, Iowa
+        latitude: 41.2619444
+        longitude: -95.8608333
+      - value: europe-west1-b
+        # Coordinates of Brussels, Belgium
+        latitude: 50.8503396
+        longitude: 4.3517103
 
   artifacts:
     - name: kubeconfig
@@ -264,9 +273,18 @@
       kind: optional
 
     - name: region
-      description: Google Cloud zone to deploy infrastructure into.
+      description: Google Cloud region to deploy infrastructure into.
       value: us-east1
       kind: optional
+      valuesByLocation:
+      - value: us-east1
+        # Coordinates of Charleston, SC
+        latitude: 32.784618
+        longitude: -79.940918
+      - value: europe-west1
+        # Coordinates of Brussels, Belgium
+        latitude: 50.8503396
+        longitude: 4.3517103
 
   artifacts:
     - name: kubeconfig
