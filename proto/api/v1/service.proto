@@ -110,9 +110,9 @@ service UserService {
 // Parameter represents a single parameter that is needed to launch a flavor.
 message Parameter {
     message LocationDependentValue {
-        string Value    = 1;
-        float Latitude  = 2;
-        float Longitude = 3;
+        string value     = 1;
+        float  latitude  = 2;
+        float  longitude = 3;
     }
 
     // Name is the unique name of the parameter.

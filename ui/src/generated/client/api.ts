@@ -52,19 +52,19 @@ export interface ParameterLocationDependentValue {
    * @type {string}
    * @memberof ParameterLocationDependentValue
    */
-  Value?: string;
+  value?: string;
   /**
    *
    * @type {number}
    * @memberof ParameterLocationDependentValue
    */
-  Latitude?: number;
+  latitude?: number;
   /**
    *
    * @type {number}
    * @memberof ParameterLocationDependentValue
    */
-  Longitude?: number;
+  longitude?: number;
 }
 /**
  *

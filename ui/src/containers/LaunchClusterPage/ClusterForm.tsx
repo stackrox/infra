@@ -13,7 +13,7 @@ import * as yup from 'yup';
 import { mapValues } from 'lodash';
 import { ClipLoader } from 'react-spinners';
 import { UploadCloud } from 'react-feather';
-import { geolocated } from 'react-geolocated';
+import { geolocated, GeolocatedProps } from 'react-geolocated';
 import { getDistance } from 'geolib';
 
 import { ClusterServiceApi, V1Parameter } from 'generated/client';
@@ -88,12 +88,16 @@ function createInitialParameterValues(
     }
     let bestValue = param.Value;
     let bestDistance = Infinity;
-    if (param.LocationDependentValues && coords) {
-      param.LocationDependentValues.forEach((locVal) => {
-        const valCoords = { latitude: locVal.Latitude || 0.0, longitude: locVal.Longitude || 0.0 };
-        const distance = getDistance(valCoords, coords);
+    const locVals = param.LocationDependentValues;
+    if (locVals && coords) {
+      locVals.forEach((locVal) => {
+        const valCoords = { latitude: locVal.latitude || 0.0, longitude: locVal.longitude || 0.0 };
+        const distance = getDistance(
+          { latitude: coords.latitude, longitude: coords.longitude },
+          valCoords
+        );
         if (distance < bestDistance) {
-          bestValue = locVal.Value;
+          bestValue = locVal.value;
           bestDistance = distance;
         }
       });
@@ -235,7 +239,6 @@ type Props = {
   flavorId: string;
   flavorParameters: FlavorParameters;
   onClusterCreated: (clusterId: string) => void;
-  coords: GeolocationCoordinates;
 };
 
 function ClusterForm({
@@ -243,7 +246,7 @@ function ClusterForm({
   flavorParameters,
   onClusterCreated,
   coords,
-}: Props): ReactElement {
+}: Props & GeolocatedProps): ReactElement {
   const parameterSchemas = createParameterSchemas(flavorParameters);
   const schema = yup.object().shape({
     ID: yup.string().required(),
@@ -292,7 +295,12 @@ function ClusterForm({
   };
 
   return (
-    <Formik initialValues={initialValues} validationSchema={schema} onSubmit={onSubmit}>
+    <Formik
+      initialValues={initialValues}
+      validationSchema={schema}
+      onSubmit={onSubmit}
+      enableReinitialize
+    >
       <Form className="md:w-1/3">
         {error && (
           <div className="p-2 mb-2 bg-alert-200">
@@ -309,6 +317,7 @@ function ClusterForm({
 export default geolocated({
   positionOptions: {
     enableHighAccuracy: false,
+    maximumAge: 3600000,
   },
   userDecisionTimeout: 5000,
-})(ClusterForm);
+})<Props>(ClusterForm);
