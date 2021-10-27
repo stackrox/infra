@@ -2,8 +2,9 @@
 package config
 
 import (
-	v1 "github.com/stackrox/infra/generated/api/v1"
 	"os"
+
+	v1 "github.com/stackrox/infra/generated/api/v1"
 
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
