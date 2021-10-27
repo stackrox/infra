@@ -128,7 +128,7 @@ type parameter struct {
 	FromFile bool `json:"fromFile"`
 
 	// ValuesByLocation contains location-dependent values.
-	ValuesByLocation []v1.Parameter_LocationDependentValue `json:"valuesByLocation,omitempty"`
+	ValuesByLocation []*v1.Parameter_LocationDependentValue `json:"valuesByLocation,omitempty"`
 }
 
 // artifact represents a single artifact that is produced by this flavor.
