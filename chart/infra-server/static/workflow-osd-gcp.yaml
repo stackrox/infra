@@ -1,0 +1,134 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: rosa-
+spec:
+  entrypoint: start
+  arguments:
+    parameters:
+      - name: name
+      - name: nodes
+        value: "4"
+      - name: machine-type
+        value: "m5.xlarge"
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 10Mi
+
+  templates:
+    - name: start
+      steps:
+        - - name: create
+            template: create
+
+        - - name: gather
+            template: gather
+
+        - - name: wait
+            template: wait
+
+        - - name: destroy
+            template: destroy
+
+    - name: create
+      activeDeadlineSeconds: 7200
+      container:
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-osd:0.2.15-24-gf92f66f309-snapshot
+        imagePullPolicy: Always
+        args:
+          - create
+          - "{{workflow.parameters.name}}"
+        env:
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: aws-access-secrets
+                key: AWS_ACCESS_KEY_ID
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: aws-access-secrets
+                key: AWS_SECRET_ACCESS_KEY
+          - name: REDHAT_PULL_SECRET_BASE64
+            valueFrom:
+              secretKeyRef:
+                name: aws-access-secrets
+                key: REDHAT_PULL_SECRET_BASE64
+          - name: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: aws-access-secrets
+                key: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
+          - name: NODE_COUNT
+            value: "{{workflow.parameters.nodes}}"
+          - name: INSTANCE_TYPE
+            value: "{{workflow.parameters.machine-type}}"
+          - name: CREATION_SOURCE
+            value: "infra"
+        volumeMounts:
+          - name: data
+            mountPath: /data
+
+    - name: gather
+      container:
+        image: busybox
+        imagePullPolicy: Always
+        command: [echo, "gathering artifacts"]
+        volumeMounts:
+          - name: data
+            mountPath: /data
+      outputs:
+        artifacts:
+          - name: kubeconfig
+            path: /data/kubeconfig
+            archive:
+              none: {}
+          - name: dotenv
+            path: /data/dotenv
+            archive:
+              none: {}
+          - name: data
+            path: /data
+            archive:
+              tar: {}
+
+    - name: wait
+      suspend: {}
+
+    - name: destroy
+      activeDeadlineSeconds: 3600
+      container:
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-osd:0.2.15-24-gf92f66f309-snapshot
+        imagePullPolicy: Always
+        args:
+          - destroy
+          - "{{workflow.parameters.name}}"
+        env:
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: aws-access-secrets
+                key: AWS_ACCESS_KEY_ID
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: aws-access-secrets
+                key: AWS_SECRET_ACCESS_KEY
+          - name: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: aws-access-secrets
+                key: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
+          - name: REDHAT_PULL_SECRET_BASE64
+            valueFrom:
+              secretKeyRef:
+                name: aws-access-secrets
+                key: REDHAT_PULL_SECRET_BASE64
+        volumeMounts:
+          - name: data
+            mountPath: /data
