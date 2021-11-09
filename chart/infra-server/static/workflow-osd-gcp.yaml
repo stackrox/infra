@@ -41,6 +41,7 @@ spec:
         image: gcr.io/stackrox-infra/automation-flavors/openshift-osd:0.2.15-24-gf92f66f309-snapshot
         imagePullPolicy: Always
         args:
+          - gcp
           - create
           - "{{workflow.parameters.name}}"
         env:

@@ -534,7 +534,7 @@
 #  Openshift OSD on AWS #
 #########################
 - id: osd-on-aws
-  name: osd-on-aws
+  name: OSD on AWS
   description: Openshift dedicated on AWS
   availability: alpha
   workflow: configuration/workflow-osd-aws.yaml
@@ -567,7 +567,7 @@
 #  Openshift OSD on GCP #
 #########################
 - id: osd-on-gcp
-  name: osd-on-gcp
+  name: OSD on GCP
   description: Openshift dedicated on GCP
   availability: alpha
   workflow: configuration/workflow-osd-gcp.yaml
