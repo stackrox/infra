@@ -45,26 +45,23 @@ spec:
           - create
           - "{{workflow.parameters.name}}"
         env:
-          - name: AWS_ACCESS_KEY_ID
-            valueFrom:
-              secretKeyRef:
-                name: aws-access-secrets
-                key: AWS_ACCESS_KEY_ID
-          - name: AWS_SECRET_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: aws-access-secrets
-                key: AWS_SECRET_ACCESS_KEY
-          - name: REDHAT_PULL_SECRET_BASE64
-            valueFrom:
-              secretKeyRef:
-                name: aws-access-secrets
-                key: REDHAT_PULL_SECRET_BASE64
           - name: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
             valueFrom:
               secretKeyRef:
-                name: aws-access-secrets
+                name: osd-access-secrets
                 key: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
+          - name: REDHAT_PULL_SECRET_BASE64
+            valueFrom:
+              secretKeyRef:
+                name: osd-access-secrets
+                key: REDHAT_PULL_SECRET_BASE64
+          - name: GCP_SA_CREDS_JSON_BASE64
+            valueFrom:
+              secretKeyRef:
+                name: osd-access-secrets
+                key: GCP_SA_CREDS_JSON_BASE64
+          - name: GCP_PROJECT
+            value: "srox-temp-dev-test"
           - name: NODE_COUNT
             value: "{{workflow.parameters.nodes}}"
           - name: INSTANCE_TYPE
@@ -107,29 +104,25 @@ spec:
         image: gcr.io/stackrox-infra/automation-flavors/openshift-osd:0.2.15-24-gf92f66f309-snapshot
         imagePullPolicy: Always
         args:
+          - gcp
           - destroy
           - "{{workflow.parameters.name}}"
         env:
-          - name: AWS_ACCESS_KEY_ID
-            valueFrom:
-              secretKeyRef:
-                name: aws-access-secrets
-                key: AWS_ACCESS_KEY_ID
-          - name: AWS_SECRET_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: aws-access-secrets
-                key: AWS_SECRET_ACCESS_KEY
           - name: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
             valueFrom:
               secretKeyRef:
-                name: aws-access-secrets
+                name: osd-access-secrets
                 key: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
           - name: REDHAT_PULL_SECRET_BASE64
             valueFrom:
               secretKeyRef:
-                name: aws-access-secrets
+                name: osd-access-secrets
                 key: REDHAT_PULL_SECRET_BASE64
+          - name: GCP_SA_CREDS_JSON_BASE64
+            valueFrom:
+              secretKeyRef:
+                name: osd-access-secrets
+                key: GCP_SA_CREDS_JSON_BASE64
         volumeMounts:
           - name: data
             mountPath: /data
