@@ -123,6 +123,8 @@ spec:
               secretKeyRef:
                 name: osd-access-secrets
                 key: GCP_SA_CREDS_JSON_BASE64
+          - name: GCP_PROJECT
+            value: "srox-temp-dev-test"
         volumeMounts:
           - name: data
             mountPath: /data
