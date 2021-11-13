@@ -282,6 +282,12 @@
     - name: SSH_ACCESS
       description: Instructions for obtaining SSH access to instances in your cluster
 
+    - name: data
+      description: An archive that includes ssh keys to connect to cluster nodes
+
+    - name: dotenv
+      description: Environment variables used to access the cluster and consoles
+
 ######################
 #  openshift-4-demo  #
 ######################
@@ -321,6 +327,9 @@
 
     - name: data
       description: An archive that includes ssh keys to connect to cluster nodes
+
+    - name: dotenv
+      description: Environment variables used to access the cluster and consoles
 
 #####################
 #  AWS EKS          #
