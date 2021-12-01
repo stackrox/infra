@@ -56,7 +56,7 @@ spec:
 
     - name: create
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.15-42-gb84fe3dcca-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.15-54-ge587d69762-snapshot
         imagePullPolicy: Always
         volumeMounts:
           - name: data
@@ -196,7 +196,7 @@ spec:
 
     - name: destroy
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.15-42-gb84fe3dcca-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.15-54-ge587d69762-snapshot
         imagePullPolicy: Always
         args:
           - destroy
