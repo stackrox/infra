@@ -286,3 +286,12 @@ gotags:
 .PHONY: argo-workflow-lint
 argo-workflow-lint:
 	@argo lint ./chart/infra-server/static/workflow*.yaml
+
+.PHONY: update-version
+update-version: image_regex   := gcr.io/stackrox-infra/automation-flavors/.*
+update-version: image_version := 0.2.16
+update-version:
+	@echo 'Updating automation-flavor image versions to "${image_version}"'
+	@perl -p -i -e 's#image: (${image_regex}):(.*)#image: \1:${image_version}#g' \
+		./chart/infra-server/static/*.yaml
+	@git diff --name-status ./chart/infra-server/static/*.yaml
