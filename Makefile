@@ -155,14 +155,16 @@ proto-generated-srcs: protoc-tools
 ##########
 .PHONY: configuration-download
 configuration-download:
-	@echo 'Downloading configuration from https://console.cloud.google.com/storage/browser/stackrox-licensing-configuration/configuration/?project=stackrox-licensing'
-	gsutil -m cp -R gs://infra-configuration/latest/configuration chart/infra-server/
+	@echo "Downloading configuration from gs://infra-configuration"
+	gsutil -m cp -R "gs://infra-configuration/latest/configuration" "chart/infra-server/"
 
 .PHONY: configuration-upload
+configuration-upload: CONST_DATESTAMP := $(shell date '+%Y-%m-%d-%H-%M-%S')
 configuration-upload:
-	@echo 'Uploading configuration to https://console.cloud.google.com/storage/browser/stackrox-licensing-configuration/configuration/?project=stackrox-licensing'
-	gsutil -m cp -R chart/infra-server/configuration "gs://infra-configuration/$(shell date '+%Y-%m-%d-%H-%M-%S')/"
-	gsutil -m cp -R chart/infra-server/configuration gs://infra-configuration/latest/
+	@echo "Uploading configuration to gs://infra-configuration/${CONST_DATESTAMP}"
+	gsutil -m cp -R chart/infra-server/configuration "gs://infra-configuration/${CONST_DATESTAMP}/"
+	@echo "Uploading configuration to gs://infra-configuration/latest/"
+	gsutil -m cp -R chart/infra-server/configuration "gs://infra-configuration/latest/"
 
 .PHONY: push
 push: image
@@ -284,3 +286,12 @@ gotags:
 .PHONY: argo-workflow-lint
 argo-workflow-lint:
 	@argo lint ./chart/infra-server/static/workflow*.yaml
+
+.PHONY: update-version
+update-version: image_regex   := gcr.io/stackrox-infra/automation-flavors/.*
+update-version: image_version := 0.2.16
+update-version:
+	@echo 'Updating automation-flavor image versions to "${image_version}"'
+	@perl -p -i -e 's#image: (${image_regex}):(.*)#image: \1:${image_version}#g' \
+		./chart/infra-server/static/*.yaml
+	@git diff --name-status ./chart/infra-server/static/*.yaml

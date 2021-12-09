@@ -282,6 +282,12 @@
     - name: SSH_ACCESS
       description: Instructions for obtaining SSH access to instances in your cluster
 
+    - name: data
+      description: An archive that includes ssh keys to connect to cluster nodes
+
+    - name: dotenv
+      description: Environment variables used to access the cluster and consoles
+
 ######################
 #  openshift-4-demo  #
 ######################
@@ -321,6 +327,9 @@
 
     - name: data
       description: An archive that includes ssh keys to connect to cluster nodes
+
+    - name: dotenv
+      description: Environment variables used to access the cluster and consoles
 
 #####################
 #  AWS EKS          #
@@ -518,6 +527,72 @@
     - name: machine-type
       description: node machine type
       value: m5.xlarge
+      kind: optional
+
+  artifacts:
+    - name: kubeconfig
+      description: Kube config for connecting to this cluster
+
+    - name: dotenv
+      description: Environment variables used to access the cluster and consoles
+
+    - name: data
+      description: An archive that includes ssh keys to connect to cluster nodes
+
+#########################
+#  Openshift OSD on AWS #
+#########################
+- id: osd-on-aws
+  name: OSD on AWS
+  description: Openshift dedicated on AWS
+  availability: alpha
+  workflow: configuration/workflow-osd-aws.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      value: example1
+
+    - name: nodes
+      description: number of nodes
+      value: "4"
+      kind: optional
+
+    - name: machine-type
+      description: node machine type
+      value: m5.xlarge
+      kind: optional
+
+  artifacts:
+    - name: kubeconfig
+      description: Kube config for connecting to this cluster
+
+    - name: dotenv
+      description: Environment variables used to access the cluster and consoles
+
+    - name: data
+      description: An archive that includes ssh keys to connect to cluster nodes
+
+#########################
+#  Openshift OSD on GCP #
+#########################
+- id: osd-on-gcp
+  name: OSD on GCP
+  description: Openshift dedicated on GCP
+  availability: alpha
+  workflow: configuration/workflow-osd-gcp.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      value: example1
+
+    - name: nodes
+      description: number of nodes
+      value: "4"
+      kind: optional
+
+    - name: machine-type
+      description: node machine type
+      value: n1-standard-4
       kind: optional
 
   artifacts:

@@ -38,32 +38,30 @@ spec:
     - name: create
       activeDeadlineSeconds: 7200
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.16
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-osd:0.2.16
         imagePullPolicy: Always
         args:
+          - gcp
           - create
           - "{{workflow.parameters.name}}"
         env:
-          - name: AWS_ACCESS_KEY_ID
-            valueFrom:
-              secretKeyRef:
-                name: osd-access-secrets
-                key: AWS_ACCESS_KEY_ID
-          - name: AWS_SECRET_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: osd-access-secrets
-                key: AWS_SECRET_ACCESS_KEY
-          - name: REDHAT_PULL_SECRET_BASE64
-            valueFrom:
-              secretKeyRef:
-                name: osd-access-secrets
-                key: REDHAT_PULL_SECRET_BASE64
           - name: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
             valueFrom:
               secretKeyRef:
                 name: osd-access-secrets
                 key: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
+          - name: REDHAT_PULL_SECRET_BASE64
+            valueFrom:
+              secretKeyRef:
+                name: osd-access-secrets
+                key: REDHAT_PULL_SECRET_BASE64
+          - name: GCP_SA_CREDS_JSON_BASE64
+            valueFrom:
+              secretKeyRef:
+                name: osd-access-secrets
+                key: GCP_SA_CREDS_JSON_BASE64
+          - name: GCP_PROJECT
+            value: "srox-temp-dev-test"
           - name: NODE_COUNT
             value: "{{workflow.parameters.nodes}}"
           - name: INSTANCE_TYPE
@@ -103,22 +101,13 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-rosa:0.2.16
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-osd:0.2.16
         imagePullPolicy: Always
         args:
+          - gcp
           - destroy
           - "{{workflow.parameters.name}}"
         env:
-          - name: AWS_ACCESS_KEY_ID
-            valueFrom:
-              secretKeyRef:
-                name: osd-access-secrets
-                key: AWS_ACCESS_KEY_ID
-          - name: AWS_SECRET_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: osd-access-secrets
-                key: AWS_SECRET_ACCESS_KEY
           - name: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
             valueFrom:
               secretKeyRef:
@@ -129,6 +118,13 @@ spec:
               secretKeyRef:
                 name: osd-access-secrets
                 key: REDHAT_PULL_SECRET_BASE64
+          - name: GCP_SA_CREDS_JSON_BASE64
+            valueFrom:
+              secretKeyRef:
+                name: osd-access-secrets
+                key: GCP_SA_CREDS_JSON_BASE64
+          - name: GCP_PROJECT
+            value: "srox-temp-dev-test"
         volumeMounts:
           - name: data
             mountPath: /data

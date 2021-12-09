@@ -61,6 +61,10 @@ spec:
             path: /data/url
             archive:
               none: {}
+          - name: dotenv
+            path: /data/dotenv
+            archive:
+              none: {}
           - name: SSH_ACCESS
             path: /data/SSH_ACCESS.md
             archive:
@@ -70,7 +74,7 @@ spec:
             archive:
               tar: {}
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.14
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.16
         imagePullPolicy: Always
         args:
           - create
@@ -111,7 +115,7 @@ spec:
 
     - name: destroy
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.14
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.16
         imagePullPolicy: Always
         args:
           - destroy
