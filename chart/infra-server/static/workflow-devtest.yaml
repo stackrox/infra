@@ -74,7 +74,7 @@ spec:
             archive:
               tar: {}
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.16-3-gaa840fd570-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.16
         imagePullPolicy: Always
         args:
           - create
@@ -115,7 +115,7 @@ spec:
 
     - name: destroy
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.16-3-gaa840fd570-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.16
         imagePullPolicy: Always
         args:
           - destroy
