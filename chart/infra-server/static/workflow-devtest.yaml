@@ -1,0 +1,130 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: devtest-
+spec:
+  entrypoint: start
+  arguments:
+    parameters:
+      - name: name
+      - name: openshift-version
+        value: ""
+      - name: master-node-type
+        value: ""
+      - name: master-node-count
+        value: ""
+      - name: worker-node-type
+        value: ""
+      - name: worker-node-count
+        value: ""
+      - name: region
+        value: ""
+      - name: pull-secret
+        value: ""
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 10Mi
+  volumes:
+    - name: credentials
+      secret:
+        secretName: google-credentials-openshift-4
+
+  templates:
+    - name: start
+      steps:
+        - - name: create
+            template: create
+
+        - - name: wait
+            template: wait
+
+        - - name: destroy
+            template: destroy
+
+    - name: create
+      outputs:
+        artifacts:
+          - name: kubeconfig
+            path: /data/auth/kubeconfig
+            archive:
+              none: {}
+          - name: kubeadmin-password
+            path: /data/auth/kubeadmin-password
+            archive:
+              none: {}
+          - name: url
+            path: /data/url
+            archive:
+              none: {}
+          - name: dotenv
+            path: /data/dotenv
+            archive:
+              none: {}
+          - name: SSH_ACCESS
+            path: /data/SSH_ACCESS.md
+            archive:
+              none: {}
+          - name: data
+            path: /data
+            archive:
+              tar: {}
+      container:
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.16-3-gaa840fd570-snapshot
+        imagePullPolicy: Always
+        args:
+          - create
+          - "{{workflow.parameters.name}}"
+          - srox-temp-dev-test
+          - openshift.infra.rox.systems
+        env:
+          - name: GOOGLE_CREDENTIALS
+            valueFrom:
+              secretKeyRef:
+                name: google-credentials-openshift-4
+                key: google-credentials.json
+          - name: PULL_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: redhat-pull-secret
+                key: REDHAT_PULL_SECRET
+          - name: USER_PULL_SECRET
+            value: "{{workflow.parameters.pull-secret}}"
+          - name: OPENSHIFT_VERSION
+            value: "{{workflow.parameters.openshift-version}}"
+          - name: MASTER_NODE_COUNT
+            value: "{{workflow.parameters.master-node-count}}"
+          - name: WORKER_NODE_COUNT
+            value: "{{workflow.parameters.worker-node-count}}"
+          - name: MASTER_NODE_TYPE
+            value: "{{workflow.parameters.master-node-type}}"
+          - name: WORKER_NODE_TYPE
+            value: "{{workflow.parameters.worker-node-type}}"
+          - name: REGION
+            value: "{{workflow.parameters.region}}"
+        volumeMounts:
+          - name: data
+            mountPath: /data
+
+    - name: wait
+      suspend: {}
+
+    - name: destroy
+      container:
+        image: gcr.io/stackrox-infra/automation-flavors/openshift-4:0.2.16-3-gaa840fd570-snapshot
+        imagePullPolicy: Always
+        args:
+          - destroy
+        env:
+          - name: GOOGLE_CREDENTIALS
+            valueFrom:
+              secretKeyRef:
+                name: google-credentials-openshift-4
+                key: google-credentials.json
+        volumeMounts:
+          - name: data
+            mountPath: /data
