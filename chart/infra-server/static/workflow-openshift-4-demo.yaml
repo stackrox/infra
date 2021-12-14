@@ -9,6 +9,8 @@ spec:
       - name: name
       - name: ansible-demo-tag
         value: ""
+      - name: openshift-version
+        value: ""
   volumeClaimTemplates:
     - metadata:
         name: data
