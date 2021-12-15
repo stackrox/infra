@@ -9,6 +9,8 @@ spec:
       - name: name
       - name: ansible-demo-tag
         value: ""
+      - name: openshift-version
+        value: ""
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -78,7 +80,7 @@ spec:
                 name: redhat-pull-secret
                 key: REDHAT_PULL_SECRET
           - name: OPENSHIFT_VERSION
-            value: ocp/stable-4.7
+            value: "{{workflow.parameters.openshift-version}}"
           - name: MASTER_NODE_COUNT
             value: "3"
           - name: WORKER_NODE_COUNT
