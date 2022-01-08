@@ -199,7 +199,7 @@ func moveIntoPlace(tempFilename string) (string, error) {
 		return "", errors.Wrap(err, "Cannot move the download into place")
 	}
 
-	err = os.Chmod(infractlFilename, 0777)
+	err = os.Chmod(infractlFilename, 0755)
 	if err != nil {
 		return "", err
 	}
