@@ -3,7 +3,6 @@ package upgrade
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -177,14 +176,12 @@ func moveIntoPlace(tempFilename string) (string, error) {
 		return "", errors.Wrap(err, "Cannot determine infractl path")
 	}
 
-	// https://pkg.go.dev/os#Open
 	src, err := os.Open(tempFilename)
 	if err != nil {
 		return "", err
 	}
 	defer src.Close()
 
-	// https://pkg.go.dev/os#Create
 	infractlFilenameStaged := infractlFilename + ".staged"
 	dst, err := os.Create(infractlFilenameStaged)
 	if err != nil {
@@ -192,22 +189,16 @@ func moveIntoPlace(tempFilename string) (string, error) {
 	}
 	defer dst.Close()
 
-	// https://pkg.go.dev/io#Copy
-	written, err := io.Copy(dst, src)
+	_, err = io.Copy(dst, src)
 	if err != nil {
 		return "", err
 	}
-	fmt.Printf("Copied %d bytes %s -> %s\n", written, tempFilename, infractlFilenameStaged)
 
-	// https://pkg.go.dev/os#Rename
-	fmt.Printf("Renaming %s -> %s\n", infractlFilenameStaged, infractlFilename)
 	err = os.Rename(infractlFilenameStaged, infractlFilename)
 	if err != nil {
 		return "", errors.Wrap(err, "Cannot move the download into place")
 	}
 
-	// https://pkg.go.dev/os#Chmod
-	fmt.Printf("Chmod %s %#o\n", infractlFilename, 0777)
 	err = os.Chmod(infractlFilename, 0777)
 	if err != nil {
 		return "", err
