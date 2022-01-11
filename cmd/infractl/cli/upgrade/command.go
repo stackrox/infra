@@ -176,9 +176,32 @@ func moveIntoPlace(tempFilename string) (string, error) {
 		return "", errors.Wrap(err, "Cannot determine infractl path")
 	}
 
-	err = os.Rename(tempFilename, infractlFilename)
+	src, err := os.Open(tempFilename)
+	if err != nil {
+		return "", err
+	}
+	defer src.Close()
+
+	infractlFilenameStaged := infractlFilename + ".staged"
+	dst, err := os.Create(infractlFilenameStaged)
+	if err != nil {
+		return "", err
+	}
+	defer dst.Close()
+
+	_, err = io.Copy(dst, src)
+	if err != nil {
+		return "", err
+	}
+
+	err = os.Rename(infractlFilenameStaged, infractlFilename)
 	if err != nil {
 		return "", errors.Wrap(err, "Cannot move the download into place")
+	}
+
+	err = os.Chmod(infractlFilename, 0755)
+	if err != nil {
+		return "", err
 	}
 
 	return infractlFilename, nil
