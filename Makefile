@@ -95,10 +95,10 @@ protoc-tools:
 	@install ${TMPDIR}/bin/protoc $(protoc)
 
 	@echo "Installing protobuf generators"
-	@go install github.com/golang/protobuf/protoc-gen-go@v$(protoc-gen-go-version)
-	# @go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v$(protoc-gen-grpc-gateway-version)
-	@go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway@v$(protoc-gen-grpc-gateway-version)
-	@go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger@v$(protoc-gen-grpc-gateway-version)
+	@go install github.com/golang/protobuf/protoc-gen-go
+	# @go install google.golang.org/grpc/cmd/protoc-gen-go-grpc
+	@go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
+	@go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
 
 
 PROTO_INPUT_DIR   = proto/api/v1
