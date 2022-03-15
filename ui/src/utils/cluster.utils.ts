@@ -23,5 +23,5 @@ export function generateClusterName(username = ''): string {
   // Truncation is needed to allow generating wildcard certificates for OpenShift using Let's Encrypt: since LE insists
   // on the domain forming the Common Name of the certificate, the string '*.apps.<name>.openshift.infra.rox.systems'
   // must not exceed 64 characters. This leaves a budget of 29 characters for the <name> portion.
-  return nameArray.join('-').slice(0, 29).replace(/-$/, "");
+  return nameArray.join('-').slice(0, 29).replace(/-$/, '');
 }
