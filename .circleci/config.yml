@@ -9,7 +9,7 @@ storeGitHubPackageRegistryNpmToken: &storeGitHubPackageRegistryNpmToken
 executors:
   custom:
     docker:
-      - image: quay.io/cgorman1/apollo-ci:0.3.13
+      - image: quay.io/rhacs-eng/apollo-ci:0.3.13
         auth:
           username: $QUAY_RHACS_ENG_RO_USERNAME
           password: $QUAY_RHACS_ENG_RO_PASSWORD
