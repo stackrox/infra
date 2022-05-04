@@ -13,7 +13,7 @@ import ClusterForm from './ClusterForm';
 const flavorService = new FlavorServiceApi(configuration);
 
 export default function LaunchClusterPage(): ReactElement {
-  const { flavorId } = useParams();
+  const { flavorId = '' } = useParams();
   const navigate = useNavigate();
   const fetchFlavorInfo = useCallback(() => flavorService.info(flavorId), [flavorId]);
   const { loading, error, data } = useApiQuery(fetchFlavorInfo);
