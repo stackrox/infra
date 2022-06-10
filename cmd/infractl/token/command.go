@@ -39,7 +39,7 @@ func args(_ *cobra.Command, args []string) error {
 	case email == "":
 		return errors.New("no email given")
 	case !(strings.HasSuffix(email, "@stackrox.com") || strings.HasSuffix(email, "@redhat.com")):
-		return errors.Errorf("given email %q was neither a stackrox.com nor a redhat.com address", email)
+		return errors.Errorf("given email %q is neither a stackrox.com nor a redhat.com address", email)
 	default:
 		return nil
 	}
