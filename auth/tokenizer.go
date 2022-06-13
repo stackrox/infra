@@ -115,8 +115,8 @@ func (c auth0Claims) Valid() error {
 	switch {
 	case !c.EmailVerified:
 		return errors.New("email address is not verified")
-	case !strings.HasSuffix(c.Email, "@stackrox.com"):
-		return errors.New("email address does not belong to StackRox")
+	case !(strings.HasSuffix(c.Email, "@stackrox.com") || strings.HasSuffix(c.Email, "@redhat.com")):
+		return errors.Errorf("%q email address does not belong to StackRox or Red Hat", c.Email)
 	default:
 		c.StandardClaims.IssuedAt -= clockDriftLeeway
 		valid := c.StandardClaims.Valid()
@@ -203,8 +203,8 @@ func (s serviceAccountValidator) Valid() error {
 		return errors.New("name was empty")
 	case s.Description == "":
 		return errors.New("description was empty")
-	case !strings.HasSuffix(s.Email, "@stackrox.com"):
-		return errors.New("email was not a StackRox address")
+	case !(strings.HasSuffix(s.Email, "@stackrox.com") || strings.HasSuffix(s.Email, "@redhat.com")):
+		return errors.Errorf("%q is not a StackRox or Red Hat address", s.Email)
 	default:
 		return nil
 	}

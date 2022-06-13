@@ -3,9 +3,9 @@ package token
 
 import (
 	"context"
-	"errors"
 	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	v1 "github.com/stackrox/infra/generated/api/v1"
@@ -38,8 +38,8 @@ func args(_ *cobra.Command, args []string) error {
 		return errors.New("no description given")
 	case email == "":
 		return errors.New("no email given")
-	case !strings.HasSuffix(email, "@stackrox.com"):
-		return errors.New("given email was not a stackrox.com address")
+	case !(strings.HasSuffix(email, "@stackrox.com") || strings.HasSuffix(email, "@redhat.com")):
+		return errors.Errorf("given email %q is neither a stackrox.com nor a redhat.com address", email)
 	default:
 		return nil
 	}
