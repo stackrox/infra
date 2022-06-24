@@ -52,6 +52,38 @@ type Auth0Config struct {
 	SessionSecret string `json:"sessionSecret"`
 }
 
+// ClaimOperation represents the configuration for checking access token claims.
+type ClaimOperation struct {
+	Key   string      `json:"key"`
+	Op    string      `json:"op"`
+	Value interface{} `json:"value"`
+}
+
+// AuthOidcConfig represents the configuration for integrating with Auth0.
+type AuthOidcConfig struct {
+	// Tenant is the full Auth0 tenant name. An example value would be
+	// "example.auth0.com".
+	Issuer string `json:"issuer"`
+
+	// ClientID is the client ID for the Auth0 application integration.
+	ClientID string `json:"clientID"`
+
+	// ClientSecret is the client secret for the Auth0 application integration.
+	ClientSecret string `json:"clientSecret"`
+
+	// Endpoint is the server hostname with optional port used for redirecting
+	// requests back from Auth0. An example value would be "localhost:8443" or
+	// "example.com".
+	Endpoint string `json:"endpoint"`
+
+	// SessionSecret is an arbitrary string used in the signing of session
+	// tokens. Changing this value would invalidate current sessions.
+	SessionSecret string `json:"sessionSecret"`
+
+	// Claims is list of defined claim operations to validate access token claims.
+	Claims []ClaimOperation `json:"claims"`
+}
+
 // ServerConfig represents the configuration used for running the HTTP & GRPC
 // servers, and providing TLS.
 type ServerConfig struct {

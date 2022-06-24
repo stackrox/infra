@@ -59,11 +59,10 @@ func mainCmd() error {
 		return errors.Wrapf(err, "failed to load flavor config file %q", flavorConfigFile)
 	}
 
-	auth0ConfigFile := filepath.Join(*flagConfigDir, "auth0.yaml")
-	auth0PublicKeyPEMFile := filepath.Join(*flagConfigDir, "auth0.pem")
-	auth0, err := auth.NewFromConfig(auth0ConfigFile, auth0PublicKeyPEMFile)
+	oidcConfigFile := filepath.Join(*flagConfigDir, "oidc.yaml")
+	oidc, err := auth.NewFromConfig(oidcConfigFile)
 	if err != nil {
-		return errors.Wrapf(err, "failed to load auth0 config file %q", auth0ConfigFile)
+		return errors.Wrapf(err, "failed to load oidc config file %q", oidcConfigFile)
 	}
 
 	signer, err := signer.NewFromEnv()
@@ -87,7 +86,7 @@ func mainCmd() error {
 			return service.NewFlavorService(registry)
 		},
 		func() (middleware.APIService, error) {
-			return service.NewUserService(auth0.GenerateServiceAccountToken)
+			return service.NewUserService(oidc.GenerateServiceAccountToken)
 		},
 		service.NewCliService,
 		service.NewVersionService,
@@ -99,7 +98,7 @@ func mainCmd() error {
 		return err
 	}
 
-	srv := server.New(*cfg, *auth0, services...)
+	srv := server.New(*cfg, *oidc, services...)
 	errCh, err := srv.RunServer()
 	if err != nil {
 		return err

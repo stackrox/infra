@@ -5,6 +5,7 @@ go 1.16
 require (
 	cloud.google.com/go/storage v1.10.0
 	github.com/argoproj/argo v0.0.0-20200506223611-54154c61eb4f
+	github.com/coreos/go-oidc/v3 v3.2.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/elazarl/goproxy v0.0.0-20200220113713-29f9e0ba54ea // indirect
 	github.com/evanphx/json-patch v4.5.0+incompatible // indirect
@@ -13,6 +14,7 @@ require (
 	github.com/google/gofuzz v1.1.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
+	github.com/jeremywohl/flatten v1.0.1
 	github.com/pkg/errors v0.9.1
 	github.com/slack-go/slack v0.9.5
 	github.com/spf13/cobra v1.2.1

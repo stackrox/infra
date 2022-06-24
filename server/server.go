@@ -26,15 +26,15 @@ import (
 type server struct {
 	services []middleware.APIService
 	cfg      config.Config
-	oauth    auth.OAuth
+	oidc     auth.OidcAuth
 }
 
 // New creates a new server that is ready to be launched.
-func New(serverCfg config.Config, auth0 auth.OAuth, services ...middleware.APIService) *server {
+func New(serverCfg config.Config, oidc auth.OidcAuth, services ...middleware.APIService) *server {
 	return &server{
 		services: services,
 		cfg:      serverCfg,
-		oauth:    auth0,
+		oidc:     oidc,
 	}
 }
 
@@ -56,9 +56,9 @@ func (s *server) RunServer() (<-chan error, error) {
 	server := grpc.NewServer(
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			// Extract user from JWT token stored in HTTP cookie.
-			middleware.ContextInterceptor(middleware.UserEnricher(s.oauth)),
+			middleware.ContextInterceptor(middleware.UserEnricher(s.oidc)),
 			// Extract service-account from token stored in Authorization header.
-			middleware.ContextInterceptor(middleware.ServiceAccountEnricher(s.oauth.ValidateServiceAccountToken)),
+			middleware.ContextInterceptor(middleware.ServiceAccountEnricher(s.oidc.ValidateServiceAccountToken)),
 
 			middleware.ContextInterceptor(middleware.AdminEnricher(s.cfg.Password)),
 			// Enforce authenticated user access on resources that declare it.
@@ -117,14 +117,14 @@ func (s *server) RunServer() (<-chan error, error) {
 
 	// Updates http handler routes. This included "web-only" routes, like
 	// login/logout/static, and also gRPC-Gateway routes.
-	routeMux.Handle("/", serveApplicationResources(s.cfg.Server.StaticDir, s.oauth))
+	routeMux.Handle("/", serveApplicationResources(s.cfg.Server.StaticDir, s.oidc))
 	routeMux.Handle("/v1/", gwMux)
-	s.oauth.Handle(routeMux)
+	s.oidc.Handle(routeMux)
 
 	mux.Handle("/",
 		wrapHealthCheck(
 			wrapCanonicalRedirect(
-				s.oauth.Endpoint(),
+				s.oidc.Endpoint(),
 				routeMux,
 			),
 		),
@@ -135,7 +135,7 @@ func (s *server) RunServer() (<-chan error, error) {
 
 // serveApplicationResources handles requests for SPA endpoints as well as
 // regular resources.
-func serveApplicationResources(dir string, oAuth auth.OAuth) http.Handler {
+func serveApplicationResources(dir string, oidc auth.OidcAuth) http.Handler {
 	type rule struct {
 		path      string
 		spa       bool
@@ -155,6 +155,10 @@ func serveApplicationResources(dir string, oAuth auth.OAuth) http.Handler {
 		},
 		{
 			path:      "/favicon.ico",
+			anonymous: true,
+		},
+		{
+			path:      "/logout-page.html",
 			anonymous: true,
 		},
 		{
@@ -199,13 +203,13 @@ func serveApplicationResources(dir string, oAuth auth.OAuth) http.Handler {
 				fs.ServeHTTP(w, r)
 			} else {
 				// Serve this path with authentication.
-				oAuth.Authorized(fs).ServeHTTP(w, r)
+				oidc.Authorized(fs).ServeHTTP(w, r)
 			}
 
 			return
 		}
 		// No rules matched, so serve this path with authentication by default.
-		oAuth.Authorized(fs).ServeHTTP(w, r)
+		oidc.Authorized(fs).ServeHTTP(w, r)
 	})
 }
 
