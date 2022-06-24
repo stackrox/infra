@@ -44,7 +44,7 @@ func (a OidcAuth) ValidateServiceAccountToken(token string) (v1.ServiceAccount, 
 	return a.jwtSvcAcct.Validate(token)
 }
 
-// loginHandlerOidc handles the login part of an OIDC flow.
+// loginHandler handles the login part of an OIDC flow.
 //
 // A state token is generated and sent along with the redirect to Auth0.
 func (a OidcAuth) loginHandler(w http.ResponseWriter, r *http.Request) {
@@ -62,7 +62,7 @@ func (a OidcAuth) loginHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, redirectURL, http.StatusTemporaryRedirect)
 }
 
-// callbackHandlerOidc handles the callback part of an Oauth2 flow.
+// callbackHandler handles the callback part of an Oauth2 flow.
 //
 // After returning from Auth0, the state token is verified. A user profile is
 // then obtained from Auth0 that includes details about the newly logged-in
@@ -99,7 +99,7 @@ func (a OidcAuth) callbackHandler(w http.ResponseWriter, r *http.Request) {
 	idToken := rawToken.Extra("id_token").(string)
 	user, err := a.jwtOidc.Validate(r.Context(), idToken)
 	if err != nil {
-		log.Printf("failed to validate OIDC token: %v", err)
+		log.Printf("failed to validate ID token: %v", err)
 		http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
 		return
 	}
