@@ -78,11 +78,11 @@ func (a OidcAuth) callbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get the value of the "code" HTTP GET param, and exchange it for a idToken token.
+	// Get the value of the "code" HTTP GET param, and exchange it for a token.
 	code := r.URL.Query().Get("code")
 	rawToken, err := a.conf.Exchange(r.Context(), code)
 	if err != nil {
-		log.Printf("here: - failed to exchange code: %v", err)
+		log.Printf("failed to exchange code: %v", err)
 		http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
 		return
 	}
@@ -120,7 +120,7 @@ func (a OidcAuth) callbackHandler(w http.ResponseWriter, r *http.Request) {
 
 // logoutHandler handles the logout.
 //
-// The user token cookie is destroyed, and the user is redirected logout page.
+// The user token cookie is destroyed, and the user is redirected to logout page.
 func (a OidcAuth) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("set-cookie", tokenCookieExpired)
 	http.Redirect(w, r, fmt.Sprintf("https://%s/logout-page.html", a.endpoint), http.StatusTemporaryRedirect)
