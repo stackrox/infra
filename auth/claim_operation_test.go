@@ -1,9 +1,10 @@
 package auth
 
 import (
+	"testing"
+
 	"github.com/stackrox/infra/config"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 type dataSet struct {
