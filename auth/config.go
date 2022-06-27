@@ -3,17 +3,18 @@ package auth
 import (
 	"context"
 	"fmt"
+	"os"
+	"time"
+
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/ghodss/yaml"
 	"github.com/stackrox/infra/config"
 	"golang.org/x/oauth2"
-	"os"
-	"time"
 )
 
-// NewFromConfig reads and parses the given Auth0 configuration file and public key.
-func NewFromConfig(auth0ConfigFile string) (*OidcAuth, error) {
-	cfgData, err := os.ReadFile(auth0ConfigFile)
+// NewFromConfig reads and parses the given OIDC configuration file.
+func NewFromConfig(oidcConfigFile string) (*OidcAuth, error) {
+	cfgData, err := os.ReadFile(oidcConfigFile)
 	if err != nil {
 		return nil, err
 	}

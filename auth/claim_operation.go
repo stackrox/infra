@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/config"
 )

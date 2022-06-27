@@ -30,57 +30,36 @@ type CalendarConfig struct {
 	Window JSONDuration `json:"window"`
 }
 
-// Auth0Config represents the configuration for integrating with Auth0.
-type Auth0Config struct {
-	// Tenant is the full Auth0 tenant name. An example value would be
-	// "example.auth0.com".
-	Tenant string `json:"tenant"`
-
-	// ClientID is the client ID for the Auth0 application integration.
-	ClientID string `json:"clientID"`
-
-	// ClientSecret is the client secret for the Auth0 application integration.
-	ClientSecret string `json:"clientSecret"`
-
-	// Endpoint is the server hostname with optional port used for redirecting
-	// requests back from Auth0. An example value would be "localhost:8443" or
-	// "example.com".
-	Endpoint string `json:"endpoint"`
-
-	// SessionSecret is an arbitrary string used in the signing of session
-	// tokens. Changing this value would invalidate current sessions.
-	SessionSecret string `json:"sessionSecret"`
-}
-
 // ClaimOperation represents the configuration for checking access token claims.
 type ClaimOperation struct {
+	Value interface{} `json:"value"`
 	Key   string      `json:"key"`
 	Op    string      `json:"op"`
-	Value interface{} `json:"value"`
 }
 
-// AuthOidcConfig represents the configuration for integrating with Auth0.
+// AuthOidcConfig represents the configuration for integrating with OIDC provider.
 type AuthOidcConfig struct {
-	// Tenant is the full Auth0 tenant name. An example value would be
-	// "example.auth0.com".
+	// Issuer is the full URL provided by OIDC provider. An example:
+	// "https://auth.stage.redhat.com/auth/realms/EmployeeIDP".
 	Issuer string `json:"issuer"`
 
-	// ClientID is the client ID for the Auth0 application integration.
+	// ClientID is the client ID for the OIDC application integration.
 	ClientID string `json:"clientID"`
 
-	// ClientSecret is the client secret for the Auth0 application integration.
+	// ClientSecret is the client secret for the OIDC application integration.
 	ClientSecret string `json:"clientSecret"`
 
 	// Endpoint is the server hostname with optional port used for redirecting
-	// requests back from Auth0. An example value would be "localhost:8443" or
-	// "example.com".
+	// requests back from OIDC provider. An example value would be
+	// "localhost:8443" or "example.com".
 	Endpoint string `json:"endpoint"`
 
 	// SessionSecret is an arbitrary string used in the signing of session
 	// tokens. Changing this value would invalidate current sessions.
 	SessionSecret string `json:"sessionSecret"`
 
-	// Claims is list of defined claim operations to validate access token claims.
+	// Claims are the list of defined claim operations to validate access token
+	// claims provided by the OIDC Provider.
 	Claims []ClaimOperation `json:"claims"`
 }
 

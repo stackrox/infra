@@ -3,11 +3,12 @@ package auth
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/coreos/go-oidc/v3/oidc"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"golang.org/x/oauth2"
-	"log"
-	"net/http"
 )
 
 const (
@@ -23,8 +24,8 @@ type OidcAuth struct {
 	jwtAccess  *accessTokenizer
 	jwtOidc    *oidcTokenizer
 	jwtUser    *userTokenizer
-	jwtSvcAcct serviceAccountTokenizer
 	conf       *oauth2.Config
+	jwtSvcAcct serviceAccountTokenizer
 }
 
 // ValidateUser validates a user JWT and returns the contained v1.User struct.
@@ -46,7 +47,7 @@ func (a OidcAuth) ValidateServiceAccountToken(token string) (v1.ServiceAccount, 
 
 // loginHandler handles the login part of an OIDC flow.
 //
-// A state token is generated and sent along with the redirect to Auth0.
+// A state token is generated and sent along with the redirect to OIDC provider.
 func (a OidcAuth) loginHandler(w http.ResponseWriter, r *http.Request) {
 	// Generate a new state token.
 	stateToken, err := a.jwtState.Generate()
@@ -64,9 +65,9 @@ func (a OidcAuth) loginHandler(w http.ResponseWriter, r *http.Request) {
 
 // callbackHandler handles the callback part of an Oauth2 flow.
 //
-// After returning from Auth0, the state token is verified. A user profile is
-// then obtained from Auth0 that includes details about the newly logged-in
-// user. This user information is then stored in a cookie.
+// After returning from OIDC provider, the state token is verified. A user
+// profile is then obtained from OIDC provider that includes details about the
+// newly logged-in user. This user information is then stored in a cookie.
 func (a OidcAuth) callbackHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the value of the "state" HTTP GET param, and validate that it is
 	// legitimate.
@@ -94,7 +95,7 @@ func (a OidcAuth) callbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Validate that the Auth0 idToken profile token is legitimate, and extract a
+	// Validate that the OIDC idToken profile token is legitimate, and extract a
 	// user struct from it.
 	idToken := rawToken.Extra("id_token").(string)
 	user, err := a.jwtOidc.Validate(r.Context(), idToken)

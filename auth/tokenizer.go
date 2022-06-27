@@ -5,6 +5,9 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"strings"
+	"time"
+
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/golang/protobuf/ptypes/timestamp"
@@ -12,8 +15,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/config"
 	v1 "github.com/stackrox/infra/generated/api/v1"
-	"strings"
-	"time"
 )
 
 // clockDriftLeeway is used to account for minor clock drift between our host,
@@ -42,8 +43,8 @@ func createHumanUser(profile oidcClaims) *v1.User {
 //
 // The generated token does not contain data outside of an expiration date.
 type stateTokenizer struct {
-	lifetime time.Duration
 	secret   []byte
+	lifetime time.Duration
 }
 
 // NewStateTokenizer creates a new stateTokenizer that can generate and verify
@@ -93,8 +94,8 @@ type oidcTokenizer struct {
 	verifier *oidc.IDTokenVerifier
 }
 
-// NewOidcTokenizer creates a new tokenizer that can verify Auth0
-// generated tokens signed with the given public key.
+// NewOidcTokenizer creates a new tokenizer that can verify OIDC provider
+// generated ID Token.
 func NewOidcTokenizer(verifier *oidc.IDTokenVerifier) *oidcTokenizer {
 	return &oidcTokenizer{
 		verifier: verifier,
@@ -104,6 +105,7 @@ func NewOidcTokenizer(verifier *oidc.IDTokenVerifier) *oidcTokenizer {
 // oidcClaims facilitates the unmarshalling of JWTs containing OIDC user
 // profile data.
 type oidcClaims struct {
+	jwt.StandardClaims
 	FamilyName    string `json:"family_name"`
 	GivenName     string `json:"given_name"`
 	Name          string `json:"name"`
@@ -111,7 +113,6 @@ type oidcClaims struct {
 	PictureURL    string `json:"picture"`
 	Email         string `json:"email"`
 	EmailVerified bool   `json:"email_verified"`
-	jwt.StandardClaims
 }
 
 // Valid imposes additional validity constraints on OIDC user profile data.
@@ -259,8 +260,8 @@ type accessTokenizer struct {
 	claims []config.ClaimOperation
 }
 
-// NewAccessTokenizer creates a new tokenizer that can verify Auth0
-// generated tokens signed with the given public key.
+// NewAccessTokenizer creates a new tokenizer that can verify OIDC provider
+// generated Access Token.
 func NewAccessTokenizer(issuer string, claims []config.ClaimOperation) *accessTokenizer {
 	return &accessTokenizer{
 		issuer: issuer,
