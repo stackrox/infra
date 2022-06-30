@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"golang.org/x/oauth2"
 	"strings"
 	"time"
 
@@ -16,6 +15,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/config"
 	v1 "github.com/stackrox/infra/generated/api/v1"
+	"golang.org/x/oauth2"
 )
 
 // clockDriftLeeway is used to account for minor clock drift between our host,
