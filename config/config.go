@@ -30,6 +30,14 @@ type CalendarConfig struct {
 	Window JSONDuration `json:"window"`
 }
 
+const (
+	// ClaimOperationIn defines claim check if value is withing the slice
+	ClaimOperationIn string = "in"
+
+	// ClaimOperationEqual defines claim check if value is exactly equal
+	ClaimOperationEqual string = "eq"
+)
+
 // ClaimOperation represents the configuration for checking access token claims.
 type ClaimOperation struct {
 	Value interface{} `json:"value"`
@@ -59,7 +67,7 @@ type AuthOidcConfig struct {
 	SessionSecret string `json:"sessionSecret"`
 
 	// Claims are the list of defined claim operations to validate access token
-	// claims provided by the OIDC Provider.
+	// claims provided by the OIDC Provider. All claims have to be fulfilled.
 	Claims []ClaimOperation `json:"claims"`
 }
 

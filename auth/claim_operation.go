@@ -7,14 +7,6 @@ import (
 	"github.com/stackrox/infra/config"
 )
 
-const (
-	// OpIn defines claim check if value is withing the slice
-	OpIn string = "in"
-
-	// OpEqual defines claim check if value is exactly equal
-	OpEqual string = "eq"
-)
-
 // ClaimOperation represents the configuration for checking access token claims.
 type ClaimOperation struct {
 	config.ClaimOperation
@@ -32,11 +24,11 @@ func (co *ClaimOperation) equalCheck(flatTokenClaims map[string]interface{}, key
 
 // Check checks expected claim against token claims
 func (co *ClaimOperation) Check(flatTokenClaims map[string]interface{}) (bool, error) {
-	if co.Op == OpEqual {
+	if co.Op == config.ClaimOperationEqual {
 		return co.equalCheck(flatTokenClaims, co.Key)
 	}
 
-	if co.Op == OpIn {
+	if co.Op == config.ClaimOperationIn {
 		// Loop will exit when we check for not existing key in flatTokenClaims.
 		// Or early exit if value is found in list.
 		for i := 0; ; i++ {
