@@ -88,8 +88,7 @@ func (a OidcAuth) callbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accessToken := rawToken.Extra("access_token").(string)
-	if err := a.jwtAccess.Validate(r.Context(), accessToken); err != nil {
+	if err := a.jwtAccess.Validate(r.Context(), rawToken); err != nil {
 		log.Printf("failed to validate Access token: %v", err)
 		http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
 		return
@@ -97,8 +96,7 @@ func (a OidcAuth) callbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Validate that the OIDC idToken profile token is legitimate, and extract a
 	// user struct from it.
-	idToken := rawToken.Extra("id_token").(string)
-	user, err := a.jwtOidc.Validate(r.Context(), idToken)
+	user, err := a.jwtOidc.Validate(r.Context(), rawToken)
 	if err != nil {
 		log.Printf("failed to validate ID token: %v", err)
 		http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)

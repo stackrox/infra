@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"golang.org/x/oauth2"
 	"strings"
 	"time"
 
@@ -133,14 +134,21 @@ func (c oidcClaims) Valid() error {
 }
 
 // Validate validates a JWT Token and returns a synthesized v1.User struct.
-func (t oidcTokenizer) Validate(ctx context.Context, rawIDToken string) (*v1.User, error) {
-	token, errVerify := t.verifier.Verify(ctx, rawIDToken)
+func (t oidcTokenizer) Validate(ctx context.Context, rawToken *oauth2.Token) (*v1.User, error) {
+	rawIDToken := rawToken.Extra("id_token").(string)
+
+	idToken, errVerify := t.verifier.Verify(ctx, rawIDToken)
 	if errVerify != nil {
 		return nil, errVerify
 	}
 
 	var claims oidcClaims
-	if err := token.Claims(&claims); err != nil {
+	if err := idToken.Claims(&claims); err != nil {
+		return nil, err
+	}
+
+	rawAccessToken := rawToken.Extra("access_token").(string)
+	if err := idToken.VerifyAccessToken(rawAccessToken); err != nil {
 		return nil, err
 	}
 
@@ -286,28 +294,34 @@ func decodeAccessToken(accessToken string) (map[string]interface{}, error) {
 	return claims, err
 }
 
-// Validate validates a JWT Token and returns a synthesized v1.User struct.
-func (t accessTokenizer) Validate(ctx context.Context, accessToken string) error {
-	claims, err := decodeAccessToken(accessToken)
+// Validate validates all specified claim operations for Access Token.
+func (t accessTokenizer) Validate(_ context.Context, rawToken *oauth2.Token) error {
+	rawAccessToken := rawToken.Extra("access_token").(string)
+
+	tokenClaims, err := decodeAccessToken(rawAccessToken)
 	if err != nil {
 		return err
 	}
 
-	flatClaims, errFlatten := flatten.Flatten(claims, "", flatten.DotStyle)
+	flatTokenClaims, errFlatten := flatten.Flatten(tokenClaims, "", flatten.DotStyle)
 	if errFlatten != nil {
 		return errFlatten
 	}
 
-	for _, claim := range t.claims {
-		authClaimOp := ClaimOperation{claim}
+	if flatTokenClaims["iss"] != t.issuer {
+		return errors.Errorf("access token issued by a different provider, expected %q got %q", t.issuer, flatTokenClaims["iss"])
+	}
 
-		isValid, errCheck := authClaimOp.Check(flatClaims)
+	for _, expectedClaim := range t.claims {
+		authClaimOp := ClaimOperation{expectedClaim}
+
+		isValid, errCheck := authClaimOp.Check(flatTokenClaims)
 		if errCheck != nil {
 			return errCheck
 		}
 
 		if !isValid {
-			return errors.Errorf("Claim for key %q is not valid", claim.Key)
+			return errors.Errorf("claim for key %q is not valid", expectedClaim.Key)
 		}
 	}
 
