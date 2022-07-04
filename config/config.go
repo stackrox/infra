@@ -6,6 +6,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
+	"github.com/stackrox/infra/auth/claimrule"
 )
 
 // Config represents the top-level configuration for infra-server.
@@ -30,21 +31,6 @@ type CalendarConfig struct {
 	Window JSONDuration `json:"window"`
 }
 
-const (
-	// ClaimOperationIn defines claim check if value is withing the slice
-	ClaimOperationIn string = "in"
-
-	// ClaimOperationEqual defines claim check if value is exactly equal
-	ClaimOperationEqual string = "eq"
-)
-
-// ClaimOperation represents the configuration for checking access token claims.
-type ClaimOperation struct {
-	Value interface{} `json:"value"`
-	Key   string      `json:"key"`
-	Op    string      `json:"op"`
-}
-
 // AuthOidcConfig represents the configuration for integrating with OIDC provider.
 type AuthOidcConfig struct {
 	// Issuer is the full URL provided by OIDC provider. An example:
@@ -66,9 +52,9 @@ type AuthOidcConfig struct {
 	// tokens. Changing this value would invalidate current sessions.
 	SessionSecret string `json:"sessionSecret"`
 
-	// Claims are the list of defined claim operations to validate access token
+	// Claims are the list of defined claim rules used to validate access token
 	// claims provided by the OIDC Provider. All claims have to be fulfilled.
-	Claims []ClaimOperation `json:"claims"`
+	Claims *claimrule.ClaimRules `json:"claims"`
 }
 
 // ServerConfig represents the configuration used for running the HTTP & GRPC
