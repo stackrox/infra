@@ -59,7 +59,7 @@ func getDataSets() map[string]dataSet {
 			tokenClaims: map[string]interface{}{},
 			rules: ClaimRules{{
 				Value: "val",
-				Key:   "field",
+				Path:  "field",
 				Op:    "eq",
 			}},
 			err: true,
@@ -70,7 +70,7 @@ func getDataSets() map[string]dataSet {
 			},
 			rules: ClaimRules{{
 				Value: "val",
-				Key:   "field",
+				Path:  "field",
 				Op:    "no",
 			}},
 			err: true,
@@ -81,7 +81,7 @@ func getDataSets() map[string]dataSet {
 			},
 			rules: ClaimRules{{
 				Value: "val",
-				Key:   "field",
+				Path:  "field",
 				Op:    "eq",
 			}},
 			err: false,
@@ -92,7 +92,7 @@ func getDataSets() map[string]dataSet {
 			},
 			rules: ClaimRules{{
 				Value: "val",
-				Key:   "field",
+				Path:  "field",
 				Op:    "eq",
 			}},
 			err: true,
@@ -103,7 +103,7 @@ func getDataSets() map[string]dataSet {
 			},
 			rules: ClaimRules{{
 				Value: "val",
-				Key:   "field",
+				Path:  "field",
 				Op:    "eq",
 			}},
 			err: true,
@@ -114,7 +114,7 @@ func getDataSets() map[string]dataSet {
 			},
 			rules: ClaimRules{{
 				Value: "val2",
-				Key:   "field",
+				Path:  "field",
 				Op:    "in",
 			}},
 			err: false,
@@ -129,7 +129,7 @@ func getDataSets() map[string]dataSet {
 			},
 			rules: ClaimRules{{
 				Value: "val",
-				Key:   "field.nested.level",
+				Path:  "field.nested.level",
 				Op:    "eq",
 			}},
 			err: false,
@@ -144,7 +144,7 @@ func getDataSets() map[string]dataSet {
 			},
 			rules: ClaimRules{{
 				Value: "val2",
-				Key:   "field.nested.level",
+				Path:  "field.nested.level",
 				Op:    "in",
 			}},
 			err: false,
@@ -159,7 +159,7 @@ func getDataSets() map[string]dataSet {
 			},
 			rules: ClaimRules{{
 				Value: "val2",
-				Key:   "field.nested.level",
+				Path:  "field.nested.level",
 				Op:    "in",
 			}},
 			err: true,
@@ -187,7 +187,7 @@ func TestClaimRulesValidate(t *testing.T) {
 func TestClaimRulesValidateNotJWT(t *testing.T) {
 	rules := ClaimRules{{
 		Value: "val",
-		Key:   "field",
+		Path:  "field",
 		Op:    "eq",
 	}}
 

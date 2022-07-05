@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/jeremywohl/flatten"
+	"github.com/jeremywohl/flatten/v2"
 	"github.com/pkg/errors"
 )
 
@@ -19,18 +19,28 @@ const (
 	Equal string = "eq"
 )
 
-// ClaimRule represents the configuration for checking access token claim.
+// ClaimRule represents the configuration for checking access token claims.
 type ClaimRule struct {
+	// Values is used to compare with retrieved value from token claims.
 	Value interface{} `json:"value"`
-	Key   string      `json:"key"`
-	Op    string      `json:"op"`
+
+	// Op represents defined operation for the claim rule that should be used
+	// during checking of token claims. It can be "eq" or "in".
+	// - "eq" is used to compare single value from token claims.
+	// - "in" is used to look if defined value is in the list of values for
+	//   defined token claim path.
+	Op string `json:"op"`
+
+	// Path represent JSON path to specific key in the token claims. Nested
+	// fields are separated by '.'. i.e. "top_level.field.sub_field".
+	Path string `json:"path"`
 }
 
 // equalCheck checks exact claim key against token claims.
-func (cr *ClaimRule) equalCheck(flatTokenClaims map[string]interface{}, key string) (bool, error) {
-	tokenClaimValue, found := flatTokenClaims[key]
+func (cr *ClaimRule) equalCheck(flatTokenClaims map[string]interface{}, jsonPath string) (bool, error) {
+	tokenClaimValue, found := flatTokenClaims[jsonPath]
 	if !found {
-		return false, errors.Errorf("expected claim %q not found", key)
+		return false, errors.Errorf("expected claim %q not found", jsonPath)
 	}
 
 	return cr.Value == tokenClaimValue, nil
@@ -40,7 +50,7 @@ func (cr *ClaimRule) equalCheck(flatTokenClaims map[string]interface{}, key stri
 // JSON created from access token claims.
 func (cr *ClaimRule) check(flatTokenClaims map[string]interface{}) (bool, error) {
 	if cr.Op == Equal {
-		return cr.equalCheck(flatTokenClaims, cr.Key)
+		return cr.equalCheck(flatTokenClaims, cr.Path)
 	}
 
 	if cr.Op == In {
@@ -50,11 +60,11 @@ func (cr *ClaimRule) check(flatTokenClaims map[string]interface{}) (bool, error)
 			// Flattened lists in token are suffixed with index. i.e.
 			// Token JSON: { test: [1, 2] }
 			// Flattened Token JSON: { "test.0": 1, "test.1": 2 }
-			key := fmt.Sprintf("%s.%d", cr.Key, i)
+			jsonPath := fmt.Sprintf("%s.%d", cr.Path, i)
 
-			isValid, err := cr.equalCheck(flatTokenClaims, key)
+			isValid, err := cr.equalCheck(flatTokenClaims, jsonPath)
 			if err != nil {
-				return false, errors.Errorf("value provided within claim %q is not found", cr.Key)
+				return false, errors.Errorf("value provided within claim %q is not found", cr.Path)
 			}
 
 			if isValid {
@@ -63,7 +73,7 @@ func (cr *ClaimRule) check(flatTokenClaims map[string]interface{}) (bool, error)
 		}
 	}
 
-	return false, errors.Errorf("unsupported rule %q for claim %q", cr.Op, cr.Key)
+	return false, errors.Errorf("unsupported rule %q for claim %q", cr.Op, cr.Path)
 }
 
 // ClaimRules represents the collection of claim ruels that should be validated
@@ -115,7 +125,7 @@ func (cos *ClaimRules) Validate(rawAccessToken string) error {
 		}
 
 		if !isValid {
-			return errors.Errorf("claim for key %q is not valid", expectedClaim.Key)
+			return errors.Errorf("claim for key %q is not valid", expectedClaim.Path)
 		}
 	}
 
