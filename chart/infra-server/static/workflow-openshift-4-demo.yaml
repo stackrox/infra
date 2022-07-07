@@ -127,12 +127,12 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: demo-secrets
-                key: DOCKER_IO_USERNAME
+                key: QUAY_RHACS_ENG_RO_USERNAME
           - name: IMAGE_PULL_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: demo-secrets
-                key: DOCKER_IO_PASSWORD
+                key: QUAY_RHACS_ENG_RO_PASSWORD
           - name: GOOGLE_CREDENTIALS
             valueFrom:
               secretKeyRef:
@@ -143,7 +143,7 @@ spec:
           - name: ORCHESTRATOR
             value: openshift
           - name: IMAGE_REGISTRY
-            value: docker.io/stackrox
+            value: quay.io/rhacs-eng
           - name: ADMIN_PASSWORD
             value: "{{ inputs.parameters.admin-password }}"
           - name: KUBECONFIG_BASE64
