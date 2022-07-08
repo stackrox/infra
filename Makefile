@@ -233,6 +233,17 @@ install-local: render-local
 	kubectl apply -R \
 	    -f chart-rendered/infra-server
 
+.PHONY: diff-development
+diff-development: render-development
+	helm diff upgrade --install \
+		--kube-context $(dev_context) \
+		--repo https://argoproj.github.io/argo-helm \
+		--namespace argo \
+		argo argo
+	kubectl diff -R \
+		--context $(dev_context) \
+		-f chart-rendered/infra-server
+
 .PHONY: install-development
 install-development: render-development
 	helm upgrade --install \
@@ -244,6 +255,17 @@ install-development: render-development
 	kubectl apply -R \
 	    --context $(dev_context) \
 	    -f chart-rendered/infra-server
+
+.PHONY: diff-production
+diff-production: render-production
+	helm diff upgrade --install \
+		--kube-context $(prod_context) \
+		--repo https://argoproj.github.io/argo-helm \
+		--namespace argo \
+		argo argo
+	kubectl diff -R \
+		--context $(prod_context) \
+		-f chart-rendered/infra-server
 
 .PHONY: install-production
 install-production: render-production
