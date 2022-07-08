@@ -33,7 +33,7 @@ func NewFromConfig(oidcConfigFile string) (*OidcAuth, error) {
 		endpoint:  cfg.Endpoint,
 		provider:  provider,
 		jwtState:  NewStateTokenizer(time.Minute, cfg.SessionSecret),
-		jwtAccess: NewAccessTokenizer(cfg.Claims),
+		jwtAccess: NewAccessTokenizer(cfg.AccessTokenClaims),
 		jwtOidc:   NewOidcTokenizer(provider.Verifier(&oidc.Config{ClientID: cfg.ClientID})),
 		jwtUser:   NewUserTokenizer(time.Hour, cfg.SessionSecret),
 		jwtSvcAcct: serviceAccountTokenizer{

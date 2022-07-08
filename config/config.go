@@ -52,9 +52,10 @@ type AuthOidcConfig struct {
 	// tokens. Changing this value would invalidate current sessions.
 	SessionSecret string `json:"sessionSecret"`
 
-	// Claims are the list of defined claim rules used to validate access token
-	// claims provided by the OIDC Provider. All claims have to be fulfilled.
-	Claims *claimrule.ClaimRules `json:"claims"`
+	// AccessTokenClaims are the list of defined claim rules used to validate
+	// access token claims provided by the OIDC Provider.
+	// All claims have to be fulfilled.
+	AccessTokenClaims *claimrule.ClaimRules `json:"accessTokenClaims"`
 }
 
 // ServerConfig represents the configuration used for running the HTTP & GRPC

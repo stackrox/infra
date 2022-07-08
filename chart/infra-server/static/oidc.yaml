@@ -3,7 +3,7 @@ clientID: "rhacs-dev-infra"
 clientSecret: "clientSecret-example"
 sessionSecret: "sessionSecret-example"
 endpoint: {{ if eq .Values.deployment "local" }}localhost:8443{{ else }}dev.infra.rox.systems{{ end }}
-claims:
+accessTokenClaims:
   - value: 'https://auth.stage.redhat.com/auth/realms/EmployeeIDP'
     op: 'eq'
     path: 'iss'
