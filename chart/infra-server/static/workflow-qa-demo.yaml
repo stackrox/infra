@@ -9,6 +9,7 @@ spec:
   imagePullSecrets:
     - name: docker-io-pull-secret
     - name: stackrox-io-pull-secret
+    - name: quay-rhacs-eng-pull-secret
 
   arguments:
     parameters:
