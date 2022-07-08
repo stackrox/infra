@@ -13,6 +13,8 @@ import (
 
 type operation string
 
+var _ json.Unmarshaler = (*operation)(nil)
+
 const (
 	// In defines claim check if value is withing the slice.
 	In operation = "in"
