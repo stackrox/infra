@@ -11,13 +11,31 @@ import (
 	"github.com/pkg/errors"
 )
 
+type operation string
+
 const (
 	// In defines claim check if value is withing the slice.
-	In string = "in"
+	In operation = "in"
 
 	// Equal defines claim check if value is equal.
-	Equal string = "eq"
+	Equal operation = "eq"
 )
+
+// UnmarshalJSON does validation of supported operations for claim rule.
+func (op *operation) UnmarshalJSON(b []byte) error {
+	var strOp string
+	err := json.Unmarshal(b, &strOp)
+	if err != nil {
+		return err
+	}
+
+	*op = operation(strOp)
+	if *op != In && *op != Equal {
+		return errors.Errorf("unsupported operation %q", *op)
+	}
+
+	return nil
+}
 
 // ClaimRule represents the configuration for checking access token claims.
 type ClaimRule struct {
@@ -29,7 +47,7 @@ type ClaimRule struct {
 	// - "eq" is used to compare single value from token claims.
 	// - "in" is used to look if defined value is in the list of values for
 	//   defined token claim path.
-	Op string `json:"op"`
+	Op operation `json:"op"`
 
 	// Path represent JSON path to specific key in the token claims. Nested
 	// fields are separated by '.'. i.e. "top_level.field.sub_field".

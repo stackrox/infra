@@ -6,7 +6,7 @@ import (
 
 	"gopkg.in/square/go-jose.v2"
 
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
 )
 
 type dataSet struct {
@@ -97,7 +97,7 @@ func getDataSets() map[string]dataSet {
 			}},
 			err: true,
 		},
-		"eq-no-filed": {
+		"eq-no-field": {
 			tokenClaims: map[string]interface{}{
 				"no-field": "val",
 			},
@@ -176,9 +176,9 @@ func TestClaimRulesValidate(t *testing.T) {
 			err := testSet.rules.Validate(rawToken)
 
 			if testSet.err {
-				require.Error(t, err)
+				assert.Error(t, err)
 			} else {
-				require.NoError(t, err)
+				assert.NoError(t, err)
 			}
 		})
 	}
@@ -192,31 +192,66 @@ func TestClaimRulesValidateNotJWT(t *testing.T) {
 	}}
 
 	err := rules.Validate("bad-token")
-	require.Error(t, err)
+	assert.Error(t, err)
 
 	err = rules.Validate("not.goo.token")
-	require.Error(t, err)
+	assert.Error(t, err)
 
 	err = rules.Validate("(not).(base64).(token)")
-	require.Error(t, err)
+	assert.Error(t, err)
 
 	err = rules.Validate("")
-	require.Error(t, err)
+	assert.Error(t, err)
 
 	err = rules.Validate("..")
-	require.Error(t, err)
+	assert.Error(t, err)
 
 	// Access token is not valid if claim rules are defined and token in not JWT.
 	exampleToken := "dmFsaWQtYWNjZXNzLXRva2Vu"
 	err = rules.Validate(exampleToken)
-	require.Error(t, err)
+	assert.Error(t, err)
 
 	// Access token is valid when claim rules are not defined.
 	rules = ClaimRules{}
 	err = rules.Validate(exampleToken)
-	require.NoError(t, err)
+	assert.NoError(t, err)
 
 	rules = nil
 	err = rules.Validate(exampleToken)
-	require.NoError(t, err)
+	assert.NoError(t, err)
+}
+
+func TestOperationUnmarshalJSON(t *testing.T) {
+	type operationUnmarshalTestSet struct {
+		rawData []byte
+		error   bool
+	}
+
+	testCases := map[string]operationUnmarshalTestSet{
+		"fail-unsupported": {
+			rawData: []byte("\"abc\""),
+			error:   true,
+		},
+		"fail-number": {
+			rawData: []byte("1"),
+			error:   true,
+		},
+		"in": {
+			rawData: []byte("\"in\""),
+			error:   false,
+		},
+		"eq": {
+			rawData: []byte("\"eq\""),
+			error:   false,
+		},
+	}
+
+	for testName, testCase := range testCases {
+		t.Run(testName, func(t *testing.T) {
+			var op operation
+			err := json.Unmarshal(testCase.rawData, &op)
+
+			assert.Equal(t, testCase.error, err != nil)
+		})
+	}
 }

@@ -59,7 +59,7 @@ func (a OidcAuth) loginHandler(w http.ResponseWriter, r *http.Request) {
 	oauth2.SetAuthURLParam("response_mode", "query")
 	redirectURL := a.conf.AuthCodeURL(stateToken)
 
-	// Redirect to RedHat so that the user can login externally.
+	// Redirect to authorization server so that the user can login externally.
 	http.Redirect(w, r, redirectURL, http.StatusTemporaryRedirect)
 }
 
