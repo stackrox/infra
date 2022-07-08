@@ -125,7 +125,7 @@
       description: The GCP image type to use for the cluster
       value: ubuntu
       kind: optional
-      help: List of image types: https://cloud.google.com/kubernetes-engine/docs/concepts/node-images
+      help: "List of image types: https://cloud.google.com/kubernetes-engine/docs/concepts/node-images"
 
     - name: gcp-zone
       description: The zone in GCP to delete the cluster from
