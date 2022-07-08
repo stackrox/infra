@@ -24,7 +24,7 @@ about the available scripts and the tooling behavior.
 
 This project depends on packages with `@stackrox` scope accessible from GitHub
 Packages NPM registry. Setup your dev env by following
-[these instructions](https://stack-rox.atlassian.net/wiki/spaces/ENGKB/pages/1411515467/Using+GitHub+Packages+with+NPM#Setting-Up-Dev-Env)
+[these instructions](https://docs.engineering.redhat.com/display/StackRox/Using+GitHub+Packages+with+NPM)
 to authenticate with the registry.
 
 ### UI Dev Server
