@@ -108,7 +108,7 @@ spec:
               none: {}
 
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/demo:0.2.26-4-gb6438814fd-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/demo:0.2.26-6-g6e278e808a-snapshot
         imagePullPolicy: Always
         args:
           - create
@@ -183,7 +183,7 @@ spec:
             path: /data/tfvars
             optional: true
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/demo:0.2.26-4-gb6438814fd-snapshot
+        image: gcr.io/stackrox-infra/automation-flavors/demo:0.2.26-6-g6e278e808a-snapshot
         imagePullPolicy: Always
         args:
           - destroy
