@@ -31,7 +31,7 @@ func (op *operation) UnmarshalJSON(b []byte) error {
 
 	*op = operation(strOp)
 	if *op != In && *op != Equal {
-		return errors.Errorf("unsupported operation %q", *op)
+		return errors.Errorf("unsupported operation %q in claim rule", *op)
 	}
 
 	return nil
@@ -54,19 +54,30 @@ type ClaimRule struct {
 	Path string `json:"path"`
 }
 
+// jsonPathExists checks if jsonPath exists in flat token claims.
+func (cr *ClaimRule) jsonPathExists(flatTokenClaims map[string]interface{}, jsonPath string) bool {
+	_, found := flatTokenClaims[jsonPath]
+
+	return found
+}
+
 // equalCheck checks exact claim key against token claims.
-func (cr *ClaimRule) equalCheck(flatTokenClaims map[string]interface{}, jsonPath string) (bool, error) {
+func (cr *ClaimRule) equalCheck(flatTokenClaims map[string]interface{}, jsonPath string) error {
 	tokenClaimValue, found := flatTokenClaims[jsonPath]
 	if !found {
-		return false, errors.Errorf("expected claim %q not found", jsonPath)
+		return errors.Errorf("expected claim %q is not found", jsonPath)
 	}
 
-	return cr.Value == tokenClaimValue, nil
+	if cr.Value != tokenClaimValue {
+		return errors.Errorf("expected claim %q is not correct", jsonPath)
+	}
+
+	return nil
 }
 
 // Checks expected claim against token claims. This function expects flattened
 // JSON created from access token claims.
-func (cr *ClaimRule) check(flatTokenClaims map[string]interface{}) (bool, error) {
+func (cr *ClaimRule) check(flatTokenClaims map[string]interface{}) error {
 	if cr.Op == Equal {
 		return cr.equalCheck(flatTokenClaims, cr.Path)
 	}
@@ -79,19 +90,17 @@ func (cr *ClaimRule) check(flatTokenClaims map[string]interface{}) (bool, error)
 			// Token JSON: { test: [1, 2] }
 			// Flattened Token JSON: { "test.0": 1, "test.1": 2 }
 			jsonPath := fmt.Sprintf("%s.%d", cr.Path, i)
-
-			isValid, err := cr.equalCheck(flatTokenClaims, jsonPath)
-			if err != nil {
-				return false, errors.Errorf("value provided within claim %q is not found", cr.Path)
+			if !cr.jsonPathExists(flatTokenClaims, jsonPath) {
+				return errors.Errorf("value %q is not found in claim rule path %q", cr.Value, cr.Path)
 			}
 
-			if isValid {
-				return isValid, nil
+			if errCheck := cr.equalCheck(flatTokenClaims, jsonPath); errCheck == nil {
+				return nil
 			}
 		}
 	}
 
-	return false, errors.Errorf("unsupported rule %q for claim %q", cr.Op, cr.Path)
+	return errors.Errorf("unsupported operation %q for claim rule path %q", cr.Op, cr.Path)
 }
 
 // ClaimRules represents the collection of claim ruels that should be validated
@@ -101,7 +110,7 @@ type ClaimRules []ClaimRule
 func decodeAccessToken(rawAccessToken string) (map[string]interface{}, error) {
 	rawTokenParts := strings.Split(rawAccessToken, ".")
 	if len(rawTokenParts) < 2 {
-		return nil, errors.New("jws: invalid token received")
+		return nil, errors.New("invalid token received")
 	}
 
 	decoded, errDecode := base64.RawURLEncoding.DecodeString(rawTokenParts[1])
@@ -137,13 +146,8 @@ func (cos *ClaimRules) Validate(rawAccessToken string) error {
 	}
 
 	for _, expectedClaim := range *cos {
-		isValid, errCheck := expectedClaim.check(flatTokenClaims)
-		if errCheck != nil {
+		if errCheck := expectedClaim.check(flatTokenClaims); errCheck != nil {
 			return errCheck
-		}
-
-		if !isValid {
-			return errors.Errorf("claim for key %q is not valid", expectedClaim.Path)
 		}
 	}
 
