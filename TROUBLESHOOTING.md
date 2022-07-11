@@ -85,8 +85,6 @@ argo logs demo-mxgf9-3875809567 | head -n 20
 [PASS] /usr/bin/roxctl (A copy of the roxctl binary)
 [PASS] AUTH_CLIENT_ID (Auth0 integration client ID)
 [PASS] AUTH_DOMAIN (Auth0 tenant)
-[PASS] DOCKER_IO_PASSWORD (password for Docker Hub)
-[PASS] DOCKER_IO_USERNAME (username for Docker Hub)
 ```
 
 The workflow steps are just pod executions, so `kubectl logs ...` also works:
