@@ -5,6 +5,7 @@ go 1.16
 require (
 	cloud.google.com/go/storage v1.10.0
 	github.com/argoproj/argo v0.0.0-20200506223611-54154c61eb4f
+	github.com/coreos/go-oidc/v3 v3.2.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/elazarl/goproxy v0.0.0-20200220113713-29f9e0ba54ea // indirect
 	github.com/evanphx/json-patch v4.5.0+incompatible // indirect
@@ -13,6 +14,7 @@ require (
 	github.com/google/gofuzz v1.1.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
+	github.com/jeremywohl/flatten/v2 v2.0.0-20211013061545-07e4a09fb8e4
 	github.com/pkg/errors v0.9.1
 	github.com/slack-go/slack v0.9.5
 	github.com/spf13/cobra v1.2.1
@@ -24,6 +26,7 @@ require (
 	google.golang.org/genproto v0.0.0-20210602131652-f16073e35f0c
 	google.golang.org/grpc v1.40.0
 	google.golang.org/protobuf v1.26.0
+	gopkg.in/square/go-jose.v2 v2.5.1
 	k8s.io/api v0.0.0-20191219150132-17cfeff5d095
 	k8s.io/apimachinery v0.16.7-beta.0
 	k8s.io/client-go v0.0.0-20191225075139-73fd2ddc9180

@@ -17,7 +17,7 @@ type userContextKey struct{}
 // possible. If there is no user, this function does not return an error, as
 // anonymous API calls are a possibility. Authorization must be independently
 // enforced.
-func UserEnricher(cfg auth.OAuth) contextFunc {
+func UserEnricher(cfg auth.OidcAuth) contextFunc {
 	return func(ctx context.Context, _ *grpc.UnaryServerInfo) (context.Context, error) {
 		// Extract request metadata (proxied http headers) from given context.
 		meta, ok := metadata.FromIncomingContext(ctx)
