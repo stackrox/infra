@@ -226,7 +226,7 @@
 
     - name: openshift-version
       description: openshift release from OCP or OKD
-      value: ocp/stable-4.7
+      value: ocp/stable
       kind: optional
       help: |
         The latest RedHat enterprise OCP releases can be found at https://mirror.openshift.com/pub/openshift-v4/clients/ocp/.
@@ -311,7 +311,7 @@
 
     - name: openshift-version
       description: openshift release from OCP or OKD
-      value: ocp/stable-4.7
+      value: ocp/stable
       kind: optional
       help: |
         The latest RedHat enterprise OCP releases can be found at https://mirror.openshift.com/pub/openshift-v4/clients/ocp/.
