@@ -54,8 +54,8 @@
       value: quay.io/stackrox-io/main:3.71.0
       help: |
         This must be a fully qualified image e.g. quay.io/stackrox-io/main:3.71.0.
-        Private images from quay.io/rhacs-eng and stackrox.io (legacy) will work.
-        Any public image should work.
+        Private images from quay.io/rhacs-eng and stackrox.io (legacy) can also be used.
+        Other public images should also be OK.
 
     - name: scanner-image
       description: StackRox Scanner image Docker name
