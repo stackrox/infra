@@ -13,6 +13,8 @@ type Props = {
   cluster: V1Cluster;
 };
 
+const minimumClusterLifetime = moment.duration(15, 'm');
+
 export default function MutableLifespan({ cluster }: Props): ReactElement {
   const [clientSideLifespan, setClientSideLifespan] = useState<string>();
   const [clearClientSideUpdate, setClearClientSideUpdate] = useState<number>();
@@ -42,7 +44,16 @@ export default function MutableLifespan({ cluster }: Props): ReactElement {
     if (!lifespan || !modifiedCluster.ID) return;
     const current = lifespanToDuration(lifespan);
     const delta = moment.duration(1, notation as moment.DurationInputArg2);
-    const update = incOrDec === 'inc' ? current.add(delta) : current.subtract(delta);
+    let update = incOrDec === 'inc' ? current.add(delta) : current.subtract(delta);
+    // Make sure a user cannot accidentally expire a cluster by reducing the duration to zero or below by clicking
+    // "-" on the days or hours counter. However, allow reducing the time to zero or 1m via subsequent clicks on "-" for
+    // the seconds counter, this should have a sufficiently low accident rate.
+    if (incOrDec === 'dec' && delta > minimumClusterLifetime && update < minimumClusterLifetime) {
+      update = minimumClusterLifetime;
+      if (update > current) {
+        return; // no change, the deletion protection should never increase the cluster's lifetime.
+      }
+    }
     setClientSideLifespan(`${update.asSeconds()}s`);
     clusterService
       .lifespan(modifiedCluster.ID, { Lifespan: `${update.asSeconds()}s` })
