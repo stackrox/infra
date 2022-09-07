@@ -45,6 +45,8 @@ func mainCmd() error {
 		return nil
 	}
 
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
 	log.Printf("Starting infra server version %s", buildinfo.All().Version)
 
 	serverConfigFile := filepath.Join(*flagConfigDir, "infra.yaml")
