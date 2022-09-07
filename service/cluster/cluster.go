@@ -139,7 +139,7 @@ func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) 
 	for _, workflow := range workflowList.Items {
 		metacluster, err := s.metaClusterFromWorkflow(workflow)
 		if err != nil {
-			log.Printf("failed to convert workflow to meta-cluster: %v", err)
+			log.Printf("failed to convert workflow to meta-cluster: %s, %v", workflow.Name, err)
 			continue
 		}
 
