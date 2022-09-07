@@ -60,6 +60,8 @@ spec:
       container:
         image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.2.19
         imagePullPolicy: Always
+        command:
+          - /usr/bin/entrypoint
         args:
           - create
           - "--name={{workflow.parameters.name}}"
@@ -83,6 +85,8 @@ spec:
       container:
         image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.2.19
         imagePullPolicy: Always
+        command:
+          - /usr/bin/entrypoint
         args:
           - destroy
           - "--name={{workflow.parameters.name}}"

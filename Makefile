@@ -215,15 +215,9 @@ install-local: render-local
 		echo Your kube context is set to production infra, should be a local cluster; \
 		exit 1; \
 	fi
-	helm upgrade --install \
-		--repo https://argoproj.github.io/argo-helm \
-		--create-namespace \
-		--namespace argo \
-		argo argo
-	@if ! kubectl get crd applications.app.k8s.io; then \
-		kubectl apply \
-			-f chart-rendered/infra-server/templates/application-crd.yaml; \
-		sleep 10; \
+	@if ! kubectl get ns argo; then \
+		kubectl create namespace argo; \
+		kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/v3.3.9/install.yaml; \
 	fi
 	@if ! kubectl get ns infra; then \
 		kubectl apply \

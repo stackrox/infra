@@ -48,6 +48,8 @@ spec:
       container:
         image: gcr.io/stackrox-infra/automation-flavors/aks:0.2.16
         imagePullPolicy: Always
+        command:
+          - entrypoint
         args:
           - create
           - "{{workflow.parameters.name}}"
@@ -94,6 +96,8 @@ spec:
       container:
         image: gcr.io/stackrox-infra/automation-flavors/aks:0.2.16
         imagePullPolicy: Always
+        command:
+          - entrypoint
         args:
           - destroy
           - "{{workflow.parameters.name}}"

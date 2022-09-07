@@ -19,7 +19,7 @@ infra-server-deployment-5c6cfb69c-54k6x   1/1     Running   0          11s
 $ kubectl -n argo get pods
 NAME                                        READY   STATUS    RESTARTS   AGE
 argo-server-58bf6d4f79-cc96j                1/1     Running   1          95s
-argo-workflow-controller-6487cc4688-cdbfz   1/1     Running   0          95s
+workflow-controller-6487cc4688-cdbfz        1/1     Running   0          95s
 ```
 
 To connect to the infra-server run a proxy:

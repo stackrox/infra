@@ -110,7 +110,7 @@ func (s *clusterImpl) Info(ctx context.Context, clusterID *v1.ResourceByID) (*v1
 
 	metacluster, err := s.metaClusterFromWorkflow(*workflow)
 	if err != nil {
-		log.Printf("failed to convert workflow to meta-cluster: %v", err)
+		log.Printf("failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
 		return nil, err
 	}
 
@@ -139,7 +139,7 @@ func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) 
 	for _, workflow := range workflowList.Items {
 		metacluster, err := s.metaClusterFromWorkflow(workflow)
 		if err != nil {
-			log.Printf("failed to convert workflow to meta-cluster: %s, %v", workflow.Name, err)
+			log.Printf("failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
 			continue
 		}
 
@@ -512,7 +512,7 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 		for _, workflow := range workflowList.Items {
 			metacluster, err := s.metaClusterFromWorkflow(workflow)
 			if err != nil {
-				log.Printf("failed to convert workflow to meta-cluster: %v", err)
+				log.Printf("failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
 				continue
 			}
 
@@ -562,7 +562,7 @@ func (s *clusterImpl) startCalendarCheck() {
 		for _, workflow := range workflowList.Items {
 			metacluster, err := s.metaClusterFromWorkflow(workflow)
 			if err != nil {
-				log.Printf("failed to convert workflow to meta-cluster: %v", err)
+				log.Printf("failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
 				continue
 			}
 
@@ -656,7 +656,7 @@ func (s *clusterImpl) startSlackCheck() {
 func (s *clusterImpl) slackCheckWorkflow(workflow v1alpha1.Workflow) {
 	metacluster, err := s.metaClusterFromWorkflow(workflow)
 	if err != nil {
-		log.Printf("failed to convert workflow to meta-cluster: %v", err)
+		log.Printf("failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
 		return
 	}
 
