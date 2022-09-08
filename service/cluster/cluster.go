@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	argov3api "github.com/argoproj/argo-workflows/v3/cmd/argo/commands/client"
+	argov3client "github.com/argoproj/argo-workflows/v3/cmd/argo/commands/client"
 	"github.com/argoproj/argo-workflows/v3/pkg/apiclient"
 	workflowpkg "github.com/argoproj/argo-workflows/v3/pkg/apiclient/workflow"
 	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
@@ -92,7 +92,7 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSo
 		return nil, err
 	}
 
-	ctx, argoClient := argov3api.NewAPIClient(context.Background())
+	ctx, argoClient := argov3client.NewAPIClient(context.Background())
 	argoWorkflowsClient := argoClient.NewWorkflowServiceClient()
 
 	impl := &clusterImpl{
@@ -744,10 +744,7 @@ func (s *clusterImpl) slackCheckWorkflow(workflow v1alpha1.Workflow) {
 		}
 
 		// Submit the patch.
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-		defer cancel()
-
-		_, err = s.k8sWorkflowsClient.Patch(ctx, metacluster.Cluster.ID, types.JSONPatchType, payloadBytes, metav1.PatchOptions{})
+		_, err = s.k8sWorkflowsClient.Patch(context.Background(), metacluster.Cluster.ID, types.JSONPatchType, payloadBytes, metav1.PatchOptions{})
 		if err != nil {
 			log.Printf("failed to patch Slack annotation for cluster %s: %v", metacluster.Cluster.ID, err)
 			return
