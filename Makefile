@@ -204,6 +204,8 @@ render-production: clean-render
 dev_context = gke_stackrox-infra_us-west2_infra-development
 prod_context = gke_stackrox-infra_us-west2_infra-production
 this_context = $(shell kubectl config current-context)
+kcdev = kubectl --context $(dev_context)
+kcprod = kubectl --context $(prod_context)
 
 .PHONY: install-local
 install-local: render-local
@@ -229,47 +231,41 @@ install-local: render-local
 
 .PHONY: diff-development
 diff-development: render-development
-	helm diff upgrade --install \
-		--kube-context $(dev_context) \
-		--repo https://argoproj.github.io/argo-helm \
-		--namespace argo \
-		argo argo
-	kubectl diff -R \
-		--context $(dev_context) \
+	$(kcdev) diff -R \
 		-f chart-rendered/infra-server
 
 .PHONY: install-development
 install-development: render-development
-	helm upgrade --install \
-	    --kube-context $(dev_context) \
-		--repo https://argoproj.github.io/argo-helm \
-		--create-namespace \
-		--namespace argo \
-		argo argo
-	kubectl apply -R \
-	    --context $(dev_context) \
+	@if ! $(kcdev) get ns argo; then \
+		$(kcdev) create namespace argo; \
+		$(kcdev) apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/v3.3.9/install.yaml; \
+	fi
+	@if ! $(kcdev) get ns infra; then \
+		$(kcdev) apply \
+			-f chart-rendered/infra-server/templates/namespace.yaml; \
+		sleep 10; \
+	fi
+	$(kcdev) apply -R \
 	    -f chart-rendered/infra-server
 
 .PHONY: diff-production
 diff-production: render-production
-	helm diff upgrade --install \
-		--kube-context $(prod_context) \
-		--repo https://argoproj.github.io/argo-helm \
-		--namespace argo \
-		argo argo
-	kubectl diff -R \
+	$(kcprod) diff -R \
 		--context $(prod_context) \
 		-f chart-rendered/infra-server
 
 .PHONY: install-production
 install-production: render-production
-	helm upgrade --install \
-	    --kube-context $(prod_context) \
-		--repo https://argoproj.github.io/argo-helm \
-		--create-namespace \
-		--namespace argo \
-		argo argo
-	kubectl apply -R \
+	@if ! $(kcprod) get ns argo; then \
+		$(kcprod) create namespace argo; \
+		$(kcprod) apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/v3.3.9/install.yaml; \
+	fi
+	@if ! $(kcprod) get ns infra; then \
+		$(kcprod) apply \
+			-f chart-rendered/infra-server/templates/namespace.yaml; \
+		sleep 10; \
+	fi
+	$(kcprod) apply -R \
 	    --context $(prod_context) \
 	    -f chart-rendered/infra-server
 
