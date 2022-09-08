@@ -54,7 +54,7 @@ spec:
       outputs:
         artifacts:
           - name: roxctl
-            path: /assets/downloads/cli/roxctl-linux
+            path: /stackrox/roxctl
       container:
         image: "{{workflow.parameters.main-image}}"
         imagePullPolicy: Always
