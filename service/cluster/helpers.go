@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
+	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
 	"github.com/golang/protobuf/ptypes"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/slack"
@@ -116,7 +116,7 @@ func (s *clusterImpl) getClusterDetailsFromArtifacts(cluster *v1.Cluster, workfl
 					}
 				}
 
-				contents, err := s.signer.Contents(artifact.GCS.Bucket, artifact.GCS.Key)
+				contents, err := s.signer.Contents(workflow.Status.ArtifactRepositoryRef.ArtifactRepository.GCS.Bucket, artifact.GCS.Key)
 				if err != nil {
 					return nil, err
 				}
