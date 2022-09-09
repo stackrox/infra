@@ -59,13 +59,17 @@ spec:
       outputs:
         artifacts:
           - name: roxctl
-            path: /assets/downloads/cli/roxctl-linux
+            path: /tmp/roxctl
       container:
         image: "{{workflow.parameters.main-image}}"
         imagePullPolicy: Always
+        command:
+          - cp
         args:
-          - version
-          - "--json"
+          - --dereference
+          - -v
+          - /stackrox/roxctl
+          - /tmp/roxctl
 
     - name: create
       activeDeadlineSeconds: 3600
