@@ -208,7 +208,7 @@ kcdev = kubectl --context $(dev_context)
 kcprod = kubectl --context $(prod_context)
 
 .PHONY: install-local
-install-local: render-local
+install-local:
 	@if [[ "$(this_context)" == "$(dev_context)" ]]; then \
 		echo Your kube context is set to development infra, should be a local cluster; \
 		exit 1; \
