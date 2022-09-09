@@ -40,6 +40,8 @@ spec:
       container:
         image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.16
         imagePullPolicy: Always
+        command:
+          - ./entrypoint.sh
         args:
           - create
           - "{{workflow.parameters.name}}"
@@ -110,6 +112,8 @@ spec:
       container:
         image: gcr.io/stackrox-infra/automation-flavors/openshift-aro:0.2.16
         imagePullPolicy: Always
+        command:
+          - ./entrypoint.sh
         args:
           - destroy
           - "{{workflow.parameters.name}}"

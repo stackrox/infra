@@ -100,6 +100,8 @@ spec:
 
       container:
         image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:0.2.16
+        command:
+          - /usr/bin/entrypoint
         args:
           - create
           - "--name={{inputs.parameters.name}}"
@@ -130,6 +132,8 @@ spec:
             path: /well-known/artifacts/terraform-destroy.tfplan
       container:
         image: gcr.io/stackrox-infra/automation-flavors/openshift-multi:0.2.16
+        command:
+          - /usr/bin/entrypoint
         args:
           - destroy
         env:

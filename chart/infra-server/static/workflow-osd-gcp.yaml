@@ -40,6 +40,8 @@ spec:
       container:
         image: gcr.io/stackrox-infra/automation-flavors/openshift-osd:0.2.24
         imagePullPolicy: Always
+        command:
+          - ./entrypoint.sh
         args:
           - gcp
           - create
@@ -103,6 +105,8 @@ spec:
       container:
         image: gcr.io/stackrox-infra/automation-flavors/openshift-osd:0.2.24
         imagePullPolicy: Always
+        command:
+          - ./entrypoint.sh
         args:
           - gcp
           - destroy
