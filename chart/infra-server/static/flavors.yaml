@@ -383,59 +383,6 @@
       kind: optional
 
 #####################
-#  AWS KOPS         #
-#####################
-- id: kops
-  name: KOPS on AWS
-  description: A cluster created with KOPS on AWS
-  availability: alpha
-  workflow: configuration/workflow-kops.yaml
-  parameters:
-    - name: name
-      description: cluster name
-      value: example1
-
-    - name: kops-version
-      description: KOPS version
-      value: 1.21.1
-      kind: optional
-
-    - name: k8s-version
-      description: kubernetes version (must be <= KOPS version)
-      value: 1.21.4
-      kind: optional
-
-    - name: master-count
-      description: number of master nodes (must be odd number)
-      value: "1"
-      kind: optional
-
-    - name: master-instance-type
-      description: EC2 instance type for k8s masters
-      value: c5.large
-      kind: optional
-
-    - name: node-count
-      description: number of nodes in the cluster
-      value: "3"
-      kind: optional
-
-    - name: node-instance-type
-      description: EC2 instance type for k8s nodes
-      value: c5.xlarge
-      kind: optional
-
-    - name: cni
-      description: K8s network plugin to use
-      value: calico
-      kind: optional
-
-    - name: region
-      description: AWS region
-      value: us-east-1
-      kind: optional
-
-#####################
 #  Azure AKS        #
 #####################
 - id: aks
