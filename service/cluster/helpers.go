@@ -116,21 +116,8 @@ func (s *clusterImpl) getClusterDetailsFromArtifacts(cluster *v1.Cluster, workfl
 					}
 				}
 
-				var bucket string
-				var key string
-				if workflow.Status.ArtifactRepositoryRef.ArtifactRepository.GCS != nil &&
-					workflow.Status.ArtifactRepositoryRef.ArtifactRepository.GCS.Bucket != "" {
-					bucket = workflow.Status.ArtifactRepositoryRef.ArtifactRepository.GCS.Bucket
-				} else if artifact.GCS != nil && artifact.GCS.Bucket != "" {
-					bucket = artifact.GCS.Bucket
-				}
-				if artifact.GCS != nil && artifact.GCS.Key != "" {
-					key = artifact.GCS.Key
-				}
+				bucket, key := handleArtifactMigration(workflow, artifact)
 				if bucket == "" || key == "" {
-					log.Printf("[WARN] Cannot figure out bucket for artifact, possibly an upgrade issue, not fatal (workflow: %q)", workflow.Name)
-					log.Printf("Artifact: %v\n", artifact)
-					log.Printf("ArtifactRepository: %v\n", workflow.Status.ArtifactRepositoryRef.ArtifactRepository)
 					continue
 				}
 
@@ -150,6 +137,31 @@ func (s *clusterImpl) getClusterDetailsFromArtifacts(cluster *v1.Cluster, workfl
 	}
 
 	return cluster, nil
+}
+
+func handleArtifactMigration(workflow v1alpha1.Workflow, artifact v1alpha1.Artifact) (string, string) {
+	var bucket string
+	var key string
+
+	if workflow.Status.ArtifactRepositoryRef.ArtifactRepository.GCS != nil &&
+		workflow.Status.ArtifactRepositoryRef.ArtifactRepository.GCS.Bucket != "" {
+		bucket = workflow.Status.ArtifactRepositoryRef.ArtifactRepository.GCS.Bucket
+	} else if artifact.GCS != nil && artifact.GCS.Bucket != "" {
+		bucket = artifact.GCS.Bucket
+	}
+
+	if artifact.GCS != nil && artifact.GCS.Key != "" {
+		key = artifact.GCS.Key
+	}
+
+	if bucket == "" || key == "" {
+		log.Printf("[WARN] Cannot figure out bucket for artifact, possibly an upgrade issue, not fatal (workflow: %q)", workflow.Name)
+		log.Printf("Artifact: %v\n", artifact)
+		log.Printf("ArtifactRepository: %v\n", workflow.Status.ArtifactRepositoryRef.ArtifactRepository)
+		return "", ""
+	}
+
+	return bucket, key
 }
 
 func prettyPrint(x interface{}) {

@@ -409,7 +409,12 @@ func (s *clusterImpl) Artifacts(ctx context.Context, clusterID *v1.ResourceByID)
 					description = meta.Description
 				}
 
-				url, err := s.signer.Generate(workflow.Status.ArtifactRepositoryRef.ArtifactRepository.GCS.Bucket, artifact.GCS.Key)
+				bucket, key := handleArtifactMigration(*workflow, artifact)
+				if bucket == "" || key == "" {
+					continue
+				}
+
+				url, err := s.signer.Generate(bucket, key)
 				if err != nil {
 					return nil, err
 				}
