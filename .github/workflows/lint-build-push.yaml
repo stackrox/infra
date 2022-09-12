@@ -9,6 +9,9 @@ on:
     tags:
       - "[0-9]+.[0-9]+.[0-9]+"
 
+env:
+  GOPATH: "$HOME/go"
+
 jobs:
 
   build-and-push:
