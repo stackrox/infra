@@ -38,6 +38,7 @@ jobs:
       - name: Push
         run: |
           GOPATH="$HOME/go"
+          cd "$GOPATH/src/github.com/stackrox/infra"
           make push | cat
 
       - name: Logout
