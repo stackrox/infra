@@ -3,7 +3,7 @@ export GO111MODULE=on
 .PHONY: all
 all: image
 
-TAG=$(shell git describe --tags)
+TAG=$(shell git describe --tags --abbrev=10 --dirty --long)
 .PHONY: tag
 tag:
 	@echo $(TAG)
