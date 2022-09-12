@@ -20,11 +20,13 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
+          path: go/src/github.com/stackrox/infra
 
       - name: Setup GO
         uses: actions/setup-go@v3
         with:
-          go-version: '^1.16'
+          go-version: '1.16'
+          cache: true
 
       - name: Build
         run: make image
@@ -35,7 +37,9 @@ jobs:
         run: docker login -u _json_key --password-stdin <<<"$INFRA_IMAGE_PUSH" https://us.gcr.io
 
       - name: Push
-        run: make push | cat
+        run: |
+          GOPATH="$HOME/go"
+          make push | cat
 
       - name: Logout
         run: |
