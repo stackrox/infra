@@ -9,9 +9,6 @@ on:
     tags:
       - "[0-9]+.[0-9]+.[0-9]+"
 
-env:
-  GOPATH: "$HOME/go"
-
 jobs:
 
   build-and-push:
@@ -23,6 +20,11 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup GO
+        uses: actions/setup-go@v3
+        with:
+          go-version: '^1.16'
 
       - name: Build
         run: make image
