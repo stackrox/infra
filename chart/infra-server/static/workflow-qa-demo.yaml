@@ -114,6 +114,8 @@ spec:
       container:
         image: quay.io/stackrox-io/ci:automation-flavors-demo-0.3.7
         imagePullPolicy: Always
+        command:
+          - /usr/bin/entrypoint
         args:
           - create
           - "--name={{workflow.parameters.name}}"
@@ -189,6 +191,8 @@ spec:
       container:
         image: quay.io/stackrox-io/ci:automation-flavors-demo-0.3.7
         imagePullPolicy: Always
+        command:
+          - /usr/bin/entrypoint
         args:
           - destroy
         volumeMounts:

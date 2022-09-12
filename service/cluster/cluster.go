@@ -12,9 +12,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
-	workflowv1 "github.com/argoproj/argo/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
-	"github.com/argoproj/argo/workflow/util"
+	argov3client "github.com/argoproj/argo-workflows/v3/cmd/argo/commands/client"
+	"github.com/argoproj/argo-workflows/v3/pkg/apiclient"
+	workflowpkg "github.com/argoproj/argo-workflows/v3/pkg/apiclient/workflow"
+	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
+	workflowv1 "github.com/argoproj/argo-workflows/v3/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/duration"
 	"github.com/golang/protobuf/ptypes/empty"
@@ -30,7 +32,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/proto"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -60,12 +61,16 @@ const (
 )
 
 type clusterImpl struct {
-	clientWorkflows workflowv1.WorkflowInterface
-	clientPods      k8sv1.PodInterface
-	registry        *flavor.Registry
-	signer          *signer.Signer
-	eventSource     calendar.EventSource
-	slackClient     slack.Slacker
+	k8sWorkflowsClient  workflowv1.WorkflowInterface
+	k8sPodsClient       k8sv1.PodInterface
+	registry            *flavor.Registry
+	signer              *signer.Signer
+	eventSource         calendar.EventSource
+	slackClient         slack.Slacker
+	argoClient          apiclient.Client
+	argoWorkflowsClient workflowpkg.WorkflowServiceClient
+	argoClientCtx       context.Context
+	workflowNamespace   string
 }
 
 var (
@@ -75,23 +80,32 @@ var (
 
 // NewClusterService creates a new ClusterService.
 func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSource calendar.EventSource, slackClient slack.Slacker) (middleware.APIService, error) {
-	clientWorkflows, err := workflowClient()
+	workflowNamespace := "default"
+
+	k8sWorkflowsClient, err := getK8sWorkflowsClient(workflowNamespace)
 	if err != nil {
 		return nil, err
 	}
 
-	clientPods, err := podsClient()
+	k8sPodsClient, err := getK8sPodsClient(workflowNamespace)
 	if err != nil {
 		return nil, err
 	}
+
+	ctx, argoClient := argov3client.NewAPIClient(context.Background())
+	argoWorkflowsClient := argoClient.NewWorkflowServiceClient()
 
 	impl := &clusterImpl{
-		clientWorkflows: clientWorkflows,
-		clientPods:      clientPods,
-		registry:        registry,
-		signer:          signer,
-		eventSource:     eventSource,
-		slackClient:     slackClient,
+		k8sWorkflowsClient:  k8sWorkflowsClient,
+		k8sPodsClient:       k8sPodsClient,
+		registry:            registry,
+		signer:              signer,
+		eventSource:         eventSource,
+		slackClient:         slackClient,
+		argoClient:          argoClient,
+		argoWorkflowsClient: argoWorkflowsClient,
+		argoClientCtx:       ctx,
+		workflowNamespace:   workflowNamespace,
 	}
 
 	go impl.startSlackCheck()
@@ -103,14 +117,17 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSo
 
 // Info implements ClusterService.Info.
 func (s *clusterImpl) Info(ctx context.Context, clusterID *v1.ResourceByID) (*v1.Cluster, error) {
-	workflow, err := s.clientWorkflows.Get(clusterID.Id, metav1.GetOptions{})
+	workflow, err := s.argoWorkflowsClient.GetWorkflow(s.argoClientCtx, &workflowpkg.WorkflowGetRequest{
+		Name:      clusterID.Id,
+		Namespace: s.workflowNamespace,
+	})
 	if err != nil {
 		return nil, err
 	}
 
 	metacluster, err := s.metaClusterFromWorkflow(*workflow)
 	if err != nil {
-		log.Printf("failed to convert workflow to meta-cluster: %v", err)
+		log.Printf("failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
 		return nil, err
 	}
 
@@ -119,7 +136,9 @@ func (s *clusterImpl) Info(ctx context.Context, clusterID *v1.ResourceByID) (*v1
 
 // List implements ClusterService.List.
 func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) (*v1.ClusterListResponse, error) {
-	workflowList, err := s.clientWorkflows.List(metav1.ListOptions{})
+	workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
+		Namespace: s.workflowNamespace,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +158,7 @@ func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) 
 	for _, workflow := range workflowList.Items {
 		metacluster, err := s.metaClusterFromWorkflow(workflow)
 		if err != nil {
-			log.Printf("failed to convert workflow to meta-cluster: %v", err)
+			log.Printf("failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
 			continue
 		}
 
@@ -195,7 +214,7 @@ func formatAnnotationPatch(annotationKey string, annotationValue string) ([]byte
 }
 
 // Lifespan implements ClusterService.Lifespan.
-func (s *clusterImpl) Lifespan(_ context.Context, req *v1.LifespanRequest) (*duration.Duration, error) {
+func (s *clusterImpl) Lifespan(ctx context.Context, req *v1.LifespanRequest) (*duration.Duration, error) {
 	lifespanRequest, _ := ptypes.Duration(req.Lifespan)
 	lifespanCurrent := time.Duration(0)
 	lifespanUpdated := time.Duration(0)
@@ -204,7 +223,10 @@ func (s *clusterImpl) Lifespan(_ context.Context, req *v1.LifespanRequest) (*dur
 	// need to know the current lifespan. Get the named workflow to obtain said
 	// current lifespan.
 	if req.Method != v1.LifespanRequest_REPLACE {
-		workflow, err := s.clientWorkflows.Get(req.Id, metav1.GetOptions{})
+		workflow, err := s.argoWorkflowsClient.GetWorkflow(s.argoClientCtx, &workflowpkg.WorkflowGetRequest{
+			Name:      req.Id,
+			Namespace: s.workflowNamespace,
+		})
 		if err != nil {
 			return nil, err
 		}
@@ -233,7 +255,7 @@ func (s *clusterImpl) Lifespan(_ context.Context, req *v1.LifespanRequest) (*dur
 	}
 
 	// Submit the patch.
-	workflow, err := s.clientWorkflows.Patch(req.Id, types.JSONPatchType, payloadBytes)
+	workflow, err := s.k8sWorkflowsClient.Patch(ctx, req.Id, types.JSONPatchType, payloadBytes, metav1.PatchOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -280,7 +302,9 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 	}
 
 	// Make sure there is no running workflow with the same name
-	workflowList, err := s.clientWorkflows.List(metav1.ListOptions{})
+	workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
+		Namespace: s.workflowNamespace,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -289,7 +313,7 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		if workflow.ObjectMeta.Name == existing.ObjectMeta.Name {
 			switch workflowStatus(existing.Status) {
 			case v1.Status_FAILED, v1.Status_FINISHED:
-				if err := s.ForceDeleteWorkflow(workflow); err == nil {
+				if err := s.forceDeleteWorkflow(workflow); err == nil {
 					break
 				}
 				fallthrough
@@ -336,7 +360,10 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		annotationSlackDMKey:     slackDM,
 	})
 
-	created, err := s.clientWorkflows.Create(&workflow)
+	created, err := s.argoWorkflowsClient.CreateWorkflow(s.argoClientCtx, &workflowpkg.WorkflowCreateRequest{
+		Workflow:  &workflow,
+		Namespace: s.workflowNamespace,
+	})
 	if err != nil {
 		log.Printf("[WARN] Create failed, %v", err)
 		return nil, err
@@ -346,8 +373,11 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 }
 
 // Artifacts implements ClusterService.Artifacts.
-func (s *clusterImpl) Artifacts(_ context.Context, clusterID *v1.ResourceByID) (*v1.ClusterArtifacts, error) {
-	workflow, err := s.clientWorkflows.Get(clusterID.Id, metav1.GetOptions{})
+func (s *clusterImpl) Artifacts(ctx context.Context, clusterID *v1.ResourceByID) (*v1.ClusterArtifacts, error) {
+	workflow, err := s.argoWorkflowsClient.GetWorkflow(s.argoClientCtx, &workflowpkg.WorkflowGetRequest{
+		Name:      clusterID.Id,
+		Namespace: s.workflowNamespace,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -379,7 +409,12 @@ func (s *clusterImpl) Artifacts(_ context.Context, clusterID *v1.ResourceByID) (
 					description = meta.Description
 				}
 
-				url, err := s.signer.Generate(artifact.GCS.Bucket, artifact.GCS.Key)
+				bucket, key := handleArtifactMigration(*workflow, artifact)
+				if bucket == "" || key == "" {
+					continue
+				}
+
+				url, err := s.signer.Generate(bucket, key)
 				if err != nil {
 					return nil, err
 				}
@@ -421,16 +456,23 @@ func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.
 		return nil, err
 	}
 
-	// Resume workflow for this cluster.
-	if err := util.ResumeWorkflow(s.clientWorkflows, nil, req.Id, ""); err != nil {
-		return nil, err
+	log.Printf("deleting workflow %q via resume", req.Id)
+	_, err := s.argoWorkflowsClient.ResumeWorkflow(s.argoClientCtx, &workflowpkg.WorkflowResumeRequest{
+		Name:      req.Id,
+		Namespace: s.workflowNamespace,
+	})
+	if err != nil {
+		log.Printf("[ERROR] failed to resume workflow %q: %v", req.Id, err)
 	}
 
 	return &empty.Empty{}, nil
 }
 
-func (s *clusterImpl) Logs(_ context.Context, clusterID *v1.ResourceByID) (*v1.LogsResponse, error) {
-	workflow, err := s.clientWorkflows.Get(clusterID.Id, metav1.GetOptions{})
+func (s *clusterImpl) Logs(ctx context.Context, clusterID *v1.ResourceByID) (*v1.LogsResponse, error) {
+	workflow, err := s.argoWorkflowsClient.GetWorkflow(s.argoClientCtx, &workflowpkg.WorkflowGetRequest{
+		Name:      clusterID.Id,
+		Namespace: s.workflowNamespace,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -450,7 +492,7 @@ func (s *clusterImpl) Logs(_ context.Context, clusterID *v1.ResourceByID) (*v1.L
 		go func(node v1alpha1.NodeStatus) {
 			defer wg.Done()
 
-			logChan <- s.getLogs(node)
+			logChan <- s.getLogs(ctx, node)
 		}(node)
 	}
 
@@ -484,13 +526,18 @@ func (s *clusterImpl) RegisterServiceHandler(ctx context.Context, mux *runtime.S
 	return v1.RegisterClusterServiceHandler(ctx, mux, conn)
 }
 
-func (s *clusterImpl) ForceDeleteWorkflow(workflow v1alpha1.Workflow) error {
+func (s *clusterImpl) forceDeleteWorkflow(workflow v1alpha1.Workflow) error {
 	var gracePeriod int64 = 0
 	deletePolicy := metav1.DeletePropagationForeground
-	if err := s.clientWorkflows.Delete(workflow.Name, &metav1.DeleteOptions{
-		GracePeriodSeconds: &gracePeriod,
-		PropagationPolicy:  &deletePolicy,
-	}); err != nil {
+	_, err := s.argoWorkflowsClient.DeleteWorkflow(s.argoClientCtx, &workflowpkg.WorkflowDeleteRequest{
+		Name:      workflow.Name,
+		Namespace: s.workflowNamespace,
+		DeleteOptions: &metav1.DeleteOptions{
+			GracePeriodSeconds: &gracePeriod,
+			PropagationPolicy:  &deletePolicy,
+		},
+	})
+	if err != nil {
 		log.Printf("[ERROR] failed to delete workflow %q: %v", workflow.Name, err)
 		return err
 	}
@@ -503,7 +550,9 @@ func (s *clusterImpl) ForceDeleteWorkflow(workflow v1alpha1.Workflow) error {
 
 func (s *clusterImpl) cleanupExpiredClusters() {
 	for ; ; time.Sleep(resumeExpiredClusterInterval) {
-		workflowList, err := s.clientWorkflows.List(metav1.ListOptions{})
+		workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
+			Namespace: s.workflowNamespace,
+		})
 		if err != nil {
 			log.Printf("[ERROR] failed to list workflows: %v", err)
 			continue
@@ -512,7 +561,7 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 		for _, workflow := range workflowList.Items {
 			metacluster, err := s.metaClusterFromWorkflow(workflow)
 			if err != nil {
-				log.Printf("failed to convert workflow to meta-cluster: %v", err)
+				log.Printf("failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
 				continue
 			}
 
@@ -524,11 +573,12 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 				continue
 			}
 
-			// ResumeWorkflow resumes a workflow by setting spec.suspend to nil and any suspended
-			// nodes to Successful. Retries conflict errors.
-			// https://github.com/argoproj/argo/blob/master/workflow/util/util.go#L348
-			log.Printf("resuming workflow %q", metacluster.ID)
-			if err := util.ResumeWorkflow(s.clientWorkflows, nil, metacluster.ID, ""); err != nil {
+			log.Printf("expiring workflow %q via resume", metacluster.ID)
+			_, err = s.argoWorkflowsClient.ResumeWorkflow(s.argoClientCtx, &workflowpkg.WorkflowResumeRequest{
+				Name:      metacluster.ID,
+				Namespace: s.workflowNamespace,
+			})
+			if err != nil {
 				log.Printf("[ERROR] failed to resume workflow %q: %v", metacluster.ID, err)
 			}
 		}
@@ -550,7 +600,9 @@ func (s *clusterImpl) startCalendarCheck() {
 		}
 
 		// List out all of the current workflows.
-		workflowList, err := s.clientWorkflows.List(metav1.ListOptions{})
+		workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
+			Namespace: s.workflowNamespace,
+		})
 		if err != nil {
 			log.Printf("[ERROR] failed to list workflows: %v", err)
 			continue
@@ -562,7 +614,7 @@ func (s *clusterImpl) startCalendarCheck() {
 		for _, workflow := range workflowList.Items {
 			metacluster, err := s.metaClusterFromWorkflow(workflow)
 			if err != nil {
-				log.Printf("failed to convert workflow to meta-cluster: %v", err)
+				log.Printf("failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
 				continue
 			}
 
@@ -609,7 +661,7 @@ func (s *clusterImpl) createFromEvent(event calendar.Event) (*v1.ResourceByID, e
 	return s.create(req, event.Email, event.ID)
 }
 
-func (s *clusterImpl) getLogs(node v1alpha1.NodeStatus) *v1.Log {
+func (s *clusterImpl) getLogs(ctx context.Context, node v1alpha1.NodeStatus) *v1.Log {
 	var body []byte
 	started, _ := ptypes.TimestampProto(node.StartedAt.UTC())
 	log := &v1.Log{
@@ -619,11 +671,11 @@ func (s *clusterImpl) getLogs(node v1alpha1.NodeStatus) *v1.Log {
 		Message: node.Message,
 	}
 
-	stream, err := s.clientPods.GetLogs(node.ID, &corev1.PodLogOptions{
+	stream, err := s.k8sPodsClient.GetLogs(node.ID, &corev1.PodLogOptions{
 		Container:  "main",
 		Follow:     false,
 		Timestamps: true,
-	}).Stream()
+	}).Stream(ctx)
 	if err != nil {
 		log.Body = []byte(err.Error())
 		return log
@@ -641,7 +693,9 @@ func (s *clusterImpl) getLogs(node v1alpha1.NodeStatus) *v1.Log {
 
 func (s *clusterImpl) startSlackCheck() {
 	for ; ; time.Sleep(slackCheckInterval) {
-		workflowList, err := s.clientWorkflows.List(metav1.ListOptions{})
+		workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
+			Namespace: s.workflowNamespace,
+		})
 		if err != nil {
 			log.Printf("[ERROR] failed to list workflows: %v", err)
 			continue
@@ -656,7 +710,7 @@ func (s *clusterImpl) startSlackCheck() {
 func (s *clusterImpl) slackCheckWorkflow(workflow v1alpha1.Workflow) {
 	metacluster, err := s.metaClusterFromWorkflow(workflow)
 	if err != nil {
-		log.Printf("failed to convert workflow to meta-cluster: %v", err)
+		log.Printf("failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
 		return
 	}
 
@@ -695,7 +749,7 @@ func (s *clusterImpl) slackCheckWorkflow(workflow v1alpha1.Workflow) {
 		}
 
 		// Submit the patch.
-		_, err = s.clientWorkflows.Patch(metacluster.Cluster.ID, types.JSONPatchType, payloadBytes)
+		_, err = s.k8sWorkflowsClient.Patch(context.Background(), metacluster.Cluster.ID, types.JSONPatchType, payloadBytes, metav1.PatchOptions{})
 		if err != nil {
 			log.Printf("failed to patch Slack annotation for cluster %s: %v", metacluster.Cluster.ID, err)
 			return
@@ -763,9 +817,11 @@ func checkAndEnrichParameters(flavorParams map[string]*v1.Parameter, requestPara
 			value = requestValue
 		}
 
+		anyString := v1alpha1.ParseAnyString(value)
+
 		allParams = append(allParams, v1alpha1.Parameter{
 			Name:  flavorParamName,
-			Value: proto.String(value),
+			Value: &anyString,
 		})
 	}
 

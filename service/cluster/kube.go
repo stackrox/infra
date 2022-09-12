@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
-	"github.com/argoproj/argo/pkg/client/clientset/versioned"
-	workflowv1 "github.com/argoproj/argo/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
+	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
+	"github.com/argoproj/argo-workflows/v3/pkg/client/clientset/versioned"
+	workflowv1 "github.com/argoproj/argo-workflows/v3/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"k8s.io/client-go/kubernetes"
 	k8sv1 "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -35,7 +35,7 @@ func restConfig() (*rest.Config, error) {
 	return rest.InClusterConfig()
 }
 
-func workflowClient() (workflowv1.WorkflowInterface, error) {
+func getK8sWorkflowsClient(workflowNamespace string) (workflowv1.WorkflowInterface, error) {
 	config, err := restConfig()
 	if err != nil {
 		return nil, err
@@ -46,10 +46,10 @@ func workflowClient() (workflowv1.WorkflowInterface, error) {
 		return nil, err
 	}
 
-	return client.ArgoprojV1alpha1().Workflows("default"), nil
+	return client.ArgoprojV1alpha1().Workflows(workflowNamespace), nil
 }
 
-func podsClient() (k8sv1.PodInterface, error) {
+func getK8sPodsClient(workflowNamespace string) (k8sv1.PodInterface, error) {
 	config, err := restConfig()
 	if err != nil {
 		return nil, err
@@ -60,25 +60,25 @@ func podsClient() (k8sv1.PodInterface, error) {
 		return nil, err
 	}
 
-	return client.CoreV1().Pods("default"), nil
+	return client.CoreV1().Pods(workflowNamespace), nil
 }
 
 func workflowStatus(workflowStatus v1alpha1.WorkflowStatus) v1.Status {
-	// https://godoc.org/github.com/argoproj/argo/pkg/apis/workflow/v1alpha1#WorkflowStatus
+	// https://godoc.org/github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1#WorkflowStatus
 	switch workflowStatus.Phase {
-	case v1alpha1.NodeFailed, v1alpha1.NodeError, v1alpha1.NodeSkipped:
+	case v1alpha1.WorkflowFailed, v1alpha1.WorkflowError:
 		return v1.Status_FAILED
 
-	case v1alpha1.NodeSucceeded:
+	case v1alpha1.WorkflowSucceeded:
 		return v1.Status_FINISHED
 
-	case v1alpha1.NodePending:
+	case v1alpha1.WorkflowPending:
 		return v1.Status_CREATING
 
-	case v1alpha1.NodeRunning:
-		// https://godoc.org/github.com/argoproj/argo/pkg/apis/workflow/v1alpha1#Nodes
+	case v1alpha1.WorkflowRunning:
+		// https://godoc.org/github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1#Nodes
 		for _, node := range workflowStatus.Nodes {
-			// https://godoc.org/github.com/argoproj/argo/pkg/apis/workflow/v1alpha1#NodeType
+			// https://godoc.org/github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1#NodeType
 			if node.Type == v1alpha1.NodeTypePod {
 				if strings.Contains(node.Message, "ImagePullBackOff") {
 					return v1.Status_FAILED
@@ -115,7 +115,7 @@ func workflowStatus(workflowStatus v1alpha1.WorkflowStatus) v1.Status {
 // Intended to provide failure details to a user via slack post.
 func workflowFailureDetails(workflowStatus v1alpha1.WorkflowStatus) error {
 	switch workflowStatus.Phase {
-	case v1alpha1.NodeRunning, v1alpha1.NodeFailed:
+	case v1alpha1.WorkflowRunning, v1alpha1.WorkflowFailed:
 		for _, node := range workflowStatus.Nodes {
 			if node.Type == v1alpha1.NodeTypePod {
 				if strings.Contains(node.Message, "ImagePullBackOff") {
