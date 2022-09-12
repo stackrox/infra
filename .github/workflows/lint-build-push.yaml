@@ -1,0 +1,37 @@
+name: Lint, Build, Push
+
+on:
+  pull_request:
+    types:
+    - opened
+    - synchronize
+  create:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
+
+jobs:
+
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Build
+        run: make image
+
+      - name: Login
+        env:
+          INFRA_IMAGE_PUSH: ${{ secrets.INFRA_IMAGE_PUSH }}
+        run: docker login -u _json_key --password-stdin <<<"$INFRA_IMAGE_PUSH" https://us.gcr.io
+
+      - name: Push
+        run: make push | cat
+
+      - name: Logout
+        run: |
+          docker logout https://us.gcr.io
