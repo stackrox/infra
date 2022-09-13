@@ -93,6 +93,7 @@ endif
 $(protoc):
 	@echo "+ $@"
 	@echo "Installing protoc $(protoc-version) to $(protoc)"
+	@mkdir -p $(GOPATH)/bin
 	@wget -q $(PROTOC_ZIP) -O /tmp/protoc.zip
 	@unzip -o -q -d /tmp /tmp/protoc.zip bin/protoc
 	@install /tmp/bin/protoc $(protoc)
@@ -129,7 +130,7 @@ PROTO_OUTPUT_DIR  = generated/api/v1
 # - Go gRPC-Gateway bindings
 # - JSON Swagger definitions file
 .PHONY: proto-generated-srcs
-proto-generated-srcs:
+proto-generated-srcs: protoc-tools
 	@echo "+ $@"
 	@mkdir -p $(PROTO_OUTPUT_DIR)
 	# Generate gRPC bindings
