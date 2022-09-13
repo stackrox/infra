@@ -24,6 +24,11 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           path: go/src/github.com/stackrox/infra
 
+      - name: Get NPM package access
+        env:
+          GITHUB_TOKEN: ${{ secrets.ROBOT_ROX_GITHUB_TOKEN }}
+        run: echo "//npm.pkg.github.com/:_authToken=\"$GITHUB_TOKEN\"" > ~/.npmrc
+
       - name: Build
         run: |
           GOPATH="$(pwd)/go"
@@ -31,7 +36,7 @@ jobs:
           cd "$GOPATH/src/github.com/stackrox/infra"
           make image
 
-      - name: Login
+      - name: Login for image push
         env:
           INFRA_IMAGE_PUSH: ${{ secrets.INFRA_IMAGE_PUSH }}
         run: docker login -u _json_key --password-stdin <<<"$INFRA_IMAGE_PUSH" https://us.gcr.io
