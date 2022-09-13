@@ -1,5 +1,5 @@
 {{ if ne .Values.deployment "local" -}}
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 
 metadata:
@@ -11,7 +11,9 @@ metadata:
     kubernetes.io/ingress.global-static-ip-name: {{ .Values.reservedAddressName }}
     networking.gke.io/managed-certificates: "infra-server-certificate"
 spec:
-  backend:
-    serviceName: infra-server-service
-    servicePort: 8443
+  defaultBackend:
+    service:
+      name: infra-server-service
+      port:
+        number: 8443
 {{ end }}

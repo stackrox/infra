@@ -143,7 +143,8 @@ func handleArtifactMigration(workflow v1alpha1.Workflow, artifact v1alpha1.Artif
 	var bucket string
 	var key string
 
-	if workflow.Status.ArtifactRepositoryRef.ArtifactRepository.GCS != nil &&
+	if workflow.Status.ArtifactRepositoryRef != nil &&
+		workflow.Status.ArtifactRepositoryRef.ArtifactRepository.GCS != nil &&
 		workflow.Status.ArtifactRepositoryRef.ArtifactRepository.GCS.Bucket != "" {
 		bucket = workflow.Status.ArtifactRepositoryRef.ArtifactRepository.GCS.Bucket
 	} else if artifact.GCS != nil && artifact.GCS.Bucket != "" {
@@ -157,7 +158,7 @@ func handleArtifactMigration(workflow v1alpha1.Workflow, artifact v1alpha1.Artif
 	if bucket == "" || key == "" {
 		log.Printf("[WARN] Cannot figure out bucket for artifact, possibly an upgrade issue, not fatal (workflow: %q)", workflow.Name)
 		log.Printf("Artifact: %v\n", artifact)
-		log.Printf("ArtifactRepository: %v\n", workflow.Status.ArtifactRepositoryRef.ArtifactRepository)
+		log.Printf("ArtifactRepository: %v\n", workflow.Status.ArtifactRepositoryRef)
 		return "", ""
 	}
 
