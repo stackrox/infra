@@ -31,9 +31,10 @@ jobs:
           env | grep GO || true
           env | grep HOME || true
           ls
-          set +x
-          GOPATH="$HOME/go"
+          ls "$GOPATH/src/github.com/stackrox/infra"
+          GOPATH="$(pwd)/go"
           cd "$GOPATH/src/github.com/stackrox/infra"
+          set +x
           make image
 
       - name: Login
