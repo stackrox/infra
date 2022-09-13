@@ -26,15 +26,8 @@ jobs:
 
       - name: Build
         run: |
-          set -x
-          pwd
-          env | grep GO || true
-          env | grep HOME || true
-          ls
           GOPATH="$(pwd)/go"
-          ls "$GOPATH/src/github.com/stackrox/infra"
           cd "$GOPATH/src/github.com/stackrox/infra"
-          set +x
           make image
 
       - name: Login
@@ -44,7 +37,7 @@ jobs:
 
       - name: Push
         run: |
-          GOPATH="$HOME/go"
+          GOPATH="$(pwd)/go"
           cd "$GOPATH/src/github.com/stackrox/infra"
           make push | cat
 

@@ -129,7 +129,7 @@ PROTO_OUTPUT_DIR  = generated/api/v1
 # - Go gRPC-Gateway bindings
 # - JSON Swagger definitions file
 .PHONY: proto-generated-srcs
-proto-generated-srcs: protoc-tools
+proto-generated-srcs:
 	@echo "+ $@"
 	@mkdir -p $(PROTO_OUTPUT_DIR)
 	# Generate gRPC bindings
