@@ -25,7 +25,12 @@ jobs:
           path: go/src/github.com/stackrox/infra
 
       - name: Build
-        run: make image
+        run: |
+          pwd
+          env | grep GO || true
+          GOPATH="$HOME/go"
+          cd "$GOPATH/src/github.com/stackrox/infra"
+          make image
 
       - name: Login
         env:
