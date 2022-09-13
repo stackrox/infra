@@ -45,7 +45,7 @@ jobs:
         run: |
           GOPATH="$(pwd)/go"
           cd "$GOPATH/src/github.com/stackrox/infra"
-          make push | cat
+          make push
 
       - name: Logout
         run: |

@@ -168,7 +168,7 @@ configuration-upload:
 	gsutil -m cp -R chart/infra-server/configuration "gs://infra-configuration/latest/"
 
 .PHONY: push
-push: image
+push:
 	docker push us.gcr.io/stackrox-infra/infra-server:$(TAG) | cat
 
 .PHONY: clean-render
