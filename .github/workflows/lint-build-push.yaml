@@ -31,8 +31,8 @@ jobs:
           env | grep GO || true
           env | grep HOME || true
           ls
-          ls "$GOPATH/src/github.com/stackrox/infra"
           GOPATH="$(pwd)/go"
+          ls "$GOPATH/src/github.com/stackrox/infra"
           cd "$GOPATH/src/github.com/stackrox/infra"
           set +x
           make image
