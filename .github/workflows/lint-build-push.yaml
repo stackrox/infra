@@ -27,6 +27,7 @@ jobs:
       - name: Build
         run: |
           GOPATH="$(pwd)/go"
+          PATH="${PATH}:${GOPATH}"
           cd "$GOPATH/src/github.com/stackrox/infra"
           make image
 
