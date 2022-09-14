@@ -42,11 +42,15 @@ jobs:
 
       - name: Generate src
         run: |
+          GOPATH="$(pwd)/go"
+          PATH="${PATH}:${GOPATH}/bin"
           cd "$GOPATH/src/github.com/stackrox/infra"
           make proto-generated-srcs
 
       - name: Lint
         run: |
+          GOPATH="$(pwd)/go"
+          PATH="${PATH}:${GOPATH}/bin"
           cd "$GOPATH/src/github.com/stackrox/infra"
           golangci-lint run
 
