@@ -42,6 +42,7 @@ jobs:
 
       - name: Generate src
         run: |
+          pwd
           GOPATH="$(pwd)/go"
           PATH="${PATH}:${GOPATH}/bin"
           cd "$GOPATH/src/github.com/stackrox/infra"
@@ -49,6 +50,7 @@ jobs:
 
       - name: Lint
         run: |
+          pwd
           GOPATH="$(pwd)/go"
           PATH="${PATH}:${GOPATH}/bin"
           cd "$GOPATH/src/github.com/stackrox/infra"
