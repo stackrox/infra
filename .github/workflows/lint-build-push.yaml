@@ -11,17 +11,6 @@ on:
 
 jobs:
 
-  lint:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/setup-go@v3
-        with:
-          go-version: 1.16
-      - uses: actions/checkout@v3
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
-
   build-and-push:
     runs-on: ubuntu-latest
     container:
@@ -39,6 +28,27 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.ROBOT_ROX_GITHUB_TOKEN }}
         run: echo "//npm.pkg.github.com/:_authToken=\"$GITHUB_TOKEN\"" > ~/.npmrc
+
+      - name: Install golangci-lint 1.33.0
+        run: |
+          cd /tmp
+          wget -q https://github.com/golangci/golangci-lint/releases/download/v1.33.0/golangci-lint-1.33.0-linux-amd64.tar.gz
+          tar -xf golangci-lint-1.33.0-linux-amd64.tar.gz
+          GOPATH="$(pwd)/go"
+          PATH="${PATH}:${GOPATH}/bin"
+          mkdir -p "${GOPATH}/bin"
+          install golangci-lint-1.33.0-linux-amd64/golangci-lint "${GOPATH}/bin/golangci-lint"
+          golangci-lint version
+
+      - name: Generate src
+        run: |
+          cd "$GOPATH/src/github.com/stackrox/infra"
+          make proto-generated-srcs
+
+      - name: Lint
+        run: |
+          cd "$GOPATH/src/github.com/stackrox/infra"
+          golangci-lint run
 
       - name: Build
         run: |
