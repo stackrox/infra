@@ -37,7 +37,7 @@ jobs:
           echo PATH="${PATH}" >> $GITHUB_ENV
 
       - name: Cache Go dependencies
-        uses: ./.github/actions/cache-go-dependencies
+        uses: go/src/github.com/stackrox/infra/.github/actions/cache-go-dependencies
 
       - name: Install golangci-lint 1.33.0
         run: |
