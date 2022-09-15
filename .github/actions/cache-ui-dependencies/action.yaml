@@ -9,7 +9,7 @@ runs:
   using: composite
   steps:
     - name: Cache UI Dependencies
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |
           ui/deps
@@ -22,3 +22,4 @@ runs:
         key: npm-v2-${{ hashFiles(inputs.lockFile) }}
         restore-keys: |
           npm-v2-
+        working-directory: go/src/github.com/stackrox/infra
