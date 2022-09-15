@@ -31,18 +31,17 @@ jobs:
 
       - name: Install golangci-lint 1.33.0
         run: |
-          cd /tmp
-          wget -q https://github.com/golangci/golangci-lint/releases/download/v1.33.0/golangci-lint-1.33.0-linux-amd64.tar.gz
-          tar -xf golangci-lint-1.33.0-linux-amd64.tar.gz
           GOPATH="$(pwd)/go"
           PATH="${PATH}:${GOPATH}/bin"
           mkdir -p "${GOPATH}/bin"
+          cd /tmp
+          wget -q https://github.com/golangci/golangci-lint/releases/download/v1.33.0/golangci-lint-1.33.0-linux-amd64.tar.gz
+          tar -xf golangci-lint-1.33.0-linux-amd64.tar.gz
           install golangci-lint-1.33.0-linux-amd64/golangci-lint "${GOPATH}/bin/golangci-lint"
           golangci-lint version
 
       - name: Generate src
         run: |
-          pwd
           GOPATH="$(pwd)/go"
           PATH="${PATH}:${GOPATH}/bin"
           cd "$GOPATH/src/github.com/stackrox/infra"
@@ -50,7 +49,6 @@ jobs:
 
       - name: Lint
         run: |
-          pwd
           GOPATH="$(pwd)/go"
           PATH="${PATH}:${GOPATH}/bin"
           cd "$GOPATH/src/github.com/stackrox/infra"
