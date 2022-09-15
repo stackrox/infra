@@ -14,7 +14,7 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     container:
-      image: quay.io/stackrox-io/apollo-ci:stackrox-build-0.3.46
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.46
 
     steps:
       - name: Checkout
