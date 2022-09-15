@@ -46,7 +46,7 @@ func isNearingExpiry(workflow v1alpha1.Workflow) bool {
 	return time.Now().Add(nearExpiry).After(workflowExpiryTime)
 }
 
-type metaCluster struct{
+type metaCluster struct {
 	v1.Cluster
 
 	EventID       string
