@@ -15,7 +15,7 @@ defaults:
 
 jobs:
 
-  build-and-push:
+  lint:
     runs-on: ubuntu-latest
     container:
       image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.46
@@ -27,16 +27,6 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
           path: go/src/github.com/stackrox/infra
-
-      - name: Debug
-        run: |
-          pwd
-          ls -l
-
-      - name: Get NPM package access
-        env:
-          GITHUB_TOKEN: ${{ secrets.ROBOT_ROX_GITHUB_TOKEN }}
-        run: echo "//npm.pkg.github.com/:_authToken=\"$GITHUB_TOKEN\"" > ~/.npmrc
 
       - name: Setup env
         run: |
@@ -63,6 +53,38 @@ jobs:
       - name: Lint
         run: |
           golangci-lint run
+
+  build-and-push:
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.46
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: go/src/github.com/stackrox/infra
+
+      - name: Get NPM package access
+        env:
+          GITHUB_TOKEN: ${{ secrets.ROBOT_ROX_GITHUB_TOKEN }}
+        run: echo "//npm.pkg.github.com/:_authToken=\"$GITHUB_TOKEN\"" > ~/.npmrc
+
+      - name: Setup env
+        run: |
+          GOPATH="$GITHUB_WORKSPACE/go"
+          echo GOPATH="${GOPATH}" >> $GITHUB_ENV
+          PATH="${PATH}:${GOPATH}/bin"
+          echo PATH="${PATH}" >> $GITHUB_ENV
+
+      - name: Cache Go dependencies
+        uses: ./go/src/github.com/stackrox/infra/.github/actions/cache-go-dependencies
+
+      - name: Generate src
+        run: |
+          make proto-generated-srcs
 
       - name: Build
         run: |
