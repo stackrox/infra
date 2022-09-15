@@ -36,10 +36,11 @@ jobs:
           PATH="${PATH}:${GOPATH}/bin"
           echo PATH="${PATH}" >> $GITHUB_ENV
 
+      - name: Cache Go dependencies
+        uses: ./.github/actions/cache-go-dependencies
+
       - name: Install golangci-lint 1.33.0
         run: |
-          echo $PATH
-          echo $GOPATH
           mkdir -p "${GOPATH}/bin"
           wget -q https://github.com/golangci/golangci-lint/releases/download/v1.33.0/golangci-lint-1.33.0-linux-amd64.tar.gz
           tar -xf golangci-lint-1.33.0-linux-amd64.tar.gz
@@ -48,22 +49,16 @@ jobs:
 
       - name: Generate src
         run: |
-          GOPATH="$(pwd)/go"
-          PATH="${PATH}:${GOPATH}/bin"
           cd "$GOPATH/src/github.com/stackrox/infra"
           make proto-generated-srcs
 
       - name: Lint
         run: |
-          GOPATH="$(pwd)/go"
-          PATH="${PATH}:${GOPATH}/bin"
           cd "$GOPATH/src/github.com/stackrox/infra"
           golangci-lint run
 
       - name: Build
         run: |
-          GOPATH="$(pwd)/go"
-          PATH="${PATH}:${GOPATH}/bin"
           cd "$GOPATH/src/github.com/stackrox/infra"
           make image
 
@@ -74,7 +69,6 @@ jobs:
 
       - name: Push
         run: |
-          GOPATH="$(pwd)/go"
           cd "$GOPATH/src/github.com/stackrox/infra"
           make push
 
