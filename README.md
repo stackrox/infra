@@ -24,7 +24,9 @@ To compile a server and client binary, run:
 
 ### Building or pushing images
 
-To build or push an infra server Docker image, run:
+GitHub Actions will build and push the infra-server image based on `make tag` of
+the most recent commit. Or you can build and push locally if you have the
+correct tooling installed with:
 
 `make image` or `make push`
 
