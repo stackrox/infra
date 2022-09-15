@@ -152,7 +152,7 @@ GitHub Actions will build and push the infra-server image based on `make tag` of
 the most recent commit. Or you can build and push locally if you have the
 correct tooling installed with:
 
-`make push`
+`make image push`
 
 ### Development
 
