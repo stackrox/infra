@@ -29,12 +29,18 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.ROBOT_ROX_GITHUB_TOKEN }}
         run: echo "//npm.pkg.github.com/:_authToken=\"$GITHUB_TOKEN\"" > ~/.npmrc
 
+      - name: Setup env
+        run: |
+          GOPATH="$GITHUB_WORKSPACE/go"
+          echo GOPATH="${GOPATH}" >> $GITHUB_ENV
+          PATH="${PATH}:${GOPATH}/bin"
+          echo PATH="${PATH}" >> $GITHUB_ENV
+
       - name: Install golangci-lint 1.33.0
         run: |
-          GOPATH="$(pwd)/go"
-          PATH="${PATH}:${GOPATH}/bin"
+          echo $PATH
+          echo $GOPATH
           mkdir -p "${GOPATH}/bin"
-          cd /tmp
           wget -q https://github.com/golangci/golangci-lint/releases/download/v1.33.0/golangci-lint-1.33.0-linux-amd64.tar.gz
           tar -xf golangci-lint-1.33.0-linux-amd64.tar.gz
           install golangci-lint-1.33.0-linux-amd64/golangci-lint "${GOPATH}/bin/golangci-lint"
