@@ -148,9 +148,11 @@ new tag &mdash; the next step is to deploy to target environments.
 
 Deployments consist of an installation of Argo, as well as the various service/flavor components.
 
-To build and push an image, run:
+GitHub Actions will build and push the infra-server image based on `make tag` of
+the most recent commit. Or you can build and push locally if you have the
+correct tooling installed with:
 
-`make push`
+`make image push`
 
 ### Development
 

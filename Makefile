@@ -3,7 +3,7 @@ export GO111MODULE=on
 .PHONY: all
 all: image
 
-TAG=$(shell git describe --tags)
+TAG=$(shell git describe --tags --abbrev=10 --dirty --long)
 .PHONY: tag
 tag:
 	@echo $(TAG)
@@ -93,6 +93,7 @@ endif
 $(protoc):
 	@echo "+ $@"
 	@echo "Installing protoc $(protoc-version) to $(protoc)"
+	@mkdir -p $(GOPATH)/bin
 	@wget -q $(PROTOC_ZIP) -O /tmp/protoc.zip
 	@unzip -o -q -d /tmp /tmp/protoc.zip bin/protoc
 	@install /tmp/bin/protoc $(protoc)
@@ -167,7 +168,7 @@ configuration-upload:
 	gsutil -m cp -R chart/infra-server/configuration "gs://infra-configuration/latest/"
 
 .PHONY: push
-push: image
+push:
 	docker push us.gcr.io/stackrox-infra/infra-server:$(TAG) | cat
 
 .PHONY: clean-render
