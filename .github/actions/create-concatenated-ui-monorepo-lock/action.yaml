@@ -4,7 +4,7 @@ inputs:
   lockFile: 
     description: Where the lockfile is written
     required: true
-    default: "go/src/github.com/stackrox/infra/ui/monorepo.lock"
+    default: "ui/monorepo.lock"
 runs:
   using: composite
   steps:
