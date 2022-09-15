@@ -38,6 +38,12 @@ jobs:
       - name: Cache Go dependencies
         uses: ./go/src/github.com/stackrox/infra/.github/actions/cache-go-dependencies
 
+      - name: Create UI cache lock
+        uses: ./go/src/github.com/stackrox/infra/.github/actions/create-concatenated-ui-monorepo-lock
+
+      - name: Cache UI dependencies
+        uses: ./go/src/github.com/stackrox/infra/.github/actions/cache-ui-dependencies
+
       - name: Install golangci-lint 1.33.0
         run: |
           mkdir -p "${GOPATH}/bin"
