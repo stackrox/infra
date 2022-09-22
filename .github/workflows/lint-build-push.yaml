@@ -30,6 +30,7 @@ jobs:
 
       - name: Setup env
         run: |
+          sudo apt-get install protobuf-compiler -y
           GOPATH="$GITHUB_WORKSPACE/go"
           echo GOPATH="${GOPATH}" >> $GITHUB_ENV
           PATH="${PATH}:${GOPATH}/bin"

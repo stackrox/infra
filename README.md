@@ -10,6 +10,22 @@
 
 Infra (the server) and infractl (the cli) are written in Go, and use gRPC for client-server communication.
 
+### Dependencies
+
+The protobuf compiler is required to generate required Go code.
+
+For macOS:
+
+`brew install protobuf`
+
+For Red Hat-based Linux distributions:
+
+`dnf install protobuf-compiler`
+
+For all operating systems, you can download a pre-built binary from the official protobuf project's release page:
+
+https://github.com/protocolbuffers/protobuf/releases
+
 ### Regenerate Go bindings from protos
 
 To regenerate the Go proto bindings, run:
