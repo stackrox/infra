@@ -9,9 +9,12 @@ import (
 	v1 "github.com/stackrox/infra/generated/api/v1"
 )
 
-type prettyCluster v1.Cluster
+type prettyCluster struct {
+	*v1.Cluster
+}
 
-func (p prettyCluster) PrettyPrint() {
+func (p *prettyCluster) PrettyPrint() {
+	//p := *pc
 	var (
 		createdOn, _   = ptypes.Timestamp(p.CreatedOn)
 		lifespan, _    = ptypes.Duration(p.Lifespan)
