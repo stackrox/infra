@@ -419,11 +419,13 @@ func (s *clusterImpl) Artifacts(ctx context.Context, clusterID *v1.ResourceByID)
 					return nil, err
 				}
 
+				fmt.Printf("Artifact mode %s: %v", artifact.Name, artifact.Mode)
+
 				resp.Artifacts = append(resp.Artifacts, &v1.Artifact{
 					Name:        artifact.Name,
 					Description: description,
 					URL:         url,
-					Mode:        *artifact.Mode,
+					// Mode:        *artifact.Mode,
 				})
 			}
 		}
