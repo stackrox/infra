@@ -423,6 +423,7 @@ func (s *clusterImpl) Artifacts(ctx context.Context, clusterID *v1.ResourceByID)
 					Name:        artifact.Name,
 					Description: description,
 					URL:         url,
+					Mode:        *artifact.Mode,
 				})
 			}
 		}
