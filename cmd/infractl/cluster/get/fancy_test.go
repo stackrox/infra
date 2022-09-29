@@ -1,3 +1,6 @@
+//go:build integration
+// +build integration
+
 package get_test
 
 import (
@@ -12,6 +15,12 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"math/big"
+	"net"
+	"os"
+	"testing"
+	"time"
+
 	"github.com/golang/protobuf/ptypes"
 	durationpb "github.com/golang/protobuf/ptypes/duration"
 	"github.com/spf13/cobra"
@@ -23,11 +32,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"math/big"
-	"net"
-	"os"
-	"testing"
-	"time"
 )
 
 type FakeClusterServiceClient struct {
@@ -134,7 +138,6 @@ func generateTLSCertification() (tls.Certificate, error) {
 	if err := pem.Encode(keyPEM, &pem.Block{Type: "EC PRIVATE KEY", Bytes: b}); err != nil {
 		return tls.Certificate{}, err
 	}
-	fmt.Println(keyPEM.String())
 
 	return tls.X509KeyPair(certPEM.Bytes(), keyPEM.Bytes())
 }
@@ -191,19 +194,21 @@ func TestGetClusterJSONOutput(t *testing.T) {
 	buf := new(bytes.Buffer)
 	cmd.SetOut(buf)
 	cmd.SetErr(buf)
+	err = cmd.Execute()
 	assert.NoError(t, err)
 
 	expected := `{
   "ID": "test-123",
-  "Status": 0,
+  "Status": "FAILED",
   "Flavor": "stable",
   "Owner": "me@redhat.com",
-  "CreatedOn": "2022-04-01T01:00:00Z",
-  "DestroyedOn": null,
-  "Lifespan": "10800s",
-  "Description": "My test cluster",
-  "URL": "",
-  "Connect": ""
+  "CreatedOn": {
+    "seconds": "1648774800"
+  },
+  "Lifespan": {
+    "seconds": "10800"
+  },
+  "Description": "My test cluster"
 }
 `
 	assert.Equal(t, expected, buf.String())

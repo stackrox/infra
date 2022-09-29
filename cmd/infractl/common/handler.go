@@ -1,12 +1,10 @@
 package common
 
 import (
-	"bytes"
 	"context"
-	"github.com/golang/protobuf/jsonpb"
+
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/runtime/protoiface"
 )
 
 // PrettyPrinter represents a type that knows how to render itself in a pretty,
@@ -14,8 +12,8 @@ import (
 type PrettyPrinter interface {
 	// PrettyPrint renders this type in a pretty, human-readable fashion to
 	// STDOUT.
-	PrettyPrint()
-	protoiface.MessageV1
+	PrettyPrint(cmd *cobra.Command)
+	PrettyJSONPrint(cmd *cobra.Command) error
 }
 
 // GRPCHandler represents a function that consumes a gRPC connection, and
@@ -44,20 +42,11 @@ func WithGRPCHandler(handler GRPCHandler) func(cmd *cobra.Command, args []string
 
 		// The --json flag was passed, render result as json.
 		if jsonOutput() {
-			var b bytes.Buffer
-			// EmitDefaults needs to be true for 0 enum values to show up, e.g., cluster status
-			m := jsonpb.Marshaler{EnumsAsInts: true, EmitDefaults: true, Indent: "  ", OrigName: true}
-			if err := m.Marshal(&b, result); err != nil {
-				return err
-			}
-
-			// Print json body with a trailing newline.
-			cmd.Printf("%s\n", b.String())
-			return nil
+			return result.PrettyJSONPrint(cmd)
 		}
 
 		// Pretty print result instead.
-		result.PrettyPrint()
+		result.PrettyPrint(cmd)
 		return nil
 	}
 }
