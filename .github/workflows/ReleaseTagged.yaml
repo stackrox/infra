@@ -12,7 +12,7 @@ defaults:
 jobs:
 
   lint:
-    uses: ./.github/workflows/lint.yml
+    uses: ./.github/workflows/lint.yaml
 
   build-and-push:
-    uses: ./.github/workflows/build-and-push.yml
+    uses: ./.github/workflows/build-and-push.yaml
