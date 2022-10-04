@@ -21,6 +21,9 @@ jobs:
 
   create-cluster:
     uses: stackrox/stackrox/.github/workflows/create-cluster.yml@master
+    with:
+      flavor: gke-default
+      name: infra-pr-${{ github.event.pull_request.number }}
 
   deploy:
     # needs:
