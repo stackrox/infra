@@ -20,10 +20,11 @@ jobs:
     secrets: inherit
 
   create-cluster:
-    uses: stackrox/stackrox/.github/workflows/create-cluster.yml@master
+    uses: stackrox/stackrox/.github/workflows/create-cluster.yml@gavin/RS-574/reuse-cluster-create
     with:
       flavor: gke-default
       name: infra-pr-${{ github.event.pull_request.number }}
+      direct_exec: true
     secrets: inherit
 
   deploy:
