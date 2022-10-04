@@ -1,4 +1,4 @@
-name: Lint, Build, Push
+name: Lint, Build, Push, Deploy
 
 on:
   pull_request:
@@ -108,3 +108,26 @@ jobs:
       - name: Logout
         run: |
           docker logout https://us.gcr.io
+
+  deploy:
+    needs:
+      - build-and-push
+    if: github.event.action == 'opened' || github.event.action == 'synchronize'
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.46
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: go/src/github.com/stackrox/infra
+
+      - name: Setup env
+        run: |
+          GOPATH="$GITHUB_WORKSPACE/go"
+          echo GOPATH="${GOPATH}" >> $GITHUB_ENV
+          PATH="${PATH}:${GOPATH}/bin"
+          echo PATH="${PATH}" >> $GITHUB_ENV
