@@ -10,6 +10,9 @@ defaults:
   run:
     working-directory: go/src/github.com/stackrox/infra
 
+env:
+  STACKROX_GHA_VERSION: test123
+
 jobs:
 
   lint:
@@ -48,3 +51,8 @@ jobs:
           echo GOPATH="${GOPATH}" >> $GITHUB_ENV
           PATH="${PATH}:${GOPATH}/bin"
           echo PATH="${PATH}" >> $GITHUB_ENV
+
+      - name: Env OK
+        run: |
+          echo "STACKROX_GHA_VERSION: $STACKROX_GHA_VERSION" || true
+          echo "env.STACKROX_GHA_VERSION: ${{ env.STACKROX_GHA_VERSION }}" || true
