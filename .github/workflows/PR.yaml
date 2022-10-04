@@ -19,6 +19,9 @@ jobs:
     uses: ./.github/workflows/build-and-push.yaml
     secrets: inherit
 
+  create-cluster:
+    uses: stackrox/stackrox/.github/workflows/create-cluster.yml
+
   deploy:
     # needs:
     #   - build-and-push
@@ -27,8 +30,6 @@ jobs:
       image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.46
 
     steps:
-      - uses: stackrox/stackrox/.github/workflows/create-cluster.yml
-
       - name: Checkout
         uses: actions/checkout@v3
         with:
