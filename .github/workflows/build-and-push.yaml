@@ -1,0 +1,65 @@
+name: Build & Push
+
+on:
+  workflow_call:
+
+defaults:
+  run:
+    working-directory: go/src/github.com/stackrox/infra
+
+jobs:
+
+  build-and-push:
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.46
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: go/src/github.com/stackrox/infra
+
+      - name: Get NPM package access
+        env:
+          GITHUB_TOKEN: ${{ secrets.ROBOT_ROX_GITHUB_TOKEN }}
+        run: echo "//npm.pkg.github.com/:_authToken=\"$GITHUB_TOKEN\"" > ~/.npmrc
+
+      - name: Setup env
+        run: |
+          GOPATH="$GITHUB_WORKSPACE/go"
+          echo GOPATH="${GOPATH}" >> $GITHUB_ENV
+          PATH="${PATH}:${GOPATH}/bin"
+          echo PATH="${PATH}" >> $GITHUB_ENV
+
+      - name: Cache Go dependencies
+        uses: ./go/src/github.com/stackrox/infra/.github/actions/cache-go-dependencies
+
+      - name: Create UI cache lock
+        uses: ./go/src/github.com/stackrox/infra/.github/actions/create-concatenated-ui-monorepo-lock
+
+      - name: Cache UI dependencies
+        uses: ./go/src/github.com/stackrox/infra/.github/actions/cache-ui-dependencies
+
+      - name: Generate src
+        run: |
+          make proto-generated-srcs
+
+      - name: Build
+        run: |
+          make image
+
+      - name: Login for image push
+        env:
+          INFRA_IMAGE_PUSH: ${{ secrets.INFRA_IMAGE_PUSH }}
+        run: docker login -u _json_key --password-stdin <<<"$INFRA_IMAGE_PUSH" https://us.gcr.io
+
+      - name: Push
+        run: |
+          make push
+
+      - name: Logout
+        run: |
+          docker logout https://us.gcr.io

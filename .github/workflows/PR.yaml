@@ -1,0 +1,41 @@
+name: PR Workflow
+
+on:
+  pull_request:
+    types:
+    - opened
+    - synchronize
+
+defaults:
+  run:
+    working-directory: go/src/github.com/stackrox/infra
+
+jobs:
+
+  lint:
+    uses: ./.github/workflows/lint.yml
+
+  build-and-push:
+    uses: ./.github/workflows/build-and-push.yml
+
+  deploy:
+    needs:
+      - build-and-push
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.46
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: go/src/github.com/stackrox/infra
+
+      - name: Setup env
+        run: |
+          GOPATH="$GITHUB_WORKSPACE/go"
+          echo GOPATH="${GOPATH}" >> $GITHUB_ENV
+          PATH="${PATH}:${GOPATH}/bin"
+          echo PATH="${PATH}" >> $GITHUB_ENV
