@@ -20,7 +20,7 @@ jobs:
     secrets: inherit
 
   create-cluster:
-    uses: stackrox/stackrox/.github/workflows/create-cluster.yml
+    uses: stackrox/stackrox/.github/workflows/create-cluster.yml@master
 
   deploy:
     # needs:
