@@ -10,9 +10,6 @@ defaults:
   run:
     working-directory: go/src/github.com/stackrox/infra
 
-env:
-  STACKROX_GHA_VERSION: test123
-
 jobs:
 
   lint:
@@ -28,6 +25,7 @@ jobs:
       flavor: gke-default
       name: infra-pr-${{ github.event.pull_request.number }}
       wait: true
+      STACKROX_GHA_VERSION: gavin/RS-574/reuse-cluster-create
     secrets: inherit
 
   deploy:
@@ -51,8 +49,3 @@ jobs:
           echo GOPATH="${GOPATH}" >> $GITHUB_ENV
           PATH="${PATH}:${GOPATH}/bin"
           echo PATH="${PATH}" >> $GITHUB_ENV
-
-      - name: Env OK
-        run: |
-          echo "STACKROX_GHA_VERSION: $STACKROX_GHA_VERSION" || true
-          echo "env.STACKROX_GHA_VERSION: ${{ env.STACKROX_GHA_VERSION }}" || true
