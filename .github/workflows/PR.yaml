@@ -19,13 +19,15 @@ jobs:
     uses: ./.github/workflows/build-and-push.yaml
 
   deploy:
-    needs:
-      - build-and-push
+    # needs:
+    #   - build-and-push
     runs-on: ubuntu-latest
     container:
       image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.46
 
     steps:
+      - uses: stackrox/stackrox/.github/workflows/create-cluster.yml
+
       - name: Checkout
         uses: actions/checkout@v3
         with:
