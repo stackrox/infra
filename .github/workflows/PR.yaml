@@ -24,6 +24,7 @@ jobs:
     with:
       flavor: gke-default
       name: infra-pr-${{ github.event.pull_request.number }}
+    secrets: inherit
 
   deploy:
     # needs:
