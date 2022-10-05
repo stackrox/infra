@@ -177,6 +177,11 @@ clean-render:
 
 .PHONY: render-local
 render-local: clean-render
+	@if [[ ! -e chart/infra-server/configuration ]]; then \
+		echo chart/infra-server/configuration is absent. Try:; \
+		echo make configuration-download; \
+		exit 1; \
+	fi
 	@mkdir -p chart-rendered
 	helm template chart/infra-server \
 	    --output-dir chart-rendered \
@@ -308,3 +313,16 @@ update-version:
 	@perl -p -i -e 's#image: (${image_regex}):(.*)#image: \1:${image_version}#g' \
 		./chart/infra-server/static/*.yaml
 	@git diff --name-status ./chart/infra-server/static/*.yaml
+
+# Assuming a local dev infra server is running and accessible via a port-forward
+# i.e. nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
+.PHONY: pull-infractl-from-dev-server
+pull-infractl-from-dev-server:
+	@rm -f bin/infractl
+	set -o pipefail; \
+	curl --retry 3 --insecure --silent --show-error --fail --location https://localhost:8443/v1/cli/linux/amd64/upgrade \
+          | jq -r ".result.fileChunk" \
+          | base64 -d \
+          > bin/infractl
+	chmod +x bin/infractl
+	bin/infractl -k -e localhost:8443 version

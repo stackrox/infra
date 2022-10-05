@@ -23,13 +23,17 @@ You can connect to this cluster with:
 gcloud container clusters get-credentials {{.Env.DEV_CLUSTER_NAME}} --zone us-central1-a --project srox-temp-dev-test
 \`\`\`
 
-Once connected you can then deploy:
+Once connected you can then deploy with:
 \`\`\`
 make render-local
 make install-local
 \`\`\`
 
-If this is
+You can pull infractl from deployed dev infra-server with:
+\`\`\`
+nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
+
+\`\`\`
 EOT
 
     hub-comment -type deploy -template-file "$tmpfile"
