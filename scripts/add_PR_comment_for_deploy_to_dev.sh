@@ -16,24 +16,34 @@ add_PR_comment_for_deploy_to_dev() {
     local tmpfile
     tmpfile=$(mktemp)
     cat > "$tmpfile" <<- EOT
-A single node development cluster ({{.Env.DEV_CLUSTER_NAME}}) has been allocated in production infra for this PR.
+A single node development cluster ({{.Env.DEV_CLUSTER_NAME}}) was allocated in production infra for this PR.
 
 You can connect to this cluster with:
 \`\`\`
 gcloud container clusters get-credentials {{.Env.DEV_CLUSTER_NAME}} --zone us-central1-a --project srox-temp-dev-test
 \`\`\`
 
-Once connected you can then deploy with:
+And then deploy your development changes with:
 \`\`\`
 make render-local
 make install-local
 \`\`\`
 
-You can pull infractl from deployed dev infra-server with:
+And pull infractl from the deployed dev infra-server with:
 \`\`\`
 nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
-
+make pull-infractl-from-dev-server
 \`\`\`
+
+You can then use the dev infra instance e.g.:
+\`\`\`
+bin/infractl -k -e localhost:8443 whoami
+\`\`\`
+
+:warning: ***Any clusters that you start in your dev infra instance should have a lifespan shorter 
+then the development cluster instance. Otherwise they will not be destroyed when the dev infra is 
+destroyed along with the development cluster.*** :warning:
+
 EOT
 
     hub-comment -type deploy -template-file "$tmpfile"
