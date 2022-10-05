@@ -19,21 +19,22 @@ jobs:
     uses: ./.github/workflows/build-and-push.yaml
     secrets: inherit
 
-  create-cluster:
+  create-dev-cluster:
     uses: stackrox/stackrox/.github/workflows/create-cluster.yml@gavin/RS-574/reuse-cluster-create
     with:
       flavor: gke-default
       name: infra-pr-${{ github.event.pull_request.number }}
       args: machine-type=e2-medium,nodes=1,gcp-image-type=ubuntu_containerd
-      lifespan: 12h
+      lifespan: 4h
       wait: true
       STACKROX_GHA_VERSION: gavin/RS-574/reuse-cluster-create
     secrets: inherit
 
-  deploy:
+  comment-for-dev-deploy:
     needs:
-    #   - build-and-push
+      - build-and-push
       - create-cluster
+    if: needs.create-dev-cluster.outputs.status == "2" || needs.create-dev-cluster.outputs.status == "CREATED"
     runs-on: ubuntu-latest
     container:
       image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.46
@@ -46,13 +47,6 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           path: go/src/github.com/stackrox/infra
 
-      - name: Setup env
+      - name: Add PR comment for deploy to dev
         run: |
-          GOPATH="$GITHUB_WORKSPACE/go"
-          echo GOPATH="${GOPATH}" >> "$GITHUB_ENV"
-          PATH="${PATH}:${GOPATH}/bin"
-          echo PATH="${PATH}" >> "$GITHUB_ENV"
-
-      - name: Cluster status
-        run: |
-          echo "Cluster status: ${{ needs.create-cluster.outputs.status }}"
+          ./scripts/add_PR_comment_for_deploy_to_dev.sh
