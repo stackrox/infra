@@ -48,5 +48,7 @@ jobs:
           path: go/src/github.com/stackrox/infra
 
       - name: Add PR comment for deploy to dev
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           ./scripts/add_PR_comment_for_deploy_to_dev.sh "${{ github.event.pull_request.html_url }}" "infra-pr-${{ github.event.pull_request.number }}"
