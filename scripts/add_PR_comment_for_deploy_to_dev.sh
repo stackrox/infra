@@ -18,24 +18,24 @@ add_PR_comment_for_deploy_to_dev() {
     cat > "$tmpfile" <<- EOT
 A single node development cluster ({{.Env.DEV_CLUSTER_NAME}}) was allocated in production infra for this PR.
 
-You can connect to this cluster with: :electric_plug:
+:electric_plug: You can **connect** to this cluster with:
 \`\`\`
 gcloud container clusters get-credentials {{.Env.DEV_CLUSTER_NAME}} --zone us-central1-a --project srox-temp-dev-test
 \`\`\`
 
-And then deploy your development infra-server with: :rocket:
+:rocket: And then **deploy** your development infra-server with:
 \`\`\`
 make render-local
 make install-local
 \`\`\`
 
-And pull infractl from the deployed dev infra-server with: :hammer_and_wrench:
+:hammer_and_wrench: And pull **infractl** from the deployed dev infra-server with:
 \`\`\`
 nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
 make pull-infractl-from-dev-server
 \`\`\`
 
-You can then use the dev infra instance e.g.: :bike:
+:bike: You can then **use** the dev infra instance e.g.:
 \`\`\`
 bin/infractl -k -e localhost:8443 whoami
 \`\`\`
