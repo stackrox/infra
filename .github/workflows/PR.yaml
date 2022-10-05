@@ -10,6 +10,9 @@ defaults:
   run:
     working-directory: go/src/github.com/stackrox/infra
 
+env:
+  DEV_CLUSTER_NAME: infra-pr-${{ github.event.pull_request.number }}
+
 jobs:
 
   lint:
@@ -23,7 +26,7 @@ jobs:
     uses: stackrox/stackrox/.github/workflows/create-cluster.yml@gavin/RS-574/reuse-cluster-create
     with:
       flavor: gke-default
-      name: infra-pr-${{ github.event.pull_request.number }}
+      name: ${{ env.DEV_CLUSTER_NAME }}
       args: machine-type=e2-medium,nodes=1,gcp-image-type=ubuntu_containerd
       lifespan: 4h
       wait: true
@@ -49,4 +52,4 @@ jobs:
 
       - name: Add PR comment for deploy to dev
         run: |
-          ./scripts/add_PR_comment_for_deploy_to_dev.sh
+          ./scripts/add_PR_comment_for_deploy_to_dev.sh "${{ github.event.pull_request.html_url }}" "$DEV_CLUSTER_NAME"
