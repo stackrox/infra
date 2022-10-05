@@ -51,4 +51,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.ROBOT_ROX_GITHUB_TOKEN }}
         run: |
-          ./scripts/add_PR_comment_for_deploy_to_dev.sh "${{ github.event.pull_request.html_url }}" "infra-pr-${{ github.event.pull_request.number }}"
+          ./scripts/add-PR-comment-for-deploy-to-dev.sh "${{ github.event.pull_request.html_url }}" "infra-pr-${{ github.event.pull_request.number }}"

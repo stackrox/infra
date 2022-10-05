@@ -42,7 +42,7 @@ bin/infractl -k -e localhost:8443 whoami
 
 :warning: ***Any clusters that you start using your dev infra instance should have a lifespan shorter 
 then the development cluster instance. Otherwise they will not be destroyed when the dev infra instance 
-ceases to exist along when the development cluster is deleted.*** :warning:
+ceases to exist when the development cluster is deleted.*** :warning:
 EOT
 
     hub-comment -type deploy -template-file "$tmpfile"
