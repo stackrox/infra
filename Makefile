@@ -167,6 +167,13 @@ configuration-upload:
 	@echo "Uploading configuration to gs://infra-configuration/latest/"
 	gsutil -m cp -R chart/infra-server/configuration "gs://infra-configuration/latest/"
 
+# Combines configuration/{development,production} files into single helm value.yaml files
+# (configuration/{development,production}-values-from-files.yaml) that can be used in template
+# rendering.
+.PHONY: create-consolidated-values
+create-consolidated-values:
+	@./scripts/create-consolidated-values.sh
+
 .PHONY: push
 push:
 	docker push us.gcr.io/stackrox-infra/infra-server:$(TAG) | cat
@@ -176,20 +183,19 @@ clean-render:
 	@rm -rf chart-rendered
 
 .PHONY: render-local
-render-local: clean-render
+render-local: clean-render create-consolidated-values
 	@if [[ ! -e chart/infra-server/configuration ]]; then \
 		echo chart/infra-server/configuration is absent. Try:; \
 		echo make configuration-download; \
 		exit 1; \
 	fi
 	@mkdir -p chart-rendered
-	gsutil cat gs://infra-configuration/latest/configuration/development-values.yaml \
-               gs://infra-configuration/latest/configuration/development-values-from-files.yaml | \
 	helm template chart/infra-server \
 	    --output-dir chart-rendered \
 		--set deployment="local" \
 		--set tag="$(TAG)" \
-		--values -
+		--values chart/infra-server/configuration/development-values.yaml \
+		--values chart/infra-server/configuration/development-values-from-files.yaml
 
 .PHONY: render-development
 render-development: clean-render
@@ -198,7 +204,8 @@ render-development: clean-render
 	    --output-dir chart-rendered \
 		--set deployment="development" \
 		--set tag="$(TAG)" \
-		--values chart/infra-server/configuration/development-values.yaml
+		--values chart/infra-server/configuration/development-values.yaml \
+		--values chart/infra-server/configuration/development-values-from-files.yaml
 
 .PHONY: render-production
 render-production: clean-render
@@ -207,7 +214,8 @@ render-production: clean-render
 	    --output-dir chart-rendered \
 		--set deployment="production" \
 		--set tag="$(TAG)" \
-		--values chart/infra-server/configuration/production-values.yaml
+		--values chart/infra-server/configuration/production-values.yaml \
+		--values chart/infra-server/configuration/production-values-from-files.yaml
 
 dev_context = gke_stackrox-infra_us-west2_infra-development
 prod_context = gke_stackrox-infra_us-west2_infra-production
@@ -215,8 +223,8 @@ this_context = $(shell kubectl config current-context)
 kcdev = kubectl --context $(dev_context)
 kcprod = kubectl --context $(prod_context)
 
-.PHONY: install-local
-install-local:
+.PHONY: install-local-common
+install-local-common:
 	@if [[ "$(this_context)" == "$(dev_context)" ]]; then \
 		echo Your kube context is set to development infra, should be a local cluster; \
 		exit 1; \
@@ -234,8 +242,22 @@ install-local:
 			-f chart-rendered/infra-server/templates/namespace.yaml; \
 		sleep 10; \
 	fi
+
+.PHONY: install-local
+install-local: install-local-common
 	kubectl apply -R \
 	    -f chart-rendered/infra-server
+
+.PHONY: install-local-without-write
+install-local-without-write: install-local-common
+	gsutil cat gs://infra-configuration/latest/configuration/development-values.yaml \
+               gs://infra-configuration/latest/configuration/development-values-from-files.yaml | \
+	helm template chart/infra-server \
+		--set deployment="local" \
+		--set tag="$(TAG)" \
+		--values - | \
+	kubectl apply -R \
+	    -f -
 
 .PHONY: diff-development
 diff-development: render-development

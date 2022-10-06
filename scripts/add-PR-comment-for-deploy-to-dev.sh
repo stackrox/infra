@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
+source "$ROOT/scripts/lib.sh"
+
 set -euo pipefail
 
 add_PR_comment_for_deploy_to_dev() {
@@ -46,11 +49,6 @@ ceases to exist when the development cluster is deleted.*** :warning:
 EOT
 
     hub-comment -type deploy -template-file "$tmpfile"
-}
-
-die() {
-    echo >&2 "$@"
-    exit 1
 }
 
 add_PR_comment_for_deploy_to_dev "$@"
