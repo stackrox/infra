@@ -420,6 +420,7 @@ func (s *clusterImpl) Artifacts(ctx context.Context, clusterID *v1.ResourceByID)
 				}
 
 				log.Printf("[DEBUG] Artifact mode  %s: %v", artifact.Name, artifact.Mode)
+				// -> nil mode everything - no mode set? could be in chart/infra-server/configuration/*/local/workflow-gke-default.yaml under outputs.artifacts that comes from GS. Upload with make configuration-upload, but 403 for me
 
 				resp.Artifacts = append(resp.Artifacts, &v1.Artifact{
 					Name:        artifact.Name,
