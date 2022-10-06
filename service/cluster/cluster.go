@@ -425,7 +425,6 @@ func (s *clusterImpl) Artifacts(ctx context.Context, clusterID *v1.ResourceByID)
 				if artifact.Mode != nil {
 					mode = *artifact.Mode
 				}
-				log.Printf("[DEBUG] Artifact mode  %s: %v", artifact.Name, mode)
 
 				resp.Artifacts = append(resp.Artifacts, &v1.Artifact{
 					Name:        artifact.Name,

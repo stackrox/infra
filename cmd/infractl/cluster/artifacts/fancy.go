@@ -15,6 +15,5 @@ func (r prettyClusterArtifacts) PrettyPrint() {
 			fmt.Printf("  Description: %s\n", artifact.Description)
 		}
 		fmt.Printf("  URL: %s\n", artifact.URL)
-		fmt.Printf("  Mode %d\n", artifact.Mode)
 	}
 }
