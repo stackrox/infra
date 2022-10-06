@@ -183,11 +183,13 @@ render-local: clean-render
 		exit 1; \
 	fi
 	@mkdir -p chart-rendered
+	gsutil cat gs://infra-configuration/latest/configuration/development-values.yaml \
+               gs://infra-configuration/latest/configuration/development-values-from-files.yaml | \
 	helm template chart/infra-server \
 	    --output-dir chart-rendered \
 		--set deployment="local" \
 		--set tag="$(TAG)" \
-		--values chart/infra-server/configuration/development-values.yaml
+		--values -
 
 .PHONY: render-development
 render-development: clean-render
