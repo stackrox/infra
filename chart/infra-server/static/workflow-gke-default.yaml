@@ -43,7 +43,7 @@ spec:
         artifacts:
           - name: kubeconfig
             path: /outputs/kubeconfig
-            mode: 0400
+            mode: 0644
             archive:
               none: {}
           - name: connect

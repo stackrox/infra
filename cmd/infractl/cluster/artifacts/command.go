@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	"io/fs"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -118,6 +119,10 @@ func download(downloadDir string, artifact v1.Artifact) (filename string, err er
 	}()
 
 	if _, err := io.Copy(file, resp.Body); err != nil {
+		return "", err
+	}
+
+	if err = os.Chmod(filename, fs.FileMode(artifact.Mode)); err != nil {
 		return "", err
 	}
 

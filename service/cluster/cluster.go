@@ -54,6 +54,8 @@ const (
 	// when is a cluster considered near expiration
 	nearExpiry = 30 * time.Minute
 
+	artifactDefaultMode = 0o644 // this is 0644 permission (-rw-r--r--)
+
 	artifactTagURL     = "url"
 	artifactTagConnect = "connect"
 
@@ -419,7 +421,7 @@ func (s *clusterImpl) Artifacts(ctx context.Context, clusterID *v1.ResourceByID)
 					return nil, err
 				}
 
-				var mode int32
+				var mode int32 = artifactDefaultMode
 				if artifact.Mode != nil {
 					mode = *artifact.Mode
 				}
