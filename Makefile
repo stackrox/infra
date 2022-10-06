@@ -164,8 +164,8 @@ configuration-upload: CONST_DATESTAMP := $(shell date '+%Y-%m-%d-%H-%M-%S')
 configuration-upload:
 	@echo "Uploading configuration to gs://infra-configuration/${CONST_DATESTAMP}"
 	gsutil -m cp -R chart/infra-server/configuration "gs://infra-configuration/${CONST_DATESTAMP}/"
-	# @echo "Uploading configuration to gs://infra-configuration/latest/"
-	# gsutil -m cp -R chart/infra-server/configuration "gs://infra-configuration/latest/"
+	@echo "Uploading configuration to gs://infra-configuration/latest/"
+	gsutil -m cp -R chart/infra-server/configuration "gs://infra-configuration/latest/"
 
 .PHONY: push
 push:

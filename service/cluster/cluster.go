@@ -54,7 +54,8 @@ const (
 	// when is a cluster considered near expiration
 	nearExpiry = 30 * time.Minute
 
-	artifactDefaultMode = 0o644 // this is 0644 permission (-rw-r--r--)
+	// default permissions for downloaded artifacts, this corresponds to -rw-r--r--
+	artifactDefaultMode = 0o644
 
 	artifactTagURL     = "url"
 	artifactTagConnect = "connect"
