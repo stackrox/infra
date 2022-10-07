@@ -48,17 +48,11 @@ ceases to exist when the development cluster is deleted.*** :warning:
 
 ### Further Development
 
-If you make changes, you can commit and push and CI will take care of updating the development cluster. 
+:coffee: If you make changes, you can commit and push and CI will take care of updating the development cluster. 
 
 :rocket: If you only modify configuration (chart/infra-server/configuration) or templates (chart/infra-server/{static,templates}), 
-you can have a faster update by:
+you can get a faster update with:
 
-\`\`\`
-make render-local
-make install-local
-\`\`\`
-
-Or in 1 command that also restarts the infra-server:
 \`\`\`
 make local-data-dev-cycle
 \`\`\`
