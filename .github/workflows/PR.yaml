@@ -94,7 +94,8 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_INFRA_CI_AUTOMATION_SA }}
 
-      - name: Connect to dev cluster
+      - name: Deploy infra to dev cluster
         run: |
           export KUBECONFIG=artifacts/kubeconfig
           kubectl get nodes -o wide
+          make install-local-without-write
