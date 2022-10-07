@@ -88,11 +88,6 @@ jobs:
           mkdir artifacts
           bin/production-infractl artifacts "$CLUSTER_NAME" -d artifacts
 
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v0
-        with:
-          credentials_json: ${{ secrets.GCP_INFRA_CI_AUTOMATION_SA }}
-
       - name: Deploy infra to dev cluster
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{secrets.GCP_INFRA_CI_AUTOMATION_SA}}
