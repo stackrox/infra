@@ -238,11 +238,11 @@ install-local-common:
 		echo Your kube context is set to production infra, should be a local cluster; \
 		exit 1; \
 	fi
-	@if ! kubectl get ns argo; then \
+	@if ! kubectl get ns argo 2> /dev/null; then \
 		kubectl create namespace argo; \
 		kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/v3.3.9/install.yaml; \
 	fi
-	@if ! kubectl get ns infra; then \
+	@if ! kubectl get ns infra 2> /dev/null; then \
 		kubectl apply \
 			-f chart/infra-server/templates/namespace.yaml; \
 		sleep 10; \
