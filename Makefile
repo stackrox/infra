@@ -244,7 +244,7 @@ install-local-common:
 	fi
 	@if ! kubectl get ns infra; then \
 		kubectl apply \
-			-f chart-rendered/infra-server/templates/namespace.yaml; \
+			-f chart/infra-server/templates/namespace.yaml; \
 		sleep 10; \
 	fi
 
