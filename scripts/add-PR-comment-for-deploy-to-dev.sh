@@ -42,16 +42,13 @@ make pull-infractl-from-dev-server
 bin/infractl -k -e localhost:8443 whoami
 \`\`\`
 
-:warning: ***Any clusters that you start using your dev infra instance should have a lifespan shorter 
-then the development cluster instance. Otherwise they will not be destroyed when the dev infra instance 
-ceases to exist when the development cluster is deleted.*** :warning:
+:warning: ***Any clusters that you start using your dev infra instance should have a lifespan shorter then the development cluster instance. Otherwise they will not be destroyed when the dev infra instance ceases to exist when the development cluster is deleted.*** :warning:
 
 ### Further Development
 
 :coffee: If you make changes, you can commit and push and CI will take care of updating the development cluster. 
 
-:rocket: If you only modify configuration (chart/infra-server/configuration) or templates (chart/infra-server/{static,templates}), 
-you can get a faster update with:
+:rocket: If you only modify configuration (chart/infra-server/configuration) or templates (chart/infra-server/{static,templates}), you can get a faster update with:
 
 \`\`\`
 make local-data-dev-cycle
