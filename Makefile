@@ -3,10 +3,15 @@ export GO111MODULE=on
 .PHONY: all
 all: image
 
-TAG=$(shell git describe --tags --abbrev=10 --dirty --long)
+TAG=$(shell git describe --tags --abbrev=10 --long)
 .PHONY: tag
 tag:
 	@echo $(TAG)
+
+IMAGE=us.gcr.io/stackrox-infra/infra-server:$(TAG)
+.PHONY: image-name
+image-name:
+	@echo $(IMAGE)
 
 ###########
 ## Build ##
@@ -50,7 +55,7 @@ image: server cli ui clean-image
 	@cp bin/infractl-darwin-amd64 image/static/downloads
 	@cp bin/infractl-darwin-arm64 image/static/downloads
 	@cp bin/infractl-linux-amd64 image/static/downloads
-	docker build -t us.gcr.io/stackrox-infra/infra-server:$(TAG) image
+	docker build -t $(IMAGE) image
 
 .PHONY: clean-image
 clean-image:
@@ -176,7 +181,7 @@ create-consolidated-values:
 
 .PHONY: push
 push:
-	docker push us.gcr.io/stackrox-infra/infra-server:$(TAG) | cat
+	docker push $(IMAGE) | cat
 
 .PHONY: clean-render
 clean-render:
@@ -198,7 +203,7 @@ render-local: clean-render create-consolidated-values
 		--values chart/infra-server/configuration/development-values-from-files.yaml
 
 .PHONY: render-development
-render-development: clean-render
+render-development: clean-render create-consolidated-values
 	@mkdir -p chart-rendered
 	helm template chart/infra-server \
 	    --output-dir chart-rendered \
@@ -208,7 +213,7 @@ render-development: clean-render
 		--values chart/infra-server/configuration/development-values-from-files.yaml
 
 .PHONY: render-production
-render-production: clean-render
+render-production: clean-render create-consolidated-values
 	@mkdir -p chart-rendered
 	helm template chart/infra-server \
 	    --output-dir chart-rendered \
@@ -258,6 +263,11 @@ install-local-without-write: install-local-common
 		--values - | \
 	kubectl apply -R \
 	    -f -
+
+.PHONY: local-data-dev-cycle
+local-data-dev-cycle: render-local install-local
+	@sleep 5
+	kubectl -n infra delete pods -l app=infra-server
 
 .PHONY: diff-development
 diff-development: render-development
@@ -342,6 +352,7 @@ update-version:
 # i.e. nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
 .PHONY: pull-infractl-from-dev-server
 pull-infractl-from-dev-server:
+	@mkdir -p bin
 	@rm -f bin/infractl
 	set -o pipefail; \
 	curl --retry 3 --insecure --silent --show-error --fail --location https://localhost:8443/v1/cli/linux/amd64/upgrade \

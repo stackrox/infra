@@ -10,6 +10,9 @@ defaults:
   run:
     working-directory: go/src/github.com/stackrox/infra
 
+env:
+  CLUSTER_NAME: infra-pr-${{ github.event.pull_request.number }}
+
 jobs:
 
   lint:
@@ -31,7 +34,7 @@ jobs:
           wait: true
           token: ${{ secrets.INFRA_TOKEN }}
 
-  comment-for-dev-deploy:
+  comment-on-PR:
     needs:
       - build-and-push
       - create-dev-cluster
@@ -51,4 +54,42 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.ROBOT_ROX_GITHUB_TOKEN }}
         run: |
-          ./scripts/add-PR-comment-for-deploy-to-dev.sh "${{ github.event.pull_request.html_url }}" "infra-pr-${{ github.event.pull_request.number }}"
+          ./scripts/add-PR-comment-for-deploy-to-dev.sh "${{ github.event.pull_request.html_url }}" "$CLUSTER_NAME"
+
+  deploy-to-dev-cluster:
+    needs:
+      - build-and-push
+      - create-dev-cluster
+    if: needs.create-dev-cluster.outputs.status == '2' || needs.create-dev-cluster.outputs.status == 'CREATED'
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.46
+    env:
+      INFRA_TOKEN: ${{secrets.INFRA_TOKEN}}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: go/src/github.com/stackrox/infra
+
+      - name: Download production infractl
+        run: |
+          mkdir -p bin
+          curl --fail -sL https://infra.rox.systems/v1/cli/linux/amd64/upgrade \
+          | jq -r ".result.fileChunk" \
+          | base64 -d \
+          > bin/production-infractl
+          chmod +x bin/production-infractl
+
+      - name: Download artifacts
+        run: |
+          mkdir artifacts
+          bin/production-infractl artifacts "$CLUSTER_NAME" -d artifacts
+
+      - name: Connect to dev cluster
+        run: |
+          KUBECONFIG=artifacts/kubeconfig
+          kubectl get nodes -o wide

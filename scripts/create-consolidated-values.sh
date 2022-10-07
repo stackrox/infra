@@ -20,6 +20,12 @@ create_consolidated_values() {
     local values_file="$ROOT/chart/infra-server/configuration/$environment-values-from-files.yaml"
     rm -f "$values_file"
 
+    {
+        echo "# This is a helm values file that combines the contents of the $environment configuration files."
+        echo "# It is updated by each render-* make target. Changes made here will be lost."
+        echo
+    } >> "$values_file"
+
     pushd "$ROOT/chart/infra-server/configuration/$environment" > /dev/null
     shopt -s globstar nullglob
     for cfg_file in **; do
