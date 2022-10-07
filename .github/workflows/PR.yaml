@@ -20,21 +20,21 @@ jobs:
     secrets: inherit
 
   create-dev-cluster:
-    uses: stackrox/stackrox/.github/workflows/create-cluster.yml@gavin/RS-574/reuse-cluster-create
-    with:
-      flavor: gke-default
-      name: infra-pr-${{ github.event.pull_request.number }}
-      args: machine-type=e2-medium,nodes=1,gcp-image-type=ubuntu_containerd
-      lifespan: 4h
-      wait: true
-      STACKROX_GHA_VERSION: gavin/RS-574/reuse-cluster-create
-    secrets: inherit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: stackrox/actions/infra/create-cluster@main
+        with:
+          flavor: gke-default
+          name: infra-pr-${{ github.event.pull_request.number }}
+          args: machine-type=e2-medium,nodes=1,gcp-image-type=ubuntu_containerd
+          lifespan: 4h
+          wait: true
+          token: ${{ secrets.INFRA_TOKEN }}
 
   comment-for-dev-deploy:
     needs:
       - build-and-push
       - create-dev-cluster
-    if: needs.create-dev-cluster.outputs.status == '2' || needs.create-dev-cluster.outputs.status == 'CREATED'
     runs-on: ubuntu-latest
     container:
       image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.46
