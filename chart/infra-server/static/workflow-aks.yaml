@@ -35,10 +35,12 @@ spec:
         artifacts:
           - name: kubeconfig
             path: /data/kubeconfig
+            mode: 0644
             archive:
               none: {}
           - name: connect
             path: /data/connect.sh
+            mode: 0755
             archive:
               none: {}
           - name: data
