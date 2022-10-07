@@ -62,8 +62,6 @@ jobs:
       - create-dev-cluster
     if: needs.create-dev-cluster.outputs.status == '2' || needs.create-dev-cluster.outputs.status == 'CREATED'
     runs-on: ubuntu-latest
-    container:
-      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.46
     env:
       INFRA_TOKEN: ${{secrets.INFRA_TOKEN}}
 
