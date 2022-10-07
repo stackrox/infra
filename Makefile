@@ -263,9 +263,13 @@ install-local-without-write: install-local-common
 		--values - | \
 	kubectl apply -R \
 	    -f -
+	# Bounce the infra-server to ensure proper update
+	@sleep 5
+	kubectl -n infra delete pods -l app=infra-server
 
 .PHONY: local-data-dev-cycle
 local-data-dev-cycle: render-local install-local
+	# Bounce the infra-server to ensure proper update
 	@sleep 5
 	kubectl -n infra delete pods -l app=infra-server
 

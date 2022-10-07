@@ -88,7 +88,7 @@ jobs:
           mkdir artifacts
           bin/production-infractl artifacts "$CLUSTER_NAME" -d artifacts
 
-      - name: Deploy infra to dev cluster
+      - name: Deploy infra to dev cluster and check the deployment
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{secrets.GCP_INFRA_CI_AUTOMATION_SA}}
         run: |
@@ -96,5 +96,29 @@ jobs:
           gcloud auth list
 
           export KUBECONFIG=artifacts/kubeconfig
-          kubectl get nodes -o wide
           make install-local-without-write
+
+          nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
+          sleep 5
+          make pull-infractl-from-dev-server
+
+          version="$(bin/infractl -k -e localhost:8443 version --json)"
+          echo "$version"
+          client="$(echo $version | jq -r '.Client.Version')"
+          server="$(echo $version | jq -r '.Server.Version')"
+          if [[ "$client" == "$server" ]]; then
+            echo "Client and server versions match"
+          else
+            echo "Client and server versions are mismatched"
+            exit 1
+          fi
+
+          tag="$(make tag)"
+          if [[ "$client" == "$tag" ]]; then
+            echo "Infra and make tag match"
+          else
+            echo "Infra and make tag are mismatched"
+            exit 1
+          fi
+
+          kill %1
