@@ -91,5 +91,5 @@ jobs:
 
       - name: Connect to dev cluster
         run: |
-          KUBECONFIG=artifacts/kubeconfig
+          export KUBECONFIG=artifacts/kubeconfig
           kubectl get nodes -o wide
