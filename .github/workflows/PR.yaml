@@ -91,11 +91,11 @@ jobs:
       - name: Deploy infra to dev cluster and check the deployment
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{secrets.GCP_INFRA_CI_AUTOMATION_SA}}
+          KUBECONFIG: artifacts/kubeconfig
         run: |
           gcloud auth activate-service-account --key-file <(echo "$GOOGLE_APPLICATION_CREDENTIALS")
           gcloud auth list
 
-          export KUBECONFIG=artifacts/kubeconfig
           make install-local-without-write
 
           nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
