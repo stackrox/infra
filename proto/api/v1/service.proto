@@ -340,6 +340,8 @@ message Artifact {
     string Description = 2;
 
     string URL = 3;
+
+    int32 Mode = 4;
 }
 
 message ClusterArtifacts {
