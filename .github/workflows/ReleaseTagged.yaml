@@ -1,0 +1,18 @@
+name: Release Tagged
+
+on:
+  create:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
+
+defaults:
+  run:
+    working-directory: go/src/github.com/stackrox/infra
+
+jobs:
+
+  lint:
+    uses: ./.github/workflows/lint.yaml
+
+  build-and-push:
+    uses: ./.github/workflows/build-and-push.yaml

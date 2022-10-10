@@ -1,0 +1,54 @@
+name: PR Workflow
+
+on:
+  pull_request:
+    types:
+    - opened
+    - synchronize
+
+defaults:
+  run:
+    working-directory: go/src/github.com/stackrox/infra
+
+jobs:
+
+  lint:
+    uses: ./.github/workflows/lint.yaml
+
+  build-and-push:
+    uses: ./.github/workflows/build-and-push.yaml
+    secrets: inherit
+
+  create-dev-cluster:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: stackrox/actions/infra/create-cluster@main
+        with:
+          flavor: gke-default
+          name: infra-pr-${{ github.event.pull_request.number }}
+          args: machine-type=e2-medium,nodes=1,gcp-image-type=ubuntu_containerd
+          lifespan: 4h
+          wait: true
+          token: ${{ secrets.INFRA_TOKEN }}
+
+  comment-for-dev-deploy:
+    needs:
+      - build-and-push
+      - create-dev-cluster
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.46
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: go/src/github.com/stackrox/infra
+
+      - name: Add PR comment for deploy to dev
+        env:
+          GITHUB_TOKEN: ${{ secrets.ROBOT_ROX_GITHUB_TOKEN }}
+        run: |
+          ./scripts/add-PR-comment-for-deploy-to-dev.sh "${{ github.event.pull_request.html_url }}" "infra-pr-${{ github.event.pull_request.number }}"
