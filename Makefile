@@ -3,10 +3,15 @@ export GO111MODULE=on
 .PHONY: all
 all: image
 
-TAG=$(shell git describe --tags --abbrev=10 --dirty --long)
+TAG=$(shell git describe --tags --abbrev=10 --long)
 .PHONY: tag
 tag:
 	@echo $(TAG)
+
+IMAGE=us.gcr.io/stackrox-infra/infra-server:$(TAG)
+.PHONY: image-name
+image-name:
+	@echo $(IMAGE)
 
 ###########
 ## Build ##
@@ -50,7 +55,7 @@ image: server cli ui clean-image
 	@cp bin/infractl-darwin-amd64 image/static/downloads
 	@cp bin/infractl-darwin-arm64 image/static/downloads
 	@cp bin/infractl-linux-amd64 image/static/downloads
-	docker build -t us.gcr.io/stackrox-infra/infra-server:$(TAG) image
+	docker build -t $(IMAGE) image
 
 .PHONY: clean-image
 clean-image:
@@ -167,16 +172,23 @@ configuration-upload:
 	@echo "Uploading configuration to gs://infra-configuration/latest/"
 	gsutil -m cp -R chart/infra-server/configuration "gs://infra-configuration/latest/"
 
+# Combines configuration/{development,production} files into single helm value.yaml files
+# (configuration/{development,production}-values-from-files.yaml) that can be used in template
+# rendering.
+.PHONY: create-consolidated-values
+create-consolidated-values:
+	@./scripts/create-consolidated-values.sh
+
 .PHONY: push
 push:
-	docker push us.gcr.io/stackrox-infra/infra-server:$(TAG) | cat
+	docker push $(IMAGE) | cat
 
 .PHONY: clean-render
 clean-render:
 	@rm -rf chart-rendered
 
 .PHONY: render-local
-render-local: clean-render
+render-local: clean-render create-consolidated-values
 	@if [[ ! -e chart/infra-server/configuration ]]; then \
 		echo chart/infra-server/configuration is absent. Try:; \
 		echo make configuration-download; \
@@ -187,25 +199,28 @@ render-local: clean-render
 	    --output-dir chart-rendered \
 		--set deployment="local" \
 		--set tag="$(TAG)" \
-		--values chart/infra-server/configuration/development-values.yaml
+		--values chart/infra-server/configuration/development-values.yaml \
+		--values chart/infra-server/configuration/development-values-from-files.yaml
 
 .PHONY: render-development
-render-development: clean-render
+render-development: clean-render create-consolidated-values
 	@mkdir -p chart-rendered
 	helm template chart/infra-server \
 	    --output-dir chart-rendered \
 		--set deployment="development" \
 		--set tag="$(TAG)" \
-		--values chart/infra-server/configuration/development-values.yaml
+		--values chart/infra-server/configuration/development-values.yaml \
+		--values chart/infra-server/configuration/development-values-from-files.yaml
 
 .PHONY: render-production
-render-production: clean-render
+render-production: clean-render create-consolidated-values
 	@mkdir -p chart-rendered
 	helm template chart/infra-server \
 	    --output-dir chart-rendered \
 		--set deployment="production" \
 		--set tag="$(TAG)" \
-		--values chart/infra-server/configuration/production-values.yaml
+		--values chart/infra-server/configuration/production-values.yaml \
+		--values chart/infra-server/configuration/production-values-from-files.yaml
 
 dev_context = gke_stackrox-infra_us-west2_infra-development
 prod_context = gke_stackrox-infra_us-west2_infra-production
@@ -213,8 +228,8 @@ this_context = $(shell kubectl config current-context)
 kcdev = kubectl --context $(dev_context)
 kcprod = kubectl --context $(prod_context)
 
-.PHONY: install-local
-install-local:
+.PHONY: install-local-common
+install-local-common:
 	@if [[ "$(this_context)" == "$(dev_context)" ]]; then \
 		echo Your kube context is set to development infra, should be a local cluster; \
 		exit 1; \
@@ -223,17 +238,40 @@ install-local:
 		echo Your kube context is set to production infra, should be a local cluster; \
 		exit 1; \
 	fi
-	@if ! kubectl get ns argo; then \
+	@if ! kubectl get ns argo 2> /dev/null; then \
 		kubectl create namespace argo; \
 		kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/v3.3.9/install.yaml; \
 	fi
-	@if ! kubectl get ns infra; then \
+	@if ! kubectl get ns infra 2> /dev/null; then \
 		kubectl apply \
-			-f chart-rendered/infra-server/templates/namespace.yaml; \
+			-f chart/infra-server/templates/namespace.yaml; \
 		sleep 10; \
 	fi
+
+.PHONY: install-local
+install-local: install-local-common
 	kubectl apply -R \
 	    -f chart-rendered/infra-server
+
+.PHONY: install-local-without-write
+install-local-without-write: install-local-common
+	gsutil cat gs://infra-configuration/latest/configuration/development-values.yaml \
+               gs://infra-configuration/latest/configuration/development-values-from-files.yaml | \
+	helm template chart/infra-server \
+		--set deployment="local" \
+		--set tag="$(TAG)" \
+		--values - | \
+	kubectl apply -R \
+	    -f -
+	# Bounce the infra-server to ensure proper update
+	@sleep 5
+	kubectl -n infra delete pods -l app=infra-server
+
+.PHONY: local-data-dev-cycle
+local-data-dev-cycle: render-local install-local
+	# Bounce the infra-server to ensure proper update
+	@sleep 5
+	kubectl -n infra delete pods -l app=infra-server
 
 .PHONY: diff-development
 diff-development: render-development
@@ -318,6 +356,7 @@ update-version:
 # i.e. nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
 .PHONY: pull-infractl-from-dev-server
 pull-infractl-from-dev-server:
+	@mkdir -p bin
 	@rm -f bin/infractl
 	set -o pipefail; \
 	curl --retry 3 --insecure --silent --show-error --fail --location https://localhost:8443/v1/cli/linux/amd64/upgrade \

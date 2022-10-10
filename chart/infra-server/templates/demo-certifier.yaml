@@ -10,7 +10,7 @@ metadata:
 
 data:
   google-credentials.json: |-
-    {{- include "require-file" (list "demo/demo-cert-bot.json" .) | b64enc | nindent 4 }}
+    {{ required ".Values.demo__demo_cert_bot_json is undefined" .Values.demo__demo_cert_bot_json }}
 
 ---
 

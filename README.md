@@ -8,7 +8,16 @@
 
 ## Development
 
-Infra (the server) and infractl (the cli) are written in Go, and use gRPC for client-server communication.
+Infra (the server) and infractl (the cli) are written in Go, and use gRPC for
+client-server communication. The UI uses a React/Typescript/Yarn toolchain (see
+(ui/README.md)[ui/README.md]).
+
+While a development workflow can be achieved using a locally installed
+toolchain, it is also possible to rely on CI. CI will lint, build and push the
+infra server. And then deploy it to a development cluster created using the
+production infra deployment. A
+(comment)[https://github.com/stackrox/infra/pull/711#issuecomment-1270457578]
+will appear on PRs with more detail. 
 
 ### Regenerate Go bindings from protos
 
@@ -32,11 +41,11 @@ correct tooling installed with:
 
 ## Deployment
 
-For additional information on how this service is deployed, please refer to the [deployment instructions](https://github.com/stackrox/infra/blob/master/DEPLOYMENT.md).
+For additional information on how this service is deployed, please refer to the [deployment instructions](DEPLOYMENT.md).
 
 ## Runbook
 
-For additional information on how to debug and remediate issues with the deployed service, please refer to the [runbook instructions](https://github.com/stackrox/infra/blob/master/TROUBLESHOOTING.md).
+For additional information on how to debug and remediate issues with the deployed service, please refer to the [runbook instructions](TROUBLESHOOTING.md).
 
 [circleci-badge]: https://circleci.com/gh/stackrox/infra.svg?style=shield&circle-token=afa342906b658b5349c68b70fa82fd85d1422212
 [circleci-link]:  https://circleci.com/gh/stackrox/infra
