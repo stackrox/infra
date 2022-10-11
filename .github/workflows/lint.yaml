@@ -54,11 +54,3 @@ jobs:
       - name: Lint
         run: |
           golangci-lint run
-
-      - name: Go fmt
-        run: |
-          go fmt ./...
-          git diff --exit-code HEAD || {
-            echo "Go code is not formatted as expected. Run `go fmt ./...` and commit the result."
-            exit 1
-          }
