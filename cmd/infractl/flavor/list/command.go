@@ -4,20 +4,22 @@ package list
 import (
 	"context"
 
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"google.golang.org/grpc"
 )
 
-const examples = `# List all flavors.
-$ infractl flavor list`
+const examples = `# List all non alpha flavors.
+$ infractl flavor list
+
+# List all flavors.
+$ infractl flavor list --all`
 
 // Command defines the handler for infractl flavor list.
 func Command() *cobra.Command {
 	// $ infractl flavor list
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:     "list",
 		Short:   "List flavors",
 		Long:    "List the available flavors",
@@ -25,10 +27,19 @@ func Command() *cobra.Command {
 		Args:    common.ArgsWithHelp(cobra.ExactArgs(0)),
 		RunE:    common.WithGRPCHandler(run),
 	}
+
+	cmd.Flags().Bool("all", false, "include clusters not owned by you")
+	return cmd
 }
 
-func run(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, _ []string) (common.PrettyPrinter, error) {
-	resp, err := v1.NewFlavorServiceClient(conn).List(ctx, &empty.Empty{})
+func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []string) (common.PrettyPrinter, error) {
+	includeAll := common.MustBool(cmd.Flags(), "all")
+
+	req := v1.FlavorListRequest{
+		All: includeAll,
+	}
+
+	resp, err := v1.NewFlavorServiceClient(conn).List(ctx, &req)
 	if err != nil {
 		return nil, err
 	}

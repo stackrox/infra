@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/stackrox/infra/flavor"
 	v1 "github.com/stackrox/infra/generated/api/v1"
@@ -32,10 +31,13 @@ func NewFlavorService(registry *flavor.Registry) (middleware.APIService, error) 
 }
 
 // List implements FlavorService.List.
-func (s *flavorImpl) List(context.Context, *empty.Empty) (*v1.FlavorListResponse, error) {
+func (s *flavorImpl) List(_ context.Context, request *v1.FlavorListRequest) (*v1.FlavorListResponse, error) {
 	var resp v1.FlavorListResponse
 	for _, flavor := range s.registry.Flavors() {
 		flavor := flavor
+		if !request.All && flavor.Availability == v1.Flavor_alpha {
+			continue
+		}
 		scrubInternalParameters(&flavor)
 		resp.Flavors = append(resp.Flavors, &flavor)
 	}

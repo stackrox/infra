@@ -190,6 +190,13 @@ message Flavor {
     map<string, FlavorArtifact> Artifacts = 6;
 }
 
+// FlavorListRequest represents a request to FlavorService.List.
+message FlavorListRequest {
+    // all indicates that all flavors should be returned, by default
+    // availability alpha clusters are excluded.
+    bool all = 1;
+}
+
 // FlavorListResponse represents details about the available cluster flavors.
 message FlavorListResponse {
     // Default is the flavor ID of the default cluster flavor.
@@ -202,7 +209,7 @@ message FlavorListResponse {
 // FlavorService provides flavor based functionality.
 service FlavorService {
     // List provides information about the available flavors.
-    rpc List (google.protobuf.Empty) returns (FlavorListResponse) {
+    rpc List (FlavorListRequest) returns (FlavorListResponse) {
         option (google.api.http) = {
             get: "/v1/flavor"
         };
