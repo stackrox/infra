@@ -12,6 +12,7 @@ jobs:
       - uses: reviewdog/action-actionlint@v1
         with:
           level: info
+      - uses: docker://rhysd/actionlint:1.33.0
 
   golint:
     runs-on: ubuntu-latest
