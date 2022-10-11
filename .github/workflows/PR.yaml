@@ -104,8 +104,8 @@ jobs:
 
           version="$(bin/infractl -k -e localhost:8443 version --json)"
           echo "$version"
-          client="$(echo $version | jq -r '.Client.Version')"
-          server="$(echo $version | jq -r '.Server.Version')"
+          client="$(echo "$version" | jq -r '.Client.Version')"
+          server="$(echo "$version" | jq -r '.Server.Version')"
           if [[ "$client" == "$server" ]]; then
             echo "Client and server versions match"
           else
@@ -117,7 +117,7 @@ jobs:
           if [[ "$client" == "$tag" ]]; then
             echo "Infra and make tag match"
           else
-            echo "Infra and make tag are mismatched"
+            echo "Infra and make tag are mismatched (make tag: $tag)"
             exit 1
           fi
 

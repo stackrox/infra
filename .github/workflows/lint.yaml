@@ -3,16 +3,23 @@ name: Lint
 on:
   workflow_call:
 
-defaults:
-  run:
-    working-directory: go/src/github.com/stackrox/infra
-
 jobs:
 
-  lint:
+  actionlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker://rhysd/actionlint:1.6.21
+        with:
+          args: -color
+
+  golint:
     runs-on: ubuntu-latest
     container:
       image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.46
+    defaults:
+      run:
+        working-directory: go/src/github.com/stackrox/infra
 
     steps:
       - name: Checkout
