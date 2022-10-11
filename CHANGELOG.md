@@ -6,6 +6,8 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+## [0.4.1]
+
 ### Removed Features
 ### Deprecated Features
 ### Technical Changes
