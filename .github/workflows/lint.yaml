@@ -9,10 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: reviewdog/action-actionlint@v1
-        with:
-          level: info
       - uses: docker://rhysd/actionlint:1.6.21
+        with:
+          args: -color
 
   golint:
     runs-on: ubuntu-latest
