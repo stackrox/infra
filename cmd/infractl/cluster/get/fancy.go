@@ -2,7 +2,6 @@ package get
 
 import (
 	"bytes"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -29,21 +28,21 @@ func (p prettyCluster) PrettyPrint(cmd *cobra.Command) {
 		remaining      = time.Until(createdOn.Add(lifespan))
 	)
 
-	fmt.Printf("ID:          %s\n", p.ID)
-	fmt.Printf("Flavor:      %s\n", p.Flavor)
-	fmt.Printf("Owner:       %s\n", p.Owner)
+	cmd.Printf("ID:          %s\n", p.ID)
+	cmd.Printf("Flavor:      %s\n", p.Flavor)
+	cmd.Printf("Owner:       %s\n", p.Owner)
 	if p.Description != "" {
-		fmt.Printf("Description: %s\n", p.Description)
+		cmd.Printf("Description: %s\n", p.Description)
 	}
-	fmt.Printf("Status:      %s\n", p.Status)
-	fmt.Printf("Created:     %v\n", common.FormatTime(createdOn))
+	cmd.Printf("Status:      %s\n", p.Status)
+	cmd.Printf("Created:     %v\n", common.FormatTime(createdOn))
 	if p.URL != "" {
-		fmt.Printf("URL:         %s\n", p.URL)
+		cmd.Printf("URL:         %s\n", p.URL)
 	}
 	if destroyedOn.Unix() != 0 {
-		fmt.Printf("Destroyed:   %v\n", common.FormatTime(destroyedOn))
+		cmd.Printf("Destroyed:   %v\n", common.FormatTime(destroyedOn))
 	}
-	fmt.Printf("Lifespan:    %s\n", common.FormatExpiration(remaining))
+	cmd.Printf("Lifespan:    %s\n", common.FormatExpiration(remaining))
 }
 
 func (p prettyCluster) PrettyJSONPrint(cmd *cobra.Command) error {

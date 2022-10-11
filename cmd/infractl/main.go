@@ -28,6 +28,10 @@ func main() {
 		Version:      buildinfo.Version(),
 	}
 
+	// For our version of Cobra, `cmd.Printf(...)` defaults to Stderr.
+	// > Printf is a convenience method to Printf to the defined output, fallback to Stderr if not set.
+	cmd.SetOut(os.Stdout)
+
 	common.AddCommonFlags(cmd)
 
 	cmd.AddCommand(
