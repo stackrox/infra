@@ -3,7 +3,7 @@ name: Release Tagged
 on:
   push:
     tags:
-      - "[0-9]+.[0-9]+.[0-9]+"
+      - "[0-9]+.[0-9]+.[0-9]+(-rc\.[0-9]+)?"
 
 defaults:
   run:
@@ -16,3 +16,4 @@ jobs:
 
   build-and-push:
     uses: ./.github/workflows/build-and-push.yaml
+    secrets: inherit
