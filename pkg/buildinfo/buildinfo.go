@@ -25,5 +25,5 @@ func All() *v1.Version {
 
 // Version returns only the Git version.
 func Version() string {
-	return internal.GitVersion
+	return    internal.GitVersion
 }
