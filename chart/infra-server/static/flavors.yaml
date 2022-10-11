@@ -41,8 +41,8 @@
 #############
 - id: qa-demo
   name: StackRox Demo for QA testing
-  description: TESTING ONLY - Demo running a provided StackRox version
-  availability: alpha
+  description: Demo running a provided StackRox version
+  availability: stable
   workflow: configuration/workflow-qa-demo.yaml
   parameters:
     - name: name
@@ -152,7 +152,7 @@
 - id: openshift-multi
   name: OpenShift 3.11
   description: OpenShift 3.11 cluster
-  availability: alpha
+  availability: stable
   workflow: configuration/workflow-openshift-multi.yaml
   parameters:
     - name: name
@@ -220,7 +220,7 @@
 - id: openshift-4
   name: OpenShift 4.x
   description: OpenShift 4.x OCP or OKD cluster
-  availability: alpha
+  availability: stable
   workflow: configuration/workflow-openshift-4.yaml
   parameters:
     - name: name
@@ -298,7 +298,7 @@
 - id: openshift-4-demo
   name: OpenShift 4.x Demo
   description: OpenShift 4.x Demo
-  availability: alpha
+  availability: stable
   workflow: configuration/workflow-openshift-4-demo.yaml
   parameters:
     - name: name
@@ -351,7 +351,7 @@
 - id: eks
   name: EKS
   description: AWS EKS cluster
-  availability: alpha
+  availability: stable
   workflow: configuration/workflow-eks.yaml
   parameters:
     - name: name
@@ -388,7 +388,7 @@
 - id: aks
   name: AKS
   description: Azure AKS cluster
-  availability: alpha
+  availability: stable
   workflow: configuration/workflow-aks.yaml
   parameters:
     - name: name
@@ -440,7 +440,7 @@
 - id: aro
   name: ARO
   description: Openshift ARO cluster
-  availability: alpha
+  availability: stable
   workflow: configuration/workflow-openshift-aro.yaml
   parameters:
     - name: name
@@ -473,7 +473,7 @@
 - id: rosa
   name: ROSA
   description: Openshift ROSA cluster
-  availability: alpha
+  availability: stable
   workflow: configuration/workflow-openshift-rosa.yaml
   parameters:
     - name: name
@@ -506,7 +506,7 @@
 - id: osd-on-aws
   name: OSD on AWS
   description: Openshift dedicated on AWS
-  availability: alpha
+  availability: stable
   workflow: configuration/workflow-osd-aws.yaml
   parameters:
     - name: name
@@ -539,7 +539,7 @@
 - id: osd-on-gcp
   name: OSD on GCP
   description: Openshift dedicated on GCP
-  availability: alpha
+  availability: stable
   workflow: configuration/workflow-osd-gcp.yaml
   parameters:
     - name: name
