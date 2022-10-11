@@ -3,16 +3,21 @@ name: Lint
 on:
   workflow_call:
 
-defaults:
-  run:
-    working-directory: go/src/github.com/stackrox/infra
-
 jobs:
 
-  lint:
+  actionlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: reviewdog/action-actionlint@v1
+
+  golint:
     runs-on: ubuntu-latest
     container:
       image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.46
+    defaults:
+      run:
+        working-directory: go/src/github.com/stackrox/infra
 
     steps:
       - name: Checkout
@@ -21,10 +26,6 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
           path: go/src/github.com/stackrox/infra
-
-      - uses: reviewdog/action-actionlint@v1
-        with:
-          workdir: go/src/github.com/stackrox/infra
 
       - name: Setup env
         run: |
