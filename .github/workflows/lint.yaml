@@ -23,6 +23,8 @@ jobs:
           path: go/src/github.com/stackrox/infra
 
       - uses: reviewdog/action-actionlint@v1
+        with:
+          workdir: go/src/github.com/stackrox/infra
 
       - name: Setup env
         run: |
