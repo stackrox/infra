@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useState, ReactElement } from 'react';
 import { AxiosPromise } from 'axios';
 
@@ -84,3 +85,5 @@ export default function LaunchPageSection(): ReactElement {
     </PageSection>
   );
 }
+
+/* eslint-enable jsx-a11y/label-has-associated-control */
