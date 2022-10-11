@@ -104,8 +104,8 @@ jobs:
 
           version="$(bin/infractl -k -e localhost:8443 version --json)"
           echo "$version"
-          client="$(echo $version | jq -r '.Client.Version')"
-          server="$(echo $version | jq -r '.Server.Version')"
+          client="$(echo "$version" | jq -r '.Client.Version')"
+          server="$(echo "$version" | jq -r '.Server.Version')"
           if [[ "$client" == "$server" ]]; then
             echo "Client and server versions match"
           else
