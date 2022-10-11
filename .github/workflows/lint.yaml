@@ -10,6 +10,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: reviewdog/action-actionlint@v1
+        with:
+          level: info
 
   golint:
     runs-on: ubuntu-latest
