@@ -117,7 +117,7 @@ jobs:
           if [[ "$client" == "$tag" ]]; then
             echo "Infra and make tag match"
           else
-            echo "Infra and make tag are mismatched"
+            echo "Infra and make tag are mismatched (make tag: $tag)"
             exit 1
           fi
 
