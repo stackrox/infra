@@ -2,8 +2,6 @@ package common
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
@@ -14,7 +12,8 @@ import (
 type PrettyPrinter interface {
 	// PrettyPrint renders this type in a pretty, human-readable fashion to
 	// STDOUT.
-	PrettyPrint()
+	PrettyPrint(cmd *cobra.Command)
+	PrettyJSONPrint(cmd *cobra.Command) error
 }
 
 // GRPCHandler represents a function that consumes a gRPC connection, and
@@ -43,18 +42,11 @@ func WithGRPCHandler(handler GRPCHandler) func(cmd *cobra.Command, args []string
 
 		// The --json flag was passed, render result as json.
 		if jsonOutput() {
-			data, err := json.MarshalIndent(result, "", "  ")
-			if err != nil {
-				return err
-			}
-
-			// Print json body with a trailing newline.
-			fmt.Printf("%s\n", string(data))
-			return nil
+			return result.PrettyJSONPrint(cmd)
 		}
 
 		// Pretty print result instead.
-		result.PrettyPrint()
+		result.PrettyPrint(cmd)
 		return nil
 	}
 }

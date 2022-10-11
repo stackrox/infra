@@ -40,5 +40,5 @@ func run(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, args []st
 		return nil, err
 	}
 
-	return prettyCluster(*resp), nil
+	return &prettyCluster{*resp}, nil
 }

@@ -2,7 +2,6 @@ package common
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/spf13/cobra"
@@ -20,7 +19,7 @@ func checkForVersionDiff(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.
 	serverVersion, _ := v1.NewVersionServiceClient(conn).GetVersion(ctx, &empty.Empty{})
 
 	if serverVersion != nil && clientVersion.Version != serverVersion.Version {
-		fmt.Printf("---\ninfractl and infra-server versions are different.\n"+
+		cmd.Printf("---\ninfractl and infra-server versions are different.\n"+
 			"%s -v- %s\n"+
 			"You can use `infractl cli upgrade` to update.\n---\n",
 			clientVersion.Version, serverVersion.Version)

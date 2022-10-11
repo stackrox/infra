@@ -42,6 +42,7 @@ require (
 	github.com/argoproj/argo-events v0.17.1-0.20220223155401-ddda8800f9f8 // indirect
 	github.com/argoproj/pkg v0.11.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
+	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/colinmarc/hdfs v1.1.4-0.20180805212432-9746310a4d31 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect

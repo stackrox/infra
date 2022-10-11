@@ -1,8 +1,10 @@
 package list
 
 import (
-	"fmt"
+	"encoding/json"
 	"time"
+
+	"github.com/spf13/cobra"
 
 	"github.com/golang/protobuf/ptypes"
 	"github.com/stackrox/infra/cmd/infractl/common"
@@ -11,7 +13,7 @@ import (
 
 type prettyClusterListResponse v1.ClusterListResponse
 
-func (p prettyClusterListResponse) PrettyPrint() {
+func (p prettyClusterListResponse) PrettyPrint(cmd *cobra.Command) {
 	for _, cluster := range p.Clusters {
 		var (
 			createdOn, _   = ptypes.Timestamp(cluster.GetCreatedOn())
@@ -20,15 +22,25 @@ func (p prettyClusterListResponse) PrettyPrint() {
 			remaining      = time.Until(createdOn.Add(lifespan))
 		)
 
-		fmt.Printf("%s \n", cluster.GetID())
-		fmt.Printf("  Flavor:      %s\n", cluster.GetFlavor())
-		fmt.Printf("  Owner:       %s\n", cluster.GetOwner())
-		fmt.Printf("  Description: %s\n", cluster.GetDescription())
-		fmt.Printf("  Status:      %s\n", cluster.GetStatus())
-		fmt.Printf("  Created:     %v\n", common.FormatTime(createdOn))
+		cmd.Printf("%s \n", cluster.GetID())
+		cmd.Printf("  Flavor:      %s\n", cluster.GetFlavor())
+		cmd.Printf("  Owner:       %s\n", cluster.GetOwner())
+		cmd.Printf("  Description: %s\n", cluster.GetDescription())
+		cmd.Printf("  Status:      %s\n", cluster.GetStatus())
+		cmd.Printf("  Created:     %v\n", common.FormatTime(createdOn))
 		if destroyedOn.Unix() != 0 {
-			fmt.Printf("  Destroyed:   %v\n", common.FormatTime(destroyedOn))
+			cmd.Printf("  Destroyed:   %v\n", common.FormatTime(destroyedOn))
 		}
-		fmt.Printf("  Lifespan:    %s\n", common.FormatExpiration(remaining))
+		cmd.Printf("  Lifespan:    %s\n", common.FormatExpiration(remaining))
 	}
+}
+
+func (p prettyClusterListResponse) PrettyJSONPrint(cmd *cobra.Command) error {
+	data, err := json.MarshalIndent(p, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	cmd.Printf("%s\n", string(data))
+	return nil
 }
