@@ -28,7 +28,7 @@ func Command() *cobra.Command {
 		RunE:    common.WithGRPCHandler(run),
 	}
 
-	cmd.Flags().Bool("all", false, "include clusters not owned by you")
+	cmd.Flags().Bool("all", false, "include alpha flavors")
 	return cmd
 }
 
