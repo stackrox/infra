@@ -47,6 +47,10 @@ jobs:
         run: |
           make proto-generated-srcs
 
+      - name: Go Unit Test
+        run: |
+          make unit-test
+
       - name: Build
         run: |
           make image
