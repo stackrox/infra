@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+case "$OSTYPE" in
+  darwin*)  export b64command="gbase64";;
+  linux*)   export b64command="base64" ;;
+  *)        echo "unknown OS: $OSTYPE"; exit 1 ;;
+esac
+
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
 source "$ROOT/scripts/lib.sh"
 
@@ -39,7 +45,7 @@ create_consolidated_values() {
         local helm_safe_key="${cfg_file//[.-]/_}"
         helm_safe_key="${helm_safe_key////__}"
 
-        echo "$helm_safe_key: $(base64 -w0 < "$cfg_file")" >> "$values_file"
+        echo "$helm_safe_key: $($b64command -w0 < "$cfg_file")" >> "$values_file"
         echo >> "$values_file"
     done
     popd > /dev/null
