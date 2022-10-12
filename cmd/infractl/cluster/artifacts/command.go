@@ -6,6 +6,7 @@ import (
 	"compress/gzip"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"net/http"
@@ -122,6 +123,7 @@ func download(downloadDir string, artifact v1.Artifact) (filename string, err er
 		return "", err
 	}
 
+	fmt.Printf("%s -> %v", filename, artifact.Mode)
 	if err = os.Chmod(filename, fs.FileMode(artifact.Mode)); err != nil {
 		return "", err
 	}
