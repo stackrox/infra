@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-const examples = `# List all non alpha flavors.
+const examples = `# List all flavors except alpha ones.
 $ infractl flavor list
 
 # List all flavors.
