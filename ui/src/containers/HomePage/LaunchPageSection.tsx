@@ -1,4 +1,5 @@
-import React, { ReactElement } from 'react';
+/* eslint-disable jsx-a11y/label-has-associated-control */
+import React, { useState, ReactElement } from 'react';
 import { AxiosPromise } from 'axios';
 
 import { V1FlavorListResponse, FlavorServiceApi } from 'generated/client';
@@ -12,10 +13,15 @@ import assertDefined from 'utils/assertDefined';
 
 const flavorService = new FlavorServiceApi(configuration);
 
-const fetchFlavors = (): AxiosPromise<V1FlavorListResponse> => flavorService.list();
+const fetchFlavors = (): AxiosPromise<V1FlavorListResponse> => flavorService.list(false);
+const fetchAllFlavors = (): AxiosPromise<V1FlavorListResponse> => flavorService.list(true);
 
-function FlavorCards(): ReactElement {
-  const { loading, error, data } = useApiQuery(fetchFlavors);
+type FlavorCardsProps = {
+  showAllFlavors: boolean;
+};
+
+function FlavorCards({ showAllFlavors = false }: FlavorCardsProps): ReactElement {
+  const { loading, error, data } = useApiQuery(showAllFlavors ? fetchAllFlavors : fetchFlavors);
 
   if (loading) {
     return <FullPageSpinner />;
@@ -43,11 +49,41 @@ function FlavorCards(): ReactElement {
 }
 
 export default function LaunchPageSection(): ReactElement {
+  const [showAllFlavors, setShowAllFlavors] = useState(false);
+
+  function toggleFlavorFilter() {
+    setShowAllFlavors(!showAllFlavors);
+  }
+
+  const headerText = showAllFlavors ? 'All Flavors' : 'My Flavors';
+  const flavorFilterToggle = (
+    <span className="flex items-center">
+      <label htmlFor="flavor-filter-toggle" className="mr-2 text-lg">
+        Show All Flavors
+      </label>
+      <input
+        type="checkbox"
+        id="flavor-filter-toggle"
+        checked={showAllFlavors}
+        onChange={toggleFlavorFilter}
+        className="w-4 h-4 rounded-sm"
+      />
+    </span>
+  );
+
+  const header = (
+    <div className="flex justify-between items-center ">
+      <span>{headerText}</span>
+      {flavorFilterToggle}
+    </div>
+  );
   return (
-    <PageSection header="Launch Cluster">
+    <PageSection header={header}>
       <div className="flex flex-wrap -m-2">
-        <FlavorCards />
+        <FlavorCards showAllFlavors={showAllFlavors} />
       </div>
     </PageSection>
   );
 }
+
+/* eslint-enable jsx-a11y/label-has-associated-control */

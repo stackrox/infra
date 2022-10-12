@@ -14,7 +14,7 @@ GENERATOR_OUTPUT_DIR="ui/${CLIENT_DIR}"
 
 set -x
 
-docker run --rm -v "${PWD}/..:/local" "${OPENAPI_GENERATOR_CLI_IMAGE}" generate \
+docker run --privileged --rm -v "${PWD}/..:/local" "${OPENAPI_GENERATOR_CLI_IMAGE}" generate \
   -i "/local/${SWAGGER_FILE}" \
   -g typescript-axios \
   --skip-validate-spec \
