@@ -39,7 +39,7 @@ create_consolidated_values() {
         local helm_safe_key="${cfg_file//[.-]/_}"
         helm_safe_key="${helm_safe_key////__}"
 
-        echo "$helm_safe_key: $(base64 -w0 < "$cfg_file")" >> "$values_file"
+        echo "$helm_safe_key: $(base64 < "$cfg_file" | tr -d '\n')" >> "$values_file"
         echo >> "$values_file"
     done
     popd > /dev/null
