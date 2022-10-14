@@ -9,6 +9,7 @@ import (
 	"sort"
 
 	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
+	workflowv1 "github.com/argoproj/argo-workflows/v3/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
@@ -24,8 +25,9 @@ type pair struct {
 
 // Registry represents the set of all configured flavors.
 type Registry struct {
-	flavors       map[string]pair
-	defaultFlavor string
+	flavors                    map[string]pair
+	defaultFlavor              string
+	k8sWorkflowTemplatesClient workflowv1.WorkflowTemplateInterface
 }
 
 // Flavors returns a sorted list of all registered flavors.
@@ -115,6 +117,10 @@ func NewFromConfig(filename string) (*Registry, error) {
 
 	registry := &Registry{
 		flavors: make(map[string]pair),
+	}
+
+	if err := registry.initWorkflowTemplatesClient(); err != nil {
+		return nil, err
 	}
 
 	for _, flavorCfg := range flavorsCfg {

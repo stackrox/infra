@@ -31,6 +31,21 @@ func GetK8sWorkflowsClient(workflowNamespace string) (workflowv1.WorkflowInterfa
 	return client.ArgoprojV1alpha1().Workflows(workflowNamespace), nil
 }
 
+// GetK8sWorkflowTemplatesClient provides access to argo workflow templates
+func GetK8sWorkflowTemplatesClient(workflowTemplatesNamespace string) (workflowv1.WorkflowTemplateInterface, error) {
+	config, err := restConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	client, err := versioned.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
+
+	return client.ArgoprojV1alpha1().WorkflowTemplates(workflowTemplatesNamespace), nil
+}
+
 // GetK8sPodsClient provides access to pods
 func GetK8sPodsClient(workflowNamespace string) (k8sv1.PodInterface, error) {
 	config, err := restConfig()
