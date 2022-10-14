@@ -2,6 +2,9 @@
 package flavor
 
 import (
+	"log"
+
+	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/kube"
 )
 
@@ -16,4 +19,9 @@ func (r *Registry) initWorkflowTemplatesClient() error {
 	r.k8sWorkflowTemplatesClient = k8sWorkflowTemplatesClient
 
 	return nil
+}
+
+func (r *Registry) appendWorkflowTemplates(results []v1.Flavor) []v1.Flavor {
+	log.Println("hooked into WFTs")
+	return results
 }

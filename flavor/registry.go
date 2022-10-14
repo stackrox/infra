@@ -36,6 +36,7 @@ func (r *Registry) Flavors() []v1.Flavor {
 	for _, pair := range r.flavors {
 		results = append(results, pair.flavor)
 	}
+	results = r.appendWorkflowTemplates(results)
 
 	sort.Slice(results, func(i, j int) bool {
 		if results[i].Availability != results[j].Availability {
