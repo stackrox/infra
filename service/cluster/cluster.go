@@ -26,6 +26,7 @@ import (
 	"github.com/stackrox/infra/cmd/infractl/common"
 	"github.com/stackrox/infra/flavor"
 	v1 "github.com/stackrox/infra/generated/api/v1"
+	"github.com/stackrox/infra/pkg/kube"
 	"github.com/stackrox/infra/service/middleware"
 	"github.com/stackrox/infra/signer"
 	"github.com/stackrox/infra/slack"
@@ -85,12 +86,12 @@ var (
 func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSource calendar.EventSource, slackClient slack.Slacker) (middleware.APIService, error) {
 	workflowNamespace := "default"
 
-	k8sWorkflowsClient, err := getK8sWorkflowsClient(workflowNamespace)
+	k8sWorkflowsClient, err := kube.GetK8sWorkflowsClient(workflowNamespace)
 	if err != nil {
 		return nil, err
 	}
 
-	k8sPodsClient, err := getK8sPodsClient(workflowNamespace)
+	k8sPodsClient, err := kube.GetK8sPodsClient(workflowNamespace)
 	if err != nil {
 		return nil, err
 	}
