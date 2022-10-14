@@ -1,3 +1,4 @@
+//Package kube provides access to the k8s API
 package kube
 
 import (
@@ -15,21 +16,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-func restConfig() (*rest.Config, error) {
-	homeDir := os.Getenv("HOME")
-	if homeDir != "" {
-		// If there is a hone directory, and there is also a kubeconfig inside
-		// that home directory, then we're running in out-of-cluster mode.
-		kubeconfig := filepath.Join(homeDir, ".kube", "config")
-		if _, err := os.Stat(kubeconfig); err == nil {
-			return clientcmd.BuildConfigFromFlags("", kubeconfig)
-		}
-	}
-
-	// Otherwise, use in-cluster mode.
-	return rest.InClusterConfig()
-}
-
+// GetK8sWorkflowsClient provides access to argo workflows
 func GetK8sWorkflowsClient(workflowNamespace string) (workflowv1.WorkflowInterface, error) {
 	config, err := restConfig()
 	if err != nil {
@@ -44,6 +31,7 @@ func GetK8sWorkflowsClient(workflowNamespace string) (workflowv1.WorkflowInterfa
 	return client.ArgoprojV1alpha1().Workflows(workflowNamespace), nil
 }
 
+// GetK8sPodsClient provides access to pods
 func GetK8sPodsClient(workflowNamespace string) (k8sv1.PodInterface, error) {
 	config, err := restConfig()
 	if err != nil {
@@ -56,4 +44,19 @@ func GetK8sPodsClient(workflowNamespace string) (k8sv1.PodInterface, error) {
 	}
 
 	return client.CoreV1().Pods(workflowNamespace), nil
+}
+
+func restConfig() (*rest.Config, error) {
+	homeDir := os.Getenv("HOME")
+	if homeDir != "" {
+		// If there is a hone directory, and there is also a kubeconfig inside
+		// that home directory, then we're running in out-of-cluster mode.
+		kubeconfig := filepath.Join(homeDir, ".kube", "config")
+		if _, err := os.Stat(kubeconfig); err == nil {
+			return clientcmd.BuildConfigFromFlags("", kubeconfig)
+		}
+	}
+
+	// Otherwise, use in-cluster mode.
+	return rest.InClusterConfig()
 }
