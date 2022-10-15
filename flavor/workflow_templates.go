@@ -34,8 +34,17 @@ func (r *Registry) appendWorkflowTemplates(results []v1.Flavor) []v1.Flavor {
 		return results
 	}
 
-	for template := range templates.Items {
+	for _, template := range templates.Items {
 		log.Printf("Found workflow template: %v\n", template)
+		flavor := &v1.Flavor{
+			ID:           template.ObjectMeta.Name,
+			Name:         template.ObjectMeta.Annotations["infra.stackrox.io/name"],
+			Description:  template.ObjectMeta.Annotations["infra.stackrox.io/description"],
+			Availability: v1.Flavor_alpha,
+			Parameters:   make(map[string]*v1.Parameter, 0),
+			Artifacts:    make(map[string]*v1.FlavorArtifact, 0),
+		}
+		results = append(results, *flavor)
 	}
 
 	return results

@@ -1,6 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate
 metadata:
+  name: gke-lite
   generateName: gke-lite-
 spec:
   entrypoint: start
