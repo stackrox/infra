@@ -247,6 +247,7 @@ install-local-common:
 			-f chart/infra-server/templates/namespace.yaml; \
 		sleep 10; \
 	fi
+	kubectl apply -f workflows/*
 
 .PHONY: install-local
 install-local: install-local-common
@@ -289,6 +290,7 @@ install-development: render-development
 			-f chart-rendered/infra-server/templates/namespace.yaml; \
 		sleep 10; \
 	fi
+	$(kcdev) apply -f workflows/*
 	$(kcdev) apply -R \
 	    -f chart-rendered/infra-server
 
@@ -309,6 +311,7 @@ install-production: render-production
 			-f chart-rendered/infra-server/templates/namespace.yaml; \
 		sleep 10; \
 	fi
+	$(kcprod) apply -f workflows/*
 	$(kcprod) apply -R \
 	    --context $(prod_context) \
 	    -f chart-rendered/infra-server
