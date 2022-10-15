@@ -3,13 +3,14 @@
 package flavor
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"sort"
 
+	workflowtemplatepkg "github.com/argoproj/argo-workflows/v3/pkg/apiclient/workflowtemplate"
 	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
-	workflowv1 "github.com/argoproj/argo-workflows/v3/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
@@ -25,9 +26,11 @@ type pair struct {
 
 // Registry represents the set of all configured flavors.
 type Registry struct {
-	flavors                    map[string]pair
-	defaultFlavor              string
-	k8sWorkflowTemplatesClient workflowv1.WorkflowTemplateInterface
+	flavors                     map[string]pair
+	defaultFlavor               string
+	argoWorkflowTemplatesClient workflowtemplatepkg.WorkflowTemplateServiceClient
+	argoClientCtx               context.Context
+	workflowTemplateNamespace   string
 }
 
 // Flavors returns a sorted list of all registered flavors.

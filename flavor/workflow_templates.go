@@ -1,27 +1,42 @@
-// This augments the infra.Flavors registry with available argo.WorkflowTemplates
+// Package flavor is augmented with available argo.WorkflowTemplates
 package flavor
 
 import (
+	"context"
 	"log"
 
+	argov3client "github.com/argoproj/argo-workflows/v3/cmd/argo/commands/client"
+	workflowtemplatepkg "github.com/argoproj/argo-workflows/v3/pkg/apiclient/workflowtemplate"
 	v1 "github.com/stackrox/infra/generated/api/v1"
-	"github.com/stackrox/infra/pkg/kube"
 )
 
 func (r *Registry) initWorkflowTemplatesClient() error {
-	workflowTemplateNamespace := "default"
+	ctx, argoClient := argov3client.NewAPIClient(context.Background())
 
-	k8sWorkflowTemplatesClient, err := kube.GetK8sWorkflowTemplatesClient(workflowTemplateNamespace)
+	argoWorkflowTemplatesClient, err := argoClient.NewWorkflowTemplateServiceClient()
 	if err != nil {
 		return err
 	}
 
-	r.k8sWorkflowTemplatesClient = k8sWorkflowTemplatesClient
+	r.argoClientCtx = ctx
+	r.argoWorkflowTemplatesClient = argoWorkflowTemplatesClient
+	r.workflowTemplateNamespace = "default"
 
 	return nil
 }
 
 func (r *Registry) appendWorkflowTemplates(results []v1.Flavor) []v1.Flavor {
-	log.Println("hooked into WFTs")
+	templates, err := r.argoWorkflowTemplatesClient.ListWorkflowTemplates(r.argoClientCtx, &workflowtemplatepkg.WorkflowTemplateListRequest{
+		Namespace: r.workflowTemplateNamespace,
+	})
+	if err != nil {
+		log.Printf("[ERROR] failed to list argo workflow templates: %v", err)
+		return results
+	}
+
+	for template := range templates.Items {
+		log.Printf("Found workflow template: %v\n", template)
+	}
+
 	return results
 }
