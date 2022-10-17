@@ -69,7 +69,7 @@ clean-image:
 .PHONY: unit-test
 unit-test: proto-generated-srcs
 	@echo "+ $@"
-	@go test ./...
+	@go test -v ./...
 
 ##############
 ## Protobuf ##
