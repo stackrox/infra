@@ -11,6 +11,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/pkg/errors"
@@ -119,6 +121,7 @@ func (s *server) RunServer() (<-chan error, error) {
 	// login/logout/static, and also gRPC-Gateway routes.
 	routeMux.Handle("/", serveApplicationResources(s.cfg.Server.StaticDir, s.oidc))
 	routeMux.Handle("/v1/", gwMux)
+	routeMux.Handle("/metrics", promhttp.Handler())
 	s.oidc.Handle(routeMux)
 
 	mux.Handle("/",
