@@ -1,14 +1,17 @@
 package get
 
 import (
-	"encoding/json"
+	"bytes"
 
 	"github.com/spf13/cobra"
 
+	"github.com/gogo/protobuf/jsonpb"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 )
 
-type prettyFlavor v1.Flavor
+type prettyFlavor struct {
+	v1.Flavor
+}
 
 func (p prettyFlavor) PrettyPrint(cmd *cobra.Command) {
 	cmd.Printf("ID:           %s\n", p.ID)
@@ -37,10 +40,14 @@ func (p prettyFlavor) PrettyPrint(cmd *cobra.Command) {
 }
 
 func (p prettyFlavor) PrettyJSONPrint(cmd *cobra.Command) error {
-	data, err := json.MarshalIndent(p, "", "  ")
-	if err != nil {
+	b := new(bytes.Buffer)
+	m := jsonpb.Marshaler{EnumsAsInts: false, EmitDefaults: true, Indent: "  "}
+
+	if err := m.Marshal(b, &p.Flavor); err != nil {
 		return err
 	}
+
+	data := b.Bytes()
 
 	cmd.Printf("%s\n", string(data))
 	return nil

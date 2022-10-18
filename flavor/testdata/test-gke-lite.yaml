@@ -6,6 +6,7 @@ metadata:
   annotations:
     infra.stackrox.io/name: test-gke-lite
     infra.stackrox.io/description: just a test
+    infra.stackrox.io/availability: stable
 spec:
   entrypoint: start
   arguments:

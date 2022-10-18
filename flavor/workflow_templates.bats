@@ -28,7 +28,7 @@ infractl() {
   bin/infractl -e localhost:8443 -k $@
 }
 
-count_flavor_id() {
+expect_count_flavor_id() {
   local expect_ID="$1"
   local expect_count="$2"
   local listing count
@@ -41,24 +41,35 @@ count_flavor_id() {
 
 @test "can add a workflow template" {
   run kubectl apply -f "$BATS_TEST_DIRNAME/testdata/test-gke-lite.yaml"
-  count_flavor_id "test-gke-lite" 1
+  expect_count_flavor_id "test-gke-lite" 1
 }
 
 @test "expects a name" {
   run kubectl apply -f "$BATS_TEST_DIRNAME/testdata/missing-annotations.yaml"
-  count_flavor_id "missing-annotations" 0
+  expect_count_flavor_id "missing-annotations" 0
   run kubectl -n infra logs -l app=infra-server
   assert_output --partial "[WARN] Ignoring a workflow template without infra.stackrox.io/name annotation: missing-annotations"
 }
 
 @test "expects a description" {
   run kubectl apply -f "$BATS_TEST_DIRNAME/testdata/missing-annotations.yaml"
-  count_flavor_id "missing-annotations" 0
+  expect_count_flavor_id "missing-annotations" 0
   run kubectl -n infra logs -l app=infra-server
   assert_output --partial "[WARN] Ignoring a workflow template without infra.stackrox.io/description annotation: missing-annotations"
 }
 
 @test "availability is alpha by default" {
   run kubectl apply -f "$BATS_TEST_DIRNAME/testdata/default-availability.yaml"
-  count_flavor_id "default-availability" 1
+  flavor="$(infractl flavor get default-availability --json)"
+  assert_success
+  availability="$(echo "$flavor" | jq -r '.Availability')"
+  assert_equal "$availability" "alpha"
+}
+
+@test "availability can be set" {
+  run kubectl apply -f "$BATS_TEST_DIRNAME/testdata/test-gke-lite.yaml"
+  flavor="$(infractl flavor get test-gke-lite --json)"
+  assert_success
+  availability="$(echo "$flavor" | jq -r '.Availability')"
+  assert_equal "$availability" "stable"
 }

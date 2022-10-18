@@ -39,7 +39,7 @@ func (r *Registry) Flavors() []v1.Flavor {
 	for _, pair := range r.flavors {
 		results = append(results, pair.flavor)
 	}
-	results = r.appendWorkflowTemplates(results)
+	results = r.appendFromWorkflowTemplates(results)
 
 	sort.Slice(results, func(i, j int) bool {
 		if results[i].Availability != results[j].Availability {
@@ -93,6 +93,9 @@ func (r *Registry) Default() string {
 func (r *Registry) Get(id string) (v1.Flavor, v1alpha1.Workflow, bool) {
 	if pair, found := r.flavors[id]; found {
 		return pair.flavor, pair.workflow, true
+	}
+	if flavor := r.getFromWorkflowTemplate(id); flavor != nil {
+		return *flavor, v1alpha1.Workflow{}, true
 	}
 
 	return v1.Flavor{}, v1alpha1.Workflow{}, false
