@@ -35,12 +35,34 @@ func (r *Registry) appendWorkflowTemplates(results []v1.Flavor) []v1.Flavor {
 	}
 
 	for _, template := range templates.Items {
-		log.Printf("Found workflow template: %v\n", template)
+		valid := true
+		log.Printf("Found workflow template: %v\n", template.ObjectMeta.Name)
+		if template.ObjectMeta.Annotations["infra.stackrox.io/name"] == "" {
+			log.Printf("[WARN] Ignoring a workflow template without infra.stackrox.io/name annotation: %v\n", template.ObjectMeta.Name)
+			valid = false
+		}
+		if template.ObjectMeta.Annotations["infra.stackrox.io/description"] == "" {
+			log.Printf("[WARN] Ignoring a workflow template without infra.stackrox.io/description annotation: %v\n", template.ObjectMeta.Name)
+			valid = false
+		}
+		availability := v1.Flavor_alpha
+		if template.ObjectMeta.Annotations["infra.stackrox.io/availability"] != "" {
+			value, ok := v1.FlavorAvailability_value[template.ObjectMeta.Annotations["infra.stackrox.io/availability"]]
+			if !ok {
+				log.Printf("[WARN] Ignoring a workflow template with an unknown infra.stackrox.io/availability annotation: %v, %v\n",
+					template.ObjectMeta.Name, template.ObjectMeta.Annotations["infra.stackrox.io/availability"])
+				valid = false
+			}
+			availability = v1.FlavorAvailability(value)
+		}
+		if !valid {
+			continue
+		}
 		flavor := &v1.Flavor{
 			ID:           template.ObjectMeta.Name,
 			Name:         template.ObjectMeta.Annotations["infra.stackrox.io/name"],
 			Description:  template.ObjectMeta.Annotations["infra.stackrox.io/description"],
-			Availability: v1.Flavor_alpha,
+			Availability: availability,
 			Parameters:   make(map[string]*v1.Parameter),
 			Artifacts:    make(map[string]*v1.FlavorArtifact),
 		}
