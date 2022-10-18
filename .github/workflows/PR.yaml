@@ -67,6 +67,7 @@ jobs:
       GOOGLE_APPLICATION_CREDENTIALS: ${{secrets.GCP_INFRA_CI_AUTOMATION_SA}}
       KUBECONFIG: artifacts/kubeconfig
       INFRA_TOKEN: ${{secrets.INFRA_TOKEN}}
+      INFRACTL: bin/infractl -k -e localhost:8443
 
     steps:
       - name: Checkout
@@ -98,16 +99,13 @@ jobs:
           make install-local-without-write
 
           nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
+          echo "PORT_FORWARD_PID=$!" >> "$GITHUB_ENV"
           sleep 5
           make pull-infractl-from-dev-server
-          kill %1
 
       - name: Check the deployment
         run: |
-          nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
-          sleep 5
-
-          version="$(bin/infractl -k -e localhost:8443 version --json)"
+          version="$($INFRACTL version --json)"
           echo "$version"
           client="$(echo "$version" | jq -r '.Client.Version')"
           server="$(echo "$version" | jq -r '.Server.Version')"
@@ -126,4 +124,6 @@ jobs:
             exit 1
           fi
 
-          kill %1
+      - name: Kill the port-forward
+        run: |
+          kill "$PORT_FORWARD_PID"
