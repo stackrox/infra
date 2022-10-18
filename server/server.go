@@ -11,6 +11,8 @@ import (
 	"os"
 	"strings"
 
+	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -65,7 +67,14 @@ func (s *server) RunServer() (<-chan error, error) {
 			middleware.ContextInterceptor(middleware.AdminEnricher(s.cfg.Password)),
 			// Enforce authenticated user access on resources that declare it.
 			middleware.ContextInterceptor(middleware.EnforceAccess),
+
+			// Collect and expose Prometheus metrics
+			grpc_prometheus.UnaryServerInterceptor,
 		)),
+		grpc.StreamInterceptor(
+			// Collect and expose Prometheus metrics
+			grpc_prometheus.StreamServerInterceptor,
+		),
 	)
 
 	// Register the gRPC API service.
