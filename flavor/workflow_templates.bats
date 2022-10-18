@@ -25,7 +25,7 @@ setup() {
 }
 
 infractl() {
-  bin/infractl -e localhost:8443 -k $@
+  bin/infractl -e localhost:8443 -k "$@"
 }
 
 expect_count_flavor_id() {
@@ -35,7 +35,7 @@ expect_count_flavor_id() {
 
   listing="$(infractl flavor list --all --json)"
   assert_success
-  count="$(echo "$listing" | jq '.Flavors[] | select(.ID == "'$expect_ID'")' | jq -s 'length')"
+  count="$(echo "$listing" | jq '.Flavors[] | select(.ID == "'"$expect_ID"'")' | jq -s 'length')"
   assert_equal "$count" "$expect_count"
 }
 
