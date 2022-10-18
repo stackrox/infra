@@ -266,7 +266,8 @@ install-local-without-write: install-local-common
 	    -f -
 	# Bounce the infra-server to ensure proper update
 	@sleep 5
-	kubectl -n infra delete pods -l app=infra-server
+	kubectl -n infra delete pods -l app=infra-server --wait
+	@sleep 5
 
 .PHONY: local-data-dev-cycle
 local-data-dev-cycle: render-local install-local
@@ -372,4 +373,4 @@ pull-infractl-from-dev-server:
 
 .PHONY: e2e-tests
 e2e-tests:
-	@bats **/*.bats
+	@bats -- **/*.bats

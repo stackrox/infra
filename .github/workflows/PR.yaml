@@ -56,7 +56,7 @@ jobs:
         run: |
           ./scripts/add-PR-comment-for-deploy-to-dev.sh "${{ github.event.pull_request.html_url }}" "$CLUSTER_NAME"
 
-  deploy-to-dev-cluster:
+  deploy-and-test:
     needs:
       - build-and-push
       - create-dev-cluster
@@ -101,6 +101,7 @@ jobs:
           nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
           echo "PORT_FORWARD_PID=$!" >> "$GITHUB_ENV"
           sleep 5
+
           make pull-infractl-from-dev-server
 
       - name: Check the deployment
@@ -125,7 +126,10 @@ jobs:
           fi
 
       - name: Run e2e tests
-        run: make e2e-tests
+        run: |
+          make e2e-tests || touch FAIL
+          kubectl -n infra logs -l app=infra-server
+          [[ ! -f FAIL ]]
 
       - name: Kill the port-forward
         run: |
