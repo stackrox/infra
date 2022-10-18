@@ -25,7 +25,7 @@ jobs:
   create-dev-cluster:
     runs-on: ubuntu-latest
     steps:
-      - uses: stackrox/actions/infra/create-cluster@main
+      - uses: stackrox/actions/infra/create-cluster@v1
         with:
           flavor: gke-default
           name: infra-pr-${{ github.event.pull_request.number }}
