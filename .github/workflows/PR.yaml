@@ -105,6 +105,7 @@ jobs:
 
       - name: Check the deployment
         run: |
+          ps axwf
           version="$($INFRACTL version --json)"
           echo "$version"
           client="$(echo "$version" | jq -r '.Client.Version')"
