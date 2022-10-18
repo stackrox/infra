@@ -369,3 +369,7 @@ pull-infractl-from-dev-server:
           > bin/infractl
 	chmod +x bin/infractl
 	bin/infractl -k -e localhost:8443 version
+
+.PHONY: e2e-tests
+e2e-tests:
+	@bats **/*.bats

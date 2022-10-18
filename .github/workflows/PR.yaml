@@ -105,7 +105,6 @@ jobs:
 
       - name: Check the deployment
         run: |
-          ps axwf
           version="$($INFRACTL version --json)"
           echo "$version"
           client="$(echo "$version" | jq -r '.Client.Version')"
@@ -124,6 +123,9 @@ jobs:
             echo "Infra and make tag are mismatched (make tag: $tag)"
             exit 1
           fi
+
+      - name: Run e2e tests
+        run: make e2e-tests
 
       - name: Kill the port-forward
         run: |
