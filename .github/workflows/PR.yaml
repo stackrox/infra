@@ -64,6 +64,8 @@ jobs:
     container:
       image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.51
     env:
+      GOOGLE_APPLICATION_CREDENTIALS: ${{secrets.GCP_INFRA_CI_AUTOMATION_SA}}
+      KUBECONFIG: artifacts/kubeconfig
       INFRA_TOKEN: ${{secrets.INFRA_TOKEN}}
 
     steps:
@@ -88,10 +90,7 @@ jobs:
           mkdir artifacts
           bin/production-infractl artifacts "$CLUSTER_NAME" -d artifacts
 
-      - name: Deploy infra to dev cluster and check the deployment
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{secrets.GCP_INFRA_CI_AUTOMATION_SA}}
-          KUBECONFIG: artifacts/kubeconfig
+      - name: Deploy infra to dev cluster
         run: |
           gcloud auth activate-service-account --key-file <(echo "$GOOGLE_APPLICATION_CREDENTIALS")
           gcloud auth list
@@ -101,6 +100,12 @@ jobs:
           nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
           sleep 5
           make pull-infractl-from-dev-server
+          kill %1
+
+      - name: Check the deployment
+        run: |
+          nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
+          sleep 5
 
           version="$(bin/infractl -k -e localhost:8443 version --json)"
           echo "$version"
