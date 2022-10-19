@@ -81,7 +81,7 @@ expect_count_flavor_id() {
   assert_output --partial "[WARN] Ignoring a workflow template with an unknown infra.stackrox.io/availability annotation: invalid-availability, woot!"
 }
 
-// Parameters
+# Parameters
 
 @test "a required parameter shows as such" {
   run kubectl apply -f "$BATS_TEST_DIRNAME/testdata/test-gke-lite.yaml"
