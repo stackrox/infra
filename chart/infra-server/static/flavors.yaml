@@ -104,7 +104,7 @@
 
     - name: nodes
       description: number of nodes
-      value: '3'
+      value: "3"
       kind: optional
 
     - name: machine-type
@@ -114,7 +114,7 @@
 
     - name: k8s-version
       description: GKE kubernetes version
-      value: ''
+      value: ""
       kind: optional
       help: |
         e.g. 1.19.12-gke.2100. Use 'gcloud container get-server-config --zone=us-central1' to see all versions.
@@ -128,7 +128,7 @@
       description: The GCP image type to use for the cluster
       value: ubuntu
       kind: optional
-      help: 'List of image types: https://cloud.google.com/kubernetes-engine/docs/concepts/node-images'
+      help: "List of image types: https://cloud.google.com/kubernetes-engine/docs/concepts/node-images"
 
     - name: gcp-zone
       description: The zone in GCP to delete the cluster from
@@ -166,7 +166,7 @@
 
     - name: nodes
       description: number of worker nodes
-      value: '2'
+      value: "2"
       kind: optional
 
     - name: machine-type
@@ -364,7 +364,7 @@
 
     - name: nodes
       description: number of nodes
-      value: '2'
+      value: "2"
       kind: optional
 
     - name: machine-type
@@ -397,7 +397,7 @@
 
     - name: nodes
       description: number of nodes
-      value: '3'
+      value: "3"
       kind: optional
 
     - name: machine-type
@@ -449,7 +449,7 @@
 
     - name: nodes
       description: number of nodes
-      value: '4'
+      value: "4"
       kind: optional
 
     - name: machine-type
@@ -482,7 +482,7 @@
 
     - name: nodes
       description: number of nodes
-      value: '4'
+      value: "4"
       kind: optional
 
     - name: machine-type
@@ -515,7 +515,7 @@
 
     - name: nodes
       description: number of nodes (multiple of 3)
-      value: '3'
+      value: "3"
       kind: optional
 
     - name: machine-type
@@ -548,7 +548,7 @@
 
     - name: nodes
       description: number of nodes (multiple of 3)
-      value: '3'
+      value: "3"
       kind: optional
 
     - name: machine-type
