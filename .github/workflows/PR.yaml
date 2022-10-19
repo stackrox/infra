@@ -142,7 +142,7 @@ jobs:
           $INFRACTL version || true
 
           make e2e-tests || touch FAIL
-          kubectl -n infra logs -l app=infra-server
+          kubectl -n infra logs -l app=infra-server --tail=-1
           kill %1
 
           [[ ! -f FAIL ]]
