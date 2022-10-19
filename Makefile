@@ -373,4 +373,4 @@ pull-infractl-from-dev-server:
 
 .PHONY: e2e-tests
 e2e-tests:
-	@bats -- **/*.bats
+	@bats -r .
