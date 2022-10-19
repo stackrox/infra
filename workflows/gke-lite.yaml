@@ -43,16 +43,16 @@ spec:
   templates:
     - name: start
       steps:
-        - - name: create
-            template: create
-        - - name: wait
-            template: wait
-        - - name: destroy
-            template: destroy
-            arguments:
-              parameters:
-                - name: name
-                  value: "{{steps.create.outputs.parameters.cluster_name}}"
+        - name: create
+          template: create
+        - name: wait
+          template: wait
+        - name: destroy
+          template: destroy
+          arguments:
+            parameters:
+              - name: name
+                value: "{{steps.create.outputs.parameters.cluster_name}}"
 
     - name: create
       activeDeadlineSeconds: 3600
