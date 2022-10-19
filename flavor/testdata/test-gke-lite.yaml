@@ -21,8 +21,11 @@ spec:
       - name: k8s-version
         description: A parameter to test optional without default
       - name: pod-security-policy
+        description: Descriptions are required
       - name: gcp-image-type
+        description: Descriptions are required
       - name: gcp-zone
+        description: Descriptions are required
 
   volumes:
     - name: credentials

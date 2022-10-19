@@ -61,14 +61,14 @@ func (r *Registry) getFromWorkflowTemplate(id string) (*v1.Flavor, *v1alpha1.Wor
 func workflowTemplate2Flavor(template *v1alpha1.WorkflowTemplate) *v1.Flavor {
 	valid := true
 	if template.ObjectMeta.Annotations["infra.stackrox.io/description"] == "" {
-		log.Printf("[WARN] Ignoring a workflow template without infra.stackrox.io/description annotation: %v\n", template.ObjectMeta.Name)
+		log.Printf("[WARN] Ignoring a workflow template without infra.stackrox.io/description annotation: %s\n", template.ObjectMeta.Name)
 		valid = false
 	}
 	availability := v1.Flavor_alpha
 	if template.ObjectMeta.Annotations["infra.stackrox.io/availability"] != "" {
 		value, ok := v1.FlavorAvailability_value[template.ObjectMeta.Annotations["infra.stackrox.io/availability"]]
 		if !ok {
-			log.Printf("[WARN] Ignoring a workflow template with an unknown infra.stackrox.io/availability annotation: %v, %v\n",
+			log.Printf("[WARN] Ignoring a workflow template with an unknown infra.stackrox.io/availability annotation: %s, %s\n",
 				template.ObjectMeta.Name, template.ObjectMeta.Annotations["infra.stackrox.io/availability"])
 			valid = false
 		}
@@ -84,9 +84,11 @@ func workflowTemplate2Flavor(template *v1alpha1.WorkflowTemplate) *v1.Flavor {
 			Name:  wfParameter.Name,
 			Order: int32(idx + 1),
 		}
-		if wfParameter.Description != nil {
-			parameter.Description = wfParameter.Description.String()
+		if wfParameter.Description == nil {
+			log.Printf("[WARN] Ignoring a workflow template with a parameter (%s) that has no description: %s\n", wfParameter.Name, template.ObjectMeta.Name)
+			continue
 		}
+		parameter.Description = wfParameter.Description.String()
 		if wfParameter.Default == nil && wfParameter.Value == nil {
 			// Required
 			parameter.Optional = false

@@ -24,21 +24,6 @@ setup() {
   kubectl delete workflowtemplates --all --wait
 }
 
-infractl() {
-  bin/infractl -e localhost:8443 -k "$@"
-}
-
-expect_count_flavor_id() {
-  local expect_ID="$1"
-  local expect_count="$2"
-  local listing count
-
-  listing="$(infractl flavor list --all --json)"
-  assert_success
-  count="$(echo "$listing" | jq '.Flavors[] | select(.ID == "'"$expect_ID"'")' | jq -s 'length')"
-  assert_equal "$count" "$expect_count"
-}
-
 @test "can add a workflow template" {
   run kubectl apply -f "$BATS_TEST_DIRNAME/testdata/test-gke-lite.yaml"
   expect_count_flavor_id "test-gke-lite" 1
@@ -89,6 +74,13 @@ expect_count_flavor_id() {
 }
 
 # Parameters
+
+@test "parameters must have descriptions" {
+  run kubectl apply -f "$BATS_TEST_DIRNAME/testdata/missing-parameter-descriptions.yaml"
+  expect_count_flavor_id "missing-parameter-descriptions" 0
+  run kubectl -n infra logs -l app=infra-server
+  assert_output --partial "[WARN] Ignoring a workflow template with a parameter (pod-security-policy) that has no description: missing-parameter-descriptions"
+}
 
 @test "a required parameter shows as such" {
   run kubectl apply -f "$BATS_TEST_DIRNAME/testdata/test-gke-lite.yaml"
@@ -145,3 +137,17 @@ expect_count_flavor_id() {
   assert_equal "$order" "7"
 }
 
+infractl() {
+  bin/infractl -e localhost:8443 -k "$@"
+}
+
+expect_count_flavor_id() {
+  local expect_ID="$1"
+  local expect_count="$2"
+  local listing count
+
+  listing="$(infractl flavor list --all --json)"
+  assert_success
+  count="$(echo "$listing" | jq '.Flavors[] | select(.ID == "'"$expect_ID"'")' | jq -s 'length')"
+  assert_equal "$count" "$expect_count"
+}
