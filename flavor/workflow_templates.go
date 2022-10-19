@@ -84,9 +84,10 @@ func workflowTemplate2Flavor(template *v1alpha1.WorkflowTemplate) *v1.Flavor {
 	}
 
 	parameters := make(map[string]*v1.Parameter)
-	for _, wfParameter := range template.Spec.Arguments.Parameters {
+	for idx, wfParameter := range template.Spec.Arguments.Parameters {
 		parameter := &v1.Parameter{
-			Name: wfParameter.Name,
+			Name:  wfParameter.Name,
+			Order: int32(idx + 1),
 		}
 		if wfParameter.Description != nil {
 			parameter.Description = wfParameter.Description.String()

@@ -81,6 +81,8 @@ expect_count_flavor_id() {
   assert_output --partial "[WARN] Ignoring a workflow template with an unknown infra.stackrox.io/availability annotation: invalid-availability, woot!"
 }
 
+// Parameters
+
 @test "a required parameter shows as such" {
   run kubectl apply -f "$BATS_TEST_DIRNAME/testdata/test-gke-lite.yaml"
   name_parm="$(infractl flavor get test-gke-lite --json | jq '.Parameters[] | select(.Name == "name")')"
@@ -125,3 +127,14 @@ expect_count_flavor_id() {
   machine_param="$(infractl flavor get test-gke-lite --json | jq '.Parameters[] | select(.Name == "machine-type")')"
   assert_equal "$machine_param" ""
 }
+
+@test "parameters order follow workflow template order" {
+  run kubectl apply -f "$BATS_TEST_DIRNAME/testdata/test-gke-lite.yaml"
+  name_parm="$(infractl flavor get test-gke-lite --json | jq '.Parameters[] | select(.Name == "name")')"
+  order="$(echo "$name_parm" | jq -r '.Order')"
+  assert_equal "$order" "1"
+  gcp_zone_parm="$(infractl flavor get test-gke-lite --json | jq '.Parameters[] | select(.Name == "gcp-zone")')"
+  order="$(echo "$gcp_zone_parm" | jq -r '.Order')"
+  assert_equal "$order" "7"
+}
+
