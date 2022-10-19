@@ -39,12 +39,12 @@ jobs:
       - name: Cache Go dependencies
         uses: ./go/src/github.com/stackrox/infra/.github/actions/cache-go-dependencies
 
-      - name: Install golangci-lint 1.33.0
+      - name: Install golangci-lint 1.50.0
         run: |
           mkdir -p "${GOPATH}/bin"
-          wget -q https://github.com/golangci/golangci-lint/releases/download/v1.33.0/golangci-lint-1.33.0-linux-amd64.tar.gz
-          tar -xf golangci-lint-1.33.0-linux-amd64.tar.gz
-          install golangci-lint-1.33.0-linux-amd64/golangci-lint "${GOPATH}/bin/golangci-lint"
+          wget -q https://github.com/golangci/golangci-lint/releases/download/v1.50.0/golangci-lint-1.50.0-linux-amd64.tar.gz
+          tar -xf golangci-lint-1.50.0-linux-amd64.tar.gz
+          install golangci-lint-1.50.0-linux-amd64/golangci-lint "${GOPATH}/bin/golangci-lint"
           golangci-lint version
 
       - name: Generate src
