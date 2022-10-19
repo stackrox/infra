@@ -1,4 +1,4 @@
-//Package kube provides access to the k8s API
+// Package kube provides access to the k8s API
 package kube
 
 import (
