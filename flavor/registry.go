@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 	"sort"
-	"strings"
 
 	workflowtemplatepkg "github.com/argoproj/argo-workflows/v3/pkg/apiclient/workflowtemplate"
 	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
@@ -40,7 +39,7 @@ func (r *Registry) Flavors() []v1.Flavor {
 	for _, pair := range r.flavors {
 		results = append(results, pair.flavor)
 	}
-	results = r.appendFromWorkflowTemplates(results)
+	results = r.addWorkflowTemplates(results)
 
 	sort.Slice(results, func(i, j int) bool {
 		if results[i].Availability != results[j].Availability {
@@ -95,17 +94,7 @@ func (r *Registry) Get(id string) (v1.Flavor, v1alpha1.Workflow, bool) {
 	if pair, found := r.flavors[id]; found {
 		return pair.flavor, pair.workflow, true
 	}
-	if flavor, workflowTemplate := r.getFromWorkflowTemplate(id); flavor != nil {
-		workflow := &v1alpha1.Workflow{}
-		workflow.APIVersion = workflowTemplate.APIVersion
-		workflow.Kind = "Workflow"
-		workflow.ObjectMeta.GenerateName = workflowTemplate.ObjectMeta.GenerateName
-		for _, annotation := range workflowTemplate.ObjectMeta.GetAnnotations() {
-			if strings.HasPrefix(annotation, "infra.stackrox.io/") {
-				workflow.ObjectMeta.Annotations[annotation] = workflowTemplate.ObjectMeta.Annotations[annotation]
-			}
-		}
-		workflow.Spec = *workflowTemplate.Spec.DeepCopy()
+	if flavor, workflow := r.getPairFromWorkflowTemplate(id); flavor != nil {
 		return *flavor, *workflow, true
 	}
 
