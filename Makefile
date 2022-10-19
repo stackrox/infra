@@ -107,19 +107,19 @@ $(protoc):
 $(protoc-gen-go):
 	@echo "+ $@"
 	@echo "Installing protoc-gen-go $(protoc-gen-go-version) to $(protoc-gen-go)"
-	@cd /tmp; go get -u github.com/golang/protobuf/protoc-gen-go@v$(protoc-gen-go-version)
+	@cd /tmp; go install github.com/golang/protobuf/protoc-gen-go@v$(protoc-gen-go-version)
 
 # This target installs the protoc-gen-grpc-gateway binary.
 $(protoc-gen-grpc-gateway):
 	@echo "+ $@"
 	@echo "Installing protoc-gen-grpc-gateway $(protoc-gen-grpc-gateway-version) to $(protoc-gen-grpc-gateway)"
-	@cd /tmp; go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway@v$(protoc-gen-grpc-gateway-version)
+	@cd /tmp; go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway@v$(protoc-gen-grpc-gateway-version)
 
 # This target installs the protoc-gen-swagger binary.
 $(protoc-gen-swagger):
 	@echo "+ $@"
 	@echo "Installing protoc-gen-swagger $(protoc-gen-swagger-version) to $(protoc-gen-swagger)"
-	@cd /tmp; go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger@v$(protoc-gen-swagger-version)
+	@cd /tmp; go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger@v$(protoc-gen-swagger-version)
 
 # This target installs all of the protoc related binaries.
 .PHONY: protoc-tools
