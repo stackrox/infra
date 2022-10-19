@@ -45,10 +45,17 @@ expect_count_flavor_id() {
 }
 
 @test "expects a name" {
-  run kubectl apply -f "$BATS_TEST_DIRNAME/testdata/missing-annotations.yaml"
-  expect_count_flavor_id "missing-annotations" 0
-  run kubectl -n infra logs -l app=infra-server
-  assert_output --partial "[WARN] Ignoring a workflow template without infra.stackrox.io/name annotation: missing-annotations"
+  run kubectl apply -f "$BATS_TEST_DIRNAME/testdata/missing-name.yaml"
+  assert_failure
+  assert_output --partial "cannot use generate name with apply"
+}
+
+@test "gets a name from metadata.name" {
+  run kubectl apply -f "$BATS_TEST_DIRNAME/testdata/test-gke-lite.yaml"
+  flavor="$(infractl flavor get test-gke-lite --json)"
+  assert_success
+  name="$(echo "$flavor" | jq -r '.Name')"
+  assert_equal "$name" "test-gke-lite"
 }
 
 @test "expects a description" {

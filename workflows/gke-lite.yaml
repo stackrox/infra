@@ -3,19 +3,30 @@ kind: WorkflowTemplate
 metadata:
   name: gke-lite
   generateName: gke-lite-
+  annotations:
+    infra.stackrox.io/name: gke-lite
+    infra.stackrox.io/description: A lightweight single node GKE cluster
 spec:
   entrypoint: start
   arguments:
     parameters:
+# name is mandatory
       - name: name
+# nodes & machine-type are optional with defaults
       - name: nodes
         default: 1
       - name: machine-type
         default: e2-standard-2
+# these other parameters are optional without defaults at the workflow level.
+# presumably good defaults are provided by the automation-flavors image.
       - name: k8s-version
+        default: ""
       - name: pod-security-policy
+        default: ""
       - name: gcp-image-type
+        default: ""
       - name: gcp-zone
+        default: ""
 
   volumes:
     - name: credentials

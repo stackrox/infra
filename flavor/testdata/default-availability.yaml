@@ -4,7 +4,6 @@ metadata:
   name: default-availability
   generateName: default-availability-
   annotations:
-    infra.stackrox.io/name: default-availability
     infra.stackrox.io/description: just a test
 spec:
   entrypoint: start

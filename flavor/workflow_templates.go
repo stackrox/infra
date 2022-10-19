@@ -61,10 +61,6 @@ func (r *Registry) getFromWorkflowTemplate(id string) (*v1.Flavor, *v1alpha1.Wor
 func workflowTemplate2Flavor(template *v1alpha1.WorkflowTemplate) *v1.Flavor {
 	valid := true
 	log.Printf("Found workflow template: %v\n", template.ObjectMeta.Name)
-	if template.ObjectMeta.Annotations["infra.stackrox.io/name"] == "" {
-		log.Printf("[WARN] Ignoring a workflow template without infra.stackrox.io/name annotation: %v\n", template.ObjectMeta.Name)
-		valid = false
-	}
 	if template.ObjectMeta.Annotations["infra.stackrox.io/description"] == "" {
 		log.Printf("[WARN] Ignoring a workflow template without infra.stackrox.io/description annotation: %v\n", template.ObjectMeta.Name)
 		valid = false
@@ -114,7 +110,7 @@ func workflowTemplate2Flavor(template *v1alpha1.WorkflowTemplate) *v1.Flavor {
 
 	flavor := &v1.Flavor{
 		ID:           template.ObjectMeta.Name,
-		Name:         template.ObjectMeta.Annotations["infra.stackrox.io/name"],
+		Name:         template.ObjectMeta.Name,
 		Description:  template.ObjectMeta.Annotations["infra.stackrox.io/description"],
 		Availability: availability,
 		Parameters:   parameters,

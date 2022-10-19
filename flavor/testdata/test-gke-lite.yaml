@@ -4,7 +4,6 @@ metadata:
   name: test-gke-lite
   generateName: test-gke-lite-
   annotations:
-    infra.stackrox.io/name: test-gke-lite
     infra.stackrox.io/description: just a test
     infra.stackrox.io/availability: stable
 spec:

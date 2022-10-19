@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"sort"
+	"strings"
 
 	workflowtemplatepkg "github.com/argoproj/argo-workflows/v3/pkg/apiclient/workflowtemplate"
 	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
@@ -89,7 +90,7 @@ func (r *Registry) Default() string {
 	return r.defaultFlavor
 }
 
-// Get returns the named flavor, and if it exists.
+// Get returns the named flavor if it exists along with a paired workflow.
 func (r *Registry) Get(id string) (v1.Flavor, v1alpha1.Workflow, bool) {
 	if pair, found := r.flavors[id]; found {
 		return pair.flavor, pair.workflow, true
@@ -98,8 +99,13 @@ func (r *Registry) Get(id string) (v1.Flavor, v1alpha1.Workflow, bool) {
 		workflow := &v1alpha1.Workflow{}
 		workflow.APIVersion = workflowTemplate.APIVersion
 		workflow.Kind = "Workflow"
-		workflow.ObjectMeta = workflowTemplate.ObjectMeta
-		workflow.Spec = workflowTemplate.Spec
+		workflow.ObjectMeta.GenerateName = workflowTemplate.ObjectMeta.GenerateName
+		for _, annotation := range workflowTemplate.ObjectMeta.GetAnnotations() {
+			if strings.HasPrefix(annotation, "infra.stackrox.io/") {
+				workflow.ObjectMeta.Annotations[annotation] = workflowTemplate.ObjectMeta.Annotations[annotation]
+			}
+		}
+		workflow.Spec = *workflowTemplate.Spec.DeepCopy()
 		return *flavor, *workflow, true
 	}
 

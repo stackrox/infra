@@ -4,7 +4,6 @@ metadata:
   name: invalid-availability
   generateName: invalid-availability-
   annotations:
-    infra.stackrox.io/name: invalid-availability
     infra.stackrox.io/description: just a test
     infra.stackrox.io/availability: woot!
 spec:
