@@ -90,11 +90,13 @@ jobs:
         run: |
           mkdir artifacts
           bin/production-infractl artifacts "$CLUSTER_NAME" -d artifacts
+          kubectl get nodes -o wide || true
 
       - name: Deploy infra to dev cluster
         run: |
           gcloud auth activate-service-account --key-file <(echo "$GOOGLE_APPLICATION_CREDENTIALS")
           gcloud auth list
+          kubectl get nodes -o wide || true
 
           make install-local-without-write
 
@@ -106,6 +108,8 @@ jobs:
 
       - name: Check the deployment
         run: |
+          kubectl get nodes -o wide || true
+
           version="$($INFRACTL version --json)"
           echo "$version"
           client="$(echo "$version" | jq -r '.Client.Version')"
@@ -127,7 +131,9 @@ jobs:
 
       - name: Run e2e tests
         run: |
+          kubectl get nodes -o wide || true
           $INFRACTL whoami || true
+          $INFRACTL version || true
           make e2e-tests || touch FAIL
           kubectl -n infra logs -l app=infra-server
           [[ ! -f FAIL ]]
