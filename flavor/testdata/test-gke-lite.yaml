@@ -12,12 +12,15 @@ spec:
   arguments:
     parameters:
       - name: name
-        description: The name for the GKE cluster
+        description: The name for the GKE cluster (tests required parameters)
       - name: nodes
+        description: A parameter to test optional - with default
         default: 1
       - name: machine-type
-        default: e2-standard-2
+        description: A parameter to test hardcoded
+        value: e2-standard-2
       - name: k8s-version
+        description: A parameter to test optional without default
       - name: pod-security-policy
       - name: gcp-image-type
       - name: gcp-zone

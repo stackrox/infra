@@ -94,7 +94,7 @@ expect_count_flavor_id() {
   run kubectl apply -f "$BATS_TEST_DIRNAME/testdata/test-gke-lite.yaml"
   name_parm="$(infractl flavor get test-gke-lite --json | jq '.Parameters[] | select(.Name == "name")')"
   description="$(echo "$name_parm" | jq -r '.Description')"
-  assert_equal "$description" "The name for the GKE cluster"
+  assert_equal "$description" "The name for the GKE cluster (tests required parameters)"
 }
 
 @test "an optional parameter shows as such" {
@@ -118,4 +118,10 @@ expect_count_flavor_id() {
   k8s_param="$(infractl flavor get test-gke-lite --json | jq '.Parameters[] | select(.Name == "k8s-version")')"
   value="$(echo "$k8s_param" | jq -r '.Value')"
   assert_equal "$value" ""
+}
+
+@test "hardcoded (internal) parameters are hidden" {
+  run kubectl apply -f "$BATS_TEST_DIRNAME/testdata/test-gke-lite.yaml"
+  machine_param="$(infractl flavor get test-gke-lite --json | jq '.Parameters[] | select(.Name == "machine-type")')"
+  assert_equal "$machine_param" ""
 }
