@@ -10,6 +10,7 @@ linters-settings:
   govet:
     enable-all: true
     disable:
+      - fieldalignment
       - shadow
     settings:
       printf: # analyzer name, run `go tool vet help` to see all analyzers
@@ -47,13 +48,6 @@ linters-settings:
     allow-unused: false # report any unused nolint directives
     require-explanation: false # don't require an explanation for nolint directives
     require-specific: true # require nolint directives to be specific about which linter is being skipped
-  revive:
-    enable-all-rules: true
-    rules:
-      - name: line-length-limit
-        disabled: true
-      - name: package-comments
-        disabled: true
 
 linters:
   # please, do not use `enable-all`: it's deprecated and will be removed soon.
@@ -94,7 +88,7 @@ linters:
     # - nestif
     - nolintlint
     # - prealloc
-    - revive
+    # - revive
     - rowserrcheck
     # - scopelint
     # - staticcheck
