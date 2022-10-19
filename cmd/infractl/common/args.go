@@ -8,7 +8,7 @@ func ArgsWithHelp(argFns ...cobra.PositionalArgs) cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		for _, argFn := range argFns {
 			if err := argFn(cmd, args); err != nil {
-				cmd.Help() // nolint:errcheck
+				cmd.Help() //nolint:errcheck
 				cmd.Println()
 				return err
 			}

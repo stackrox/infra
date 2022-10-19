@@ -22,7 +22,7 @@ const (
 
 // flags represents the collection of flag and environment variable values
 // passed to infractl.
-var flags struct { // nolint:gochecknoglobals
+var flags struct { //nolint:gochecknoglobals
 	endpoint string
 	insecure bool
 	json     bool
