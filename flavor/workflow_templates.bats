@@ -81,9 +81,41 @@ expect_count_flavor_id() {
   assert_output --partial "[WARN] Ignoring a workflow template with an unknown infra.stackrox.io/availability annotation: invalid-availability, woot!"
 }
 
-@test "required parameter shows as such" {
+@test "a required parameter shows as such" {
   run kubectl apply -f "$BATS_TEST_DIRNAME/testdata/test-gke-lite.yaml"
   name_parm="$(infractl flavor get test-gke-lite --json | jq '.Parameters[] | select(.Name == "name")')"
   optionality="$(echo "$name_parm" | jq -r '.Optional')"
   assert_equal "$optionality" "false"
+  internality="$(echo "$name_parm" | jq -r '.Internal')"
+  assert_equal "$internality" "false"
+}
+
+@test "a parameter may have a description" {
+  run kubectl apply -f "$BATS_TEST_DIRNAME/testdata/test-gke-lite.yaml"
+  name_parm="$(infractl flavor get test-gke-lite --json | jq '.Parameters[] | select(.Name == "name")')"
+  description="$(echo "$name_parm" | jq -r '.Description')"
+  assert_equal "$description" "The name for the GKE cluster"
+}
+
+@test "an optional parameter shows as such" {
+  run kubectl apply -f "$BATS_TEST_DIRNAME/testdata/test-gke-lite.yaml"
+  nodes_param="$(infractl flavor get test-gke-lite --json | jq '.Parameters[] | select(.Name == "nodes")')"
+  optionality="$(echo "$nodes_param" | jq -r '.Optional')"
+  assert_equal "$optionality" "true"
+  internality="$(echo "$nodes_param" | jq -r '.Internal')"
+  assert_equal "$internality" "false"
+}
+
+@test "an optional parameter may have a default value" {
+  run kubectl apply -f "$BATS_TEST_DIRNAME/testdata/test-gke-lite.yaml"
+  nodes_param="$(infractl flavor get test-gke-lite --json | jq '.Parameters[] | select(.Name == "nodes")')"
+  value="$(echo "$nodes_param" | jq -r '.Value')"
+  assert_equal "$value" "1"
+}
+
+@test "an optional parameter may not have a default value" {
+  run kubectl apply -f "$BATS_TEST_DIRNAME/testdata/test-gke-lite.yaml"
+  k8s_param="$(infractl flavor get test-gke-lite --json | jq '.Parameters[] | select(.Name == "k8s-version")')"
+  value="$(echo "$k8s_param" | jq -r '.Value')"
+  assert_equal "$value" ""
 }

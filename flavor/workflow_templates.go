@@ -89,7 +89,7 @@ func workflowTemplate2Flavor(template *v1alpha1.WorkflowTemplate) *v1.Flavor {
 			Name: wfParameter.Name,
 		}
 		if wfParameter.Description != nil {
-			parameter.Description = string(*wfParameter.Description)
+			parameter.Description = wfParameter.Description.String()
 		}
 		if wfParameter.Default == nil && wfParameter.Value == nil {
 			parameter.Optional = false

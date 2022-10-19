@@ -12,6 +12,7 @@ spec:
   arguments:
     parameters:
       - name: name
+        description: The name for the GKE cluster
       - name: nodes
         default: 1
       - name: machine-type
