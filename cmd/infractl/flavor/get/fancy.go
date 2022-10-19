@@ -30,7 +30,7 @@ func (p prettyFlavor) PrettyPrint(cmd *cobra.Command) {
 		cmd.Printf("    Description: %s\n", parameter.GetDescription())
 		if parameter.GetOptional() {
 			cmd.Printf("    Default:     %q\n", parameter.GetValue())
-		} else {
+		} else if parameter.GetValue() != "" {
 			cmd.Printf("    Example:     %q\n", parameter.GetValue())
 		}
 		if parameter.GetHelp() != "" {
