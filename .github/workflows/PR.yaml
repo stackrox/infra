@@ -100,15 +100,17 @@ jobs:
 
           make install-local-without-write
 
-          nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
-          echo "PORT_FORWARD_PID=$!" >> "$GITHUB_ENV"
+          kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
           sleep 5
 
           make pull-infractl-from-dev-server
 
+          kill %1
+
       - name: Check the deployment
         run: |
-          kubectl get nodes -o wide || true
+          kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
+          sleep 5
 
           version="$($INFRACTL version --json)"
           echo "$version"
@@ -129,15 +131,19 @@ jobs:
             exit 1
           fi
 
+          kill %1
+
       - name: Run e2e tests
         run: |
-          kubectl get nodes -o wide || true
+          kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
+          sleep 5
+
           $INFRACTL whoami || true
           $INFRACTL version || true
+
           make e2e-tests || touch FAIL
           kubectl -n infra logs -l app=infra-server
+          kill %1
+
           [[ ! -f FAIL ]]
 
-      - name: Kill the port-forward
-        run: |
-          kill "$PORT_FORWARD_PID"
