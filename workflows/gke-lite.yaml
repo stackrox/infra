@@ -12,20 +12,27 @@ spec:
     parameters:
 # name is mandatory
       - name: name
+        description: cluster name
 # nodes & machine-type are optional with defaults
       - name: nodes
+        description: number of nodes
         default: 1
       - name: machine-type
+        description: node machine type
         default: e2-standard-2
 # these other parameters are optional without defaults at the workflow level.
 # presumably good defaults are provided by the automation-flavors image.
       - name: k8s-version
+        description: GKE kubernetes version
         default: ""
       - name: pod-security-policy
+        description: Enables the pod security policy admission controller for the cluster
         default: ""
       - name: gcp-image-type
+        description: The GCP image type to use for the cluster
         default: ""
       - name: gcp-zone
+        description: The zone in GCP to create the cluster in
         default: ""
 
   volumes:
