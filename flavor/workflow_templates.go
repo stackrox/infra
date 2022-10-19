@@ -83,12 +83,28 @@ func workflowTemplate2Flavor(template *v1alpha1.WorkflowTemplate) *v1.Flavor {
 		return nil
 	}
 
+	parameters := make(map[string]*v1.Parameter)
+	for _, wfParameter := range template.Spec.Arguments.Parameters {
+		parameter := &v1.Parameter{
+			Name: wfParameter.Name,
+		}
+		if wfParameter.Description != nil {
+			parameter.Description = string(*wfParameter.Description)
+		}
+		if wfParameter.Default == nil && wfParameter.Value == nil {
+			parameter.Optional = false
+			parameter.Internal = false
+			parameter.Value = ""
+		}
+		parameters[parameter.Name] = parameter
+	}
+
 	flavor := &v1.Flavor{
 		ID:           template.ObjectMeta.Name,
 		Name:         template.ObjectMeta.Annotations["infra.stackrox.io/name"],
 		Description:  template.ObjectMeta.Annotations["infra.stackrox.io/description"],
 		Availability: availability,
-		Parameters:   make(map[string]*v1.Parameter),
+		Parameters:   parameters,
 		Artifacts:    make(map[string]*v1.FlavorArtifact),
 	}
 

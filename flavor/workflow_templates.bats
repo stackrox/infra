@@ -80,3 +80,10 @@ expect_count_flavor_id() {
   run kubectl -n infra logs -l app=infra-server
   assert_output --partial "[WARN] Ignoring a workflow template with an unknown infra.stackrox.io/availability annotation: invalid-availability, woot!"
 }
+
+@test "required parameter shows as such" {
+  run kubectl apply -f "$BATS_TEST_DIRNAME/testdata/test-gke-lite.yaml"
+  name_parm="$(infractl flavor get test-gke-lite --json | jq '.Parameters[] | select(.Name == "name")')"
+  optionality="$(echo "$name_parm" | jq -r '.Optional')"
+  assert_equal "$optionality" "false"
+}
