@@ -1,22 +1,8 @@
 run:
-  timeout: 5m
+  timeout: 15m
 
 issues:
   exclude-use-default: false
-
-  exclude-rules:
-    - linters:
-        - golint
-      text: "should have a package comment, unless it's in another file for this package"
-    - linters:
-        - golint
-      text: "should not use dot imports"
-    - linters:
-        - golint
-      text: "returns unexported type .* which can be annoying to use"
-    - linters:
-        - golint
-      text: "error strings should not be capitalized or end with punctuation or a newline"
 
 linters-settings:
   golint:
@@ -87,7 +73,6 @@ linters:
     # - goerr113
     - gofmt
     - goimports
-    - golint
     # - gomnd
     # - goprintffuncname
     # - gosec
@@ -102,6 +87,7 @@ linters:
     # - nestif
     - nolintlint
     # - prealloc
+    - revive
     - rowserrcheck
     # - scopelint
     # - staticcheck
