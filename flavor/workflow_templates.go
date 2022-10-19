@@ -45,17 +45,17 @@ func (r *Registry) appendFromWorkflowTemplates(results []v1.Flavor) []v1.Flavor 
 	return results
 }
 
-func (r *Registry) getFromWorkflowTemplate(id string) *v1.Flavor {
+func (r *Registry) getFromWorkflowTemplate(id string) (*v1.Flavor, *v1alpha1.WorkflowTemplate) {
 	template, err := r.argoWorkflowTemplatesClient.GetWorkflowTemplate(r.argoClientCtx, &workflowtemplatepkg.WorkflowTemplateGetRequest{
 		Name:      id,
 		Namespace: r.workflowTemplateNamespace,
 	})
 	if err != nil {
 		log.Printf("Failed to get an argo workflow template: %s, %v", id, err)
-		return nil
+		return nil, nil
 	}
 
-	return workflowTemplate2Flavor(template)
+	return workflowTemplate2Flavor(template), template
 }
 
 func workflowTemplate2Flavor(template *v1alpha1.WorkflowTemplate) *v1.Flavor {

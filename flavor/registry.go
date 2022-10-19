@@ -94,8 +94,13 @@ func (r *Registry) Get(id string) (v1.Flavor, v1alpha1.Workflow, bool) {
 	if pair, found := r.flavors[id]; found {
 		return pair.flavor, pair.workflow, true
 	}
-	if flavor := r.getFromWorkflowTemplate(id); flavor != nil {
-		return *flavor, v1alpha1.Workflow{}, true
+	if flavor, workflowTemplate := r.getFromWorkflowTemplate(id); flavor != nil {
+		workflow := &v1alpha1.Workflow{}
+		workflow.APIVersion = workflowTemplate.APIVersion
+		workflow.Kind = "Workflow"
+		workflow.ObjectMeta = workflowTemplate.ObjectMeta
+		workflow.Spec = workflowTemplate.Spec
+		return *flavor, *workflow, true
 	}
 
 	return v1.Flavor{}, v1alpha1.Workflow{}, false

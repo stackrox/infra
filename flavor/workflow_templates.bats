@@ -73,3 +73,10 @@ expect_count_flavor_id() {
   availability="$(echo "$flavor" | jq -r '.Availability')"
   assert_equal "$availability" "stable"
 }
+
+@test "invalid availability workflows are dropped" {
+  run kubectl apply -f "$BATS_TEST_DIRNAME/testdata/invalid-availability.yaml"
+  expect_count_flavor_id "invalid-availability" 0
+  run kubectl -n infra logs -l app=infra-server
+  assert_output --partial "[WARN] Ignoring a workflow template with an unknown infra.stackrox.io/availability annotation: invalid-availability, woot!"
+}
