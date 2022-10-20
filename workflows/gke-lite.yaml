@@ -6,6 +6,7 @@ metadata:
   annotations:
     infra.stackrox.io/name: gke-lite
     infra.stackrox.io/description: A lightweight single node GKE cluster
+    infra.stackrox.io/availability: alpha
 spec:
   entrypoint: start
   arguments:
