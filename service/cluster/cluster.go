@@ -12,6 +12,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/stackrox/infra/service/metrics"
+
 	argov3client "github.com/argoproj/argo-workflows/v3/cmd/argo/commands/client"
 	"github.com/argoproj/argo-workflows/v3/pkg/apiclient"
 	workflowpkg "github.com/argoproj/argo-workflows/v3/pkg/apiclient/workflow"
@@ -371,6 +373,8 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		log.Printf("[WARN] Create failed, %v", err)
 		return nil, err
 	}
+
+	metrics.FlavorsUsedCounter.WithLabelValues(flav.ID).Inc()
 
 	return &v1.ResourceByID{Id: created.Name}, nil
 }
