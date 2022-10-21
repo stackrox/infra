@@ -69,7 +69,7 @@ clean-image:
 .PHONY: unit-test
 unit-test: proto-generated-srcs
 	@echo "+ $@"
-	@go test ./...
+	@go test -v ./...
 
 ##############
 ## Protobuf ##
@@ -247,6 +247,7 @@ install-local-common:
 			-f chart/infra-server/templates/namespace.yaml; \
 		sleep 10; \
 	fi
+	kubectl apply -f workflows/*
 
 .PHONY: install-local
 install-local: install-local-common
@@ -265,13 +266,15 @@ install-local-without-write: install-local-common
 	    -f -
 	# Bounce the infra-server to ensure proper update
 	@sleep 5
-	kubectl -n infra delete pods -l app=infra-server
+	kubectl -n infra delete pods -l app=infra-server --wait
+	@sleep 5
 
 .PHONY: local-data-dev-cycle
 local-data-dev-cycle: render-local install-local
 	# Bounce the infra-server to ensure proper update
 	@sleep 5
-	kubectl -n infra delete pods -l app=infra-server
+	kubectl -n infra delete pods -l app=infra-server --wait
+	@sleep 5
 
 .PHONY: diff-development
 diff-development: render-development
@@ -289,6 +292,7 @@ install-development: render-development
 			-f chart-rendered/infra-server/templates/namespace.yaml; \
 		sleep 10; \
 	fi
+	$(kcdev) apply -f workflows/*
 	$(kcdev) apply -R \
 	    -f chart-rendered/infra-server
 
@@ -309,6 +313,7 @@ install-production: render-production
 			-f chart-rendered/infra-server/templates/namespace.yaml; \
 		sleep 10; \
 	fi
+	$(kcprod) apply -f workflows/*
 	$(kcprod) apply -R \
 	    --context $(prod_context) \
 	    -f chart-rendered/infra-server
@@ -365,3 +370,7 @@ pull-infractl-from-dev-server:
           > bin/infractl
 	chmod +x bin/infractl
 	bin/infractl -k -e localhost:8443 version
+
+.PHONY: e2e-tests
+e2e-tests:
+	@bats -r .

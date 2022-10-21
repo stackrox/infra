@@ -3,11 +3,13 @@
 package flavor
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"sort"
 
+	workflowtemplatepkg "github.com/argoproj/argo-workflows/v3/pkg/apiclient/workflowtemplate"
 	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/golang/protobuf/ptypes/empty"
@@ -24,8 +26,11 @@ type pair struct {
 
 // Registry represents the set of all configured flavors.
 type Registry struct {
-	flavors       map[string]pair
-	defaultFlavor string
+	flavors                     map[string]pair
+	defaultFlavor               string
+	argoWorkflowTemplatesClient workflowtemplatepkg.WorkflowTemplateServiceClient
+	argoClientCtx               context.Context
+	workflowTemplateNamespace   string
 }
 
 // Flavors returns a sorted list of all registered flavors.
@@ -34,6 +39,7 @@ func (r *Registry) Flavors() []v1.Flavor {
 	for _, pair := range r.flavors {
 		results = append(results, pair.flavor)
 	}
+	results = r.addWorkflowTemplates(results)
 
 	sort.Slice(results, func(i, j int) bool {
 		if results[i].Availability != results[j].Availability {
@@ -83,10 +89,13 @@ func (r *Registry) Default() string {
 	return r.defaultFlavor
 }
 
-// Get returns the named flavor, and if it exists.
+// Get returns the named flavor if it exists along with a paired workflow.
 func (r *Registry) Get(id string) (v1.Flavor, v1alpha1.Workflow, bool) {
 	if pair, found := r.flavors[id]; found {
 		return pair.flavor, pair.workflow, true
+	}
+	if flavor, workflow := r.getPairFromWorkflowTemplate(id); flavor != nil {
+		return *flavor, *workflow, true
 	}
 
 	return v1.Flavor{}, v1alpha1.Workflow{}, false
@@ -115,6 +124,10 @@ func NewFromConfig(filename string) (*Registry, error) {
 
 	registry := &Registry{
 		flavors: make(map[string]pair),
+	}
+
+	if err := registry.initWorkflowTemplatesClient(); err != nil {
+		return nil, err
 	}
 
 	for _, flavorCfg := range flavorsCfg {

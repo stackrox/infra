@@ -1,0 +1,74 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: invalid-availability
+  generateName: invalid-availability-
+  annotations:
+    infra.stackrox.io/description: just a test
+    infra.stackrox.io/availability: woot!
+spec:
+  entrypoint: start
+  arguments:
+    parameters:
+      - name: name
+        description: is required
+
+  volumes:
+    - name: credentials
+      secret:
+        secretName: google-credentials
+
+  templates:
+    - name: start
+      steps:
+        - - name: create
+            template: create
+        - - name: wait
+            template: wait
+        - - name: destroy
+            template: destroy
+            arguments:
+              parameters:
+                - name: name
+                  value: "{{steps.create.outputs.parameters.cluster_name}}"
+
+    - name: create
+      activeDeadlineSeconds: 3600
+      outputs:
+        artifacts:
+          - name: kubeconfig
+            path: /outputs/kubeconfig
+            mode: 0644
+            archive:
+              none: {}
+        parameters:
+          - name: cluster_name
+            valueFrom:
+              path: /outputs/cluster_name
+      container:
+        image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.2.19
+        imagePullPolicy: Always
+        command:
+          - /usr/bin/entrypoint
+        args:
+          - create
+          - "--name={{workflow.parameters.name}}"
+        volumeMounts:
+          - name: credentials
+            mountPath: /tmp
+
+    - name: wait
+      suspend: {}
+
+    - name: destroy
+      activeDeadlineSeconds: 3600
+      container:
+        image: gcr.io/stackrox-infra/automation-flavors/gke-default:0.2.19
+        imagePullPolicy: Always
+        command:
+          - /usr/bin/entrypoint
+        args:
+          - destroy
+        volumeMounts:
+          - name: credentials
+            mountPath: /tmp

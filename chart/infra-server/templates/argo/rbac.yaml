@@ -6,7 +6,7 @@ metadata:
 
 rules:
   - apiGroups: ["argoproj.io"]
-    resources: ["workflows"]
+    resources: ["workflows", "workflowtemplates"]
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 
   - apiGroups: [""]
