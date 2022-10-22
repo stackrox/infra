@@ -151,9 +151,6 @@ message FlavorArtifact {
 
     // Tags is a set of artifact tags.
     map<string, google.protobuf.Empty> Tags = 3;
-
-    // Break is to test an ungenerated update
-    string Break = 4;
 }
 
 // Flavor represents a configured cluster flavor.
