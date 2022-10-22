@@ -26,6 +26,8 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.50
 
   shellcheck:
     runs-on: ubuntu-latest

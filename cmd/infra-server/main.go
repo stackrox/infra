@@ -41,7 +41,7 @@ func mainCmd() error {
 
 	// If the -version flag was given, print the version and exit.
 	if *flagVersion {
-		fmt.Println(buildinfo.Version())
+		fmt.Println(buildinfo.Version()) // nolint
 		return nil
 	}
 
