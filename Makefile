@@ -21,14 +21,14 @@ image-name:
 # When run locally, a Darwin binary is built and installed into the user's GOPATH bin.
 # When run in CI, a Darwin and Linux binary is built.
 .PHONY: server
-server: proto-generated-srcs
+server:
 	@echo "+ $@"
 	GOARCH=amd64 GOOS=linux ./scripts/go-build -o bin/infra-server-linux-amd64 ./cmd/infra-server
 
 # cli - Builds the infractl client binary
 # When run in CI or when preparing an image, a Darwin and Linux binary is built.
 .PHONY: cli
-cli: proto-generated-srcs
+cli:
 	@echo "+ $@"
 	GOARCH=amd64 GOOS=darwin ./scripts/go-build -o bin/infractl-darwin-amd64 ./cmd/infractl
 	GOARCH=arm64 GOOS=darwin ./scripts/go-build -o bin/infractl-darwin-arm64 ./cmd/infractl
@@ -37,7 +37,7 @@ cli: proto-generated-srcs
 # cli-local - Builds the infractl client binary
 # When run locally, a Darwin binary is built and installed into the user's GOPATH bin.
 .PHONY: cli-local
-cli-local: proto-generated-srcs
+cli-local:
 	@echo "+ $@"
 	./scripts/go-build -o $(GOPATH)/bin/infractl  ./cmd/infractl
 
@@ -67,7 +67,7 @@ clean-image:
 #############
 
 .PHONY: unit-test
-unit-test: proto-generated-srcs
+unit-test:
 	@echo "+ $@"
 	@go test -v ./...
 
