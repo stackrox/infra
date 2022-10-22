@@ -537,7 +537,7 @@ func (s *clusterImpl) RegisterServiceHandler(ctx context.Context, mux *runtime.S
 }
 
 func (s *clusterImpl) forceDeleteWorkflow(workflow v1alpha1.Workflow) error {
-	var gracePeriod int64 = 0
+	var gracePeriod int64
 	deletePolicy := metav1.DeletePropagationForeground
 	_, err := s.argoWorkflowsClient.DeleteWorkflow(s.argoClientCtx, &workflowpkg.WorkflowDeleteRequest{
 		Name:      workflow.Name,
