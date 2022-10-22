@@ -1,6 +1,5 @@
 bin/
 deps
-generated/
 vendor/
 infra
 infra.toml
