@@ -74,28 +74,23 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           path: go/src/github.com/stackrox/infra
 
+      - uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GCP_INFRA_CI_AUTOMATION_SA }}'
+
       - name: Download production infractl
-        run: |
-          mkdir -p bin
-          curl --fail -sL https://infra.rox.systems/v1/cli/linux/amd64/upgrade \
-          | jq -r ".result.fileChunk" \
-          | base64 -d \
-          > bin/production-infractl
-          chmod +x bin/production-infractl
+        uses: stackrox/actions/infra/install-infractl@v1
 
       - name: Download artifacts
+        id: artifacts
         run: |
-          mkdir artifacts
-          bin/production-infractl artifacts "$CLUSTER_NAME" -d artifacts
+          infractl artifacts "$CLUSTER_NAME" -d artifacts >> "$GITHUB_STEP_SUMMARY"
 
       - name: Deploy infra to dev cluster and check the deployment
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{secrets.GCP_INFRA_CI_AUTOMATION_SA}}
           KUBECONFIG: artifacts/kubeconfig
         run: |
-          gcloud auth activate-service-account --key-file <(echo "$GOOGLE_APPLICATION_CREDENTIALS")
-          gcloud auth list
-
           make install-local-without-write
 
           nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
