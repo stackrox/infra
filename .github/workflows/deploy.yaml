@@ -34,6 +34,9 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_INFRA_DEPLOY_AUTOMATION_SA }}
 
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v0'
+
       - name: Deploy to ${{ inputs.environment }}
         run: |
           gcloud auth list
