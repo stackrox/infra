@@ -8,6 +8,7 @@ on:
         default: development
         type: choice
         options:
+        - local
         - development
         - production
       version:
