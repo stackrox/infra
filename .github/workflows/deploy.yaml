@@ -8,6 +8,7 @@ on:
         default: development
         type: choice
         options:
+        - development-clone-tom
         - development
         - production
       version:
@@ -35,7 +36,11 @@ jobs:
 
       - name: Deploy to ${{ inputs.environment }}
         run: |
-          gcloud container clusters get-credentials infra-${{ inputs.environment }} \
+          # gcloud container clusters get-credentials infra-${{ inputs.environment }} \
+          #   --project stackrox-infra \
+          #   --region us-west2
+          # make install-${{ inputs.environment }}-without-write
+          gcloud container clusters get-credentials infra-development-clone-tom \
             --project stackrox-infra \
             --region us-west2
           make install-${{ inputs.environment }}-without-write
