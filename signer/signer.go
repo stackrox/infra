@@ -98,7 +98,7 @@ func (s Signer) Contents(gcsBucketName, gcsBucketKey string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer gr.Close() // nolint:errcheck
+	defer gr.Close() //nolint:errcheck
 
 	// Archive is a normal tar archive.
 	tr := tar.NewReader(gr)

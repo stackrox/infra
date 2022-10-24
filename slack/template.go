@@ -48,15 +48,15 @@ const (
 )
 
 var (
-	templatesFailed = []string{ // nolint:gochecknoglobals
+	templatesFailed = []string{ //nolint:gochecknoglobals
 		"<@{{.OwnerID}}> - Your {{if .Scheduled}}scheduled {{end}}{{if .Description}}*{{.Description}}* {{else}}*{{.ID}}* {{end}}cluster has failed!{{if .FailureDetails}} {{.FailureDetails}}{{end}} :fire:",
 	}
 
-	templatesDestroyed = []string{ // nolint:gochecknoglobals
+	templatesDestroyed = []string{ //nolint:gochecknoglobals
 		":skull_and_crossbones: The {{if .Scheduled}}scheduled {{end}}{{if .Description}}*{{.Description}}* {{else}}*{{.ID}}* {{end}}cluster has been destroyed.",
 	}
 
-	templatesReady = []string{ // nolint:gochecknoglobals
+	templatesReady = []string{ //nolint:gochecknoglobals
 		"<@{{.OwnerID}}> - Your {{if .Scheduled}}scheduled {{end}}{{if .Description}}*{{.Description}}* {{else}}*{{.ID}}* {{end}}cluster is now ready! :party-parrot:",
 		"{{if .URL}}:earth_americas: Browse to *{{.URL}}* to login.{{end}}",
 		":clock2: This cluster has about *{{.Remaining}}* before it is destroyed.",
@@ -65,14 +65,14 @@ var (
 		":package: To download cluster *artifacts*, you can run:\n```$ infractl artifacts {{.ID}}```",
 	}
 
-	templatesCreating = []string{ // nolint:gochecknoglobals
+	templatesCreating = []string{ //nolint:gochecknoglobals
 		"<@{{.OwnerID}}> - Your {{if .Scheduled}}scheduled {{end}}{{if .Description}}*{{.Description}}* {{else}}*{{.ID}}* {{end}}cluster is being created. :rocket:",
 		":clock2: This cluster has about *{{.Remaining}}* before it is destroyed.",
 		":thinking_face: To view cluster *info*, you can run:\n ```$ infractl get {{.ID}}```",
 		":link: Or go to: https://infra.rox.systems/cluster/{{.ID}}",
 	}
 
-	templatesNearingExpiry = []string{ // nolint:gochecknoglobals
+	templatesNearingExpiry = []string{ //nolint:gochecknoglobals
 		"<@{{.OwnerID}}> - Your {{if .Scheduled}}scheduled {{end}}{{if .Description}}*{{.Description}}* {{else}}*{{.ID}}* {{end}}cluster has about *{{.Remaining}}*. :skull_and_crossbones:",
 		":clock2: To buy more time, you can run:\n```$ infractl lifespan {{.ID}} '+1h'```",
 		":link: Or go to: https://infra.rox.systems/cluster/{{.ID}}",

@@ -40,7 +40,7 @@ jobs:
       - create-dev-cluster
     runs-on: ubuntu-latest
     container:
-      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.46
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.51
 
     steps:
       - name: Checkout
@@ -56,15 +56,18 @@ jobs:
         run: |
           ./scripts/add-PR-comment-for-deploy-to-dev.sh "${{ github.event.pull_request.html_url }}" "$CLUSTER_NAME"
 
-  deploy-to-dev-cluster:
+  deploy-and-test:
     needs:
       - build-and-push
       - create-dev-cluster
     runs-on: ubuntu-latest
     container:
-      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.46
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.51
     env:
-      INFRA_TOKEN: ${{secrets.INFRA_TOKEN}}
+      GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_INFRA_CI_AUTOMATION_SA }}
+      KUBECONFIG: artifacts/kubeconfig
+      INFRA_TOKEN: ${{ secrets.INFRA_TOKEN }}
+      INFRACTL: bin/infractl -k -e localhost:8443
 
     steps:
       - name: Checkout
@@ -74,9 +77,13 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           path: go/src/github.com/stackrox/infra
 
-      - uses: 'google-github-actions/auth@v0'
+      - name: Authenticate to GCloud
+        uses: google-github-actions/auth@v0
         with:
-          credentials_json: '${{ secrets.GCP_INFRA_CI_AUTOMATION_SA }}'
+          credentials_json: ${{ secrets.GCP_INFRA_DEPLOY_AUTOMATION_SA }}
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v0'
 
       - name: Download production infractl
         uses: stackrox/actions/infra/install-infractl@v1
@@ -85,19 +92,25 @@ jobs:
         id: artifacts
         run: |
           infractl artifacts "$CLUSTER_NAME" -d artifacts >> "$GITHUB_STEP_SUMMARY"
+          kubectl get nodes -o wide || true
 
-      - name: Deploy infra to dev cluster and check the deployment
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{secrets.GCP_INFRA_CI_AUTOMATION_SA}}
-          KUBECONFIG: artifacts/kubeconfig
+      - name: Deploy infra to dev cluster
         run: |
           make install-local-without-write
 
-          nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
+          kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
           sleep 5
+
           make pull-infractl-from-dev-server
 
-          version="$(bin/infractl -k -e localhost:8443 version --json)"
+          kill %1
+
+      - name: Check the deployment
+        run: |
+          kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
+          sleep 5
+
+          version="$($INFRACTL version --json)"
           echo "$version"
           client="$(echo "$version" | jq -r '.Client.Version')"
           server="$(echo "$version" | jq -r '.Server.Version')"
@@ -117,3 +130,19 @@ jobs:
           fi
 
           kill %1
+
+      - name: Run e2e tests
+        run: |
+          kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
+          sleep 5
+
+          $INFRACTL whoami || true
+          $INFRACTL version || true
+
+          make e2e-tests || touch FAIL
+          kubectl -n infra logs -l app=infra-server --tail=-1
+          # Reapply workflow templates deleted by test
+          kubectl apply -f workflows/*
+          kill %1
+
+          [[ ! -f FAIL ]]
