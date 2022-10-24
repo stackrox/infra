@@ -1,0 +1,24 @@
+name: Deploy infra
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Dev or Prod?
+        required: true
+        default: development
+        type: choice
+        options:
+        - development
+        - production
+      version:
+        description: Version, expanded to Github + Docker image tag
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show inputs
+        run: |
+          echo "Environment: ${{ inputs.environment }}"
+          echo "Version: ${{ inputs.version }}"
