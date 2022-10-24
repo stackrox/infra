@@ -45,7 +45,7 @@ func (s *flavorImpl) List(_ context.Context, request *v1.FlavorListRequest) (*v1
 	return &resp, nil
 }
 
-// List implements FlavorService.Info.
+// Info implements FlavorService.Info.
 func (s *flavorImpl) Info(_ context.Context, flavorID *v1.ResourceByID) (*v1.Flavor, error) {
 	flavor, _, found := s.registry.Get(flavorID.Id)
 	if !found {

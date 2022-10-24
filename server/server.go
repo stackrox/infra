@@ -229,8 +229,9 @@ func serveApplicationResources(dir string, oidc auth.OidcAuth) http.Handler {
 // to the canonical endpoint.
 //
 // Examples:
-//   http://example.com      --> https://example.com (non https)
-//   https://old.example.com --> https://example.com (CNAME)
+//
+//	http://example.com      --> https://example.com (non https)
+//	https://old.example.com --> https://example.com (CNAME)
 func wrapCanonicalRedirect(endpoint string, wrapped http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		headerXForwardedFor := r.Header.Get("X-Forwarded-For")

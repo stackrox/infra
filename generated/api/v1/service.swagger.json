@@ -1,0 +1,862 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "service.proto",
+    "version": "version not set"
+  },
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/cli/{os}/{arch}/upgrade": {
+      "get": {
+        "operationId": "Upgrade",
+        "responses": {
+          "200": {
+            "description": "A successful response.(streaming responses)",
+            "schema": {
+              "$ref": "#/x-stream-definitions/v1CliUpgradeResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "os",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "arch",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "CliService"
+        ]
+      }
+    },
+    "/v1/cluster": {
+      "get": {
+        "summary": "CreateToken generates an arbitrary service account token",
+        "operationId": "List",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ClusterListResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "all",
+            "description": "all indicates that all clusters should be returned, not just the ones\nowned by the user.",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          },
+          {
+            "name": "expired",
+            "description": "expired indicates that expired clusters should be returned, not just the\nones that are launching/ready.",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          }
+        ],
+        "tags": [
+          "ClusterService"
+        ]
+      },
+      "post": {
+        "summary": "Create launches a new cluster.",
+        "operationId": "Create",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ResourceByID"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateClusterRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ClusterService"
+        ]
+      }
+    },
+    "/v1/cluster/{id}": {
+      "get": {
+        "operationId": "Info",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1Cluster"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ClusterService"
+        ]
+      },
+      "delete": {
+        "summary": "Delete deletes an existing cluster.",
+        "operationId": "Delete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "properties": {}
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ClusterService"
+        ]
+      }
+    },
+    "/v1/cluster/{id}/artifacts": {
+      "get": {
+        "summary": "Artifacts returns the artifacts for a specific cluster.",
+        "operationId": "Artifacts",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ClusterArtifacts"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ClusterService"
+        ]
+      }
+    },
+    "/v1/cluster/{id}/lifespan": {
+      "post": {
+        "summary": "Token generates a service account token for the current user.",
+        "operationId": "Lifespan",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "ID is the unique ID for the cluster.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1LifespanRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ClusterService"
+        ]
+      }
+    },
+    "/v1/cluster/{id}/logs": {
+      "get": {
+        "summary": "Logs returns the logs for a specific cluster.",
+        "operationId": "Logs",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1LogsResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ClusterService"
+        ]
+      }
+    },
+    "/v1/flavor": {
+      "get": {
+        "operationId": "List",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1FlavorListResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "all",
+            "description": "all indicates that all flavors should be returned, by default\navailability alpha clusters are excluded.",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          }
+        ],
+        "tags": [
+          "FlavorService"
+        ]
+      }
+    },
+    "/v1/flavor/{id}": {
+      "get": {
+        "summary": "CreateToken generates an arbitrary service account token",
+        "operationId": "Info",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1Flavor"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "FlavorService"
+        ]
+      }
+    },
+    "/v1/token": {
+      "post": {
+        "summary": "Token generates a service account token for the current user.",
+        "operationId": "Token",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1TokenResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "properties": {}
+            }
+          }
+        ],
+        "tags": [
+          "UserService"
+        ]
+      }
+    },
+    "/v1/token-create": {
+      "post": {
+        "summary": "CreateToken generates an arbitrary service account token",
+        "operationId": "CreateToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1TokenResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1ServiceAccount"
+            }
+          }
+        ],
+        "tags": [
+          "UserService"
+        ]
+      }
+    },
+    "/v1/version": {
+      "get": {
+        "operationId": "GetVersion",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1Version"
+            }
+          }
+        },
+        "tags": [
+          "VersionService"
+        ]
+      }
+    },
+    "/v1/whoami": {
+      "get": {
+        "operationId": "Whoami",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1WhoamiResponse"
+            }
+          }
+        },
+        "tags": [
+          "UserService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "Flavoravailability": {
+      "type": "string",
+      "enum": [
+        "alpha",
+        "beta",
+        "stable",
+        "default"
+      ],
+      "default": "alpha",
+      "description": "availability represents the availability classification levels.\n\n - alpha: alpha is completely experemental, and is not expected to work in any way.\n - beta: beta is being tested, and is expected to work with minor issues.\n - stable: stable is available for public consumption, and works without issue.\n - default: default is stable, and available for customer demo consumption.\nExactly 1 flavor should be configured as default."
+    },
+    "LifespanRequestMethod": {
+      "type": "string",
+      "enum": [
+        "REPLACE",
+        "ADD",
+        "SUBTRACT"
+      ],
+      "default": "REPLACE",
+      "description": "method represents the various lifespan operations.\n\n - REPLACE: REPLACE indicates that the given lifespan should replace the current\nlifespan.\n - ADD: ADD indicates that the given lifespan should be added to the current\nlifespan.\n - SUBTRACT: SUBTRACT indicates that the given lifespan should be subtracted from\nthe current lifespan."
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "type_url": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "runtimeStreamError": {
+      "type": "object",
+      "properties": {
+        "grpc_code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "http_code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "http_status": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1Artifact": {
+      "type": "object",
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        },
+        "URL": {
+          "type": "string"
+        },
+        "Mode": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "v1CliUpgradeResponse": {
+      "type": "object",
+      "properties": {
+        "fileChunk": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "v1Cluster": {
+      "type": "object",
+      "properties": {
+        "ID": {
+          "type": "string",
+          "description": "ID is the unique ID for the cluster."
+        },
+        "Status": {
+          "$ref": "#/definitions/v1Status",
+          "description": "Status is the current status for the cluster."
+        },
+        "Flavor": {
+          "type": "string",
+          "description": "Flavor is the original flavor ID that launched this cluster."
+        },
+        "Owner": {
+          "type": "string",
+          "description": "Owner is the email address for the cluster owner."
+        },
+        "CreatedOn": {
+          "type": "string",
+          "format": "date-time",
+          "description": "CreatedOn is the timestamp on which the cluster started being created."
+        },
+        "DestroyedOn": {
+          "type": "string",
+          "format": "date-time",
+          "description": "DestroyedOn is the timestamp on which the cluster finished being\ndestroyed."
+        },
+        "Lifespan": {
+          "type": "string",
+          "description": "Lifespan is the duration for which the cluster should be kept alive."
+        },
+        "Description": {
+          "type": "string",
+          "description": "Description is a human readable description for the cluster."
+        },
+        "URL": {
+          "type": "string",
+          "description": "URL is an optional URL for this cluster."
+        },
+        "Connect": {
+          "type": "string",
+          "description": "Connect is a command to add kube connection information to kubeconfig."
+        }
+      },
+      "description": "Cluster represents a single cluster."
+    },
+    "v1ClusterArtifacts": {
+      "type": "object",
+      "properties": {
+        "Artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Artifact"
+          }
+        }
+      }
+    },
+    "v1ClusterListResponse": {
+      "type": "object",
+      "properties": {
+        "Clusters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Cluster"
+          },
+          "description": "Clusters is a list of all clusters."
+        }
+      },
+      "description": "ClusterListResponse represents details about all clusters."
+    },
+    "v1CreateClusterRequest": {
+      "type": "object",
+      "properties": {
+        "ID": {
+          "type": "string",
+          "description": "ID is the flavor ID to launch."
+        },
+        "Lifespan": {
+          "type": "string",
+          "description": "Lifespan is the initial cluster lifespan."
+        },
+        "Parameters": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Parameters is a map of launch parameter names to values."
+        },
+        "Description": {
+          "type": "string",
+          "description": "Description is a human readable description for the cluster."
+        },
+        "NoSlack": {
+          "type": "boolean",
+          "format": "boolean",
+          "description": "NoSlack is used to skip sending Slack messages for cluster lifecycle\nevents."
+        },
+        "SlackDM": {
+          "type": "boolean",
+          "format": "boolean",
+          "description": "SlackDM is used to choose direct messages for cluster lifecycle\nevents."
+        }
+      },
+      "description": "CreateClusterRequest represents details for launching a new cluster."
+    },
+    "v1Flavor": {
+      "type": "object",
+      "properties": {
+        "ID": {
+          "type": "string",
+          "description": "ID is the unique, human type-able, ID for the flavor."
+        },
+        "Name": {
+          "type": "string",
+          "description": "Name is a human readable name for the flavor."
+        },
+        "Description": {
+          "type": "string",
+          "description": "Description is a human readable description for the flavor."
+        },
+        "Availability": {
+          "$ref": "#/definitions/Flavoravailability",
+          "description": "Description is an availability classification for the flavor."
+        },
+        "Parameters": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/v1Parameter"
+          },
+          "description": "Parameters is a map of parameters required for launching this flavor."
+        },
+        "Artifacts": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/v1FlavorArtifact"
+          },
+          "description": "Artifacts is a map of artifacts produced by this flavor."
+        }
+      },
+      "description": "Flavor represents a configured cluster flavor."
+    },
+    "v1FlavorArtifact": {
+      "type": "object",
+      "properties": {
+        "Name": {
+          "type": "string",
+          "description": "Name is the unique name of the artifact."
+        },
+        "Description": {
+          "type": "string",
+          "description": "Description is a human readable description for the artifact."
+        },
+        "Tags": {
+          "type": "object",
+          "additionalProperties": {
+            "properties": {}
+          },
+          "description": "Tags is a set of artifact tags."
+        }
+      },
+      "description": "FlavorArtifact represents a single artifact that is produced by a flavor."
+    },
+    "v1FlavorListResponse": {
+      "type": "object",
+      "properties": {
+        "Default": {
+          "type": "string",
+          "description": "Default is the flavor ID of the default cluster flavor."
+        },
+        "Flavors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Flavor"
+          },
+          "description": "Flavors is a list of all available cluster flavors."
+        }
+      },
+      "description": "FlavorListResponse represents details about the available cluster flavors."
+    },
+    "v1LifespanRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID is the unique ID for the cluster."
+        },
+        "Lifespan": {
+          "type": "string",
+          "description": "Lifespan is the new lifespan."
+        },
+        "method": {
+          "$ref": "#/definitions/LifespanRequestMethod"
+        }
+      }
+    },
+    "v1Log": {
+      "type": "object",
+      "properties": {
+        "Name": {
+          "type": "string",
+          "description": "Name is the name given to this pod in the workflow."
+        },
+        "Started": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Started is the time at which this pod was started. Used for ordering\nbetween pods."
+        },
+        "Body": {
+          "type": "string",
+          "format": "byte",
+          "description": "Body is the raw pod logs."
+        },
+        "Message": {
+          "type": "string",
+          "description": "Message surfaces step state from Argo."
+        }
+      },
+      "description": "Log represents the logs from a specific pod."
+    },
+    "v1LogsResponse": {
+      "type": "object",
+      "properties": {
+        "Logs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Log"
+          },
+          "description": "Logs are all of the logs from a cluster."
+        }
+      },
+      "description": "LogsResponse represents a collection of logs."
+    },
+    "v1Parameter": {
+      "type": "object",
+      "properties": {
+        "Name": {
+          "type": "string",
+          "description": "Name is the unique name of the parameter."
+        },
+        "Description": {
+          "type": "string",
+          "description": "Description is a human readable description for the parameter."
+        },
+        "Value": {
+          "type": "string",
+          "description": "Value that this parameter could have.\nIf the parameter is not optional, then value serves as an example.\nIf the parameter is optional, then value serves as a default.\nIf the parameter is internal, then value serves as a hardcoded constant."
+        },
+        "Optional": {
+          "type": "boolean",
+          "format": "boolean",
+          "description": "Optional indicates that this parameter can be optionally provided by a\nuser. If the user does not provide a value, then Value serves as a\ndefault."
+        },
+        "Internal": {
+          "type": "boolean",
+          "format": "boolean",
+          "description": "Internal indicates that this parameter should not be provided by a user,\nbut rather treats Value as a hardcoded constant."
+        },
+        "Order": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The relative order of importance of this parameter for when presenting in\na UI for example."
+        },
+        "Help": {
+          "type": "string"
+        },
+        "FromFile": {
+          "type": "boolean",
+          "format": "boolean",
+          "description": "Indicates that the value for this parameter can be provided from the\ncontents of a file."
+        }
+      },
+      "description": "Parameter represents a single parameter that is needed to launch a flavor."
+    },
+    "v1ResourceByID": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "description": "ResourceByID represents a generic reference to a named/unique resource."
+    },
+    "v1ServiceAccount": {
+      "type": "object",
+      "properties": {
+        "Name": {
+          "type": "string",
+          "description": "Name is a human readable name for the service account."
+        },
+        "Description": {
+          "type": "string",
+          "description": "Description is a human readable description for the service account."
+        },
+        "Email": {
+          "type": "string",
+          "description": "Email is the StackRox email address for the service account."
+        }
+      },
+      "description": "ServiceAccount represents an authenticated service account (robot) principal."
+    },
+    "v1Status": {
+      "type": "string",
+      "enum": [
+        "FAILED",
+        "CREATING",
+        "READY",
+        "DESTROYING",
+        "FINISHED"
+      ],
+      "default": "FAILED",
+      "description": "Status represents the various cluster states.\n\n - FAILED: FAILED is the state when the cluster has failed in one way or another.\n - CREATING: CREATING is the state when the cluster is being created.\n - READY: READY is the state when the cluster is available and ready for use.\n - DESTROYING: DESTROYING is the state when the cluster is being destroyed.\n - FINISHED: FINISHED is the state when the cluster has been successfully destroyed."
+    },
+    "v1TokenResponse": {
+      "type": "object",
+      "properties": {
+        "Account": {
+          "$ref": "#/definitions/v1ServiceAccount",
+          "description": "Account is the service account the token was generated for."
+        },
+        "Token": {
+          "type": "string",
+          "description": "Token is the token generated for the service account."
+        }
+      }
+    },
+    "v1User": {
+      "type": "object",
+      "properties": {
+        "Expiry": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Expiry is the expiration date of this user session. Used only as a hint\nto the user and not for enforcement."
+        },
+        "Name": {
+          "type": "string",
+          "description": "Name is the full name of the user."
+        },
+        "Email": {
+          "type": "string",
+          "description": "Email is the email address of the user."
+        },
+        "Picture": {
+          "type": "string",
+          "description": "Picture is a URL linking to this user's profile picture, if available."
+        }
+      },
+      "description": "User represents an authenticated (human) principal."
+    },
+    "v1Version": {
+      "type": "object",
+      "properties": {
+        "BuildDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "GitCommit": {
+          "type": "string"
+        },
+        "GoVersion": {
+          "type": "string"
+        },
+        "Platform": {
+          "type": "string"
+        },
+        "Version": {
+          "type": "string"
+        },
+        "Workflow": {
+          "type": "string"
+        }
+      }
+    },
+    "v1WhoamiResponse": {
+      "type": "object",
+      "properties": {
+        "User": {
+          "$ref": "#/definitions/v1User",
+          "description": "User represents an authenticated human."
+        },
+        "ServiceAccount": {
+          "$ref": "#/definitions/v1ServiceAccount",
+          "description": "ServiceAccount represents an authenticated service account robot."
+        }
+      },
+      "description": "WhoamiResponse represents details about the current authenticated principal."
+    }
+  },
+  "x-stream-definitions": {
+    "v1CliUpgradeResponse": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "$ref": "#/definitions/v1CliUpgradeResponse"
+        },
+        "error": {
+          "$ref": "#/definitions/runtimeStreamError"
+        }
+      },
+      "title": "Stream result of v1CliUpgradeResponse"
+    }
+  }
+}

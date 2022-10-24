@@ -63,7 +63,7 @@ func (gcs *gcs) load(ctx context.Context, path string) ([]byte, error) {
 		return nil, err
 	}
 
-	defer reader.Close() // nolint:errcheck
+	defer reader.Close() //nolint:errcheck
 
 	return io.ReadAll(reader)
 }
@@ -80,7 +80,7 @@ func (gcs *gcs) save(ctx context.Context, path string, data []byte) error {
 
 	obj := bh.Object(path)
 	w := obj.NewWriter(ctx)
-	defer w.Close() // nolint:errcheck
+	defer w.Close() //nolint:errcheck
 	r := bytes.NewBuffer(data)
 
 	_, err = io.Copy(w, r)
