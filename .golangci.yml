@@ -1,17 +1,47 @@
 run:
-  timeout: 15m
+  timeout: 16m
+
+output:
+  format: "junit-xml:report.xml,colored-line-number"
 
 issues:
   exclude-use-default: false
 
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - wrapcheck
+        - forbidigo
+    - linters:
+        - revive
+      text: "should have a package comment"
+    - linters:
+        - revive
+      text: "should not use dot imports"
+    - linters:
+        - revive
+      text: "returns unexported type .* which can be annoying to use"
+    - linters:
+        - revive
+      text: "error strings should not be capitalized or end with punctuation or a newline"
+    - linters:
+        - revive
+      text: "should omit type int from declaration"
+    - linters:
+        - revive
+      text: "don't use leading k in Go names"
+
 linters-settings:
-  golint:
+  gosec:
+    includes:
+    - G601
+  revive:
     min-confidence: 0
   govet:
     enable-all: true
     disable:
-      - fieldalignment
       - shadow
+      - fieldalignment
     settings:
       printf: # analyzer name, run `go tool vet help` to see all analyzers
         funcs: # run `go tool vet help printf` to see available settings for `printf` analyzer
@@ -26,28 +56,23 @@ linters-settings:
           - Warnf
           - Error
           - Errorf
-          - github.com/stackrox/rox/migrator/log.WritetoStderr
-          - github.com/stackrox/rox/migrator/log.WritetoStderrf     -
   gocritic:
-    enabled-tags:
-      - diagnostic
-      - experimental
-      - opinionated
-      - performance
-      - style
-    disabled-checks:
-      - dupImport # https://github.com/go-critic/go-critic/issues/845
+    enabled-checks:
       - commentFormatting
-      - octalLiteral
-      - unnamedResult
-      - unnecessaryDefer
-      - importShadow
-      - emptyStringTest
   nolintlint:
-    allow-leading-space: true # require machine-readable nolint directives (i.e. with no leading space)
+    allow-leading-space: false # require machine-readable nolint directives (i.e. with no leading space)
     allow-unused: false # report any unused nolint directives
     require-explanation: false # don't require an explanation for nolint directives
     require-specific: true # require nolint directives to be specific about which linter is being skipped
+  staticcheck:
+    go: "1.18"
+    checks: [all,-ST1000,-ST1001,-ST1003,-ST1005,-SA1019,-SA4001,-ST1016]
+  wrapcheck:
+    ignoreSigRegexps:
+      - utils\.Should
+      - errox\..+\.CausedBy(f)?
+      - retry\.MakeRetryable
+      - policy\.NewErr.*
 
 linters:
   # please, do not use `enable-all`: it's deprecated and will be removed soon.
@@ -62,21 +87,23 @@ linters:
     # - dupl
     # - errcheck
     # - funlen
+    - forbidigo
     # - gochecknoglobals
     # - gochecknoinits
     # - gocognit
     # - goconst
     - exportloopref
-    # - gocritic TODO: add in follow-up
+    - gocritic
     # - gocyclo
     # - godot
     # - godox
     # - goerr113
     - gofmt
     - goimports
+    - revive # replaces golint
     # - gomnd
     # - goprintffuncname
-    # - gosec
+    - gosec
     - gosimple
     - govet
     - ineffassign
@@ -88,10 +115,9 @@ linters:
     # - nestif
     - nolintlint
     # - prealloc
-    # - revive
     - rowserrcheck
     # - scopelint
-    # - staticcheck
+    - staticcheck
     # - structcheck
     # - stylecheck
     # - testpackage
@@ -101,4 +127,5 @@ linters:
     # - unused
     # - varcheck
     # - whitespace
+    # - wrapcheck
     # - wsl

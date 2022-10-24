@@ -44,8 +44,11 @@ jobs:
         uses: ./go/src/github.com/stackrox/infra/.github/actions/cache-ui-dependencies
 
       - name: Generate src
+        # This is committed at generated/ but building here ensure the make
+        # targets do not go stale and that any updates are committed.
         run: |
           make proto-generated-srcs
+          git diff --exit-code HEAD
 
       - name: Go Unit Test
         run: |

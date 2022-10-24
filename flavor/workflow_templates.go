@@ -36,8 +36,8 @@ func (r *Registry) addWorkflowTemplates(results []v1.Flavor) []v1.Flavor {
 		return results
 	}
 
-	for _, template := range templates.Items {
-		flavor := workflowTemplate2Flavor(&template)
+	for i := range templates.Items {
+		flavor := workflowTemplate2Flavor(&templates.Items[i])
 		if flavor != nil {
 			results = append(results, *flavor)
 		}
