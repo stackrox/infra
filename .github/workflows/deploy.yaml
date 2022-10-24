@@ -8,7 +8,6 @@ on:
         default: development
         type: choice
         options:
-        - local
         - development
         - production
       version:
@@ -27,6 +26,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
         with:
+          fetch-depth: 0
           ref: ${{ inputs.version }}
 
       - name: Authenticate to GCloud
@@ -39,8 +39,6 @@ jobs:
 
       - name: Deploy to ${{ inputs.environment }}
         run: |
-          gcloud auth list
-          gsutil cat gs://infra-configuration/latest/configuration/${{ inputs.environment }}-values.yaml | wc -l
           # gcloud container clusters get-credentials infra-${{ inputs.environment }} \
           #   --project stackrox-infra \
           #   --region us-west2
@@ -49,4 +47,4 @@ jobs:
             --project stackrox-infra \
             --region us-west2
           make tag
-          make install-${{ inputs.environment }}-without-write
+          make install-local-without-write
