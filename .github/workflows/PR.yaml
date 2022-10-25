@@ -83,10 +83,15 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_INFRA_DEPLOY_AUTOMATION_SA }}
 
-      - name: 'Set up Cloud SDK'
+      - name: Set up Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v0'
         with:
           install_components: "gke-gcloud-auth-plugin"
+
+      - name: Set up PATH
+        run: |
+          PATH="${PATH}:${HOME}/.local/bin"
+          echo PATH="${PATH}" >> "$GITHUB_ENV"
 
       - name: Download production infractl
         uses: stackrox/actions/infra/install-infractl@v1
