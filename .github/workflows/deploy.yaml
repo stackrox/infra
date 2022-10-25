@@ -36,8 +36,12 @@ jobs:
 
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v0'
+        with:
+          install_components: "gke-gcloud-auth-plugin"
 
       - name: Deploy to ${{ inputs.environment }}
+        env:
+          USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
         run: |
           # gcloud container clusters get-credentials infra-${{ inputs.environment }} \
           #   --project stackrox-infra \
@@ -46,5 +50,4 @@ jobs:
           gcloud container clusters get-credentials infra-development-clone-tom \
             --project stackrox-infra \
             --region us-west2
-          make tag
           make install-local-without-write
