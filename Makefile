@@ -185,7 +185,7 @@ kc=kubectl
 else ifeq ($(DEPLOYMENT), development)
 kc=kubectl --context gke_stackrox-infra_us-west2_infra-development
 else ifeq ($(DEPLOYMENT), production)
-kc=kubectl --context gke_stackrox-infra_us-west2_infra-development
+kc=kubectl --context gke_stackrox-infra_us-west2_infra-production
 endif
 
 ## Configuration
