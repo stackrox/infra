@@ -1,4 +1,11 @@
-name: Deploy infra
+run-name: >-
+  ${{
+    format('Deploy infra version {0} to {1}',
+      inputs.version,
+      inputs.environment
+    )
+  }}
+
 on:
   workflow_dispatch:
     inputs:
