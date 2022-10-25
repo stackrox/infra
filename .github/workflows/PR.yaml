@@ -68,7 +68,6 @@ jobs:
       KUBECONFIG: artifacts/kubeconfig
       INFRA_TOKEN: ${{ secrets.INFRA_TOKEN }}
       INFRACTL: bin/infractl -k -e localhost:8443
-      USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
 
     steps:
       - name: Checkout
@@ -90,11 +89,16 @@ jobs:
 
       - name: Set up PATH
         run: |
+          echo ${HOME}
           PATH="${PATH}:${HOME}/.local/bin"
           echo PATH="${PATH}" >> "$GITHUB_ENV"
 
       - name: Download production infractl
         uses: stackrox/actions/infra/install-infractl@v1
+
+      - run: |
+          ls -lisa ${HOME}
+          ls -lisa /github/home/.local/bin
 
       - name: Download artifacts
         run: |
