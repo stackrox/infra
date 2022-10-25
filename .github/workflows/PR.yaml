@@ -92,7 +92,6 @@ jobs:
         uses: stackrox/actions/infra/install-infractl@v1
 
       - name: Download artifacts
-        id: artifacts
         run: |
           infractl artifacts "$CLUSTER_NAME" -d artifacts >> "$GITHUB_STEP_SUMMARY"
           kubectl get nodes -o wide || true
