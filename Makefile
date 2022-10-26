@@ -17,7 +17,7 @@ endif
 tag:
 	@echo $(VERSION)
 
-IMAGE=us.gcr.io/stackrox-infra/infra-server:$(TAG)
+IMAGE=us.gcr.io/stackrox-infra/infra-server:$(VERSION)
 .PHONY: image-name
 image-name:
 	@echo $(IMAGE)
@@ -234,7 +234,7 @@ render: pre-check clean-render create-consolidated-values
 	helm template chart/infra-server \
 	    --output-dir chart-rendered \
 		--set deployment="${DEPLOYMENT}" \
-		--set tag="$(TAG)" \
+		--set tag="$(VERSION)" \
 		--values chart/infra-server/configuration/${ENVIRONMENT}-values.yaml \
 		--values chart/infra-server/configuration/${ENVIRONMENT}-values-from-files.yaml
 
@@ -289,7 +289,7 @@ install-without-write: setup-kc install-common
                gs://infra-configuration/latest/configuration/$(ENVIRONMENT)-values-from-files.yaml | \
 	helm template chart/infra-server \
 		--set deployment="$(DEPLOYMENT)" \
-		--set tag="$(TAG)" \
+		--set tag="$(VERSION)" \
 		--values - | \
 	$(kc) apply -R \
 	    -f -
@@ -315,7 +315,7 @@ diff: setup-kc
                gs://infra-configuration/latest/configuration/$(ENVIRONMENT)-values-from-files.yaml | \
 	helm template chart/infra-server \
 		--set deployment="$(DEPLOYMENT)" \
-		--set tag="$(TAG)" \
+		--set tag="$(VERSION)" \
 		--values - | \
 	$(kc) diff -R -f -
 

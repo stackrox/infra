@@ -6,10 +6,14 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
-- gke-default: Use the gke-gcloud-auth-plugin for kubeconfig artifact.
+## [0.5.1]
+
+- gke-default: Use the gke-gcloud-auth-plugin for kubeconfig artifact. (#719)
   ref: https://cloud.google.com/blog/products/containers-kubernetes/kubectl-auth-changes-in-gke
   This change may require users to update their gcloud SDK and install the auth plugin.
   For MacOS users: `gcloud components update && gcloud components install gke-gcloud-auth-plugin`.
+- Bump demo images to latest 3.72.1 release (#723)
+- RS-576: Add default Prometheus metrics (#721)
 
 ## [0.5.0]
 
