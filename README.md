@@ -1,4 +1,3 @@
-[![CircleCI][circleci-badge]][circleci-link]
 [![Dev][dev-badge]][dev-link]
 [![Prod][prod-badge]][prod-link]
 
@@ -47,8 +46,6 @@ For additional information on how this service is deployed, please refer to the 
 
 For additional information on how to debug and remediate issues with the deployed service, please refer to the [runbook instructions](TROUBLESHOOTING.md).
 
-[circleci-badge]: https://circleci.com/gh/stackrox/infra.svg?style=shield&circle-token=afa342906b658b5349c68b70fa82fd85d1422212
-[circleci-link]:  https://circleci.com/gh/stackrox/infra
 [dev-badge]:      https://img.shields.io/badge/infra-development-green
 [dev-link]:       https://infra.rox.systems
 [prod-badge]:     https://img.shields.io/badge/infra-production-green
