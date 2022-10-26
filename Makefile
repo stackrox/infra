@@ -17,7 +17,7 @@ endif
 tag:
 	@echo $(VERSION)
 
-IMAGE=us.gcr.io/stackrox-infra/infra-server:$(TAG)
+IMAGE=us.gcr.io/stackrox-infra/infra-server:$(VERSION)
 .PHONY: image-name
 image-name:
 	@echo $(IMAGE)
@@ -207,7 +207,7 @@ render-local: clean-render create-consolidated-values
 	helm template chart/infra-server \
 	    --output-dir chart-rendered \
 		--set deployment="local" \
-		--set tag="$(TAG)" \
+		--set tag="$(VERSION)" \
 		--values chart/infra-server/configuration/development-values.yaml \
 		--values chart/infra-server/configuration/development-values-from-files.yaml
 
@@ -217,7 +217,7 @@ render-development: clean-render create-consolidated-values
 	helm template chart/infra-server \
 	    --output-dir chart-rendered \
 		--set deployment="development" \
-		--set tag="$(TAG)" \
+		--set tag="$(VERSION)" \
 		--values chart/infra-server/configuration/development-values.yaml \
 		--values chart/infra-server/configuration/development-values-from-files.yaml
 
@@ -227,7 +227,7 @@ render-production: clean-render create-consolidated-values
 	helm template chart/infra-server \
 	    --output-dir chart-rendered \
 		--set deployment="production" \
-		--set tag="$(TAG)" \
+		--set tag="$(VERSION)" \
 		--values chart/infra-server/configuration/production-values.yaml \
 		--values chart/infra-server/configuration/production-values-from-files.yaml
 
@@ -269,7 +269,7 @@ install-local-without-write: install-local-common
                gs://infra-configuration/latest/configuration/development-values-from-files.yaml | \
 	helm template chart/infra-server \
 		--set deployment="local" \
-		--set tag="$(TAG)" \
+		--set tag="$(VERSION)" \
 		--values - | \
 	kubectl apply -R \
 	    -f -
