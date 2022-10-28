@@ -87,11 +87,6 @@ jobs:
         with:
           install_components: "gke-gcloud-auth-plugin"
 
-      - name: Set up PATH
-        run: |
-          PATH="${PATH}:${HOME}/.local/bin"
-          echo PATH="${PATH}" >> "$GITHUB_ENV"
-
       - name: Download production infractl
         uses: stackrox/actions/infra/install-infractl@v1
 
@@ -102,14 +97,9 @@ jobs:
 
       - name: Deploy infra to dev cluster
         run: |
-          set -xe
           make install-local-without-write
-          sleep 10
+          sleep 10 # wait for old pods to disappear so the svc port-forward doesn't connect to them
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
-          # Make sure we actually connect to a running pod
-          # POD=$(kubectl get po -n infra -l app=infra-server -o jsonpath='{ .items[?(@.status.phase=="Running")].metadata.name }' | head -n 1)
-          # echo "POD=${POD}" >> "$GITHUB_ENV"
-          # kubectl -n infra port-forward "pod/$POD" 8443:8443 &
           sleep 10
           make pull-infractl-from-dev-server
 
