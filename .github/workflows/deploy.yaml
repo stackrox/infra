@@ -50,11 +50,7 @@ jobs:
         env:
           USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
         run: |
-          # gcloud container clusters get-credentials infra-${{ inputs.environment }} \
-          #   --project stackrox-infra \
-          #   --region us-west2
-          # make install-${{ inputs.environment }}-without-write
-          gcloud container clusters get-credentials infra-development-clone-tom \
+          gcloud container clusters get-credentials infra-${{ inputs.environment }} \
             --project stackrox-infra \
             --region us-west2
-          make install-local-without-write
+          make install-${{ inputs.environment }}-without-write
