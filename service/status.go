@@ -17,12 +17,12 @@ var (
 	_ v1.InfraStatusServiceServer = (*statusImpl)(nil)
 )
 
-// NewCliService creates a new CliUpgradeService.
+// NewStatusImpl creates a new InfraStatusService.
 func NewStatusImpl() (middleware.APIService, error) {
 	return &statusImpl{}, nil
 }
 
-// Upgrade provides the binary for the requested OS and architecture.
+// GetStatus shows infra maintenance status.
 func (s *statusImpl) GetStatus(ctx context.Context, _ *empty.Empty) (*v1.InfraStatus, error) {
 	return &v1.InfraStatus{
 		Maintainer:        "tmartens@redhat.com",
