@@ -1,7 +1,9 @@
 #!/usr/bin/env bats
 
-ROOT="$(cd "$(dirname "$BATS_TEST_DIRNAME")"/.. && pwd)"
-source "$ROOT/test/bats-lib.sh"
+# shellcheck disable=SC1091
+source "$BATS_TEST_DIRNAME/../test/bats-lib.sh"
+
+load_bats_support
 
 setup() {
   e2e_setup
