@@ -68,6 +68,5 @@ jobs:
           make push
 
       - name: Logout
-        if: always() # also run on previous failures
         run: |
           docker logout https://us.gcr.io
