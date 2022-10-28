@@ -283,6 +283,22 @@
         ]
       }
     },
+    "/v1/status": {
+      "get": {
+        "operationId": "GetStatus",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1InfraStatus"
+            }
+          }
+        },
+        "tags": [
+          "InfraStatusService"
+        ]
+      }
+    },
     "/v1/token": {
       "post": {
         "summary": "Token generates a service account token for the current user.",
@@ -636,6 +652,20 @@
         }
       },
       "description": "FlavorListResponse represents details about the available cluster flavors."
+    },
+    "v1InfraStatus": {
+      "type": "object",
+      "properties": {
+        "MaintenanceActive": {
+          "type": "boolean",
+          "format": "boolean",
+          "description": "MaintenanceActive is an indicator whether a maintenance is ongoing."
+        },
+        "Maintainer": {
+          "type": "string",
+          "description": "Maintainer is the email of the person currently doing maintenance."
+        }
+      }
     },
     "v1LifespanRequest": {
       "type": "object",
