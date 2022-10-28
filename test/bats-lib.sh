@@ -23,5 +23,4 @@ e2e_setup() {
     echo "Quitting test. This is not an infra PR development cluster."
     exit 1
   fi
-  kubectl delete workflowtemplates --all --wait
 }

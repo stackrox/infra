@@ -5,9 +5,11 @@ source "$BATS_TEST_DIRNAME/../../../../test/bats-lib.sh"
 
 load_bats_support
 
+kubectl delete workflowtemplates --all --wait
+kubectl apply -f "$BATS_TEST_DIRNAME/testdata/test-hello-world.yaml"
+
 setup() {
   e2e_setup
-  kubectl apply -f "$BATS_TEST_DIRNAME/testdata/test-hello-world.yaml"
 }
 
 @test "can create a workflow" {

@@ -7,6 +7,7 @@ load_bats_support
 
 setup() {
   e2e_setup
+  kubectl delete workflowtemplates --all --wait
 }
 
 @test "can add a workflow template" {
