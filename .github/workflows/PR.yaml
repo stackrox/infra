@@ -96,13 +96,9 @@ jobs:
       - name: Download production infractl
         uses: stackrox/actions/infra/install-infractl@v1
 
-      - run: |
-          ls -lisa /github/home/.local/bin
-          /github/home/.local/bin/infractl --version
-
       - name: Download artifacts
         run: |
-          infractl artifacts "$CLUSTER_NAME" -d artifacts >> "$GITHUB_STEP_SUMMARY"
+          /github/home/.local/bin/infractl artifacts "$CLUSTER_NAME" -d artifacts >> "$GITHUB_STEP_SUMMARY"
           kubectl get nodes -o wide || true
 
       - name: Deploy infra to dev cluster
