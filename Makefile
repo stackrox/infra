@@ -341,8 +341,7 @@ clean-argo:
 	$(kc) delete namespace argo || true
 
 .PHONY: clean-local
-clean-local: DEPLOYMENT := local
-clean-local: # setup-kc
+clean-local:
 	DEPLOYMENT=local ENVIRONMENT=development make setup-kc clean-infra clean-argo
 
 .PHONY: clean-development
