@@ -22,6 +22,18 @@ IMAGE=us.gcr.io/stackrox-infra/infra-server:$(VERSION)
 image-name:
 	@echo $(IMAGE)
 
+#############
+## Linting ##
+#############
+
+.PHONY: argo-workflow-lint
+argo-workflow-lint:
+	@argo lint ./chart/infra-server/static/workflow*.yaml
+
+.PHONY: shellcheck
+shellcheck:
+	@shellcheck -x -- **/*.{bats,sh}
+
 ###########
 ## Build ##
 ###########
@@ -84,6 +96,23 @@ unit-test: proto-generated-srcs
 	@echo "+ $@"
 	@go test -v ./...
 
+<<<<<<< HEAD
+=======
+# Assuming a local dev infra server is running and accessible via a port-forward
+# i.e. nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
+.PHONY: pull-infractl-from-dev-server
+pull-infractl-from-dev-server:
+	@mkdir -p bin
+	@rm -f bin/infractl
+	set -o pipefail; \
+	curl --retry 3 --insecure --silent --show-error --fail --location https://localhost:8443/v1/cli/linux/amd64/upgrade \
+          | jq -r ".result.fileChunk" \
+          | base64 -d \
+          > bin/infractl
+	chmod +x bin/infractl
+	bin/infractl -k -e localhost:8443 version
+
+>>>>>>> bae2c90 (fix)
 .PHONY: e2e-tests
 e2e-tests:
 	@bats -r .
@@ -384,10 +413,6 @@ gotags:
 	@gotags -R . > tags
 	@echo "GoTags written to $(PWD)/tags"
 
-.PHONY: argo-workflow-lint
-argo-workflow-lint:
-	@argo lint ./chart/infra-server/static/workflow*.yaml
-
 .PHONY: update-version
 update-version: image_regex   := gcr.io/stackrox-infra/automation-flavors/.*
 update-version: image_version := 0.2.16
@@ -397,6 +422,7 @@ update-version:
 		./chart/infra-server/static/*.yaml
 	@git diff --name-status ./chart/infra-server/static/*.yaml
 
+<<<<<<< HEAD
 # Assuming a local dev infra server is running and accessible via a port-forward
 # i.e. nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
 .PHONY: pull-infractl-from-dev-server
@@ -410,3 +436,5 @@ pull-infractl-from-dev-server:
           > bin/infractl
 	chmod +x bin/infractl
 	bin/infractl -k -e localhost:8443 version
+=======
+>>>>>>> bae2c90 (fix)

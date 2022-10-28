@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
+ROOT="$(cd "$(dirname "$BATS_TEST_DIRNAME")"/.. && pwd)"
 source "$ROOT/test/bats-lib.sh"
 
 setup() {
