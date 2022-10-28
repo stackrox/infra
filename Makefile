@@ -390,7 +390,7 @@ pull-infractl-from-dev-server:
 	@mkdir -p bin
 	@rm -f bin/infractl
 	set -o pipefail; \
-	curl --retry 10 --insecure -v --show-error --fail --location https://localhost:8443/v1/cli/linux/amd64/upgrade \
+	curl --retry 10 --insecure --show-error --fail --location https://localhost:8443/v1/cli/linux/amd64/upgrade \
           | jq -r ".result.fileChunk" \
           | base64 -d \
           > bin/infractl
