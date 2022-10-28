@@ -104,9 +104,11 @@ jobs:
         run: |
           make install-local-without-write
 
+          kubectl -n infra get pods
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
           sleep 5
 
+          kubectl -n infra get pods
           make pull-infractl-from-dev-server
 
           kill %1
