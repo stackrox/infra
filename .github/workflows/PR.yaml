@@ -90,7 +90,6 @@ jobs:
 
       - name: Set up PATH
         run: |
-          echo ${HOME}
           PATH="${PATH}:${HOME}/.local/bin"
           echo PATH="${PATH}" >> "$GITHUB_ENV"
 
@@ -98,8 +97,8 @@ jobs:
         uses: stackrox/actions/infra/install-infractl@v1
 
       - run: |
-          ls -lisa ${HOME}
           ls -lisa /github/home/.local/bin
+          /github/home/.local/bin/infractl --version
 
       - name: Download artifacts
         run: |
