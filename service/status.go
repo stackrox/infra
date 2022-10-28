@@ -17,8 +17,8 @@ var (
 	_ v1.InfraStatusServiceServer = (*statusImpl)(nil)
 )
 
-// NewStatusImpl creates a new InfraStatusService.
-func NewStatusImpl() (middleware.APIService, error) {
+// NewStatusService creates a new InfraStatusService.
+func NewStatusService() (middleware.APIService, error) {
 	return &statusImpl{}, nil
 }
 

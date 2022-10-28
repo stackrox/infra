@@ -94,6 +94,7 @@ func mainCmd() error {
 		},
 		service.NewCliService,
 		service.NewVersionService,
+		service.NewStatusService,
 		func() (middleware.APIService, error) {
 			return cluster.NewClusterService(registry, signer, eventSource, slackClient)
 		},
