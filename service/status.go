@@ -24,10 +24,11 @@ func NewStatusService() (middleware.APIService, error) {
 
 // GetStatus shows infra maintenance status.
 func (s *statusImpl) GetStatus(ctx context.Context, _ *empty.Empty) (*v1.InfraStatus, error) {
-	return &v1.InfraStatus{
+	infraStatus := v1.InfraStatus{
 		Maintainer:        "tmartens@redhat.com",
 		MaintenanceActive: true,
-	}, nil
+	}
+	return &infraStatus, nil
 }
 
 // Access configures access for this service.

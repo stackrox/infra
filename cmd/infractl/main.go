@@ -14,6 +14,7 @@ import (
 	"github.com/stackrox/infra/cmd/infractl/cluster/logs"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	"github.com/stackrox/infra/cmd/infractl/flavor"
+	"github.com/stackrox/infra/cmd/infractl/status"
 	"github.com/stackrox/infra/cmd/infractl/token"
 	"github.com/stackrox/infra/cmd/infractl/version"
 	"github.com/stackrox/infra/cmd/infractl/whoami"
@@ -61,6 +62,9 @@ func main() {
 
 		// $ infractl logs
 		logs.Command(),
+
+		// $ infractl status
+		status.Command(),
 
 		// $ infractl token
 		token.Command(),
