@@ -112,7 +112,7 @@ spec:
               none: {}
 
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.3.7
+        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.3.12-1-gee331205ca-snapshot
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint
@@ -169,11 +169,6 @@ spec:
               secretKeyRef:
                 name: demo-secrets
                 key: SLACK_WEBHOOK
-          - name: STACKROX_LICENSE
-            valueFrom:
-              secretKeyRef:
-                name: demo-secrets
-                key: STACKROX_LICENSE
 
     - name: wait
       suspend: {}
@@ -189,7 +184,7 @@ spec:
             path: /data/tfvars
             optional: true
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.3.7
+        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.3.12-1-gee331205ca-snapshot
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint
