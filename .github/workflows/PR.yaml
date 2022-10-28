@@ -104,18 +104,18 @@ jobs:
         run: |
           make install-local-without-write
 
-          kubectl -n infra get pods
+          # Make sure we actually connect to a running pod
+          POD=$(kubectl get po -n infra -l app=infra-server -o jsonpath='{ .items[?(@.status.phase=="Running")].metadata.name }' | head -n 1)
+          echo "POD=${POD}" >> "$GITHUB_ENV"
+          kubectl -n infra port-forward pod/$POD 8443:8443 &
           sleep 10
-          kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
-          sleep 10
-          kubectl -n infra get pods
           make pull-infractl-from-dev-server
 
           kill %1
 
       - name: Check the deployment
         run: |
-          kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
+          kubectl -n infra port-forward pod/$POD 8443:8443 &
           sleep 10
 
           version="$($INFRACTL version --json)"
