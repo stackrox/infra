@@ -3,13 +3,15 @@ package create
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/cluster/artifacts"
 	"github.com/stackrox/infra/cmd/infractl/common"
@@ -21,17 +23,21 @@ const examples = `# Create a new "gke-default" cluster.
 $ infractl create gke-default you-20200921-1 --arg nodes=3
 
 # Create another "gke-default" cluster with a 30 minute lifespan.
-$ infractl create gke-default you-20200921-2 --lifespan 30m --arg nodes=3`
+$ infractl create gke-default you-20200921-2 --lifespan 30m
+
+# Create a demo cluster with a name based on your environment.
+# Uses your infra user initials - make tag if present OR MM-DD-N if not.
+$ infractl create qa-demo`
 
 // Command defines the handler for infractl create.
 func Command() *cobra.Command {
 	// $ infractl create
 	cmd := &cobra.Command{
-		Use:     "create FLAVOR NAME",
+		Use:     "create FLAVOR [NAME|<defaults to initials + tag or short date>]",
 		Short:   "Create a new cluster",
 		Long:    "Creates a new cluster",
 		Example: examples,
-		Args:    common.ArgsWithHelp(cobra.ExactArgs(2), args),
+		Args:    common.ArgsWithHelp(cobra.RangeArgs(1, 2), args),
 		RunE:    common.WithGRPCHandler(run),
 	}
 
@@ -48,9 +54,6 @@ func Command() *cobra.Command {
 func args(_ *cobra.Command, args []string) error {
 	if args[0] == "" {
 		return errors.New("no flavor ID given")
-	}
-	if args[1] == "" {
-		return errors.New("no cluster name given")
 	}
 	return nil
 }
@@ -84,7 +87,15 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 		}
 		req.Parameters[parts[0]] = parts[1]
 	}
-	req.Parameters["name"] = args[1]
+	if len(args) > 1 {
+		req.Parameters["name"] = args[1]
+	} else {
+		name, err := determineAName(ctx, conn)
+		if err != nil {
+			return nil, err
+		}
+		req.Parameters["name"] = name
+	}
 
 	clusterID, err := client.Create(ctx, &req)
 	if err != nil {
@@ -96,11 +107,39 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 			return nil, err
 		}
 		if downloadDir != "" {
-			return artifacts.DownloadArtifacts(context.Background(), client, args[1], downloadDir)
+			return artifacts.DownloadArtifacts(context.Background(), client, req.Parameters["name"], downloadDir)
 		}
 	}
 
 	return prettyResourceByID(*clusterID), nil
+}
+
+func determineAName(ctx context.Context, conn *grpc.ClientConn) (string, error) {
+	resp, err := v1.NewUserServiceClient(conn).Whoami(ctx, &empty.Empty{})
+	if err != nil {
+		return "", err
+	}
+	switch resp := resp.Principal.(type) {
+	case *v1.WhoamiResponse_User:
+		return "", errors.New("authenticating as a user is not possible in this context")
+	case *v1.WhoamiResponse_ServiceAccount:
+		initials := ""
+		name := resp.ServiceAccount.GetName()
+		for _, part := range regexp.MustCompile(`[\s-_\.]+`).Split(name, -1) {
+			initials += strings.ToLower(part)[0:1]
+		}
+		if len(initials) < 2 {
+			return "", errors.Errorf("Cannot determine a default name for %s", name)
+		}
+		if len(initials) > 4 {
+			initials = initials[0:4]
+		}
+		return initials, nil
+	case nil:
+		return "", errors.New("anonymous authentication is not possible in this context")
+	}
+
+	return "hoo", nil
 }
 
 func waitForCluster(client v1.ClusterServiceClient, clusterID *v1.ResourceByID) error {

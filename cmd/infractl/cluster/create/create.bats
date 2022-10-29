@@ -18,6 +18,12 @@ setup() {
   assert_output "ID: this-is-a-test"
 }
 
+@test "can create a workflow without a name" {
+  run infractl create test-hello-world
+  assert_success
+  assert_output "ID: rb"
+}
+
 infractl() {
   bin/infractl -e localhost:8443 -k "$@"
 }
