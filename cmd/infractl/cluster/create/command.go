@@ -202,7 +202,7 @@ func avoidConflicts(ctx context.Context, conn *grpc.ClientConn, nameSoFar string
 }
 
 func addDefaultImageVersion(flavorID string, req *v1.CreateClusterRequest) {
-	if strings.Contains(flavorID, "qa-demo") {
+	if !strings.Contains(flavorID, "qa-demo") {
 		return
 	}
 	makeTag := exec.Command("make", "tag")

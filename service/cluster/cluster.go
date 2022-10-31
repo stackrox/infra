@@ -802,7 +802,7 @@ func checkAndEnrichParameters(flavorParams map[string]*v1.Parameter, requestPara
 			// Extra sanity check to reject any internal parameters from the
 			// user.
 			if found {
-				return nil, fmt.Errorf("parameter %q was not requested", flavorParamName)
+				return nil, fmt.Errorf("rejecting an internal parameter: %q", flavorParamName)
 			}
 
 			// Parameter is internally hardcoded.
@@ -838,7 +838,7 @@ func checkAndEnrichParameters(flavorParams map[string]*v1.Parameter, requestPara
 	for requestParamName := range requestParams {
 		flavorParam, found := flavorParams[requestParamName]
 		if !found || flavorParam.Internal {
-			return nil, fmt.Errorf("parameter %q was not requested", requestParamName)
+			return nil, fmt.Errorf("passed parameter %q is not defined for this flavor", requestParamName)
 		}
 	}
 
