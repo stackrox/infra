@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -121,7 +122,12 @@ func determineAName(ctx context.Context, conn *grpc.ClientConn) (string, error) 
 	}
 
 	datePart := time.Now().Format("01-02")
-	return initials + "-" + datePart, nil
+
+	unconflicted, err := avoidConflicts(ctx, conn, initials+"-"+datePart)
+	if err != nil {
+		return "", err
+	}
+	return unconflicted, nil
 }
 
 func getUserInitials(ctx context.Context, conn *grpc.ClientConn) (string, error) {
@@ -150,6 +156,34 @@ func getUserInitials(ctx context.Context, conn *grpc.ClientConn) (string, error)
 	}
 
 	panic("unexpected")
+}
+
+func avoidConflicts(ctx context.Context, conn *grpc.ClientConn, nameSoFar string) (string, error) {
+	req := v1.ClusterListRequest{
+		All:     true,
+		Expired: true,
+	}
+
+	resp, err := v1.NewClusterServiceClient(conn).List(ctx, &req)
+	if err != nil {
+		return "", err
+	}
+
+	for i := 1; i <= 11; i++ {
+		potential := nameSoFar + "-" + strconv.Itoa(i)
+		inUse := false
+		for _, cluster := range resp.Clusters {
+			if cluster.ID == potential {
+				inUse = true
+				break
+			}
+		}
+		if !inUse {
+			return potential, nil
+		}
+	}
+
+	return "", errors.New("could not find a default name for this cluster")
 }
 
 func waitForCluster(client v1.ClusterServiceClient, clusterID *v1.ResourceByID) error {

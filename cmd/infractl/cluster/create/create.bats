@@ -32,6 +32,14 @@ setup() {
   assert_output --regexp "ID\: ...?.?-${date_suffix}"
 }
 
+@test "names do not conflict" {
+  run infractl create test-hello-world
+  run infractl create test-hello-world
+  assert_success
+  date_suffix="$(date '+%m-%d')"
+  assert_output --regexp "ID\: ...?.?-${date_suffix}-2"
+}
+
 infractl() {
   bin/infractl -e localhost:8443 -k "$@"
 }
