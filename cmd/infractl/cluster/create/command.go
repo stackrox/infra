@@ -119,7 +119,9 @@ func determineAName(ctx context.Context, conn *grpc.ClientConn) (string, error) 
 	if err != nil {
 		return "", err
 	}
-	return initials, nil
+
+	datePart := time.Now().Format("01-02")
+	return initials + "-" + datePart, nil
 }
 
 func getUserInitials(ctx context.Context, conn *grpc.ClientConn) (string, error) {
