@@ -101,6 +101,9 @@ jobs:
           sleep 10 # wait for old pods to disappear so the svc port-forward doesn't connect to them
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
           sleep 10
+
+          kubectl -n infra logs -l app=infra-server --tail=-1
+
           make pull-infractl-from-dev-server
 
           kill %1

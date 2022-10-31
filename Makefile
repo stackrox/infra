@@ -96,8 +96,6 @@ unit-test: proto-generated-srcs
 	@echo "+ $@"
 	@go test -v ./...
 
-<<<<<<< HEAD
-=======
 # Assuming a local dev infra server is running and accessible via a port-forward
 # i.e. nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
 .PHONY: pull-infractl-from-dev-server
@@ -112,7 +110,6 @@ pull-infractl-from-dev-server:
 	chmod +x bin/infractl
 	bin/infractl -k -e localhost:8443 version
 
->>>>>>> bae2c90 (fix)
 .PHONY: e2e-tests
 e2e-tests:
 	@bats -r .
@@ -319,6 +316,16 @@ install: setup-kc install-common
 		--values - | \
 	$(kc) apply -R \
 	    -f -
+	@sleep 10
+	# Bounce the infra-server to ensure proper update.
+	kubectl -n infra delete pods -l app=infra-server --wait
+	@sleep 10
+
+.PHONY: local-data-dev-cycle
+local-data-dev-cycle: render-local install-local
+	# Bounce the infra-server to ensure proper update
+	@sleep 5
+	kubectl -n infra delete pods -l app=infra-server --wait
 	@sleep 5
 	make bounce-infra-pods
 
@@ -422,19 +429,3 @@ update-version:
 		./chart/infra-server/static/*.yaml
 	@git diff --name-status ./chart/infra-server/static/*.yaml
 
-<<<<<<< HEAD
-# Assuming a local dev infra server is running and accessible via a port-forward
-# i.e. nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
-.PHONY: pull-infractl-from-dev-server
-pull-infractl-from-dev-server:
-	@mkdir -p bin
-	@rm -f bin/infractl
-	set -o pipefail; \
-	curl --retry 3 --insecure --silent --show-error --fail --location https://localhost:8443/v1/cli/linux/amd64/upgrade \
-          | jq -r ".result.fileChunk" \
-          | base64 -d \
-          > bin/infractl
-	chmod +x bin/infractl
-	bin/infractl -k -e localhost:8443 version
-=======
->>>>>>> bae2c90 (fix)
