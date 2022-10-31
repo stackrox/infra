@@ -25,6 +25,13 @@ setup() {
   assert_output --regex "ID\: ...?.?"
 }
 
+@test "names default to date" {
+  run infractl create test-hello-world
+  assert_success
+  date_suffix="$(date '+%m-%d')"
+  assert_output --regex "ID\: ...?.?-${date_suffix}"
+}
+
 infractl() {
   bin/infractl -e localhost:8443 -k "$@"
 }

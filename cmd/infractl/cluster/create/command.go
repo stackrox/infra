@@ -115,6 +115,14 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 }
 
 func determineAName(ctx context.Context, conn *grpc.ClientConn) (string, error) {
+	initials, err := getUserInitials(ctx, conn)
+	if err != nil {
+		return "", err
+	}
+	return initials, nil
+}
+
+func getUserInitials(ctx context.Context, conn *grpc.ClientConn) (string, error) {
 	resp, err := v1.NewUserServiceClient(conn).Whoami(ctx, &empty.Empty{})
 	if err != nil {
 		return "", err
@@ -139,7 +147,7 @@ func determineAName(ctx context.Context, conn *grpc.ClientConn) (string, error) 
 		return "", errors.New("anonymous authentication is not possible in this context")
 	}
 
-	return "hoo", nil
+	panic("unexpected")
 }
 
 func waitForCluster(client v1.ClusterServiceClient, clusterID *v1.ResourceByID) error {
