@@ -4,12 +4,13 @@
 source "$BATS_TEST_DIRNAME/../../../../test/bats-lib.sh"
 
 load_bats_support
+e2e_setup
 
 kubectl delete workflowtemplates --all --wait
 kubectl apply -f "$BATS_TEST_DIRNAME/testdata/test-hello-world.yaml"
 
 setup() {
-  e2e_setup
+  kubectl delete workflows --all --wait
 }
 
 @test "can create a workflow" {
@@ -21,7 +22,7 @@ setup() {
 @test "can create a workflow without a name" {
   run infractl create test-hello-world
   assert_success
-  assert_output "ID: rb"
+  assert_output --regex "ID\: ...?.?"
 }
 
 infractl() {

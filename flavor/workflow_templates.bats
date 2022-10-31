@@ -4,9 +4,9 @@
 source "$BATS_TEST_DIRNAME/../test/bats-lib.sh"
 
 load_bats_support
+e2e_setup
 
 setup() {
-  e2e_setup
   kubectl delete workflowtemplates --all --wait
 }
 
