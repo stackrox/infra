@@ -98,6 +98,8 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 		req.Parameters["name"] = name
 	}
 
+	addDefaultImageVersion(args[0], &req)
+
 	clusterID, err := client.Create(ctx, &req)
 	if err != nil {
 		return nil, err
@@ -197,6 +199,17 @@ func avoidConflicts(ctx context.Context, conn *grpc.ClientConn, nameSoFar string
 	}
 
 	return "", errors.New("could not find a default name for this cluster")
+}
+
+func addDefaultImageVersion(flavorID string, req *v1.CreateClusterRequest) {
+	if strings.Contains(flavorID, "qa-demo") {
+		return
+	}
+	makeTag := exec.Command("make", "tag")
+	out, err := makeTag.Output()
+	if err == nil {
+		req.Parameters["main-image"] = string(out)
+	}
 }
 
 func waitForCluster(client v1.ClusterServiceClient, clusterID *v1.ResourceByID) error {

@@ -41,10 +41,12 @@ setup() {
 }
 
 @test "qa-demo names use the tag" {
+  pushd "$(git rev-parse --show-toplevel)"
   run infractl create test-qa-demo
   assert_success
   tag_suffix="$(make tag)"
   assert_output --regexp "ID\: ...?.?-${tag_suffix}-1"
+  popd
 }
 
 infractl() {
