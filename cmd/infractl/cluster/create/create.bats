@@ -7,7 +7,7 @@ load_bats_support
 e2e_setup
 
 kubectl delete workflowtemplates --all --wait
-kubectl apply -f "$BATS_TEST_DIRNAME/testdata/test-hello-world.yaml"
+kubectl apply -f "$BATS_TEST_DIRNAME/testdata/*.yaml"
 
 setup() {
   kubectl delete workflows --all --wait
@@ -38,6 +38,13 @@ setup() {
   assert_success
   date_suffix="$(date '+%m-%d')"
   assert_output --regexp "ID\: ...?.?-${date_suffix}-2"
+}
+
+@test "qa-demo names use the tag" {
+  run infractl create test-qa-demo
+  assert_success
+  tag_suffix="$(make tag)"
+  assert_output --regexp "ID\: ...?.?-${tag_suffix}-1"
 }
 
 infractl() {

@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
@@ -21,14 +22,13 @@ import (
 )
 
 const examples = `# Create a new "gke-default" cluster.
-$ infractl create gke-default you-20200921-1 --arg nodes=3
+$ infractl create gke-default
 
-# Create another "gke-default" cluster with a 30 minute lifespan.
-$ infractl create gke-default you-20200921-2 --lifespan 30m
+# Create another "gke-default" cluster with a 8 hour lifespan.
+$ infractl create gke-default --lifespan 8h
 
-# Create a demo cluster with a name based on your environment.
-# Uses your infra user initials - make tag if present OR MM-DD-N if not.
-$ infractl create qa-demo`
+# Create a demo cluster with a name of your own choosing.
+$ infractl create qa-demo my-demo-for-3-88-0`
 
 // Command defines the handler for infractl create.
 func Command() *cobra.Command {
@@ -91,7 +91,7 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 	if len(args) > 1 {
 		req.Parameters["name"] = args[1]
 	} else {
-		name, err := determineAName(ctx, conn)
+		name, err := determineAName(ctx, conn, args[0])
 		if err != nil {
 			return nil, err
 		}
@@ -115,18 +115,19 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 	return prettyResourceByID(*clusterID), nil
 }
 
-func determineAName(ctx context.Context, conn *grpc.ClientConn) (string, error) {
+func determineAName(ctx context.Context, conn *grpc.ClientConn, flavorID string) (string, error) {
 	initials, err := getUserInitials(ctx, conn)
 	if err != nil {
 		return "", err
 	}
 
-	datePart := time.Now().Format("01-02")
+	suffix := getTagOrDate(flavorID)
 
-	unconflicted, err := avoidConflicts(ctx, conn, initials+"-"+datePart)
+	unconflicted, err := avoidConflicts(ctx, conn, initials+"-"+suffix)
 	if err != nil {
 		return "", err
 	}
+
 	return unconflicted, nil
 }
 
@@ -156,6 +157,18 @@ func getUserInitials(ctx context.Context, conn *grpc.ClientConn) (string, error)
 	}
 
 	panic("unexpected")
+}
+
+func getTagOrDate(flavorID string) string {
+	if strings.Contains(flavorID, "qa-demo") {
+		makeTag := exec.Command("make", "tag")
+		out, err := makeTag.Output()
+		if err == nil {
+			return string(out)
+		}
+	}
+
+	return time.Now().Format("01-02")
 }
 
 func avoidConflicts(ctx context.Context, conn *grpc.ClientConn, nameSoFar string) (string, error) {
