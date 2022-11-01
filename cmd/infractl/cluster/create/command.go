@@ -171,6 +171,9 @@ func getNameFromTag(flavorID string) string {
 		}
 		rootDir := string(out)
 		rootDir = strings.TrimSpace(rootDir)
+		if !strings.Contains(rootDir, "stackrox/stackrox") {
+			return ""
+		}
 
 		makeTag := exec.Command("make", "--quiet", "tag")
 		makeTag.Dir = rootDir

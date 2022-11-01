@@ -2,17 +2,31 @@
 
 # shellcheck disable=SC1091
 source "$BATS_TEST_DIRNAME/../../../../test/bats-lib.sh"
-
 load_bats_support
-e2e_setup
 
-kubectl delete workflowtemplates --all --wait
-kubectl apply -f "$BATS_TEST_DIRNAME/testdata/*.yaml"
+setup_file() {
+  e2e_setup
 
-tag_suffix="$(make --quiet tag | sed 's/\./-/g')"
+  kubectl delete workflowtemplates --all --wait
+  kubectl apply -f "$BATS_TEST_DIRNAME/testdata/*.yaml"
+
+  ROOT="$(git rev-parse --show-toplevel)"
+  export ROOT
+  mkdir -p "$ROOT/mocks/stackrox/collector"
+  mkdir -p "$ROOT/mocks/stackrox/stackrox"
+  export PATH="$ROOT/mocks:$PATH}"
+  date_suffix="$(date '+%m-%d')"
+  export date_suffix
+  test_tag="0.5.2-23-g2e873a9145"
+  export test_tag
+  tag_suffix="0-5-2-23-g2e873a9145"
+  export tag_suffix
+}
 
 setup() {
   kubectl delete workflows --all --wait
+  create_mock_make_for_tag "${test_tag}"
+  create_mock_git_for_toplevel "$ROOT/mocks/stackrox/stackrox"
 }
 
 @test "can create a workflow" {
@@ -30,7 +44,6 @@ setup() {
 @test "names include a date by default" {
   run infractl create test-hello-world
   assert_success
-  date_suffix="$(date '+%m-%d')"
   assert_output --regexp "ID\: ...?.?-${date_suffix}"
 }
 
@@ -38,7 +51,6 @@ setup() {
   run infractl create test-hello-world
   run infractl create test-hello-world
   assert_success
-  date_suffix="$(date '+%m-%d')"
   assert_output --regexp "ID\: ...?.?-${date_suffix}-2"
 }
 
@@ -48,14 +60,59 @@ setup() {
   assert_output --regexp "ID\: ...?.?-${tag_suffix}-1"
 }
 
-@test "qa-demo names use the tag - subdirs are OK" {
-  pushd "$BATS_TEST_DIRNAME"
+@test "qa-demo names use the date when not in a git context" {
+  create_mock_git_that_fails
   run infractl create test-qa-demo
   assert_success
-  assert_output --regexp "ID\: ...?.?-${tag_suffix}-1"
-  popd
+  assert_output --regexp "ID\: ...?.?-${date_suffix}-1"
+}
+
+@test "qa-demo names use the date when in a git context other than stackrox" {
+  create_mock_git_for_toplevel "$ROOT/mocks/stackrox/collector"
+  create_mock_make_for_tag_without_pwd_check "${test_tag}"
+  run infractl create test-qa-demo
+  assert_success
+  assert_output --regexp "ID\: ...?.?-${date_suffix}-1"
 }
 
 infractl() {
-  "$(git rev-parse --show-toplevel)"/bin/infractl -e localhost:8443 -k "$@"
+  "$ROOT"/bin/infractl -e localhost:8443 -k "$@"
+}
+
+create_mock_make_for_tag() {
+  cat <<_EOD_ > "$ROOT/mocks/make"
+#!/usr/bin/env bash
+# this should really be an @test that make runs in the right context, but
+# I cannot figure that one out.
+if [[ "\$(pwd)" != "$ROOT/mocks/stackrox/stackrox" ]]; then
+  echo "make should run in the mock root"
+  exit 1
+fi
+echo $1
+_EOD_
+  chmod 0755 "$ROOT/mocks/make"
+}
+
+create_mock_make_for_tag_without_pwd_check() {
+  cat <<_EOD_ > "$ROOT/mocks/make"
+#!/usr/bin/env bash
+echo $1
+_EOD_
+  chmod 0755 "$ROOT/mocks/make"
+}
+
+create_mock_git_for_toplevel() {
+  cat <<_EOD_ > "$ROOT/mocks/git"
+#!/usr/bin/env bash
+echo $1
+_EOD_
+  chmod 0755 "$ROOT/mocks/git"
+}
+
+create_mock_git_that_fails() {
+  cat <<_EOD_ > "$ROOT/mocks/git"
+#!/usr/bin/env bash
+exit 1
+_EOD_
+  chmod 0755 "$ROOT/mocks/git"
 }
