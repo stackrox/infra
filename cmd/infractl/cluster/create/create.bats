@@ -75,7 +75,14 @@ setup() {
   assert_equal "$arg" "quay.io/stackrox-io/main:${test_tag}"
 }
 
-@test "does not override main-image" {
+@test "qa-demo defaults main-image from --rhacs" {
+  run infractl create test-qa-demo --rhacs
+  assert_success
+  arg="$(kubectl get workflows -o json | jq -r '.items[].spec.arguments.parameters[] | select(.name=="main-image") | .value')"
+  assert_equal "$arg" "quay.io/rhacs-eng/main:${test_tag}"
+}
+
+@test "does not override main-image if passed" {
   run infractl create test-qa-demo --arg main-image=a.b.c
   assert_success
   arg="$(kubectl get workflows -o json | jq -r '.items[].spec.arguments.parameters[] | select(.name=="main-image") | .value')"

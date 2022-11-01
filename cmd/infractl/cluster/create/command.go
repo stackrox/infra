@@ -49,10 +49,11 @@ func Command() *cobra.Command {
 	cmd.Flags().Bool("no-slack", false, "skip sending Slack messages for lifecycle events")
 	cmd.Flags().Bool("slack-me", false, "send slack messages directly and not to the #infra_notifications channel")
 	cmd.Flags().StringP("download-dir", "d", "", "wait for readiness and download artifacts to this dir")
+	cmd.Flags().Bool("rhacs", false, "use the RH branded images for qa-demo (defaults is opensource images)")
 	return cmd
 }
 
-func args(_ *cobra.Command, args []string) error {
+func args(cmd *cobra.Command, args []string) error {
 	if args[0] == "" {
 		return errors.New("no flavor ID given")
 	}
@@ -106,7 +107,7 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 		req.Parameters["name"] = name
 	}
 
-	assignDefaults(&req)
+	assignDefaults(cmd, &req)
 
 	clusterID, err := client.Create(ctx, &req)
 	if err != nil {
@@ -247,7 +248,7 @@ func avoidConflicts(ctx context.Context, conn *grpc.ClientConn, nameSoFar string
 	return "", errors.New("could not find a default name for this cluster")
 }
 
-func assignDefaults(req *v1.CreateClusterRequest) {
+func assignDefaults(cmd *cobra.Command, req *v1.CreateClusterRequest) {
 	if !strings.Contains(req.ID, "qa-demo") {
 		return
 	}
@@ -260,8 +261,13 @@ func assignDefaults(req *v1.CreateClusterRequest) {
 		return
 	}
 
+	registry := "quay.io/stackrox-io"
+	if rhacsImages, _ := cmd.Flags().GetBool("rhacs"); rhacsImages {
+		registry = "quay.io/rhacs-eng"
+	}
+
 	tag := strings.TrimSuffix(workingEnvironment.tag, "-dirty")
-	req.Parameters["main-image"] = "quay.io/stackrox-io/main:" + tag
+	req.Parameters["main-image"] = registry + "/main:" + tag
 }
 
 func waitForCluster(client v1.ClusterServiceClient, clusterID *v1.ResourceByID) error {
