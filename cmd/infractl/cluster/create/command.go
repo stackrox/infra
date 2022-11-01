@@ -24,17 +24,17 @@ import (
 const examples = `# Create a new "gke-default" cluster.
 $ infractl create gke-default
 
-# Create another "gke-default" cluster with a 8 hour lifespan.
+# Create another "gke-default" cluster with an 8 hour lifespan.
 $ infractl create gke-default --lifespan 8h
 
 # Create a demo cluster with a name of your own choosing.
-$ infractl create qa-demo my-demo-for-3-88-0`
+$ infractl create qa-demo my-demo-for-me`
 
 // Command defines the handler for infractl create.
 func Command() *cobra.Command {
 	// $ infractl create
 	cmd := &cobra.Command{
-		Use:     "create FLAVOR [NAME|<defaults to initials + tag or short date>]",
+		Use:     "create FLAVOR [NAME|<defaults to initials - tag or a short date>]",
 		Short:   "Create a new cluster",
 		Long:    "Creates a new cluster",
 		Example: examples,
@@ -121,7 +121,7 @@ func determineAName(ctx context.Context, conn *grpc.ClientConn, flavorID string)
 		return "", err
 	}
 
-	suffix := getTagForName(flavorID)
+	suffix := getNameFromTag(flavorID)
 	if suffix == "" {
 		suffix = time.Now().Format("01-02")
 	}
@@ -162,7 +162,7 @@ func getUserInitials(ctx context.Context, conn *grpc.ClientConn) (string, error)
 	panic("unexpected")
 }
 
-func getTagForName(flavorID string) string {
+func getNameFromTag(flavorID string) string {
 	if strings.Contains(flavorID, "qa-demo") {
 		topLevel := exec.Command("git", "rev-parse", "--show-toplevel")
 		out, err := topLevel.Output()
@@ -179,8 +179,9 @@ func getTagForName(flavorID string) string {
 			return ""
 		}
 		tag := string(out)
-		tag = strings.ReplaceAll(tag, ".", "-")
 		tag = strings.TrimSpace(tag)
+		tag = strings.TrimSuffix(tag, "-dirty")
+		tag = strings.ReplaceAll(tag, ".", "-")
 		return tag
 	}
 
