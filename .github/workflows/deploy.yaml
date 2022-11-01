@@ -53,4 +53,4 @@ jobs:
           gcloud container clusters get-credentials infra-${{ inputs.environment }} \
             --project stackrox-infra \
             --region us-west2
-          make install-${{ inputs.environment }}-without-write
+          make install-${{ inputs.environment }}

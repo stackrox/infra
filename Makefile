@@ -30,14 +30,14 @@ image-name:
 # When run locally, a Darwin binary is built and installed into the user's GOPATH bin.
 # When run in CI, a Darwin and Linux binary is built.
 .PHONY: server
-server: proto-generated-srcs
+server:
 	@echo "+ $@"
 	GOARCH=amd64 GOOS=linux ./scripts/go-build -o bin/infra-server-linux-amd64 ./cmd/infra-server
 
 # cli - Builds the infractl client binary
 # When run in CI or when preparing an image, a Darwin and Linux binary is built.
 .PHONY: cli
-cli: proto-generated-srcs
+cli:
 	@echo "+ $@"
 	GOARCH=amd64 GOOS=darwin ./scripts/go-build -o bin/infractl-darwin-amd64 ./cmd/infractl
 	GOARCH=arm64 GOOS=darwin ./scripts/go-build -o bin/infractl-darwin-arm64 ./cmd/infractl
@@ -46,7 +46,7 @@ cli: proto-generated-srcs
 # cli-local - Builds the infractl client binary
 # When run locally, a Darwin binary is built and installed into the user's GOPATH bin.
 .PHONY: cli-local
-cli-local: proto-generated-srcs
+cli-local:
 	@echo "+ $@"
 	./scripts/go-build -o $(GOPATH)/bin/infractl  ./cmd/infractl
 
@@ -176,6 +176,10 @@ proto-generated-srcs: protoc-tools
 ##########
 ## Kube ##
 ##########
+dev_context = gke_stackrox-infra_us-west2_infra-development
+prod_context = gke_stackrox-infra_us-west2_infra-production
+this_context = $(shell kubectl config current-context)
+
 ## Meta
 .PHONY: pre-check
 pre-check:
@@ -185,6 +189,18 @@ endif
 ifndef ENVIRONMENT
 	$(error ENVIRONMENT is undefined)
 endif
+	@if [[ "${DEPLOYMENT}" == "local" && ("${this_context}" == "${dev_context}" || "${this_context}" == "${prod_context}") ]]; then \
+		echo "Your kube context is not set to a local infra!"; \
+		exit 1; \
+	fi
+	@if [[ "${DEPLOYMENT}" == "development" && "${this_context}" != "${dev_context}" ]]; then \
+		echo "Your kube context is not set to development infra:\n\tkubectl config use-context ${dev_context}"; \
+		exit 1; \
+	fi
+	@if [[ "${DEPLOYMENT}" == "production" && "${this_context}" != "${prod_context}" ]]; then \
+		echo "Your kube context is not set to production infra:\n\tkubectl config use-context ${prod_context}"; \
+		exit 1; \
+	fi
 
 .PHONY: setup-kc
 setup-kc: pre-check
@@ -264,27 +280,8 @@ install-common: setup-kc
 		$(kc) apply -f chart/infra-server/templates/namespace.yaml; \
 	fi
 
-## Install
-.PHONY: install
+## Install (without write)
 install: setup-kc install-common
-	$(kc) apply -R \
-	    -f chart-rendered/infra-server
-
-.PHONY: install-local
-install-local:
-	DEPLOYMENT=local ENVIRONMENT=development make render install
-
-.PHONY: install-development
-install-development:
-	DEPLOYMENT=development ENVIRONMENT=development make render install
-
-.PHONY: install-production
-install-production:
-	DEPLOYMENT=production ENVIRONMENT=production make render install
-
-
-## Install without write
-install-without-write: setup-kc install-common
 	gsutil cat gs://infra-configuration/latest/configuration/$(ENVIRONMENT)-values.yaml \
                gs://infra-configuration/latest/configuration/$(ENVIRONMENT)-values-from-files.yaml | \
 	helm template chart/infra-server \
@@ -296,17 +293,35 @@ install-without-write: setup-kc install-common
 	@sleep 5
 	make bounce-infra-pods
 
-.PHONY: install-local-without-write
-install-local-without-write:
-	DEPLOYMENT=local ENVIRONMENT=development make install-common install-without-write
+.PHONY: install-local
+install-local:
+	DEPLOYMENT=local ENVIRONMENT=development make install-common install
 
-.PHONY: install-development-without-write
-install-development-without-write:
-	DEPLOYMENT=development ENVIRONMENT=development make install-common install-without-write
+.PHONY: install-development
+install-development:
+	DEPLOYMENT=development ENVIRONMENT=development make install-common install
 
-.PHONY: install-production-without-write
-install-production-without-write:
-	DEPLOYMENT=production ENVIRONMENT=production make install-common install-without-write
+.PHONY: install-production
+install-production:
+	DEPLOYMENT=production ENVIRONMENT=production make install-common install
+
+## Install (with rendered)
+.PHONY: install-with-rendered
+install-with-rendered: setup-kc install-common
+	$(kc) apply -R \
+	    -f chart-rendered/infra-server
+
+.PHONY: install-local
+install-local-with-rendered:
+	DEPLOYMENT=local ENVIRONMENT=development make render install-with-rendered
+
+.PHONY: install-development
+install-development-with-rendered:
+	DEPLOYMENT=development ENVIRONMENT=development make render install-with-rendered
+
+.PHONY: install-production
+install-production-with-rendered:
+	DEPLOYMENT=production ENVIRONMENT=production make render install-with-rendered
 
 ## Diff
 .PHONY: diff
@@ -345,7 +360,7 @@ clean-local:
 	DEPLOYMENT=local ENVIRONMENT=development make setup-kc clean-infra clean-argo
 
 .PHONY: clean-development
-clean-development: setup-kc
+clean-development:
 	DEPLOYMENT=development ENVIRONMENT=development make setup-kc clean-infra
 
 ## Deploy
