@@ -1,4 +1,4 @@
-// Package version implements the infractl version command.
+// Package status implements the infractl status command.
 package status
 
 import (
@@ -15,9 +15,9 @@ import (
 const examples = `# Print server status.
 $ infractl status`
 
-// Command defines the handler for infractl version.
+// Command defines the handler for infractl status.
 func Command() *cobra.Command {
-	// $ infractl version
+	// $ infractl status
 	return &cobra.Command{
 		Use:     "status",
 		Short:   "Server status information",
@@ -31,9 +31,11 @@ func Command() *cobra.Command {
 func run(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, _ []string) (common.PrettyPrinter, error) {
 	var infraStatus *v1.InfraStatus
 
-	// Attempt to get the server version if possible. If not, then continue
-	// normal operation, and ignore any errors.
-	infraStatus, _ = v1.NewInfraStatusServiceClient(conn).GetStatus(ctx, &empty.Empty{})
+	infraStatus, err := v1.NewInfraStatusServiceClient(conn).GetStatus(ctx, &empty.Empty{})
+
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	fmt.Println(infraStatus)
 
