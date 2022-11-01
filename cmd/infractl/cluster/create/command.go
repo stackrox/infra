@@ -166,7 +166,10 @@ func getTagOrDateForName(flavorID string) string {
 		makeTag := exec.Command("make", "--quiet", "tag")
 		out, err := makeTag.Output()
 		if err == nil {
-			return strings.TrimSpace(strings.ReplaceAll(string(out), ".", "-"))
+			tag := string(out)
+			tag = strings.ReplaceAll(string(out), ".", "-")
+			tag = strings.TrimSpace(tag)
+			return tag
 		}
 	}
 
@@ -208,7 +211,9 @@ func addDefaultImageVersion(flavorID string, req *v1.CreateClusterRequest) {
 	makeTag := exec.Command("make", "--quiet", "tag")
 	out, err := makeTag.Output()
 	if err == nil {
-		req.Parameters["main-image"] = strings.TrimSpace(string(out))
+		tag := string(out)
+		tag = strings.TrimSpace(tag)
+		req.Parameters["main-image"] = tag
 	}
 }
 

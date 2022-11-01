@@ -44,7 +44,7 @@ setup() {
   pushd "$(git rev-parse --show-toplevel)"
   run infractl create test-qa-demo
   assert_success
-  tag_suffix="$(make tag)"
+  tag_suffix="$(make --quiet tag | sed 's/\./-/g')"
   assert_output --regexp "ID\: ...?.?-${tag_suffix}-1"
   popd
 }
@@ -53,7 +53,7 @@ setup() {
   # The working directory in BATs is the test file location
   run infractl create test-qa-demo
   assert_success
-  tag_suffix="$(make tag)"
+  tag_suffix="$(make --quiet tag | sed 's/\./-/g')"
   assert_output --regexp "ID\: ...?.?-${tag_suffix}-1"
 }
 
