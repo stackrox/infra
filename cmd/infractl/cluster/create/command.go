@@ -164,14 +164,24 @@ func getUserInitials(ctx context.Context, conn *grpc.ClientConn) (string, error)
 
 func getTagForName(flavorID string) string {
 	if strings.Contains(flavorID, "qa-demo") {
-		makeTag := exec.Command("make", "--quiet", "tag")
-		out, err := makeTag.Output()
-		if err == nil {
-			tag := string(out)
-			tag = strings.ReplaceAll(tag, ".", "-")
-			tag = strings.TrimSpace(tag)
-			return tag
+		topLevel := exec.Command("git", "rev-parse", "--show-toplevel")
+		out, err := topLevel.Output()
+		if err != nil {
+			return ""
 		}
+		rootDir := string(out)
+		rootDir = strings.TrimSpace(rootDir)
+
+		makeTag := exec.Command("make", "--quiet", "tag")
+		makeTag.Dir = rootDir
+		out, err = makeTag.Output()
+		if err != nil {
+			return ""
+		}
+		tag := string(out)
+		tag = strings.ReplaceAll(tag, ".", "-")
+		tag = strings.TrimSpace(tag)
+		return tag
 	}
 
 	return ""
