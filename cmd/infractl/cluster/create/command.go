@@ -196,7 +196,7 @@ func getUserInitials(ctx context.Context, conn *grpc.ClientConn) (string, error)
 
 func getNameForFlavor(flavorID string) string {
 	switch flavorID {
-	case "qa-demo":
+	case "qa-demo", "test-qa-demo":
 		return getNameForQaDemoFlavor()
 	}
 	return ""
