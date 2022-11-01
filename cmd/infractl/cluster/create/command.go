@@ -163,7 +163,7 @@ func getUserInitials(ctx context.Context, conn *grpc.ClientConn) (string, error)
 
 func getTagOrDate(flavorID string) string {
 	if strings.Contains(flavorID, "qa-demo") {
-		makeTag := exec.Command("make", "tag")
+		makeTag := exec.Command("make", "--quiet", "tag")
 		out, err := makeTag.Output()
 		if err == nil {
 			return string(out)
@@ -205,7 +205,7 @@ func addDefaultImageVersion(flavorID string, req *v1.CreateClusterRequest) {
 	if !strings.Contains(flavorID, "qa-demo") {
 		return
 	}
-	makeTag := exec.Command("make", "tag")
+	makeTag := exec.Command("make", "--quiet", "tag")
 	out, err := makeTag.Output()
 	if err == nil {
 		req.Parameters["main-image"] = string(out)
