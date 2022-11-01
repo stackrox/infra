@@ -12,11 +12,9 @@ spec:
     parameters:
       - name: name
         description: say hello to?
-      - name: main-image
-        description: something something
   templates:
   - name: whalesay
     container:
       image: docker/whalesay:latest
       command: [cowsay]
-      args: ["hello world to: ", "{{workflow.parameters.name}} and {{workflow.parameters.main-image}}"]
+      args: ["hello world to: ", "{{workflow.parameters.name}}"]

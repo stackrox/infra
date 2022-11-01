@@ -98,8 +98,6 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 		req.Parameters["name"] = name
 	}
 
-	addDefaultImageVersion(args[0], &req)
-
 	clusterID, err := client.Create(ctx, &req)
 	if err != nil {
 		return nil, err
@@ -123,7 +121,10 @@ func determineAName(ctx context.Context, conn *grpc.ClientConn, flavorID string)
 		return "", err
 	}
 
-	suffix := getTagOrDateForName(flavorID)
+	suffix := getTagForName(flavorID)
+	if suffix == "" {
+		suffix = time.Now().Format("01-02")
+	}
 
 	unconflicted, err := avoidConflicts(ctx, conn, initials+"-"+suffix)
 	if err != nil {
@@ -161,7 +162,7 @@ func getUserInitials(ctx context.Context, conn *grpc.ClientConn) (string, error)
 	panic("unexpected")
 }
 
-func getTagOrDateForName(flavorID string) string {
+func getTagForName(flavorID string) string {
 	if strings.Contains(flavorID, "qa-demo") {
 		makeTag := exec.Command("make", "--quiet", "tag")
 		out, err := makeTag.Output()
@@ -173,7 +174,7 @@ func getTagOrDateForName(flavorID string) string {
 		}
 	}
 
-	return time.Now().Format("01-02")
+	return ""
 }
 
 func avoidConflicts(ctx context.Context, conn *grpc.ClientConn, nameSoFar string) (string, error) {
@@ -202,19 +203,6 @@ func avoidConflicts(ctx context.Context, conn *grpc.ClientConn, nameSoFar string
 	}
 
 	return "", errors.New("could not find a default name for this cluster")
-}
-
-func addDefaultImageVersion(flavorID string, req *v1.CreateClusterRequest) {
-	if !strings.Contains(flavorID, "qa-demo") {
-		return
-	}
-	makeTag := exec.Command("make", "--quiet", "tag")
-	out, err := makeTag.Output()
-	if err == nil {
-		tag := string(out)
-		tag = strings.TrimSpace(tag)
-		req.Parameters["main-image"] = tag
-	}
 }
 
 func waitForCluster(client v1.ClusterServiceClient, clusterID *v1.ResourceByID) error {
