@@ -167,7 +167,7 @@ func getTagOrDateForName(flavorID string) string {
 		out, err := makeTag.Output()
 		if err == nil {
 			tag := string(out)
-			tag = strings.ReplaceAll(string(out), ".", "-")
+			tag = strings.ReplaceAll(tag, ".", "-")
 			tag = strings.TrimSpace(tag)
 			return tag
 		}
