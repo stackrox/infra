@@ -71,14 +71,14 @@ setup() {
   create_mock_make_for_tag "${test_tag}-dirty"
   run infractl create test-qa-demo
   assert_success
-  arg="$(argo list -o json | jq -r '.[].spec.arguments.parameters[] | select(.name=="main-image") | .value')"
+  arg="$(kubectl get workflows -o json | jq -r '.items[].spec.arguments.parameters[] | select(.name=="main-image") | .value')"
   assert_equal "$arg" "quay.io/stackrox-io/main:${test_tag}"
 }
 
 @test "does not override main-image" {
   run infractl create test-qa-demo --arg main-image=a.b.c
   assert_success
-  arg="$(argo list -o json | jq -r '.[].spec.arguments.parameters[] | select(.name=="main-image") | .value')"
+  arg="$(kubectl get workflows -o json | jq -r '.items[].spec.arguments.parameters[] | select(.name=="main-image") | .value')"
   assert_equal "$arg" "a.b.c"
 }
 
