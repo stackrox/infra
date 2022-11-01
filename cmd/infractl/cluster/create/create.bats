@@ -60,19 +60,56 @@ setup() {
   assert_output --regexp "ID\: ...?.?-${tag_suffix}-1"
 }
 
-@test "qa-demo names use the date when not in a git context" {
-  create_mock_git_that_fails
+@test "qa-demo names strip any -dirty suffix" {
+  create_mock_make_for_tag "${test_tag}-dirty"
   run infractl create test-qa-demo
   assert_success
+  assert_output --regexp "ID\: ...?.?-${tag_suffix}-1"
+}
+
+@test "qa-demo defaults main-image from the tag" {
+  create_mock_make_for_tag "${test_tag}-dirty"
+  run infractl create test-qa-demo
+  assert_success
+  arg="$(argo list -o json | jq -r '.[].spec.arguments.parameters[] | select(.name=="main-image") | .value')"
+  assert_equal "$arg" "quay.io/stackrox-io/main:${test_tag}"
+}
+
+@test "does not override main-image" {
+  run infractl create test-qa-demo --arg main-image=a.b.c
+  assert_success
+  arg="$(argo list -o json | jq -r '.[].spec.arguments.parameters[] | select(.name=="main-image") | .value')"
+  assert_equal "$arg" "a.b.c"
+}
+
+@test "qa-demo names use the date when not in a git context" {
+  create_mock_git_that_fails
+  run infractl create test-qa-demo --arg main-image=test
+  assert_success
   assert_output --regexp "ID\: ...?.?-${date_suffix}-1"
+}
+
+@test "qa-demo must supply a main-image when not in a git context" {
+  create_mock_git_that_fails
+  run infractl create test-qa-demo
+  assert_failure
+  assert_output --partial "parameter \"main-image\" was not provided"
 }
 
 @test "qa-demo names use the date when in a git context other than stackrox" {
   create_mock_git_for_toplevel "$ROOT/mocks/stackrox/collector"
   create_mock_make_for_tag_without_pwd_check "${test_tag}"
-  run infractl create test-qa-demo
+  run infractl create test-qa-demo --arg main-image=test
   assert_success
   assert_output --regexp "ID\: ...?.?-${date_suffix}-1"
+}
+
+@test "qa-demo must supply a main-image when in a git context other than stackrox" {
+  create_mock_git_for_toplevel "$ROOT/mocks/stackrox/collector"
+  create_mock_make_for_tag_without_pwd_check "${test_tag}"
+  run infractl create test-qa-demo
+  assert_failure
+  assert_output --partial "parameter \"main-image\" was not provided"
 }
 
 infractl() {

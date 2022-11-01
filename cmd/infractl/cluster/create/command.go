@@ -106,6 +106,8 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 		req.Parameters["name"] = name
 	}
 
+	assignDefaults(&req)
+
 	clusterID, err := client.Create(ctx, &req)
 	if err != nil {
 		return nil, err
@@ -243,6 +245,23 @@ func avoidConflicts(ctx context.Context, conn *grpc.ClientConn, nameSoFar string
 	}
 
 	return "", errors.New("could not find a default name for this cluster")
+}
+
+func assignDefaults(req *v1.CreateClusterRequest) {
+	if !strings.Contains(req.ID, "qa-demo") {
+		return
+	}
+
+	if req.Parameters["main-image"] != "" {
+		return
+	}
+
+	if !strings.Contains(workingEnvironment.gitTopLevel, "stackrox/stackrox") {
+		return
+	}
+
+	tag := strings.TrimSuffix(workingEnvironment.tag, "-dirty")
+	req.Parameters["main-image"] = "quay.io/stackrox-io/main:" + tag
 }
 
 func waitForCluster(client v1.ClusterServiceClient, clusterID *v1.ResourceByID) error {

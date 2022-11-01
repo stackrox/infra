@@ -12,6 +12,8 @@ spec:
     parameters:
       - name: name
         description: say hello to?
+      - name: main-image
+        description: what to demo
   templates:
   - name: whalesay
     container:
