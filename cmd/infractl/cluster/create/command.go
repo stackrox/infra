@@ -59,6 +59,11 @@ func args(_ *cobra.Command, args []string) error {
 	return nil
 }
 
+var workingEnvironment struct {
+	gitTopLevel string
+	tag         string
+}
+
 func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []string) (common.PrettyPrinter, error) {
 	params, _ := cmd.Flags().GetStringArray("arg")
 	description, _ := cmd.Flags().GetString("description")
@@ -88,10 +93,13 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 		}
 		req.Parameters[parts[0]] = parts[1]
 	}
+
+	determineWorkingEnvironment()
+
 	if len(args) > 1 {
 		req.Parameters["name"] = args[1]
 	} else {
-		name, err := determineAName(ctx, conn, args[0])
+		name, err := determineName(ctx, conn, args[0])
 		if err != nil {
 			return nil, err
 		}
@@ -115,13 +123,37 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 	return prettyResourceByID(*clusterID), nil
 }
 
-func determineAName(ctx context.Context, conn *grpc.ClientConn, flavorID string) (string, error) {
+func determineWorkingEnvironment() {
+	workingEnvironment.gitTopLevel = ""
+	workingEnvironment.tag = ""
+
+	topLevel := exec.Command("git", "rev-parse", "--show-toplevel")
+	out, err := topLevel.Output()
+	if err != nil {
+		return
+	}
+	rootDir := string(out)
+	rootDir = strings.TrimSpace(rootDir)
+	workingEnvironment.gitTopLevel = rootDir
+
+	makeTag := exec.Command("make", "--quiet", "tag")
+	makeTag.Dir = rootDir
+	out, err = makeTag.Output()
+	if err != nil {
+		return
+	}
+	tag := string(out)
+	tag = strings.TrimSpace(tag)
+	workingEnvironment.tag = tag
+}
+
+func determineName(ctx context.Context, conn *grpc.ClientConn, flavorID string) (string, error) {
 	initials, err := getUserInitials(ctx, conn)
 	if err != nil {
 		return "", err
 	}
 
-	suffix := getNameFromTag(flavorID)
+	suffix := getNameForFlavor(flavorID)
 	if suffix == "" {
 		suffix = time.Now().Format("01-02")
 	}
@@ -162,33 +194,27 @@ func getUserInitials(ctx context.Context, conn *grpc.ClientConn) (string, error)
 	panic("unexpected")
 }
 
-func getNameFromTag(flavorID string) string {
-	if strings.Contains(flavorID, "qa-demo") {
-		topLevel := exec.Command("git", "rev-parse", "--show-toplevel")
-		out, err := topLevel.Output()
-		if err != nil {
-			return ""
-		}
-		rootDir := string(out)
-		rootDir = strings.TrimSpace(rootDir)
-		if !strings.Contains(rootDir, "stackrox/stackrox") {
-			return ""
-		}
+func getNameForFlavor(flavorID string) string {
+	switch flavorID {
+	case "qa-demo":
+		return getNameForQaDemoFlavor()
+	}
+	return ""
+}
 
-		makeTag := exec.Command("make", "--quiet", "tag")
-		makeTag.Dir = rootDir
-		out, err = makeTag.Output()
-		if err != nil {
-			return ""
-		}
-		tag := string(out)
-		tag = strings.TrimSpace(tag)
-		tag = strings.TrimSuffix(tag, "-dirty")
-		tag = strings.ReplaceAll(tag, ".", "-")
-		return tag
+func getNameForQaDemoFlavor() string {
+	if !strings.Contains(workingEnvironment.gitTopLevel, "stackrox/stackrox") {
+		return ""
 	}
 
-	return ""
+	if workingEnvironment.tag == "" {
+		return ""
+	}
+
+	name := strings.TrimSuffix(workingEnvironment.tag, "-dirty")
+	name = strings.ReplaceAll(name, ".", "-")
+
+	return name
 }
 
 func avoidConflicts(ctx context.Context, conn *grpc.ClientConn, nameSoFar string) (string, error) {
