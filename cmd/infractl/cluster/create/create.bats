@@ -9,6 +9,8 @@ e2e_setup
 kubectl delete workflowtemplates --all --wait
 kubectl apply -f "$BATS_TEST_DIRNAME/testdata/*.yaml"
 
+tag_suffix="$(make --quiet tag | sed 's/\./-/g')"
+
 setup() {
   kubectl delete workflows --all --wait
 }
@@ -41,22 +43,19 @@ setup() {
 }
 
 @test "qa-demo names use the tag" {
-  pushd "$(git rev-parse --show-toplevel)"
   run infractl create test-qa-demo
   assert_success
-  tag_suffix="$(make --quiet tag | sed 's/\./-/g')"
+  assert_output --regexp "ID\: ...?.?-${tag_suffix}-1"
+}
+
+@test "qa-demo names use the tag - subdirs are OK" {
+  pushd "$BATS_TEST_DIRNAME"
+  run infractl create test-qa-demo
+  assert_success
   assert_output --regexp "ID\: ...?.?-${tag_suffix}-1"
   popd
 }
 
-@test "qa-demo names use the tag - subdirs are OK" {
-  # The working directory in BATs is the test file location
-  run infractl create test-qa-demo
-  assert_success
-  tag_suffix="$(make --quiet tag | sed 's/\./-/g')"
-  assert_output --regexp "ID\: ...?.?-${tag_suffix}-1"
-}
-
 infractl() {
-  bin/infractl -e localhost:8443 -k "$@"
+  "$(git rev-parse --show-toplevel)"/bin/infractl -e localhost:8443 -k "$@"
 }
