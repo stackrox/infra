@@ -123,7 +123,7 @@ func determineAName(ctx context.Context, conn *grpc.ClientConn, flavorID string)
 		return "", err
 	}
 
-	suffix := getTagOrDate(flavorID)
+	suffix := getTagOrDateForName(flavorID)
 
 	unconflicted, err := avoidConflicts(ctx, conn, initials+"-"+suffix)
 	if err != nil {
@@ -161,12 +161,12 @@ func getUserInitials(ctx context.Context, conn *grpc.ClientConn) (string, error)
 	panic("unexpected")
 }
 
-func getTagOrDate(flavorID string) string {
+func getTagOrDateForName(flavorID string) string {
 	if strings.Contains(flavorID, "qa-demo") {
 		makeTag := exec.Command("make", "--quiet", "tag")
 		out, err := makeTag.Output()
 		if err == nil {
-			return string(out)
+			return strings.TrimSpace(strings.ReplaceAll(string(out), ".", "-"))
 		}
 	}
 
@@ -208,7 +208,7 @@ func addDefaultImageVersion(flavorID string, req *v1.CreateClusterRequest) {
 	makeTag := exec.Command("make", "--quiet", "tag")
 	out, err := makeTag.Output()
 	if err == nil {
-		req.Parameters["main-image"] = string(out)
+		req.Parameters["main-image"] = strings.TrimSpace(string(out))
 	}
 }
 

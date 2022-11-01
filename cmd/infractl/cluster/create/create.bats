@@ -49,6 +49,14 @@ setup() {
   popd
 }
 
+@test "qa-demo names use the tag - subdirs are OK" {
+  # The working directory in BATs is the test file location
+  run infractl create test-qa-demo
+  assert_success
+  tag_suffix="$(make tag)"
+  assert_output --regexp "ID\: ...?.?-${tag_suffix}-1"
+}
+
 infractl() {
   bin/infractl -e localhost:8443 -k "$@"
 }
