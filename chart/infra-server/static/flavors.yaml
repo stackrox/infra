@@ -126,7 +126,7 @@
 
     - name: gcp-image-type
       description: The GCP image type to use for the cluster
-      value: ubuntu
+      value: ""
       kind: optional
       help: "List of image types: https://cloud.google.com/kubernetes-engine/docs/concepts/node-images"
 

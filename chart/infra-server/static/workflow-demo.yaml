@@ -110,7 +110,7 @@ spec:
               none: {}
 
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.3.13
+        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.5.3
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint
@@ -180,7 +180,7 @@ spec:
             path: /data/tfvars
             optional: true
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.3.13
+        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.5.3
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint
