@@ -60,7 +60,7 @@ spec:
             valueFrom:
               path: /outputs/cluster_name
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-gke-default-0.3.13-3-g2f0c47db67-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-gke-default-0.3.13-5-g0660041c58-snapshot
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint
@@ -85,7 +85,7 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-gke-default-0.3.13-3-g2f0c47db67-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-gke-default-0.3.13-5-g0660041c58-snapshot
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint
