@@ -21,7 +21,8 @@ import (
 	"google.golang.org/grpc"
 )
 
-const examples = `# Create a new "gke-default" cluster.
+const (
+	examples = `# Create a new "gke-default" cluster.
 $ infractl create gke-default
 
 # Create another "gke-default" cluster with an 8 hour lifespan.
@@ -29,6 +30,10 @@ $ infractl create gke-default --lifespan 8h
 
 # Create a demo cluster with a name of your own choosing.
 $ infractl create qa-demo my-demo-for-me`
+
+	openSourceRegistry = "quay.io/stackrox-io"
+	rhacsRegistry      = "quay.io/rhacs-eng"
+)
 
 // Command defines the handler for infractl create.
 func Command() *cobra.Command {
@@ -49,7 +54,7 @@ func Command() *cobra.Command {
 	cmd.Flags().Bool("no-slack", false, "skip sending Slack messages for lifecycle events")
 	cmd.Flags().Bool("slack-me", false, "send slack messages directly and not to the #infra_notifications channel")
 	cmd.Flags().StringP("download-dir", "d", "", "wait for readiness and download artifacts to this dir")
-	cmd.Flags().Bool("rhacs", false, "use the RH branded images for qa-demo (defaults is opensource images)")
+	cmd.Flags().Bool("rhacs", false, "use RedHat branded images for qa-demo (the default is to use opensource images)")
 	return cmd
 }
 
@@ -261,9 +266,9 @@ func assignDefaults(cmd *cobra.Command, req *v1.CreateClusterRequest) {
 		return
 	}
 
-	registry := "quay.io/stackrox-io"
+	registry := openSourceRegistry
 	if rhacsImages, _ := cmd.Flags().GetBool("rhacs"); rhacsImages {
-		registry = "quay.io/rhacs-eng"
+		registry = rhacsRegistry
 	}
 
 	tag := strings.TrimSuffix(workingEnvironment.tag, "-dirty")
