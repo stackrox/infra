@@ -319,11 +319,6 @@ install: setup-kc install-common
 	@sleep 10
 	make bounce-infra-pods
 
-.PHONY: local-data-dev-cycle
-local-data-dev-cycle: render-local install-local
-	@sleep 10
-	make bounce-infra-pods
-
 .PHONY: install-local
 install-local:
 	DEPLOYMENT=local ENVIRONMENT=development make install-common install
