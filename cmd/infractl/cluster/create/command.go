@@ -54,7 +54,11 @@ func Command() *cobra.Command {
 	cmd.Flags().Bool("no-slack", false, "skip sending Slack messages for lifecycle events")
 	cmd.Flags().Bool("slack-me", false, "send slack messages directly and not to the #infra_notifications channel")
 	cmd.Flags().StringP("download-dir", "d", "", "wait for readiness and download artifacts to this dir")
-	cmd.Flags().Bool("rhacs", false, "use RedHat branded images for qa-demo (the default is to use opensource images)")
+	for _, osArg := range os.Args {
+		if strings.Contains(osArg, "qa-demo") {
+			cmd.Flags().Bool("rhacs", false, "use RedHat branded images for qa-demo (the default is to use opensource images)")
+		}
+	}
 	return cmd
 }
 
