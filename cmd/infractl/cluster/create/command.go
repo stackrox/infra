@@ -22,28 +22,45 @@ import (
 )
 
 const (
-	examples = `# Create a new "gke-default" cluster.
+	examples = `# Create a "gke-default" cluster with default naming.
 $ infractl create gke-default
+ID: jb-10-21-1
 
 # Create another "gke-default" cluster with an 8 hour lifespan.
 $ infractl create gke-default --lifespan 8h
+ID: jb-10-21-2
 
 # Create a demo cluster with a name of your own choosing.
-$ infractl create qa-demo my-demo-for-me`
+$ infractl create qa-demo my-demo-for-me
+ID: my-demo-for-me`
 
 	openSourceRegistry = "quay.io/stackrox-io"
 	rhacsRegistry      = "quay.io/rhacs-eng"
+
+	nameProvidedToQaDemoInStackroxContext = `NOTE: infractl no longer requires a NAME parameter when creating a cluster. 
+      qa-demo flavors created from a stackrox repo context will get a name 
+      derived from the tag of the last commit.`
+
+	nameProvidedToOther = `NOTE: infractl no longer requires a NAME parameter when creating a cluster.
+      If ommitted a name will be generated using your infra initials and a 
+      short date.`
+
+	mainImageProvidedToQaDemoInStackroxContext = `NOTE: infractl no longer requires a --arg main-image=<image> when creating 
+      a qa-demo cluster in a stackrox repo context. An image will be choosen 
+      to match the last commit. That commit should be pushed in order to ensure 
+      that the image is built. By default opensource (quay.io/stackrox-io) 
+      images are used. Pass --rhacs to get RedHat images.`
 )
 
 // Command defines the handler for infractl create.
 func Command() *cobra.Command {
 	// $ infractl create
 	cmd := &cobra.Command{
-		Use:     "create FLAVOR [NAME|<defaults to initials - tag or a short date>]",
+		Use:     "create FLAVOR [NAME]",
 		Short:   "Create a new cluster",
 		Long:    "Creates a new cluster",
 		Example: examples,
-		Args:    common.ArgsWithHelp(cobra.RangeArgs(1, 2), args),
+		Args:    common.ArgsWithHelp(cobra.RangeArgs(1, 2)),
 		RunE:    common.WithGRPCHandler(run),
 	}
 
@@ -60,13 +77,6 @@ func Command() *cobra.Command {
 		}
 	}
 	return cmd
-}
-
-func args(cmd *cobra.Command, args []string) error {
-	if args[0] == "" {
-		return errors.New("no flavor ID given")
-	}
-	return nil
 }
 
 var workingEnvironment struct {
@@ -105,6 +115,7 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 	}
 
 	determineWorkingEnvironment()
+	displayUserNotes(cmd, args, &req)
 
 	if len(args) > 1 {
 		req.Parameters["name"] = args[1]
@@ -306,5 +317,21 @@ func waitForCluster(client v1.ClusterServiceClient, clusterID *v1.ResourceByID) 
 			fmt.Fprintln(os.Stderr, "...failed")
 			return errors.New("failed to provision cluster")
 		}
+	}
+}
+
+func displayUserNotes(cmd *cobra.Command, args []string, req *v1.CreateClusterRequest) {
+	if len(args) >= 2 && args[1] != "" {
+		if strings.Contains(args[0], "qa-demo") &&
+			strings.Contains(workingEnvironment.gitTopLevel, "stackrox/stackrox") {
+			cmd.Println(nameProvidedToQaDemoInStackroxContext)
+		} else {
+			cmd.Println(nameProvidedToOther)
+		}
+	}
+	if len(args) >= 1 && strings.Contains(args[0], "qa-demo") &&
+		strings.Contains(workingEnvironment.gitTopLevel, "stackrox/stackrox") &&
+		req.Parameters["main-image"] != "" {
+		cmd.Println(mainImageProvidedToQaDemoInStackroxContext)
 	}
 }
