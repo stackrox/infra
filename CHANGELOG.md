@@ -6,6 +6,15 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+## [0.5.3]
+
+- Switch to containerd for GKE runtime to support k8s v1.23. Affects
+  gke-default, demo, qa-demo.
+
+## [0.5.2]
+
+- Remove the --license arg for newer ACS installs.
+
 ## [0.5.1]
 
 - gke-default: Use the gke-gcloud-auth-plugin for kubeconfig artifact. (#719)
