@@ -316,17 +316,10 @@ install: setup-kc install-common
 		--values - | \
 	$(kc) apply -R \
 	    -f -
-	@sleep 10
-	# Bounce the infra-server to ensure proper update.
-	kubectl -n infra delete pods -l app=infra-server --wait
-	@sleep 10
+	make bounce-infra-pods
 
 .PHONY: local-data-dev-cycle
 local-data-dev-cycle: render-local install-local
-	# Bounce the infra-server to ensure proper update
-	@sleep 5
-	kubectl -n infra delete pods -l app=infra-server --wait
-	@sleep 5
 	make bounce-infra-pods
 
 .PHONY: install-local
