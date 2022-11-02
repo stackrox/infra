@@ -92,6 +92,8 @@ correct tooling installed with:
 
 `make image push`
 
+Use the `deploy` Github action to update development or production environments with a new release.
+
 ### Development/Staging
 
 To render a copy of the charts (for inspection), run:
@@ -100,17 +102,13 @@ To render a copy of the charts (for inspection), run:
 
 To then apply that chart to the development cluster, run:
 
-`make install-development`
+`make install-development-with-rendered`
 
 To do everything in one command, run:
 
-`make deploy-development`
+`make install-development`
 
-Note: If the development server version does not change then `make deploy-development`
-will not result in a running `infra-server` that reflects
-your local changes. A brute force way to ensure an update is to delete the
-`infra-server-deployment` deployment in the `infra` namespace. It will be recreated by
-`make deploy-development`.
+Note: This will always bounce the infra server pods.
 
 ### Production
 
@@ -120,7 +118,7 @@ To render a copy of the charts (for inspection), run:
 
 To then apply that chart to the development cluster, run:
 
-`make install-production`
+`make install-production-with-rendered`
 
 To do everything in one command, run:
 
@@ -141,4 +139,3 @@ Download a copy of `infractl` and export your token. Verify API connectivity:
 | --- | --- |
 | Development | `infractl -e dev.infra.rox.systems:443 whoami` |
 | Production | `infractl whoami` |
-

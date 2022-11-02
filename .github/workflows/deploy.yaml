@@ -1,4 +1,11 @@
-name: Deploy infra
+run-name: >-
+  ${{
+    format('Deploy infra version {0} to {1}',
+      inputs.version,
+      inputs.environment
+    )
+  }}
+
 on:
   workflow_dispatch:
     inputs:
@@ -22,3 +29,28 @@ jobs:
         run: |
           echo "Environment: ${{ inputs.environment }}"
           echo "Version: ${{ inputs.version }}"
+
+      - name: Check out code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.version }}
+
+      - name: Authenticate to GCloud
+        uses: google-github-actions/auth@v0
+        with:
+          credentials_json: ${{ secrets.GCP_INFRA_DEPLOY_AUTOMATION_SA }}
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v0'
+        with:
+          install_components: "gke-gcloud-auth-plugin"
+
+      - name: Deploy to ${{ inputs.environment }}
+        env:
+          USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
+        run: |
+          gcloud container clusters get-credentials infra-${{ inputs.environment }} \
+            --project stackrox-infra \
+            --region us-west2
+          make install-${{ inputs.environment }}
