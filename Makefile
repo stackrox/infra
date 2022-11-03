@@ -1,3 +1,4 @@
+SHELL := /usr/bin/env bash
 export GO111MODULE=on
 
 .PHONY: all
@@ -194,11 +195,11 @@ endif
 		exit 1; \
 	fi
 	@if [[ "${DEPLOYMENT}" == "development" && "${this_context}" != "${dev_context}" ]]; then \
-		echo "Your kube context is not set to development infra:\n\tkubectl config use-context ${dev_context}"; \
+		echo -e "Your kube context is not set to development infra:\n\tkubectl config use-context ${dev_context}"; \
 		exit 1; \
 	fi
 	@if [[ "${DEPLOYMENT}" == "production" && "${this_context}" != "${prod_context}" ]]; then \
-		echo "Your kube context is not set to production infra:\n\tkubectl config use-context ${prod_context}"; \
+		echo -e "Your kube context is not set to production infra:\n\tkubectl config use-context ${prod_context}"; \
 		exit 1; \
 	fi
 
