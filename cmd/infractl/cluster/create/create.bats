@@ -12,9 +12,9 @@ setup_file() {
 
   ROOT="$(git rev-parse --show-toplevel)"
   export ROOT
-  mkdir -p "$ROOT/mocks/stackrox/collector"
-  mkdir -p "$ROOT/mocks/stackrox/stackrox"
-  export PATH="$ROOT/mocks:$PATH}"
+  mkdir -p "$ROOT/test/mocks/stackrox/collector"
+  mkdir -p "$ROOT/test/mocks/stackrox/stackrox"
+  export PATH="$ROOT/test/mocks:$PATH}"
   date_suffix="$(date '+%m-%d')"
   export date_suffix
   test_tag="0.5.2-23-g2e873a9145"
@@ -26,7 +26,7 @@ setup_file() {
 setup() {
   kubectl delete workflows --all --wait
   create_mock_make_for_tag "${test_tag}"
-  create_mock_git_for_toplevel "$ROOT/mocks/stackrox/stackrox"
+  create_mock_git_for_toplevel "$ROOT/test/mocks/stackrox/stackrox"
 }
 
 @test "can create a workflow" {
@@ -104,7 +104,7 @@ setup() {
 }
 
 @test "qa-demo names use the date when in a git context other than stackrox" {
-  create_mock_git_for_toplevel "$ROOT/mocks/stackrox/collector"
+  create_mock_git_for_toplevel "$ROOT/test/mocks/stackrox/collector"
   create_mock_make_for_tag_without_pwd_check "${test_tag}"
   run infractl create test-qa-demo --arg main-image=test
   assert_success
@@ -112,7 +112,7 @@ setup() {
 }
 
 @test "qa-demo must supply a main-image when in a git context other than stackrox" {
-  create_mock_git_for_toplevel "$ROOT/mocks/stackrox/collector"
+  create_mock_git_for_toplevel "$ROOT/test/mocks/stackrox/collector"
   create_mock_make_for_tag_without_pwd_check "${test_tag}"
   run infractl create test-qa-demo
   assert_failure
@@ -124,39 +124,39 @@ infractl() {
 }
 
 create_mock_make_for_tag() {
-  cat <<_EOD_ > "$ROOT/mocks/make"
+  cat <<_EOD_ > "$ROOT/test/mocks/make"
 #!/usr/bin/env bash
 # this should really be an @test that make runs in the right context, but
 # I cannot figure that one out.
-if [[ "\$(pwd)" != "$ROOT/mocks/stackrox/stackrox" ]]; then
+if [[ "\$(pwd)" != "$ROOT/test/mocks/stackrox/stackrox" ]]; then
   echo "make should run in the mock root"
   exit 1
 fi
 echo $1
 _EOD_
-  chmod 0755 "$ROOT/mocks/make"
+  chmod 0755 "$ROOT/test/mocks/make"
 }
 
 create_mock_make_for_tag_without_pwd_check() {
-  cat <<_EOD_ > "$ROOT/mocks/make"
+  cat <<_EOD_ > "$ROOT/test/mocks/make"
 #!/usr/bin/env bash
 echo $1
 _EOD_
-  chmod 0755 "$ROOT/mocks/make"
+  chmod 0755 "$ROOT/test/mocks/make"
 }
 
 create_mock_git_for_toplevel() {
-  cat <<_EOD_ > "$ROOT/mocks/git"
+  cat <<_EOD_ > "$ROOT/test/mocks/git"
 #!/usr/bin/env bash
 echo $1
 _EOD_
-  chmod 0755 "$ROOT/mocks/git"
+  chmod 0755 "$ROOT/test/mocks/git"
 }
 
 create_mock_git_that_fails() {
-  cat <<_EOD_ > "$ROOT/mocks/git"
+  cat <<_EOD_ > "$ROOT/test/mocks/git"
 #!/usr/bin/env bash
 exit 1
 _EOD_
-  chmod 0755 "$ROOT/mocks/git"
+  chmod 0755 "$ROOT/test/mocks/git"
 }
