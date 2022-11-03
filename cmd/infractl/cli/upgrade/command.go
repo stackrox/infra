@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"strings"
+	"runtime"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -46,10 +46,7 @@ func Command() *cobra.Command {
 func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []string) (common.PrettyPrinter, error) {
 	argOS, _ := cmd.Flags().GetString("os")
 	argArch, _ := cmd.Flags().GetString("arch")
-	OS, arch, err := guessOSAndArchIfNotSet(argOS, argArch)
-	if err != nil {
-		return nil, err
-	}
+	OS, arch := guessOSAndArchIfNotSet(argOS, argArch)
 	if err := validateOSAndArch(OS, arch); err != nil {
 		return nil, err
 	}
@@ -76,39 +73,20 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []str
 	return prettyCliUpgrade{infractlFilename}, nil
 }
 
-func guessOSAndArchIfNotSet(os, arch string) (string, string, error) {
+func guessOSAndArchIfNotSet(os, arch string) (string, string) {
 	if os != "" && arch != "" {
-		return os, arch, nil
-	}
-
-	uname, err := exec.Command("uname", "-sm").Output()
-	if err != nil {
-		return "", "", errors.Wrap(err, "Cannot run uname -sm to determine OS")
+		return os, arch
 	}
 
 	if os == "" {
-		switch {
-		case strings.Contains(string(uname), "Darwin"):
-			os = "darwin"
-		case strings.Contains(string(uname), "Linux"):
-			os = "linux"
-		default:
-			return "", "", errors.Errorf("uname returned invalid OS: %s; must be Darwin or Linux", string(uname))
-		}
+		os = runtime.GOOS
 	}
 
 	if arch == "" {
-		switch {
-		case strings.Contains(string(uname), "x86_64"):
-			arch = "amd64"
-		case strings.Contains(string(uname), "arm64"):
-			arch = "arm64"
-		default:
-			return "", "", errors.Errorf("uname returned invalid arch: %s; must be x86_64 or arm64", string(uname))
-		}
+		arch = runtime.GOARCH
 	}
 
-	return os, arch, nil
+	return os, arch
 }
 
 func validateOSAndArch(os, arch string) error {
