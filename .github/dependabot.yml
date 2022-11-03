@@ -17,3 +17,13 @@ updates:
       - "pedrottimark"
       - "sachaudh"
       - "vjwilson"
+
+  - package-ecosystem: 'gomod'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'wednesday'
+    open-pull-requests-limit: 3
+    reviewers:
+      - 'gavin-stackrox'
+      - 'RTann'
