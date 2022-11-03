@@ -50,7 +50,7 @@ func mainCmd() error {
 
 	log.Printf("Starting infra server version %s", buildinfo.All().Version)
 
-	log.Printf("{'level': 'INFO', 'msg': 'Is GCP logging smart?'")
+	log.Printf("{'level': 'DEBUG', 'msg': 'Is GCP logging smart?'")
 
 	serverConfigFile := filepath.Join(*flagConfigDir, "infra.yaml")
 	cfg, err := config.Load(serverConfigFile)
