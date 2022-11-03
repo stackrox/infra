@@ -54,6 +54,10 @@ bin/infractl -k -e localhost:8443 whoami
 make install-local
 \`\`\`
 
+### Logs
+
+Logs for the development infra will be [here (authuser=1)](https://console.cloud.google.com/logs/query;query=resource.labels.cluster_name%3D%22{{.Env.DEV_CLUSTER_NAME}}%22%0Aresource.labels.container_name%3D%22infra-server%22?project=srox-temp-dev-test&authuser=1)
+
 EOT
 
     hub-comment -type deploy -template-file "$tmpfile"
