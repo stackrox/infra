@@ -39,11 +39,11 @@ ID: my-demo-for-me`
 
 	nameProvidedToQaDemoInStackroxContext = `NOTE: infractl no longer requires a NAME parameter when creating a cluster. 
       qa-demo flavors created from a stackrox repo context will get a name 
-      derived from the tag of the last commit.`
+      derived from the tag of the last commit when the name is not specified.`
 
 	nameProvidedToOther = `NOTE: infractl no longer requires a NAME parameter when creating a cluster.
-      If ommitted a name will be generated using your infra initials and a 
-      short date.`
+      If ommitted a name will be generated using your infra user initials, a 
+      short date and a counter for uniqueness. e.g. jb-10-31-1`
 
 	mainImageProvidedToQaDemoInStackroxContext = `NOTE: infractl no longer requires a --arg main-image=<image> when creating 
       a qa-demo cluster in a stackrox repo context. An image will be choosen 
