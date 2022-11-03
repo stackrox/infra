@@ -6,6 +6,14 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+- Get a QA demo with just `infractl create qa-demo`. When `infractl create
+  qa-demo` is run without specifying a NAME in a stackrox/stackrox repo context
+  a NAME will be generated based on user initials and the most recent commit.
+  The most recent commit will also be used to set main-image.
+- Default names for other contexts. When `infractl create` is run without
+  specifying a NAME one will be generated based on user initials, date and a
+  counter to ensure uniqueness e.g. jb-10-31-1.
+
 ## [0.5.3]
 
 - Switch to containerd for GKE runtime to support k8s v1.23. Affects
