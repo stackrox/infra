@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	v1 "github.com/stackrox/infra/generated/api/v1"
+	"github.com/stackrox/infra/pkg/platform"
 	"google.golang.org/grpc"
 )
 
@@ -112,19 +113,11 @@ func guessOSAndArchIfNotSet(os, arch string) (string, string, error) {
 }
 
 func validateOSAndArch(os, arch string) error {
-	switch os {
-	case "linux":
-		if arch == "amd64" {
-			return nil
-		}
-	case "darwin":
-		if arch == "amd64" || arch == "arm64" {
-			return nil
-		}
-	default:
+	if platform.IsValid(os, arch) {
+		return nil
 	}
 
-	return errors.Errorf("invalid OS and architecture combination: %s %s", os, arch)
+	return errors.Errorf("invalid platform: %s/%s", os, arch)
 }
 
 func recvBytes(reader v1.CliService_UpgradeClient) ([]byte, error) {
