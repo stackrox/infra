@@ -131,7 +131,7 @@ func (s *clusterImpl) Info(ctx context.Context, clusterID *v1.ResourceByID) (*v1
 
 	metacluster, err := s.metaClusterFromWorkflow(*workflow)
 	if err != nil {
-		log.Printf("failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
+		log.Printf("[ERROR] Failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
 		return nil, err
 	}
 
@@ -162,7 +162,7 @@ func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) 
 	for _, workflow := range workflowList.Items {
 		metacluster, err := s.metaClusterFromWorkflow(workflow)
 		if err != nil {
-			log.Printf("failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
+			log.Printf("[ERROR] Failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
 			continue
 		}
 
@@ -466,7 +466,7 @@ func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.
 		return nil, err
 	}
 
-	log.Printf("deleting workflow %q via resume", req.Id)
+	log.Printf("[INFO] deleting workflow %q via resume", req.Id)
 	_, err := s.argoWorkflowsClient.ResumeWorkflow(s.argoClientCtx, &workflowpkg.WorkflowResumeRequest{
 		Name:      req.Id,
 		Namespace: s.workflowNamespace,
@@ -571,7 +571,7 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 		for _, workflow := range workflowList.Items {
 			metacluster, err := s.metaClusterFromWorkflow(workflow)
 			if err != nil {
-				log.Printf("failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
+				log.Printf("[ERROR] Failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
 				continue
 			}
 
@@ -583,7 +583,7 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 				continue
 			}
 
-			log.Printf("expiring workflow %q via resume", metacluster.ID)
+			log.Printf("[INFO] expiring workflow %q via resume", metacluster.ID)
 			_, err = s.argoWorkflowsClient.ResumeWorkflow(s.argoClientCtx, &workflowpkg.WorkflowResumeRequest{
 				Name:      metacluster.ID,
 				Namespace: s.workflowNamespace,
@@ -624,7 +624,7 @@ func (s *clusterImpl) startCalendarCheck() {
 		for _, workflow := range workflowList.Items {
 			metacluster, err := s.metaClusterFromWorkflow(workflow)
 			if err != nil {
-				log.Printf("failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
+				log.Printf("[ERROR] Failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
 				continue
 			}
 
@@ -645,7 +645,7 @@ func (s *clusterImpl) startCalendarCheck() {
 				log.Printf("[ERROR] failed to launch scheduled demo for %q: %v", event.Title, err)
 				continue
 			} else {
-				log.Printf("Launched scheduled demo for %q: %s", event.Title, id.Id)
+				log.Printf("[INFO] Launched scheduled demo for %q: %s", event.Title, id.Id)
 			}
 		}
 	}
@@ -720,7 +720,7 @@ func (s *clusterImpl) startSlackCheck() {
 func (s *clusterImpl) slackCheckWorkflow(workflow v1alpha1.Workflow) {
 	metacluster, err := s.metaClusterFromWorkflow(workflow)
 	if err != nil {
-		log.Printf("failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
+		log.Printf("[ERROR] Failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
 		return
 	}
 
@@ -735,14 +735,14 @@ func (s *clusterImpl) slackCheckWorkflow(workflow v1alpha1.Workflow) {
 		user, found := s.slackClient.LookupUser(metacluster.Owner)
 		if found && metacluster.SlackDM {
 			if err := s.slackClient.PostMessageToUser(user, message...); err != nil {
-				log.Printf("failed to send Slack message directly to user %s: %v", user.Profile.Email, err)
+				log.Printf("[ERROR] Failed to send Slack message directly to user %s: %v", user.Profile.Email, err)
 			} else {
 				sent = true
 			}
 		}
 		if !sent {
 			if err := s.slackClient.PostMessage(message...); err != nil {
-				log.Printf("failed to send Slack message: %v", err)
+				log.Printf("[ERROR] Failed to send Slack message: %v", err)
 				return
 			}
 		}
@@ -754,14 +754,14 @@ func (s *clusterImpl) slackCheckWorkflow(workflow v1alpha1.Workflow) {
 		// Construct our replacement patch
 		payloadBytes, err := formatAnnotationPatch(annotationSlackKey, string(newSlackStatus))
 		if err != nil {
-			log.Printf("failed to format Slack annotation patch: %v", err)
+			log.Printf("[ERROR] Failed to format Slack annotation patch: %v", err)
 			return
 		}
 
 		// Submit the patch.
 		_, err = s.k8sWorkflowsClient.Patch(context.Background(), metacluster.Cluster.ID, types.JSONPatchType, payloadBytes, metav1.PatchOptions{})
 		if err != nil {
-			log.Printf("failed to patch Slack annotation for cluster %s: %v", metacluster.Cluster.ID, err)
+			log.Printf("[ERROR] Failed to patch Slack annotation for cluster %s: %v", metacluster.Cluster.ID, err)
 			return
 		}
 	}

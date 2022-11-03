@@ -74,7 +74,7 @@ func (a OidcAuth) callbackHandler(w http.ResponseWriter, r *http.Request) {
 	stateToken := r.URL.Query().Get("state")
 	err := a.jwtState.Validate(stateToken)
 	if err != nil {
-		log.Printf("failed to validate state token: %v", err)
+		log.Printf("[ERROR] Failed to validate state token: %v", err)
 		http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
 		return
 	}
@@ -83,13 +83,13 @@ func (a OidcAuth) callbackHandler(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Query().Get("code")
 	rawToken, err := a.conf.Exchange(r.Context(), code)
 	if err != nil {
-		log.Printf("failed to exchange code: %v", err)
+		log.Printf("[ERROR] Failed to exchange code: %v", err)
 		http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
 		return
 	}
 
 	if err := a.jwtAccess.Validate(r.Context(), rawToken); err != nil {
-		log.Printf("failed to validate Access token: %v", err)
+		log.Printf("[ERROR] Failed to validate Access token: %v", err)
 		http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
 		return
 	}
@@ -98,7 +98,7 @@ func (a OidcAuth) callbackHandler(w http.ResponseWriter, r *http.Request) {
 	// user struct from it.
 	user, err := a.jwtOidc.Validate(r.Context(), rawToken)
 	if err != nil {
-		log.Printf("failed to validate ID token: %v", err)
+		log.Printf("[ERROR] Failed to validate ID token: %v", err)
 		http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
 		return
 	}
@@ -106,7 +106,7 @@ func (a OidcAuth) callbackHandler(w http.ResponseWriter, r *http.Request) {
 	// Generate token containing a user struct.
 	userToken, err := a.jwtUser.Generate(user)
 	if err != nil {
-		log.Printf("failed to generate user token: %v", err)
+		log.Printf("[ERROR] Failed to generate user token: %v", err)
 		http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
 		return
 	}

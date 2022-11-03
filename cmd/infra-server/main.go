@@ -46,11 +46,10 @@ func mainCmd() error {
 	}
 
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	// Use stdout so that GCP does not view all logs as severity ERROR.
 	log.SetOutput(os.Stdout)
 
-	log.Printf("Starting infra server version %s", buildinfo.All().Version)
-
-	log.Printf("{'level': 'DEBUG', 'msg': 'Is GCP logging smart?'")
+	log.Printf("[INFO] Starting infra server version %s", buildinfo.All().Version)
 
 	serverConfigFile := filepath.Join(*flagConfigDir, "infra.yaml")
 	cfg, err := config.Load(serverConfigFile)

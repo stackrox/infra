@@ -69,7 +69,7 @@ func (r *Registry) add(flavor v1.Flavor, workflow v1alpha1.Workflow) error {
 		workflow: workflow,
 		flavor:   flavor,
 	}
-	log.Printf("registered flavor %q (%s)\n", flavor.ID, flavor.Name)
+	log.Printf("[INFO] registered flavor %q (%s)\n", flavor.ID, flavor.Name)
 
 	// Register a default flavor if one has not already been registered.
 	if flavor.Availability == v1.Flavor_default {
@@ -78,7 +78,7 @@ func (r *Registry) add(flavor v1.Flavor, workflow v1alpha1.Workflow) error {
 			return fmt.Errorf("both %q and %q configured as default flavors", r.defaultFlavor, flavor.ID)
 		}
 		r.defaultFlavor = flavor.ID
-		log.Printf("registered default flavor %q (%s)\n", flavor.ID, flavor.Name)
+		log.Printf("[INFO] registered default flavor %q (%s)\n", flavor.ID, flavor.Name)
 	}
 
 	return nil
