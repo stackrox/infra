@@ -74,14 +74,9 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []str
 }
 
 func guessOSAndArchIfNotSet(os, arch string) (string, string) {
-	if os != "" && arch != "" {
-		return os, arch
-	}
-
 	if os == "" {
 		os = runtime.GOOS
 	}
-
 	if arch == "" {
 		arch = runtime.GOARCH
 	}
