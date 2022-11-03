@@ -32,7 +32,7 @@ setup() {
 @test "can create a workflow" {
   run infractl create test-hello-world this-is-a-test
   assert_success
-  assert_output "ID: this-is-a-test"
+  assert_output --partial "ID: this-is-a-test"
 }
 
 @test "can create a workflow without a name" {
@@ -44,27 +44,27 @@ setup() {
 @test "names include a date by default" {
   run infractl create test-hello-world
   assert_success
-  assert_output --regexp "ID\: ...?.?-${date_suffix}"
+  assert_output --regexp "ID: ...?.?-${date_suffix}"
 }
 
 @test "names do not conflict" {
   run infractl create test-hello-world
   run infractl create test-hello-world
   assert_success
-  assert_output --regexp "ID\: ...?.?-${date_suffix}-2"
+  assert_output --regexp "ID: ...?.?-${date_suffix}-2"
 }
 
 @test "qa-demo names use the tag" {
   run infractl create test-qa-demo
   assert_success
-  assert_output --regexp "ID\: ...?.?-${tag_suffix}-1"
+  assert_output --regexp "ID: ...?.?-${tag_suffix}-1"
 }
 
 @test "qa-demo names strip any -dirty suffix" {
   create_mock_make_for_tag "${test_tag}-dirty"
   run infractl create test-qa-demo
   assert_success
-  assert_output --regexp "ID\: ...?.?-${tag_suffix}-1"
+  assert_output --regexp "ID: ...?.?-${tag_suffix}-1"
 }
 
 @test "qa-demo defaults main-image from the tag" {
@@ -93,7 +93,7 @@ setup() {
   create_mock_git_that_fails
   run infractl create test-qa-demo --arg main-image=test
   assert_success
-  assert_output --regexp "ID\: ...?.?-${date_suffix}-1"
+  assert_output --regexp "ID: ...?.?-${date_suffix}-1"
 }
 
 @test "qa-demo must supply a main-image when not in a git context" {
@@ -108,7 +108,7 @@ setup() {
   create_mock_make_for_tag_without_pwd_check "${test_tag}"
   run infractl create test-qa-demo --arg main-image=test
   assert_success
-  assert_output --regexp "ID\: ...?.?-${date_suffix}-1"
+  assert_output --regexp "ID: ...?.?-${date_suffix}-1"
 }
 
 @test "qa-demo must supply a main-image when in a git context other than stackrox" {
