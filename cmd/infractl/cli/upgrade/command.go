@@ -6,12 +6,13 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"strings"
+	"runtime"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	v1 "github.com/stackrox/infra/generated/api/v1"
+	"github.com/stackrox/infra/pkg/platform"
 	"google.golang.org/grpc"
 )
 
@@ -37,24 +38,20 @@ func Command() *cobra.Command {
 		RunE:    common.WithGRPCHandler(run),
 	}
 
-	cmd.Flags().String("os", "", "Optionally choose an OS: darwin (macOS) or linux")
-	cmd.Flags().String("arch", "", "Optionally choose and arch: amd64 (Intel-based) or arm64 (Apple Silicon)")
+	cmd.Flags().String("os", runtime.GOOS, "Optionally choose an OS: darwin (macOS) or linux")
+	cmd.Flags().String("arch", runtime.GOARCH, "Optionally choose and arch: amd64 (Intel-based) or arm64 (Apple Silicon)")
 
 	return cmd
 }
 
 func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []string) (common.PrettyPrinter, error) {
-	argOS, _ := cmd.Flags().GetString("os")
-	argArch, _ := cmd.Flags().GetString("arch")
-	OS, arch, err := guessOSAndArchIfNotSet(argOS, argArch)
-	if err != nil {
-		return nil, err
-	}
-	if err := validateOSAndArch(OS, arch); err != nil {
+	os, _ := cmd.Flags().GetString("os")
+	arch, _ := cmd.Flags().GetString("arch")
+	if err := platform.Validate(os, arch); err != nil {
 		return nil, err
 	}
 
-	reader, err := v1.NewCliServiceClient(conn).Upgrade(ctx, &v1.CliUpgradeRequest{Os: OS, Arch: arch})
+	reader, err := v1.NewCliServiceClient(conn).Upgrade(ctx, &v1.CliUpgradeRequest{Os: os, Arch: arch})
 	if err != nil {
 		return nil, err
 	}
@@ -74,57 +71,6 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []str
 	}
 
 	return prettyCliUpgrade{infractlFilename}, nil
-}
-
-func guessOSAndArchIfNotSet(os, arch string) (string, string, error) {
-	if os != "" && arch != "" {
-		return os, arch, nil
-	}
-
-	uname, err := exec.Command("uname", "-sm").Output()
-	if err != nil {
-		return "", "", errors.Wrap(err, "Cannot run uname -sm to determine OS")
-	}
-
-	if os == "" {
-		switch {
-		case strings.Contains(string(uname), "Darwin"):
-			os = "darwin"
-		case strings.Contains(string(uname), "Linux"):
-			os = "linux"
-		default:
-			return "", "", errors.Errorf("uname returned invalid OS: %s; must be Darwin or Linux", string(uname))
-		}
-	}
-
-	if arch == "" {
-		switch {
-		case strings.Contains(string(uname), "x86_64"):
-			arch = "amd64"
-		case strings.Contains(string(uname), "arm64"):
-			arch = "arm64"
-		default:
-			return "", "", errors.Errorf("uname returned invalid arch: %s; must be x86_64 or arm64", string(uname))
-		}
-	}
-
-	return os, arch, nil
-}
-
-func validateOSAndArch(os, arch string) error {
-	switch os {
-	case "linux":
-		if arch == "amd64" {
-			return nil
-		}
-	case "darwin":
-		if arch == "amd64" || arch == "arm64" {
-			return nil
-		}
-	default:
-	}
-
-	return errors.Errorf("invalid OS and architecture combination: %s %s", os, arch)
 }
 
 func recvBytes(reader v1.CliService_UpgradeClient) ([]byte, error) {
