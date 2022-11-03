@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	v1 "github.com/stackrox/infra/generated/api/v1"
+	"github.com/stackrox/infra/pkg/platform"
 	"google.golang.org/grpc"
 )
 
@@ -47,7 +48,7 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []str
 	argOS, _ := cmd.Flags().GetString("os")
 	argArch, _ := cmd.Flags().GetString("arch")
 	OS, arch := guessOSAndArchIfNotSet(argOS, argArch)
-	if err := validateOSAndArch(OS, arch); err != nil {
+	if err := platform.Validate(OS, arch); err != nil {
 		return nil, err
 	}
 
@@ -82,22 +83,6 @@ func guessOSAndArchIfNotSet(os, arch string) (string, string) {
 	}
 
 	return os, arch
-}
-
-func validateOSAndArch(os, arch string) error {
-	switch os {
-	case "linux":
-		if arch == "amd64" {
-			return nil
-		}
-	case "darwin":
-		if arch == "amd64" || arch == "arm64" {
-			return nil
-		}
-	default:
-	}
-
-	return errors.Errorf("invalid OS and architecture combination: %s %s", os, arch)
 }
 
 func recvBytes(reader v1.CliService_UpgradeClient) ([]byte, error) {
