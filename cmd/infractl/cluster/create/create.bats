@@ -38,7 +38,7 @@ setup() {
 @test "can create a workflow without a name" {
   run infractl create test-hello-world
   assert_success
-  assert_output --regexp "ID\: ...?.?"
+  assert_output --regexp "ID: ...?.?"
 }
 
 @test "names include a date by default" {
