@@ -191,7 +191,7 @@ ifndef ENVIRONMENT
 	$(error ENVIRONMENT is undefined)
 endif
 	@if [[ "${DEPLOYMENT}" == "local" && ("${this_context}" == "${dev_context}" || "${this_context}" == "${prod_context}") ]]; then \
-		echo -e "Your kube context is not set to a local infra!"; \
+		echo "Your kube context is not set to a local infra!"; \
 		exit 1; \
 	fi
 	@if [[ "${DEPLOYMENT}" == "development" && "${this_context}" != "${dev_context}" ]]; then \
