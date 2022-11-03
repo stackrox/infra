@@ -7,7 +7,7 @@ import (
 )
 
 func TestValidate(t *testing.T) {
-	testcases := []struct{
+	testcases := []struct {
 		platform platform
 		valid    bool
 	}{
