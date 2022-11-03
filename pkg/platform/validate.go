@@ -7,6 +7,10 @@ type platform struct {
 	arch string
 }
 
+func (p platform) String() string {
+	return p.os + "/" + p.arch
+}
+
 var validPlatforms = map[platform]struct{}{
 	{
 		os:   "darwin",
