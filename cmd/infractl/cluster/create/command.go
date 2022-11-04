@@ -49,7 +49,7 @@ ID: my-demo-for-me`
       a qa-demo cluster in a stackrox repo context. An image will be choosen 
       to match the last commit. That commit should be pushed in order to ensure 
       that the image is built. By default opensource (quay.io/stackrox-io) 
-      images are used. Pass --rhacs to get RedHat images.`
+      images are used. Pass --rhacs to get Red Hat images.`
 )
 
 // Command defines the handler for infractl create.
