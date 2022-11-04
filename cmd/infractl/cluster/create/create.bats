@@ -7,7 +7,10 @@ load_bats_support
 setup_file() {
   e2e_setup
 
-  kubectl delete workflowtemplates --all --wait
+  # These cannot run in parallel because the mocks in particular are per test
+  # dependent.
+  export BATS_NO_PARALLELIZE_WITHIN_FILE=true
+
   kubectl apply -f "$BATS_TEST_DIRNAME/testdata/*.yaml"
 
   ROOT="$(git rev-parse --show-toplevel)"
@@ -24,9 +27,10 @@ setup_file() {
 }
 
 setup() {
-  kubectl delete workflows --all --wait
   create_mock_make_for_tag "${test_tag}"
   create_mock_git_for_toplevel "$ROOT/test/mocks/stackrox/stackrox"
+  delete_all_workflows_by_flavor "test-hello-world"
+  delete_all_workflows_by_flavor "test-qa-demo"
 }
 
 @test "can create a workflow" {
@@ -41,26 +45,26 @@ setup() {
   assert_output --regexp "ID: ...?.?"
 }
 
-@test "names include a date by default" {
+@test "default names include a date" {
   run infractl create test-hello-world
   assert_success
   assert_output --regexp "ID: ...?.?-${date_suffix}"
 }
 
-@test "names do not conflict" {
+@test "default names do not conflict" {
   run infractl create test-hello-world
   run infractl create test-hello-world
   assert_success
   assert_output --regexp "ID: ...?.?-${date_suffix}-2"
 }
 
-@test "qa-demo names use the tag" {
+@test "default qa-demo names use the tag" {
   run infractl create test-qa-demo
   assert_success
   assert_output --regexp "ID: ...?.?-${tag_suffix}-1"
 }
 
-@test "qa-demo names strip any -dirty suffix" {
+@test "default qa-demo names strip any -dirty suffix" {
   create_mock_make_for_tag "${test_tag}-dirty"
   run infractl create test-qa-demo
   assert_success
@@ -89,7 +93,7 @@ setup() {
   assert_equal "$arg" "a.b.c"
 }
 
-@test "qa-demo names use the date when not in a git context" {
+@test "default qa-demo names use the date when not in a git context" {
   create_mock_git_that_fails
   run infractl create test-qa-demo --arg main-image=test
   assert_success
@@ -103,7 +107,7 @@ setup() {
   assert_output --partial "parameter \"main-image\" was not provided"
 }
 
-@test "qa-demo names use the date when in a git context other than stackrox" {
+@test "default qa-demo names use the date when in a git context other than stackrox" {
   create_mock_git_for_toplevel "$ROOT/test/mocks/stackrox/collector"
   create_mock_make_for_tag_without_pwd_check "${test_tag}"
   run infractl create test-qa-demo --arg main-image=test

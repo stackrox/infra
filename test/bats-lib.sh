@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# (this does not appear to be BATs compatible)
+# set -euo pipefail
+
 load_bats_support() {
   # Find the location for bats packages. Centos, local install, CI.
   for helpers_root in "/usr/share/toolbox/test/system/libs" "${HOME}/bats-core" "/usr/lib/node_modules"; do
@@ -23,6 +26,12 @@ e2e_setup() {
     echo "Quitting test. This is not an infra PR development cluster."
     exit 1
   fi
+}
+
+delete_all_workflows_by_flavor() {
+  flavor="$1"
+  kubectl get workflows -o json | jq -r '.items[] | select( .metadata.annotations."infra.stackrox.com/flavor" == "'"$flavor"'" ) | .metadata.name' | \
+    xargs kubectl delete workflow || true
 }
 
 diag() {
