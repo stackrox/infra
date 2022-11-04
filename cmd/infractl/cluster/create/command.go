@@ -73,7 +73,7 @@ func Command() *cobra.Command {
 	cmd.Flags().StringP("download-dir", "d", "", "wait for readiness and download artifacts to this dir")
 	for _, osArg := range os.Args {
 		if strings.Contains(osArg, "qa-demo") {
-			cmd.Flags().Bool("rhacs", false, "use RedHat branded images for qa-demo (the default is to use opensource images)")
+			cmd.Flags().Bool("rhacs", false, "use Red Hat branded images for qa-demo (the default is to use open source images)")
 		}
 	}
 	return cmd
