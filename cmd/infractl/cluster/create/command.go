@@ -201,13 +201,13 @@ func getUserInitials(ctx context.Context, conn *grpc.ClientConn) (string, error)
 		initials := ""
 		name := resp.ServiceAccount.GetName()
 		for _, part := range regexp.MustCompile(`[\s-_\.]+`).Split(name, -1) {
-			initials += strings.ToLower(part)[0:1]
+			initials += strings.ToLower(part[:1])
 		}
 		if len(initials) < 2 {
 			return "", errors.Errorf("Cannot determine a default name for %s", name)
 		}
 		if len(initials) > 4 {
-			initials = initials[0:4]
+			initials = initials[:4]
 		}
 		return initials, nil
 	case nil:
@@ -253,8 +253,8 @@ func avoidConflicts(ctx context.Context, conn *grpc.ClientConn, nameSoFar string
 
 	for i := 1; i <= 11; i++ {
 		potential := nameSoFar + "-" + strconv.Itoa(i)
-		inUse := false
-		for _, cluster := range resp.Clusters {
+		var inUse bool
+		for _, cluster := range resp.GetClusters() {
 			if cluster.ID == potential {
 				inUse = true
 				break
