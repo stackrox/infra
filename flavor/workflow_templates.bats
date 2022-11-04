@@ -10,10 +10,6 @@ setup_file() {
   kubectl apply -f "$BATS_TEST_DIRNAME/testdata/*.yaml"
 }
 
-# setup() {
-#   # kubectl delete workflowtemplates --all --wait
-# }
-
 @test "a flavor from workflow template" {
   expect_count_flavor_id "test-gke-lite" 1
 }

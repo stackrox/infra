@@ -56,7 +56,15 @@ make install-local
 
 ### Logs
 
-Logs for the development infra will be [here (authuser=1)](https://console.cloud.google.com/logs/query;query=resource.labels.cluster_name%3D%22{{.Env.DEV_CLUSTER_NAME}}%22%0Aresource.labels.container_name%3D%22infra-server%22?project=srox-temp-dev-test&authuser=1)
+Logs for the development infra depending on your @stackrox.com authuser:
+- [authuser=0](https://console.cloud.google.com/logs/query;query=resource.labels.cluster_name%3D%22{{.Env.DEV_CLUSTER_NAME}}%22%0Aresource.labels.container_name%3D%22infra-server%22?project=srox-temp-dev-test&authuser=0)
+- [authuser=1](https://console.cloud.google.com/logs/query;query=resource.labels.cluster_name%3D%22{{.Env.DEV_CLUSTER_NAME}}%22%0Aresource.labels.container_name%3D%22infra-server%22?project=srox-temp-dev-test&authuser=1)
+- [authuser=2](https://console.cloud.google.com/logs/query;query=resource.labels.cluster_name%3D%22{{.Env.DEV_CLUSTER_NAME}}%22%0Aresource.labels.container_name%3D%22infra-server%22?project=srox-temp-dev-test&authuser=2)
+
+Or: 
+\`\`\`
+kubectl -n infra logs -l app=infra-server --tail=1 -f
+\`\`\`
 
 EOT
 
