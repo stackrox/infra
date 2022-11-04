@@ -24,3 +24,8 @@ e2e_setup() {
     exit 1
   fi
 }
+
+diag() {
+  # shellcheck disable=SC2001
+    echo "$@" | sed -e 's/^/# /' >&3 ;
+}

@@ -145,7 +145,7 @@ jobs:
           make e2e-tests || touch FAIL
           kubectl -n infra logs -l app=infra-server --tail=-1
           # Reapply workflow templates deleted by test
-          kubectl apply -f workflows/*
+          kubectl apply -f 'workflows/*'
           kill %1
 
           [[ ! -f FAIL ]]
