@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"sort"
 	"strings"
 	"sync"
@@ -39,11 +40,13 @@ import (
 	k8sv1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
-const (
+var (
 	// resumeExpiredClusterInterval is how often to periodically check for
 	// expired workflows.
 	resumeExpiredClusterInterval = 1 * time.Minute
+)
 
+const (
 	// calendarCheckInterval is how often to periodically check the calendar
 	// for scheduled demos.
 	calendarCheckInterval = 5 * time.Minute
@@ -98,6 +101,10 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSo
 
 	ctx, argoClient := argov3client.NewAPIClient(context.Background())
 	argoWorkflowsClient := argoClient.NewWorkflowServiceClient()
+
+	if os.Getenv("TEST_MODE") == "true" {
+		resumeExpiredClusterInterval = 5 * time.Second
+	}
 
 	impl := &clusterImpl{
 		k8sWorkflowsClient:  k8sWorkflowsClient,
