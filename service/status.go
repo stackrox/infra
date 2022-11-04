@@ -34,7 +34,7 @@ func (s *statusImpl) GetStatus(ctx context.Context, _ *empty.Empty) (*v1.InfraSt
 // Access configures access for this service.
 func (s *statusImpl) Access() map[string]middleware.Access {
 	return map[string]middleware.Access{
-		"/v1.InfraStatusService/Status": middleware.Anonymous,
+		"/v1.InfraStatusService/GetStatus": middleware.Anonymous,
 	}
 }
 
