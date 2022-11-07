@@ -7,8 +7,8 @@ import (
 	"os"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/pkg/errors"
 	v1 "github.com/stackrox/infra/generated/api/v1"
+	"github.com/stackrox/infra/pkg/platform"
 	"github.com/stackrox/infra/service/middleware"
 	"google.golang.org/grpc"
 )
@@ -29,18 +29,12 @@ func NewCliService() (middleware.APIService, error) {
 
 // Upgrade provides the binary for the requested OS and architecture.
 func (s *cliImpl) Upgrade(request *v1.CliUpgradeRequest, stream v1.CliService_UpgradeServer) error {
-	if request.Os != "linux" && request.Os != "darwin" {
-		err := errors.Errorf("%s is not a supported OS", request.Os)
-		log.Println("[INFO] infractl cli upgrade:", err)
-		return err
-	}
-	if request.Arch != "amd64" && request.Arch != "arm64" {
-		err := errors.Errorf("%s is not a supported arch", request.Arch)
+	if err := platform.Validate(request.GetOs(), request.GetArch()); err != nil {
 		log.Println("[INFO] infractl cli upgrade:", err)
 		return err
 	}
 
-	filename := webRoot + "/downloads/infractl-" + request.Os + "-" + request.Arch
+	filename := webRoot + "/downloads/infractl-" + request.GetOs() + "-" + request.GetArch()
 	file, err := os.Open(filename)
 	if err != nil {
 		log.Println("[ERROR] Failed to open infractl binary:", err)
