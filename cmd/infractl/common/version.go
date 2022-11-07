@@ -11,7 +11,7 @@ import (
 )
 
 func checkForVersionDiff(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command) {
-	if cmd.Use == "version" {
+	if cmd.Use == "version" || cmd.Use == "cli" {
 		return
 	}
 

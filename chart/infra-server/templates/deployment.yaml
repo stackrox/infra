@@ -29,6 +29,8 @@ spec:
           env:
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /configuration/google-credentials.json
+            - name: TEST_MODE
+              value: "{{ eq .Values.deployment "local" }}"
           readinessProbe:
             httpGet:
               path: /

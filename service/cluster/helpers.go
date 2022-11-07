@@ -159,8 +159,8 @@ func handleArtifactMigration(workflow v1alpha1.Workflow, artifact v1alpha1.Artif
 
 	if bucket == "" || key == "" {
 		log.Printf("[WARN] Cannot figure out bucket for artifact, possibly an upgrade issue, not fatal (workflow: %q)", workflow.Name)
-		log.Printf("Artifact: %v\n", artifact)
-		log.Printf("ArtifactRepository: %v\n", workflow.Status.ArtifactRepositoryRef)
+		log.Printf("[INFO] Artifact: %v\n", artifact)
+		log.Printf("[INFO] ArtifactRepository: %v\n", workflow.Status.ArtifactRepositoryRef)
 		return "", ""
 	}
 

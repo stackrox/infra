@@ -52,7 +52,7 @@ func (r *Registry) getPairFromWorkflowTemplate(id string) (*v1.Flavor, *v1alpha1
 		Namespace: r.workflowTemplateNamespace,
 	})
 	if err != nil {
-		log.Printf("Failed to get an argo workflow template: %s, %v", id, err)
+		log.Printf("[WARN] Failed to get an argo workflow template: %s, %v", id, err)
 		return nil, nil
 	}
 

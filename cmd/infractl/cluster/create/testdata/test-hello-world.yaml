@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: test-hello-world
+  generateName: test-hello-world-
+  annotations:
+    infra.stackrox.io/description: just a test
+    infra.stackrox.io/availability: stable
+spec:
+  entrypoint: start
+  arguments:
+    parameters:
+      - name: name
+        description: say hello to?
+  templates:
+    - name: start
+      steps:
+        - - name: create
+            template: whalesay
+        - - name: wait
+            template: wait
+        - - name: destroy
+            template: whalesay
+
+    - name: whalesay
+      container:
+        image: docker/whalesay:latest
+        command: [cowsay]
+        args: ["hello world to: ", "{{workflow.parameters.name}}"]
+
+    - name: wait
+      suspend: {}

@@ -30,14 +30,14 @@ func NewCliService() (middleware.APIService, error) {
 // Upgrade provides the binary for the requested OS and architecture.
 func (s *cliImpl) Upgrade(request *v1.CliUpgradeRequest, stream v1.CliService_UpgradeServer) error {
 	if err := platform.Validate(request.GetOs(), request.GetArch()); err != nil {
-		log.Println("infractl cli upgrade:", err)
+		log.Println("[INFO] infractl cli upgrade:", err)
 		return err
 	}
 
 	filename := webRoot + "/downloads/infractl-" + request.GetOs() + "-" + request.GetArch()
 	file, err := os.Open(filename)
 	if err != nil {
-		log.Println("Failed to open infractl binary:", err)
+		log.Println("[ERROR] Failed to open infractl binary:", err)
 		return err
 	}
 	defer file.Close()
@@ -48,12 +48,12 @@ func (s *cliImpl) Upgrade(request *v1.CliUpgradeRequest, stream v1.CliService_Up
 			break
 		}
 		if err != nil {
-			log.Println("error while reading chunk:", err)
+			log.Println("[ERROR] error while reading chunk:", err)
 			return err
 		}
 		resp := &v1.CliUpgradeResponse{FileChunk: buff[:bytesRead]}
 		if err := stream.Send(resp); err != nil {
-			log.Println("error while sending chunk:", err)
+			log.Println("[ERROR] error while sending chunk:", err)
 			return err
 		}
 	}
