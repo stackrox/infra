@@ -7,14 +7,26 @@ metadata:
     infra.stackrox.io/description: just a test
     infra.stackrox.io/availability: stable
 spec:
-  entrypoint: whalesay
+  entrypoint: start
   arguments:
     parameters:
       - name: name
         description: say hello to?
   templates:
-  - name: whalesay
-    container:
-      image: docker/whalesay:latest
-      command: [cowsay]
-      args: ["hello world to: ", "{{workflow.parameters.name}}"]
+    - name: start
+      steps:
+        - - name: create
+            template: whalesay
+        - - name: wait
+            template: wait
+        - - name: destroy
+            template: whalesay
+
+    - name: whalesay
+      container:
+        image: docker/whalesay:latest
+        command: [cowsay]
+        args: ["hello world to: ", "{{workflow.parameters.name}}"]
+
+    - name: wait
+      suspend: {}

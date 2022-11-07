@@ -95,7 +95,7 @@ func (s *server) RunServer() (<-chan error, error) {
 		mux.ServeHTTP(w, r)
 	})
 
-	log.Printf("Starting gRPC server on %s", listenAddress)
+	log.Printf("[INFO] Starting gRPC server on %s", listenAddress)
 	go func() {
 		if err := http.ListenAndServeTLS(listenAddress, s.cfg.Server.CertFile, s.cfg.Server.KeyFile, h2c.NewHandler(muxHandler, &http2.Server{})); err != nil {
 			errCh <- err
@@ -107,7 +107,7 @@ func (s *server) RunServer() (<-chan error, error) {
 		return nil, err
 	}
 
-	log.Printf("Starting gRPC-Gateway client on %s", connectAddress)
+	log.Printf("[INFO] Starting gRPC-Gateway client on %s", connectAddress)
 	conn, err := grpc.Dial(connectAddress, dialOption)
 	if err != nil {
 		return nil, errors.Wrap(err, "dialing gRPC")
