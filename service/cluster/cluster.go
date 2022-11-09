@@ -313,7 +313,7 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 
 	// Use the user supplied name as the Argo workflow name.
 	if name, ok := req.Parameters["name"]; ok {
-		workflow.ObjectMeta.Name = name
+		workflow.ObjectMeta.GenerateName = name + "-"
 	} else {
 		return nil, fmt.Errorf("parameter 'name' was not provided")
 	}
