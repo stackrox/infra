@@ -15,6 +15,7 @@ import (
 	"github.com/stackrox/infra/cmd/infractl/common"
 	"github.com/stackrox/infra/cmd/infractl/flavor"
 	statusGet "github.com/stackrox/infra/cmd/infractl/status/get"
+	statusReset "github.com/stackrox/infra/cmd/infractl/status/reset"
 	statusSet "github.com/stackrox/infra/cmd/infractl/status/set"
 	"github.com/stackrox/infra/cmd/infractl/token"
 	"github.com/stackrox/infra/cmd/infractl/version"
@@ -33,10 +34,11 @@ func main() {
 	statusCommand := &cobra.Command{
 		Use:   "status get|set",
 		Short: "Modify or retrieve Server status information",
-		Long:  "Set or get server status",
+		Long:  "Get, set or reset server status",
 	}
 	statusCommand.AddCommand(
 		statusGet.Command(),
+		statusReset.Command(),
 		statusSet.Command(),
 	)
 

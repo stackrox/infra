@@ -32,17 +32,23 @@ func (s *statusImpl) GetStatus(ctx context.Context, _ *empty.Empty) (*v1.InfraSt
 	return &infraStatus, nil
 }
 
-func (s *statusImpl) SetStatus(ctx context.Context, infraStatus *v1.InfraStatus) (*empty.Empty, error) {
-	log.Println("New Status was set: ")
-	log.Printf(infraStatus.Maintainer, infraStatus.MaintenanceActive)
-	return &empty.Empty{}, nil
+func (s *statusImpl) SetStatus(ctx context.Context, infraStatus *v1.InfraStatus) (*v1.InfraStatus, error) {
+	log.Printf("New Status was set by maintainer %s\n", infraStatus.Maintainer)
+	return infraStatus, nil
+}
+
+func (s *statusImpl) ResetStatus(ctx context.Context, _ *empty.Empty) (*v1.InfraStatus, error) {
+	log.Println("Status was reset")
+	return &v1.InfraStatus{}, nil
 }
 
 // Access configures access for this service.
 func (s *statusImpl) Access() map[string]middleware.Access {
 	return map[string]middleware.Access{
 		"/v1.InfraStatusService/GetStatus": middleware.Anonymous,
-		"/v1.InfraStatusService/SetStatus": middleware.Authenticated,
+		// TODO: change both modifying commands to middleware.Admin
+		"/v1.InfraStatusService/ResetStatus": middleware.Authenticated,
+		"/v1.InfraStatusService/SetStatus":   middleware.Authenticated,
 	}
 }
 

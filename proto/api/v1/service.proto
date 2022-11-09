@@ -460,17 +460,24 @@ message InfraStatus {
 // InfraStatusService provides information on the status of the server.
 service InfraStatusService {
 
-    // InfraStatus gets the maintenance
+    // GetStatus gets the maintenance
     rpc GetStatus (google.protobuf.Empty) returns (InfraStatus) {
         option (google.api.http) = {
             get: "/v1/status"
         };
     }
 
-    // InfraStatus gets the maintenance
-    rpc SetStatus (InfraStatus) returns (google.protobuf.Empty) {
+    // SetStatus sets the maintenance
+    rpc SetStatus (InfraStatus) returns (InfraStatus) {
         option (google.api.http) = {
             put: "/v1/status"
+        };
+    }
+
+    // ResetStatus resets the maintenance
+    rpc ResetStatus (google.protobuf.Empty) returns (InfraStatus) {
+        option (google.api.http) = {
+            delete: "/v1/status"
         };
     }
 }

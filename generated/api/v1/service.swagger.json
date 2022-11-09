@@ -298,6 +298,21 @@
           "InfraStatusService"
         ]
       },
+      "delete": {
+        "summary": "Token generates a service account token for the current user.",
+        "operationId": "ResetStatus",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1InfraStatus"
+            }
+          }
+        },
+        "tags": [
+          "InfraStatusService"
+        ]
+      },
       "put": {
         "summary": "CreateToken generates an arbitrary service account token",
         "operationId": "SetStatus",
@@ -305,7 +320,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "properties": {}
+              "$ref": "#/definitions/v1InfraStatus"
             }
           }
         },

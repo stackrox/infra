@@ -39,7 +39,7 @@ func getMaintainer(ctx context.Context, conn *grpc.ClientConn) (string, error) {
 	case *v1.WhoamiResponse_User:
 		return "", errors.New("authenticating as a user is not possible in this context")
 	case *v1.WhoamiResponse_ServiceAccount:
-		return resp.ServiceAccount.GetName(), nil
+		return resp.ServiceAccount.GetEmail(), nil
 	}
 	return "", errors.New("authentication required - must provide a ServiceAccount token")
 }
@@ -54,11 +54,11 @@ func run(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, _ []strin
 		Maintainer:        maintainer,
 	}
 
-	_, err = v1.NewInfraStatusServiceClient(conn).SetStatus(ctx, infraStatus)
+	newInfraStatus, err := v1.NewInfraStatusServiceClient(conn).SetStatus(ctx, infraStatus)
 	if err != nil {
 		return nil, err
 	}
 	return status.PrettyStatusResp{
-		Status: infraStatus,
+		Status: newInfraStatus,
 	}, nil
 }
