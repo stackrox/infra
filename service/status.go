@@ -67,9 +67,10 @@ func (s *statusImpl) convertConfigMapToInfraStatus(configMap *corev1.ConfigMap) 
 
 func (s *statusImpl) convertInfraStatusToConfigMap(infraStatus *v1.InfraStatus) *applyConfigurationv1.ConfigMapApplyConfiguration {
 	configMap := applyConfigurationv1.ConfigMap(s.infraStatusName, s.infraNamespace)
-	configMap.Data["maintainer"] = infraStatus.GetMaintainer()
-	configMap.Data["maintenanceActive"] = strconv.FormatBool(infraStatus.GetMaintenanceActive())
-	return configMap
+	return configMap.WithData(map[string]string{
+		"maintainer":        infraStatus.GetMaintainer(),
+		"maintenanceActive": strconv.FormatBool(infraStatus.GetMaintenanceActive()),
+	})
 }
 
 // GetStatus shows infra maintenance status.
@@ -89,6 +90,7 @@ func (s *statusImpl) GetStatus(ctx context.Context, _ *empty.Empty) (*v1.InfraSt
 
 func (s *statusImpl) SetStatus(ctx context.Context, infraStatus *v1.InfraStatus) (*v1.InfraStatus, error) {
 	configMap := s.convertInfraStatusToConfigMap(infraStatus)
+
 	_, err := s.k8sConfigMapClient.Apply(ctx, configMap, metav1.ApplyOptions{})
 	if err != nil {
 		return nil, err

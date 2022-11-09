@@ -46,6 +46,7 @@ func GetK8sPodsClient(workflowNamespace string) (k8sv1.PodInterface, error) {
 	return client.CoreV1().Pods(workflowNamespace), nil
 }
 
+// GetK8sConfigMapClient provides access to ConfigMaps
 func GetK8sConfigMapClient(namespace string) (k8sv1.ConfigMapInterface, error) {
 	// TODO: could be refactored to getGenericK8sClient() ?
 	config, err := restConfig()
