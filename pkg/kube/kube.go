@@ -46,6 +46,20 @@ func GetK8sPodsClient(workflowNamespace string) (k8sv1.PodInterface, error) {
 	return client.CoreV1().Pods(workflowNamespace), nil
 }
 
+func GetK8sConfigMapClient(namespace string) (k8sv1.ConfigMapInterface, error) {
+	// TODO: could be refactored to getGenericK8sClient() ?
+	config, err := restConfig()
+	if err != nil {
+		return nil, err
+	}
+	client, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
+
+	return client.CoreV1().ConfigMaps(namespace), nil
+}
+
 func restConfig() (*rest.Config, error) {
 	homeDir := os.Getenv("HOME")
 	if homeDir != "" {
