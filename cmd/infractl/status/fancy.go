@@ -8,15 +8,18 @@ import (
 	v1 "github.com/stackrox/infra/generated/api/v1"
 )
 
+// PrettyStatusResp is a struct wrapping an InfraStatus
 type PrettyStatusResp struct {
-	Status *v1.InfraStatus `json:"Status"`
+	Status *v1.InfraStatus `json:"status"`
 }
 
+// PrettyPrint prints the infra status pretty
 func (p PrettyStatusResp) PrettyPrint(cmd *cobra.Command) {
 	cmd.Printf("  Maintenance active: %v\n", p.Status.GetMaintenanceActive())
 	cmd.Printf("  Maintainer:         %s\n", p.Status.GetMaintainer())
 }
 
+// PrettyJSONPrint prints the infra status as JSON
 func (p PrettyStatusResp) PrettyJSONPrint(cmd *cobra.Command) error {
 	data, err := json.MarshalIndent(p, "", "  ")
 	if err != nil {
