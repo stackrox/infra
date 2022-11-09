@@ -1,13 +1,13 @@
-// Package status implements the infractl status command.
-package status
+// Package get implements the infractl status get command.
+package get
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/common"
+	"github.com/stackrox/infra/cmd/infractl/status"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"google.golang.org/grpc"
 )
@@ -15,11 +15,11 @@ import (
 const examples = `# Print server status.
 $ infractl status`
 
-// Command defines the handler for infractl status.
+// Command defines the handler for infractl status get.
 func Command() *cobra.Command {
-	// $ infractl status
+	// $ infractl status get
 	return &cobra.Command{
-		Use:     "status",
+		Use:     "status get",
 		Short:   "Server status information",
 		Long:    "Print server status",
 		Example: examples,
@@ -32,14 +32,11 @@ func run(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, _ []strin
 	var infraStatus *v1.InfraStatus
 
 	infraStatus, err := v1.NewInfraStatusServiceClient(conn).GetStatus(ctx, &empty.Empty{})
-
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 
-	fmt.Println(infraStatus)
-
-	return prettyStatusResp{
+	return status.PrettyStatusResp{
 		Status: infraStatus,
 	}, nil
 }

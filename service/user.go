@@ -59,7 +59,7 @@ func (s *userImpl) Token(ctx context.Context, _ *empty.Empty) (*v1.TokenResponse
 	return s.CreateToken(ctx, &svcacct)
 }
 
-// GetVersion implements UserService.Whoami.
+// Whoami implements UserService.Whoami.
 func (s *userImpl) Whoami(ctx context.Context, _ *empty.Empty) (*v1.WhoamiResponse, error) {
 	if user, found := middleware.UserFromContext(ctx); found {
 		return &v1.WhoamiResponse{

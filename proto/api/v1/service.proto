@@ -466,4 +466,11 @@ service InfraStatusService {
             get: "/v1/status"
         };
     }
+
+    // InfraStatus gets the maintenance
+    rpc SetStatus (InfraStatus) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            put: "/v1/status"
+        };
+    }
 }

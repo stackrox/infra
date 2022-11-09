@@ -297,6 +297,21 @@
         "tags": [
           "InfraStatusService"
         ]
+      },
+      "put": {
+        "summary": "CreateToken generates an arbitrary service account token",
+        "operationId": "SetStatus",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "properties": {}
+            }
+          }
+        },
+        "tags": [
+          "InfraStatusService"
+        ]
       }
     },
     "/v1/token": {

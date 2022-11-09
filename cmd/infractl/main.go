@@ -14,7 +14,8 @@ import (
 	"github.com/stackrox/infra/cmd/infractl/cluster/logs"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	"github.com/stackrox/infra/cmd/infractl/flavor"
-	"github.com/stackrox/infra/cmd/infractl/status"
+	statusGet "github.com/stackrox/infra/cmd/infractl/status/get"
+	statusSet "github.com/stackrox/infra/cmd/infractl/status/set"
 	"github.com/stackrox/infra/cmd/infractl/token"
 	"github.com/stackrox/infra/cmd/infractl/version"
 	"github.com/stackrox/infra/cmd/infractl/whoami"
@@ -28,6 +29,16 @@ func main() {
 		Use:          os.Args[0],
 		Version:      buildinfo.Version(),
 	}
+
+	statusCommand := &cobra.Command{
+		Use:   "status get|set",
+		Short: "Modify or retrieve Server status information",
+		Long:  "Set or get server status",
+	}
+	statusCommand.AddCommand(
+		statusGet.Command(),
+		statusSet.Command(),
+	)
 
 	// For our version of Cobra, `cmd.Printf(...)` defaults to Stderr.
 	// > Printf is a convenience method to Printf to the defined output, fallback to Stderr if not set.
@@ -64,7 +75,7 @@ func main() {
 		logs.Command(),
 
 		// $ infractl status
-		status.Command(),
+		statusCommand,
 
 		// $ infractl token
 		token.Command(),
