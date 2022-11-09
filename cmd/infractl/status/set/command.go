@@ -21,7 +21,7 @@ $ infractl status`
 func Command() *cobra.Command {
 	// $ infractl status set
 	return &cobra.Command{
-		Use:     "status set",
+		Use:     "set",
 		Short:   "Set Server status information",
 		Long:    "Set server status",
 		Example: examples,

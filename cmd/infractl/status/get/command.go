@@ -19,7 +19,7 @@ $ infractl status`
 func Command() *cobra.Command {
 	// $ infractl status get
 	return &cobra.Command{
-		Use:     "status get",
+		Use:     "get",
 		Short:   "Server status information",
 		Long:    "Print server status",
 		Example: examples,

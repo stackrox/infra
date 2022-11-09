@@ -42,7 +42,7 @@ func (s *statusImpl) SetStatus(ctx context.Context, infraStatus *v1.InfraStatus)
 func (s *statusImpl) Access() map[string]middleware.Access {
 	return map[string]middleware.Access{
 		"/v1.InfraStatusService/GetStatus": middleware.Anonymous,
-		"/v1.InfraStatusService/SetStatus": middleware.Admin,
+		"/v1.InfraStatusService/SetStatus": middleware.Authenticated,
 	}
 }
 
