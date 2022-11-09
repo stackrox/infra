@@ -299,7 +299,7 @@
         ]
       },
       "delete": {
-        "summary": "Token generates a service account token for the current user.",
+        "summary": "CreateToken generates an arbitrary service account token",
         "operationId": "ResetStatus",
         "responses": {
           "200": {
@@ -314,7 +314,7 @@
         ]
       },
       "put": {
-        "summary": "CreateToken generates an arbitrary service account token",
+        "summary": "Token generates a service account token for the current user.",
         "operationId": "SetStatus",
         "responses": {
           "200": {

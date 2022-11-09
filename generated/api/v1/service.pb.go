@@ -1723,9 +1723,9 @@ var fileDescriptor_a0b84a42fa06f626 = []byte{
 	0x87, 0xe8, 0x81, 0x74, 0xe3, 0x56, 0x5f, 0x07, 0xd1, 0x9b, 0xea, 0x6b, 0x3e, 0x72, 0xdf, 0x54,
 	0x27, 0x52, 0xf9, 0x13, 0xa3, 0xf6, 0x1f, 0x03, 0x50, 0x62, 0x94, 0xce, 0x87, 0x49, 0xe1, 0x39,
 	0x65, 0xfa, 0x5d, 0xbb, 0xe1, 0xce, 0xde, 0xe1, 0xae, 0x13, 0xc6, 0x8b, 0x57, 0x2a, 0x92, 0xc6,
-	0x75, 0x28, 0x74, 0x63, 0xa4, 0x65, 0x8b, 0x8d, 0x10, 0x76, 0x12, 0xe2, 0xc7, 0x50, 0x74, 0x68,
-	0xf4, 0xde, 0xe1, 0x1c, 0x25, 0xb0, 0x8e, 0x33, 0x3f, 0x4f, 0x4d, 0x9f, 0x5c, 0x67, 0x85, 0xe9,
-	0x77, 0xff, 0x17, 0x00, 0x00, 0xff, 0xff, 0xed, 0xc6, 0x98, 0x9b, 0x27, 0x13, 0x00, 0x00,
+	0x3f, 0x86, 0xa2, 0x43, 0xa3, 0xf7, 0xc6, 0x3a, 0x4a, 0x62, 0xd5, 0xa1, 0xd0, 0x8d, 0x91, 0x96,
+	0x2d, 0x36, 0x42, 0xd8, 0x09, 0x88, 0xe3, 0xcc, 0xcf, 0x53, 0xd3, 0x27, 0xd7, 0x59, 0xe1, 0xfd,
+	0xbb, 0xff, 0x0b, 0x00, 0x00, 0xff, 0xff, 0x20, 0x5b, 0xd6, 0x6d, 0x27, 0x13, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -2479,10 +2479,10 @@ var _CliService_serviceDesc = grpc.ServiceDesc{
 type InfraStatusServiceClient interface {
 	// GetStatus gets the maintenance
 	GetStatus(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*InfraStatus, error)
-	// SetStatus sets the maintenance
-	SetStatus(ctx context.Context, in *InfraStatus, opts ...grpc.CallOption) (*InfraStatus, error)
 	// ResetStatus resets the maintenance
 	ResetStatus(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*InfraStatus, error)
+	// SetStatus sets the maintenance
+	SetStatus(ctx context.Context, in *InfraStatus, opts ...grpc.CallOption) (*InfraStatus, error)
 }
 
 type infraStatusServiceClient struct {
@@ -2502,18 +2502,18 @@ func (c *infraStatusServiceClient) GetStatus(ctx context.Context, in *emptypb.Em
 	return out, nil
 }
 
-func (c *infraStatusServiceClient) SetStatus(ctx context.Context, in *InfraStatus, opts ...grpc.CallOption) (*InfraStatus, error) {
+func (c *infraStatusServiceClient) ResetStatus(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*InfraStatus, error) {
 	out := new(InfraStatus)
-	err := c.cc.Invoke(ctx, "/v1.InfraStatusService/SetStatus", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/v1.InfraStatusService/ResetStatus", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *infraStatusServiceClient) ResetStatus(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*InfraStatus, error) {
+func (c *infraStatusServiceClient) SetStatus(ctx context.Context, in *InfraStatus, opts ...grpc.CallOption) (*InfraStatus, error) {
 	out := new(InfraStatus)
-	err := c.cc.Invoke(ctx, "/v1.InfraStatusService/ResetStatus", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/v1.InfraStatusService/SetStatus", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2524,10 +2524,10 @@ func (c *infraStatusServiceClient) ResetStatus(ctx context.Context, in *emptypb.
 type InfraStatusServiceServer interface {
 	// GetStatus gets the maintenance
 	GetStatus(context.Context, *emptypb.Empty) (*InfraStatus, error)
-	// SetStatus sets the maintenance
-	SetStatus(context.Context, *InfraStatus) (*InfraStatus, error)
 	// ResetStatus resets the maintenance
 	ResetStatus(context.Context, *emptypb.Empty) (*InfraStatus, error)
+	// SetStatus sets the maintenance
+	SetStatus(context.Context, *InfraStatus) (*InfraStatus, error)
 }
 
 // UnimplementedInfraStatusServiceServer can be embedded to have forward compatible implementations.
@@ -2537,11 +2537,11 @@ type UnimplementedInfraStatusServiceServer struct {
 func (*UnimplementedInfraStatusServiceServer) GetStatus(ctx context.Context, req *emptypb.Empty) (*InfraStatus, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStatus not implemented")
 }
-func (*UnimplementedInfraStatusServiceServer) SetStatus(ctx context.Context, req *InfraStatus) (*InfraStatus, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetStatus not implemented")
-}
 func (*UnimplementedInfraStatusServiceServer) ResetStatus(ctx context.Context, req *emptypb.Empty) (*InfraStatus, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ResetStatus not implemented")
+}
+func (*UnimplementedInfraStatusServiceServer) SetStatus(ctx context.Context, req *InfraStatus) (*InfraStatus, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetStatus not implemented")
 }
 
 func RegisterInfraStatusServiceServer(s *grpc.Server, srv InfraStatusServiceServer) {
@@ -2566,24 +2566,6 @@ func _InfraStatusService_GetStatus_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
-func _InfraStatusService_SetStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(InfraStatus)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(InfraStatusServiceServer).SetStatus(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/v1.InfraStatusService/SetStatus",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(InfraStatusServiceServer).SetStatus(ctx, req.(*InfraStatus))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _InfraStatusService_ResetStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
@@ -2602,6 +2584,24 @@ func _InfraStatusService_ResetStatus_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _InfraStatusService_SetStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InfraStatus)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(InfraStatusServiceServer).SetStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/v1.InfraStatusService/SetStatus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(InfraStatusServiceServer).SetStatus(ctx, req.(*InfraStatus))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _InfraStatusService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "v1.InfraStatusService",
 	HandlerType: (*InfraStatusServiceServer)(nil),
@@ -2611,12 +2611,12 @@ var _InfraStatusService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _InfraStatusService_GetStatus_Handler,
 		},
 		{
-			MethodName: "SetStatus",
-			Handler:    _InfraStatusService_SetStatus_Handler,
-		},
-		{
 			MethodName: "ResetStatus",
 			Handler:    _InfraStatusService_ResetStatus_Handler,
+		},
+		{
+			MethodName: "SetStatus",
+			Handler:    _InfraStatusService_SetStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
