@@ -10,7 +10,7 @@ import (
 
 // PrettyStatusResp is a struct wrapping an InfraStatus
 type PrettyStatusResp struct {
-	Status *v1.InfraStatus `json:"status"`
+	Status *v1.InfraStatus
 }
 
 // PrettyPrint prints the infra status pretty
