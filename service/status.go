@@ -91,7 +91,7 @@ func (s *statusImpl) GetStatus(ctx context.Context, _ *empty.Empty) (*v1.InfraSt
 func (s *statusImpl) SetStatus(ctx context.Context, infraStatus *v1.InfraStatus) (*v1.InfraStatus, error) {
 	configMap := s.convertInfraStatusToConfigMap(infraStatus)
 
-	_, err := s.k8sConfigMapClient.Apply(ctx, configMap, metav1.ApplyOptions{})
+	_, err := s.k8sConfigMapClient.Apply(ctx, configMap, metav1.ApplyOptions{FieldManager: "infra"})
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +102,7 @@ func (s *statusImpl) SetStatus(ctx context.Context, infraStatus *v1.InfraStatus)
 func (s *statusImpl) ResetStatus(ctx context.Context, _ *empty.Empty) (*v1.InfraStatus, error) {
 	emptyInfraStatus := &v1.InfraStatus{}
 	configMap := s.convertInfraStatusToConfigMap(emptyInfraStatus)
-	_, err := s.k8sConfigMapClient.Apply(ctx, configMap, metav1.ApplyOptions{})
+	_, err := s.k8sConfigMapClient.Apply(ctx, configMap, metav1.ApplyOptions{FieldManager: "infra"})
 	if err != nil {
 		return nil, err
 	}
