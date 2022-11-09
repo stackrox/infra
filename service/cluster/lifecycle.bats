@@ -25,7 +25,7 @@ setup_file() {
 }
 
 @test "can run through the infra standard lifecycle" {
-  id="$(infractl create simulate standard-"$(date '+%s')" --lifespan=30s --arg create-delay-seconds=5 --arg destroy-delay-seconds=5)"
+  id="$(infractl create simulate standard --lifespan=30s --arg create-delay-seconds=5 --arg destroy-delay-seconds=5)"
   assert_success
   id="$(grep -E ^ID: <<<"$id")"
   id="${id//ID: /}"
@@ -38,7 +38,7 @@ setup_file() {
 }
 
 @test "can fail in create" {
-  id="$(infractl create simulate create-fails-"$(date '+%s')" --lifespan=30s --arg create-delay-seconds=5 --arg create-outcome=fail)"
+  id="$(infractl create simulate create-fails --lifespan=30s --arg create-delay-seconds=5 --arg create-outcome=fail)"
   assert_success
   id="$(grep -E ^ID: <<<"$id")"
   id="${id//ID: /}"
@@ -49,7 +49,7 @@ setup_file() {
 }
 
 @test "can fail in destroy" {
-  id="$(infractl create simulate destroy-fails-"$(date '+%s')" --lifespan=30s --arg create-delay-seconds=5 --arg destroy-delay-seconds=5 --arg destroy-outcome=fail)"
+  id="$(infractl create simulate destroy-fails --lifespan=30s --arg create-delay-seconds=5 --arg destroy-delay-seconds=5 --arg destroy-outcome=fail)"
   assert_success
   id="$(grep -E ^ID: <<<"$id")"
   id="${id//ID: /}"
