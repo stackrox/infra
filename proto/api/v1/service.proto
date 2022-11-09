@@ -467,6 +467,13 @@ service InfraStatusService {
         };
     }
 
+    // ResetStatus resets the maintenance
+    rpc ResetStatus (google.protobuf.Empty) returns (InfraStatus) {
+        option (google.api.http) = {
+            delete: "/v1/status"
+        };
+    }
+
     // SetStatus sets the maintenance
     rpc SetStatus (InfraStatus) returns (InfraStatus) {
         option (google.api.http) = {
@@ -474,10 +481,4 @@ service InfraStatusService {
         };
     }
 
-    // ResetStatus resets the maintenance
-    rpc ResetStatus (google.protobuf.Empty) returns (InfraStatus) {
-        option (google.api.http) = {
-            delete: "/v1/status"
-        };
-    }
 }

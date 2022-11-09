@@ -29,8 +29,6 @@ func Command() *cobra.Command {
 }
 
 func run(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, _ []string) (common.PrettyPrinter, error) {
-	var infraStatus *v1.InfraStatus
-
 	infraStatus, err := v1.NewInfraStatusServiceClient(conn).GetStatus(ctx, &empty.Empty{})
 	if err != nil {
 		return nil, err

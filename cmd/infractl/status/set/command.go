@@ -54,11 +54,11 @@ func run(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, _ []strin
 		Maintainer:        maintainer,
 	}
 
-	newInfraStatus, err := v1.NewInfraStatusServiceClient(conn).SetStatus(ctx, infraStatus)
+	updatedInfraStatus, err := v1.NewInfraStatusServiceClient(conn).SetStatus(ctx, infraStatus)
 	if err != nil {
 		return nil, err
 	}
 	return status.PrettyStatusResp{
-		Status: newInfraStatus,
+		Status: updatedInfraStatus,
 	}, nil
 }

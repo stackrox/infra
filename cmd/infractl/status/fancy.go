@@ -15,7 +15,7 @@ type PrettyStatusResp struct {
 
 // PrettyPrint prints the infra status pretty
 func (p PrettyStatusResp) PrettyPrint(cmd *cobra.Command) {
-	cmd.Printf("  Maintenance active: %v\n", p.Status.GetMaintenanceActive())
+	cmd.Printf("  Maintenance active: %t\n", p.Status.GetMaintenanceActive())
 	cmd.Printf("  Maintainer:         %s\n", p.Status.GetMaintainer())
 }
 

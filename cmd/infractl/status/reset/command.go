@@ -30,11 +30,11 @@ func Command() *cobra.Command {
 }
 
 func run(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, _ []string) (common.PrettyPrinter, error) {
-	newInfraStatus, err := v1.NewInfraStatusServiceClient(conn).ResetStatus(ctx, &emptypb.Empty{})
+	updatedInfraStatus, err := v1.NewInfraStatusServiceClient(conn).ResetStatus(ctx, &emptypb.Empty{})
 	if err != nil {
 		return nil, err
 	}
 	return status.PrettyStatusResp{
-		Status: newInfraStatus,
+		Status: updatedInfraStatus,
 	}, nil
 }

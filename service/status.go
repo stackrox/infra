@@ -35,7 +35,7 @@ const (
 
 // NewStatusService creates a new InfraStatusService.
 func NewStatusService() (middleware.APIService, error) {
-	// TODO: can we remove hardcoding?
+
 	k8sConfigMapClient, err := kube.GetK8sConfigMapClient(infraNamespace)
 	if err != nil {
 		return nil, err
@@ -75,7 +75,6 @@ func (s *statusImpl) convertInfraStatusToConfigMap(infraStatus *v1.InfraStatus) 
 
 // GetStatus shows infra maintenance status.
 func (s *statusImpl) GetStatus(ctx context.Context, _ *empty.Empty) (*v1.InfraStatus, error) {
-
 	configMap, err := s.k8sConfigMapClient.Get(ctx, s.infraStatusName, metav1.GetOptions{})
 	if err != nil {
 		// if err = doesn't exist, create empty, like in ResetStatus
