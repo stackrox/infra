@@ -314,7 +314,7 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 	}
 
 	// Make sure there is no running infra cluster with the same ID
-	existingWorkflow, err := s.getArgoWorkflowFromClusterID(clusterID)
+	existingWorkflow, _ := s.getArgoWorkflowFromClusterID(clusterID)
 	if existingWorkflow != nil {
 		switch workflowStatus(existingWorkflow.Status) {
 		case v1.Status_FAILED, v1.Status_FINISHED:
@@ -367,9 +367,9 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		annotationSlackDMKey:     slackDM,
 	})
 
-	log.Printf("[INFO] Will create a %q cluster %q for %s", flav.ID, workflow.ObjectMeta.Name, owner)
+	log.Printf("[INFO] Will create a %q cluster %q for %s", flav.ID, clusterID, owner)
 
-	created, err := s.argoWorkflowsClient.CreateWorkflow(s.argoClientCtx, &workflowpkg.WorkflowCreateRequest{
+	_, err = s.argoWorkflowsClient.CreateWorkflow(s.argoClientCtx, &workflowpkg.WorkflowCreateRequest{
 		Workflow:  &workflow,
 		Namespace: s.workflowNamespace,
 	})
@@ -378,7 +378,7 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		return nil, err
 	}
 
-	return &v1.ResourceByID{Id: created.Name}, nil
+	return &v1.ResourceByID{Id: clusterID}, nil
 }
 
 // Artifacts implements ClusterService.Artifacts.
