@@ -772,9 +772,9 @@ func (s *clusterImpl) slackCheckWorkflow(workflow v1alpha1.Workflow) {
 		}
 
 		// Submit the patch.
-		_, err = s.k8sWorkflowsClient.Patch(context.Background(), metacluster.Cluster.ID, types.JSONPatchType, payloadBytes, metav1.PatchOptions{})
+		_, err = s.k8sWorkflowsClient.Patch(context.Background(), workflow.GetName(), types.JSONPatchType, payloadBytes, metav1.PatchOptions{})
 		if err != nil {
-			log.Printf("[ERROR] Failed to patch Slack annotation for cluster %s: %v", metacluster.Cluster.ID, err)
+			log.Printf("[ERROR] Failed to patch Slack annotation for cluster %s, workflow %q: %v", metacluster.Cluster.ID, workflow.GetName(), err)
 			return
 		}
 	}
