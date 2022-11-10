@@ -473,10 +473,15 @@ func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.
 
 	log.Printf("[INFO] Resuming workflow %q", req.Id)
 
+	workflow, _ := s.getArgoWorkflowFromClusterID(req.GetId())
+	if workflow == nil {
+		return &empty.Empty{}, nil
+	}
+
 	// Resume the workflow so that it may move to the destroy phase without
 	// waiting for cleanupExpiredClusters() to kick in.
 	_, err := s.argoWorkflowsClient.ResumeWorkflow(s.argoClientCtx, &workflowpkg.WorkflowResumeRequest{
-		Name:      req.Id,
+		Name:      workflow.GetName(),
 		Namespace: s.workflowNamespace,
 	})
 	if err != nil {
@@ -541,28 +546,6 @@ func (s *clusterImpl) RegisterServiceHandler(ctx context.Context, mux *runtime.S
 	return v1.RegisterClusterServiceHandler(ctx, mux, conn)
 }
 
-func (s *clusterImpl) forceDeleteWorkflow(workflow v1alpha1.Workflow) error {
-	var gracePeriod int64
-	deletePolicy := metav1.DeletePropagationForeground
-	_, err := s.argoWorkflowsClient.DeleteWorkflow(s.argoClientCtx, &workflowpkg.WorkflowDeleteRequest{
-		Name:      workflow.Name,
-		Namespace: s.workflowNamespace,
-		DeleteOptions: &metav1.DeleteOptions{
-			GracePeriodSeconds: &gracePeriod,
-			PropagationPolicy:  &deletePolicy,
-		},
-	})
-	if err != nil {
-		log.Printf("[ERROR] failed to delete workflow %q: %v", workflow.Name, err)
-		return err
-	}
-
-	log.Printf("[INFO] deleted workflow %q", workflow.Name)
-	// The delete is not entirely synchronous WRT PVCs so give it 5 seconds
-	time.Sleep(5 * time.Second)
-	return nil
-}
-
 func (s *clusterImpl) getArgoWorkflowFromClusterID(clusterID string) (*v1alpha1.Workflow, error) {
 	workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
 		Namespace: s.workflowNamespace,
@@ -615,7 +598,7 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 
 			log.Printf("[INFO] Resuming a workflow that has expired: %q", metacluster.ID)
 			_, err = s.argoWorkflowsClient.ResumeWorkflow(s.argoClientCtx, &workflowpkg.WorkflowResumeRequest{
-				Name:      metacluster.ID,
+				Name:      workflow.GetName(),
 				Namespace: s.workflowNamespace,
 			})
 			if err != nil {
