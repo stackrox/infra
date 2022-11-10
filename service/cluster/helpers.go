@@ -16,8 +16,15 @@ import (
 
 // clusterFromWorkflow converts an Argo workflow into a cluster.
 func clusterFromWorkflow(workflow v1alpha1.Workflow) *v1.Cluster {
+	var clusterID string
+	clusterID, ok := workflow.GetObjectMeta().GetAnnotations()[annotationClusterID]
+	if !ok {
+		// Prior workflows used a direct mapping from Argo workflow name to Infra cluster ID
+		clusterID = workflow.GetName()
+	}
+
 	cluster := &v1.Cluster{
-		ID:          workflow.GetName(),
+		ID:          clusterID,
 		Status:      workflowStatus(workflow.Status),
 		Flavor:      GetFlavor(&workflow),
 		Owner:       GetOwner(&workflow),
