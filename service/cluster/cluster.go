@@ -315,7 +315,7 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 
 	// Make sure there is no running infra cluster with the same ID
 	existingWorkflow, err := s.getArgoWorkflowFromClusterID(clusterID)
-	if err == nil {
+	if existingWorkflow != nil {
 		switch workflowStatus(existingWorkflow.Status) {
 		case v1.Status_FAILED, v1.Status_FINISHED:
 			// It should be ok to reuse failed clusters.
@@ -585,7 +585,7 @@ func (s *clusterImpl) getArgoWorkflowFromClusterID(clusterID string) (*v1alpha1.
 
 	log.Printf("[INFO] failed to find an argo workflow to match cluster %q", clusterID)
 
-	return nil, err
+	return nil, nil
 }
 
 func (s *clusterImpl) cleanupExpiredClusters() {
