@@ -5,7 +5,7 @@
 # Notes:
 # These tests can run in parallel (bats --jobs #).
 # The 5 second create/destroy times are typically longer due to argo container
-# overhead. Hence the need for a 30 second lifespan - to test the workflow enters
+# overhead. Hence the need for a 40 second lifespan - to test the workflow enters
 # the READY state and does not move to DESTROYING before that is detected. Overall
 # run time is typically < 60 seconds.
 # If you make changes, run a repeat look to get confidence e.g.:
@@ -18,7 +18,7 @@ load_bats_support
 setup_file() {
   e2e_setup
   kubectl apply -f "workflows/*.yaml"
-  delete_all_workflows_by_flavor "simulate"
+  # delete_all_workflows_by_flavor "simulate"
 
   ROOT="$(git rev-parse --show-toplevel)"
   export ROOT
@@ -70,7 +70,7 @@ assert_status_becomes() {
   desired_status="$2"
 
   tries=0
-  limit=30
+  limit=40
   while [[ "$((tries++))" -le "$limit" ]]; do
     status="$(infractl get "$id" --json | jq -r '.Status')"
     assert_success
