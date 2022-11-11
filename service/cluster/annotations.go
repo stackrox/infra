@@ -8,10 +8,6 @@ import (
 )
 
 const (
-	// annotationClusterId is the annotation key used to map an infra cluster to
-	// an argo workflow.
-	annotationClusterID = "infra.stackrox.com/clusterid"
-
 	// annotationFlavorKey is the k8s annotation that contains the flavor ID.
 	annotationFlavorKey = "infra.stackrox.com/flavor"
 

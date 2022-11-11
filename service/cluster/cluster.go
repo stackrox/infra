@@ -36,6 +36,8 @@ import (
 	"google.golang.org/grpc/status"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apimachinery/pkg/types"
 	k8sv1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
@@ -363,7 +365,6 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 
 	// Set workflow metadata annotations.
 	workflow.SetAnnotations(map[string]string{
-		annotationClusterID:      clusterID,
 		annotationDescriptionKey: req.Description,
 		annotationEventKey:       eventID,
 		annotationFlavorKey:      flav.ID,
@@ -371,6 +372,10 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		annotationOwnerKey:       owner,
 		annotationSlackKey:       string(slackStatus),
 		annotationSlackDMKey:     slackDM,
+	})
+
+	workflow.SetLabels(map[string]string{
+		labelClusterID: clusterID,
 	})
 
 	log.Printf("[INFO] Will create a %q infra cluster %q for %s", flav.ID, clusterID, owner)
@@ -555,29 +560,34 @@ func (s *clusterImpl) RegisterServiceHandler(ctx context.Context, mux *runtime.S
 }
 
 func (s *clusterImpl) getMostRecentArgoWorkflowFromClusterID(clusterID string) (*v1alpha1.Workflow, error) {
+	listOpts := &metav1.ListOptions{
+		Limit: 1,
+	}
+	labelSelector := labels.NewSelector()
+	req, _ := labels.NewRequirement(labelClusterID, selection.Equals, []string{clusterID})
+	labelSelector = labelSelector.Add(*req)
+	listOpts.LabelSelector = labelSelector.String()
+
 	workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
-		Namespace: s.workflowNamespace,
+		Namespace:   s.workflowNamespace,
+		ListOptions: listOpts,
 	})
 	if err != nil {
-		log.Printf("[ERROR] failed to list workflows: %v", err)
+		log.Printf("[ERROR] Failed to list workflows: %v", err)
 		return nil, err
 	}
-
-	// this relies on the default sort of ListWorkflows() being most recent first
-	for _, workflow := range workflowList.Items {
-		// Current behaviour - the cluster ID exists as a workflow annotation
-		if thisClusterID, ok := workflow.GetObjectMeta().GetAnnotations()[annotationClusterID]; ok && clusterID == thisClusterID {
-			return &workflow, nil
-		}
-		// Prior behaviour - the cluster ID mapped to the workflow name
-		if workflow.GetName() == clusterID {
-			return &workflow, nil
-		}
+	if len(workflowList.Items) == 1 {
+		// Current behaviour - the cluster ID exists as a workflow label
+		return &workflowList.Items[0], nil
 	}
 
-	log.Printf("[INFO] Could not find an argo workflow to match infra cluster %q", clusterID)
+	log.Printf("[INFO] Could not find an argo workflow to match infra cluster %q by label", clusterID)
 
-	return nil, status.Errorf(codes.NotFound, "Cannot find infra cluster %q", clusterID)
+	// Prior behaviour - Try to find using the cluster ID mapped to the workflow name
+	return s.argoWorkflowsClient.GetWorkflow(s.argoClientCtx, &workflowpkg.WorkflowGetRequest{
+		Name:      clusterID,
+		Namespace: s.workflowNamespace,
+	})
 }
 
 func (s *clusterImpl) cleanupExpiredClusters() {
