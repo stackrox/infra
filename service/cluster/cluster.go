@@ -330,7 +330,6 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 			// It should be ok to reuse failed cluster IDs.
 			log.Printf("[INFO] An existing completed argo workflow %q exists for infra cluster %q in state %s",
 				existingWorkflow.GetName(), clusterID, existingWorkflow.Status.String())
-			fallthrough
 
 		default:
 			log.Printf(
