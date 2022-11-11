@@ -26,7 +26,7 @@ jobs:
       - run: |
           gh pr edit ${{ github.event.pull_request.number }} --add-label dependabot/needs-review
           gh pr comment ${{ github.event.pull_request.number }} \
-            --body "Reviewers, please check this PR and add label `dependabot/ok-to-test` if you want dependabot to test the changes."
+            --body "Reviewers, please check this PR and add label \`dependabot/ok-to-test\` if you want dependabot to test the changes."
 
   build-and-push:
     if: ${{ github.actor != 'dependabot[bot]' || contains(toJson(github.event.pull_request.labels.*.name), 'dependabot/ok-to-test') }}
