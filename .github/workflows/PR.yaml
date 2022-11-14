@@ -25,7 +25,7 @@ jobs:
     if: ${{ !contains(toJson(github.event.pull_request.labels.*.name), 'dependabot/needs-review') && !contains(toJson(github.event.pull_request.labels.*.name), 'dependabot/ok-to-test') }}
     runs-on: ubuntu-latest
     steps:
-      - working-directory: /home/runner/work/infra
+      - working-directory: /home/runner/work
         run: |
           gh pr edit ${{ github.event.pull_request.number }} --add-label dependabot/needs-review
           gh pr comment ${{ github.event.pull_request.number }} \
