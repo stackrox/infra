@@ -6,7 +6,6 @@ on:
     - opened
     - synchronize
     - labeled
-    - unlabeled
 
 defaults:
   run:
@@ -14,7 +13,7 @@ defaults:
 
 env:
   CLUSTER_NAME: infra-pr-${{ github.event.pull_request.number }}
-  GH_TOKEN: ${{ secrets.ROBOT_ROX_GITHUB_TOKEN }}
+  GH_TOKEN: ${{ github.token }}
 
 jobs:
 
