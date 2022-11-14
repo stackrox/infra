@@ -20,7 +20,8 @@ jobs:
     uses: ./.github/workflows/lint.yaml
 
   add-dependabot-instructions:
-    if: ${{ github.actor == 'dependabot[bot]' &&  !contains(toJson(github.event.pull_request.labels.*.name), 'dependabot/needs-review') && !contains(toJson(github.event.pull_request.labels.*.name), 'dependabot/ok-to-test') }}
+    # if: ${{ github.actor == 'dependabot[bot]' &&  !contains(toJson(github.event.pull_request.labels.*.name), 'dependabot/needs-review') && !contains(toJson(github.event.pull_request.labels.*.name), 'dependabot/ok-to-test') }}
+    if: ${{ !contains(toJson(github.event.pull_request.labels.*.name), 'dependabot/needs-review') && !contains(toJson(github.event.pull_request.labels.*.name), 'dependabot/ok-to-test') }}
     runs-on: ubuntu-latest
     steps:
       - run: |
@@ -29,12 +30,14 @@ jobs:
             --body "Reviewers, please check this PR and add label \`dependabot/ok-to-test\` if you want dependabot to test the changes."
 
   build-and-push:
-    if: ${{ github.actor != 'dependabot[bot]' || contains(toJson(github.event.pull_request.labels.*.name), 'dependabot/ok-to-test') }}
+    # if: ${{ github.actor != 'dependabot[bot]' || contains(toJson(github.event.pull_request.labels.*.name), 'dependabot/ok-to-test') }}
+    if: ${{ contains(toJson(github.event.pull_request.labels.*.name), 'dependabot/ok-to-test') }}
     uses: ./.github/workflows/build-and-push.yaml
     secrets: inherit
 
   create-dev-cluster:
-    if: ${{ github.actor != 'dependabot[bot]' || contains(toJson(github.event.pull_request.labels.*.name), 'dependabot/ok-to-test') }}
+    # if: ${{ github.actor != 'dependabot[bot]' || contains(toJson(github.event.pull_request.labels.*.name), 'dependabot/ok-to-test') }}
+    if: ${{ contains(toJson(github.event.pull_request.labels.*.name), 'dependabot/ok-to-test') }}
     runs-on: ubuntu-latest
     steps:
       - uses: stackrox/actions/infra/create-cluster@v1
