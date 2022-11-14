@@ -27,8 +27,11 @@ jobs:
     steps:
       - working-directory: /home/runner/work
         run: |
-          gh pr edit ${{ github.event.pull_request.number }} --add-label dependabot/needs-review
+          gh pr edit ${{ github.event.pull_request.number }} \
+            --repo stackrox/infra \
+            --add-label dependabot/needs-review
           gh pr comment ${{ github.event.pull_request.number }} \
+            --repo stackrox/infra \
             --body "Reviewers, please check this PR and add label \`dependabot/ok-to-test\` if you want dependabot to test the changes."
 
   build-and-push:
