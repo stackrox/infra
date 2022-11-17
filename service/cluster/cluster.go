@@ -60,6 +60,9 @@ const (
 	// when is a cluster considered near expiration
 	nearExpiry = 30 * time.Minute
 
+	// warn when loops take too long
+	loopDurationWarning = 5 * time.Second
+
 	// default permissions for downloaded artifacts, this corresponds to -rw-r--r--
 	artifactDefaultMode = 0o644
 
@@ -590,6 +593,7 @@ func (s *clusterImpl) getMostRecentArgoWorkflowFromClusterID(clusterID string) (
 
 func (s *clusterImpl) cleanupExpiredClusters() {
 	for ; ; time.Sleep(resumeExpiredClusterInterval) {
+		start := time.Now()
 		workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
 			Namespace: s.workflowNamespace,
 		})
@@ -615,6 +619,9 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 			if err != nil {
 				log.Printf("[WARN] failed to resume argo workflow %q: %v", workflow.GetName(), err)
 			}
+		}
+		if time.Since(start) > loopDurationWarning {
+			log.Printf("[WARN] Expire loop took %s", time.Since(start).String())
 		}
 	}
 }
@@ -727,6 +734,7 @@ func (s *clusterImpl) getLogs(ctx context.Context, node v1alpha1.NodeStatus) *v1
 
 func (s *clusterImpl) startSlackCheck() {
 	for ; ; time.Sleep(slackCheckInterval) {
+		start := time.Now()
 		workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
 			Namespace: s.workflowNamespace,
 		})
@@ -738,10 +746,17 @@ func (s *clusterImpl) startSlackCheck() {
 		for _, workflow := range workflowList.Items {
 			s.slackCheckWorkflow(workflow)
 		}
+		if time.Since(start) > loopDurationWarning {
+			log.Printf("[WARN] Slack loop took %s", time.Since(start).String())
+		}
 	}
 }
 
 func (s *clusterImpl) slackCheckWorkflow(workflow v1alpha1.Workflow) {
+	if slack.IsSlackComplete(slack.Status(GetSlack(&workflow))) {
+		return
+	}
+
 	metacluster, err := s.metaClusterFromWorkflow(workflow)
 	if err != nil {
 		log.Printf("[ERROR] Failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
