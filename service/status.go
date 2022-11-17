@@ -49,21 +49,22 @@ func NewStatusService() (middleware.APIService, error) {
 }
 
 func (s *statusImpl) convertConfigMapToInfraStatus(configMap *corev1.ConfigMap) (*v1.InfraStatus, error) {
-	var maintenanceActive bool
-	maintenanceActiveValue, ok := configMap.Data["maintenanceActive"]
-	if !ok {
-		maintenanceActive = false
+	infraStatus := v1.InfraStatus{
+		Maintainer: configMap.Data["maintainer"],
 	}
-	maintenanceActive, err := strconv.ParseBool(maintenanceActiveValue)
-	if err != nil {
-		return nil, err
-	}
-	maintainer := configMap.Data["maintainer"]
 
-	return &v1.InfraStatus{
-		Maintainer:        maintainer,
-		MaintenanceActive: maintenanceActive,
-	}, nil
+	maintenanceActiveValue, ok := configMap.Data["maintenanceActive"]
+	if !ok || maintenanceActiveValue == "" {
+		infraStatus.MaintenanceActive = false
+	} else {
+		maintenanceActive, err := strconv.ParseBool(maintenanceActiveValue)
+		if err != nil {
+			return nil, err
+		}
+		infraStatus.MaintenanceActive = maintenanceActive
+	}
+
+	return &infraStatus, nil
 }
 
 func (s *statusImpl) convertInfraStatusToConfigMap(infraStatus *v1.InfraStatus) *applyConfigurationv1.ConfigMapApplyConfiguration {
@@ -74,7 +75,7 @@ func (s *statusImpl) convertInfraStatusToConfigMap(infraStatus *v1.InfraStatus) 
 	})
 }
 
-func (s *statusImpl) createEmptyConfigMap(ctx context.Context) (*v1.InfraStatus, error) {
+func (s *statusImpl) createEmptyInfraStatus(ctx context.Context) (*v1.InfraStatus, error) {
 	emptyInfraStatus := &v1.InfraStatus{}
 	configMap := s.convertInfraStatusToConfigMap(emptyInfraStatus)
 	_, err := s.k8sConfigMapClient.Apply(ctx, configMap, metav1.ApplyOptions{FieldManager: "infra"})
@@ -89,15 +90,14 @@ func (s *statusImpl) GetStatus(ctx context.Context, _ *empty.Empty) (*v1.InfraSt
 	configMap, err := s.k8sConfigMapClient.Get(ctx, s.infraStatusName, metav1.GetOptions{})
 	if err != nil {
 		if errorsv1.IsNotFound(err) {
-			infraStatus, err := s.createEmptyConfigMap(ctx)
+			infraStatus, err := s.createEmptyInfraStatus(ctx)
 			if err != nil {
 				return nil, err
 			}
 			log.Println("Initialized infra status lazily")
 			return infraStatus, nil
-		} else {
-			return nil, err
 		}
+		return nil, err
 	}
 	infraStatus, err := s.convertConfigMapToInfraStatus(configMap)
 	if err != nil {
@@ -118,7 +118,7 @@ func (s *statusImpl) SetStatus(ctx context.Context, infraStatus *v1.InfraStatus)
 }
 
 func (s *statusImpl) ResetStatus(ctx context.Context, _ *empty.Empty) (*v1.InfraStatus, error) {
-	infraStatus, err := s.createEmptyConfigMap(ctx)
+	infraStatus, err := s.createEmptyInfraStatus(ctx)
 	if err != nil {
 		return nil, err
 	}
