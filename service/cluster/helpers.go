@@ -14,16 +14,19 @@ import (
 	"github.com/stackrox/infra/slack"
 )
 
-// clusterFromWorkflow converts an Argo workflow into an infra cluster.
-func clusterFromWorkflow(workflow v1alpha1.Workflow) *v1.Cluster {
-	clusterID := GetClusterID(&workflow)
+func getClusterIDFromWorkflow(workflow *v1alpha1.Workflow) string {
+	clusterID := GetClusterID(workflow)
 	if clusterID == "" {
 		// Prior workflows used a direct mapping from Argo workflow name to Infra cluster ID
 		clusterID = workflow.GetName()
 	}
+	return clusterID
+}
 
+// clusterFromWorkflow converts an Argo workflow into an infra cluster.
+func clusterFromWorkflow(workflow v1alpha1.Workflow) *v1.Cluster {
 	cluster := &v1.Cluster{
-		ID:          clusterID,
+		ID:          getClusterIDFromWorkflow(&workflow),
 		Status:      workflowStatus(workflow.Status),
 		Flavor:      GetFlavor(&workflow),
 		Owner:       GetOwner(&workflow),

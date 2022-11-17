@@ -599,27 +599,21 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 		}
 
 		for _, workflow := range workflowList.Items {
-			metacluster, err := s.metaClusterFromWorkflow(workflow)
-			if err != nil {
-				log.Printf("[ERROR] Failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
+			if workflowStatus(workflow.Status) != v1.Status_READY {
 				continue
 			}
 
-			if metacluster.Status != v1.Status_READY {
+			if !isWorkflowExpired(workflow) {
 				continue
 			}
 
-			if !metacluster.Expired {
-				continue
-			}
-
-			log.Printf("[INFO] Resuming a workflow that has expired: %q", metacluster.ID)
+			log.Printf("[INFO] Resuming an argo workflow that has expired: %q", workflow.GetName())
 			_, err = s.argoWorkflowsClient.ResumeWorkflow(s.argoClientCtx, &workflowpkg.WorkflowResumeRequest{
 				Name:      workflow.GetName(),
 				Namespace: s.workflowNamespace,
 			})
 			if err != nil {
-				log.Printf("[WARN] failed to resume workflow %q: %v", metacluster.ID, err)
+				log.Printf("[WARN] failed to resume argo workflow %q: %v", workflow.GetName(), err)
 			}
 		}
 	}
