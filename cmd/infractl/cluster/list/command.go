@@ -16,8 +16,11 @@ $ infractl list
 # List your clusters, including ones that have expired.
 $ infractl list --expired
 
-# List everyone's' clusters.
-$ infractl list --all`
+# List everyone's clusters.
+$ infractl list --all
+
+# List clusters whose name matches a prefix.
+$ infractl list --prefix=<match>`
 
 // Command defines the handler for infractl list.
 func Command() *cobra.Command {
@@ -25,7 +28,7 @@ func Command() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "list",
 		Short:   "List clusters",
-		Long:    "List the available clusters",
+		Long:    "List the infra clusters",
 		Example: examples,
 		Args:    common.ArgsWithHelp(cobra.ExactArgs(0)),
 		RunE:    common.WithGRPCHandler(run),
@@ -33,16 +36,19 @@ func Command() *cobra.Command {
 
 	cmd.Flags().Bool("all", false, "include clusters not owned by you")
 	cmd.Flags().Bool("expired", false, "include expired clusters")
+	cmd.Flags().String("prefix", "", "include clusters whose names matches this prefix")
 	return cmd
 }
 
 func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []string) (common.PrettyPrinter, error) {
 	includeAll := common.MustBool(cmd.Flags(), "all")
 	includeExpired := common.MustBool(cmd.Flags(), "expired")
+	prefix, _ := cmd.Flags().GetString("prefix")
 
 	req := v1.ClusterListRequest{
 		All:     includeAll,
 		Expired: includeExpired,
+		Prefix:  prefix,
 	}
 
 	resp, err := v1.NewClusterServiceClient(conn).List(ctx, &req)

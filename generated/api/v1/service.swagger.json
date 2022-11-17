@@ -69,6 +69,13 @@
             "required": false,
             "type": "boolean",
             "format": "boolean"
+          },
+          {
+            "name": "prefix",
+            "description": "match cluster names to this prefix.",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [

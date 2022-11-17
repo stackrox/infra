@@ -170,21 +170,25 @@ func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) 
 	// Loop over all of the workflows, and keep only the ones that match our
 	// request criteria.
 	for _, workflow := range workflowList.Items {
-		metacluster, err := s.metaClusterFromWorkflow(workflow)
-		if err != nil {
-			log.Printf("[ERROR] Failed to convert argo workflow to infra meta-cluster: %q, %v", workflow.Name, err)
-			continue
-		}
-
 		// This cluster is expired, and we did not request to include expired
 		// clusters.
-		if !request.Expired && metacluster.Expired {
+		if !request.Expired && isWorkflowExpired(workflow) {
 			continue
 		}
 
 		// This cluster is not ours, and we did not request to include all
 		// clusters.
-		if !request.All && metacluster.Owner != email {
+		if !request.All && GetOwner(&workflow) != email {
+			continue
+		}
+
+		if request.Prefix != "" && !strings.HasPrefix(getClusterIDFromWorkflow(&workflow), request.Prefix) {
+			continue
+		}
+
+		metacluster, err := s.metaClusterFromWorkflow(workflow)
+		if err != nil {
+			log.Printf("[ERROR] Failed to convert argo workflow to infra meta-cluster: %q, %v", workflow.Name, err)
 			continue
 		}
 
