@@ -12,6 +12,7 @@ import (
 	"github.com/stackrox/infra/service/middleware"
 	"google.golang.org/grpc"
 	corev1 "k8s.io/api/core/v1"
+	errorsv1 "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	applyConfigurationv1 "k8s.io/client-go/applyconfigurations/core/v1"
 	k8sv1 "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -48,16 +49,16 @@ func NewStatusService() (middleware.APIService, error) {
 }
 
 func (s *statusImpl) convertConfigMapToInfraStatus(configMap *corev1.ConfigMap) (*v1.InfraStatus, error) {
-	// TODO: this is a bit clumsy. Catching the case that maintenanceActive is undefined
-	maintainer := configMap.Data["maintainer"]
-	maintenanceActiveValue := configMap.Data["maintenanceActive"]
-	if maintenanceActiveValue == "" {
-		maintenanceActiveValue = "false"
+	var maintenanceActive bool
+	maintenanceActiveValue, ok := configMap.Data["maintenanceActive"]
+	if !ok {
+		maintenanceActive = false
 	}
 	maintenanceActive, err := strconv.ParseBool(maintenanceActiveValue)
 	if err != nil {
 		return nil, err
 	}
+	maintainer := configMap.Data["maintainer"]
 
 	return &v1.InfraStatus{
 		Maintainer:        maintainer,
@@ -73,12 +74,30 @@ func (s *statusImpl) convertInfraStatusToConfigMap(infraStatus *v1.InfraStatus) 
 	})
 }
 
+func (s *statusImpl) createEmptyConfigMap(ctx context.Context) (*v1.InfraStatus, error) {
+	emptyInfraStatus := &v1.InfraStatus{}
+	configMap := s.convertInfraStatusToConfigMap(emptyInfraStatus)
+	_, err := s.k8sConfigMapClient.Apply(ctx, configMap, metav1.ApplyOptions{FieldManager: "infra"})
+	if err != nil {
+		return nil, err
+	}
+	return emptyInfraStatus, nil
+}
+
 // GetStatus shows infra maintenance status.
 func (s *statusImpl) GetStatus(ctx context.Context, _ *empty.Empty) (*v1.InfraStatus, error) {
 	configMap, err := s.k8sConfigMapClient.Get(ctx, s.infraStatusName, metav1.GetOptions{})
 	if err != nil {
-		// if err = doesn't exist, create empty, like in ResetStatus
-		return nil, err
+		if errorsv1.IsNotFound(err) {
+			infraStatus, err := s.createEmptyConfigMap(ctx)
+			if err != nil {
+				return nil, err
+			}
+			log.Println("Initialized infra status lazily")
+			return infraStatus, nil
+		} else {
+			return nil, err
+		}
 	}
 	infraStatus, err := s.convertConfigMapToInfraStatus(configMap)
 	if err != nil {
@@ -99,14 +118,12 @@ func (s *statusImpl) SetStatus(ctx context.Context, infraStatus *v1.InfraStatus)
 }
 
 func (s *statusImpl) ResetStatus(ctx context.Context, _ *empty.Empty) (*v1.InfraStatus, error) {
-	emptyInfraStatus := &v1.InfraStatus{}
-	configMap := s.convertInfraStatusToConfigMap(emptyInfraStatus)
-	_, err := s.k8sConfigMapClient.Apply(ctx, configMap, metav1.ApplyOptions{FieldManager: "infra"})
+	infraStatus, err := s.createEmptyConfigMap(ctx)
 	if err != nil {
 		return nil, err
 	}
 	log.Println("Status was reset")
-	return emptyInfraStatus, nil
+	return infraStatus, nil
 }
 
 // Access configures access for this service.
