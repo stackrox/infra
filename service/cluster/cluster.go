@@ -594,6 +594,7 @@ func (s *clusterImpl) getMostRecentArgoWorkflowFromClusterID(clusterID string) (
 func (s *clusterImpl) cleanupExpiredClusters() {
 	for ; ; time.Sleep(resumeExpiredClusterInterval) {
 		start := time.Now()
+
 		workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
 			Namespace: s.workflowNamespace,
 		})
@@ -620,6 +621,7 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 				log.Printf("[WARN] failed to resume argo workflow %q: %v", workflow.GetName(), err)
 			}
 		}
+
 		if time.Since(start) > loopDurationWarning {
 			log.Printf("[WARN] Expire loop took %s", time.Since(start).String())
 		}
@@ -735,6 +737,7 @@ func (s *clusterImpl) getLogs(ctx context.Context, node v1alpha1.NodeStatus) *v1
 func (s *clusterImpl) startSlackCheck() {
 	for ; ; time.Sleep(slackCheckInterval) {
 		start := time.Now()
+
 		workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
 			Namespace: s.workflowNamespace,
 		})
@@ -746,6 +749,7 @@ func (s *clusterImpl) startSlackCheck() {
 		for _, workflow := range workflowList.Items {
 			s.slackCheckWorkflow(workflow)
 		}
+
 		if time.Since(start) > loopDurationWarning {
 			log.Printf("[WARN] Slack loop took %s", time.Since(start).String())
 		}
