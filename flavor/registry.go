@@ -26,11 +26,13 @@ type pair struct {
 
 // Registry represents the set of all configured flavors.
 type Registry struct {
-	flavors                     map[string]pair
-	defaultFlavor               string
-	argoWorkflowTemplatesClient workflowtemplatepkg.WorkflowTemplateServiceClient
-	argoClientCtx               context.Context
-	workflowTemplateNamespace   string
+	flavors                        map[string]pair
+	defaultFlavor                  string
+	argoWorkflowTemplatesClient    workflowtemplatepkg.WorkflowTemplateServiceClient
+	argoClientCtx                  context.Context
+	workflowTemplateNamespace      string
+	workflowTemplateCache          map[string]*v1alpha1.WorkflowTemplate
+	workflowTemplateCacheTimestamp int64
 }
 
 // Flavors returns a sorted list of all registered flavors.
