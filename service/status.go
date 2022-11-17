@@ -106,6 +106,7 @@ func (s *statusImpl) GetStatus(ctx context.Context, _ *empty.Empty) (*v1.InfraSt
 	return infraStatus, nil
 }
 
+// SetStatus activates maintenance and sets the maintainer to the user from the context
 func (s *statusImpl) SetStatus(ctx context.Context, infraStatus *v1.InfraStatus) (*v1.InfraStatus, error) {
 	configMap := s.convertInfraStatusToConfigMap(infraStatus)
 
@@ -117,6 +118,7 @@ func (s *statusImpl) SetStatus(ctx context.Context, infraStatus *v1.InfraStatus)
 	return infraStatus, nil
 }
 
+// ResetStatus sets the maintenance active to false and clears the maintainer.
 func (s *statusImpl) ResetStatus(ctx context.Context, _ *empty.Empty) (*v1.InfraStatus, error) {
 	infraStatus, err := s.createEmptyInfraStatus(ctx)
 	if err != nil {
