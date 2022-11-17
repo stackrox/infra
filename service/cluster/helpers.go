@@ -14,7 +14,7 @@ import (
 	"github.com/stackrox/infra/slack"
 )
 
-// clusterFromWorkflow converts an Argo workflow into a cluster.
+// clusterFromWorkflow converts an Argo workflow into an infra cluster.
 func clusterFromWorkflow(workflow v1alpha1.Workflow) *v1.Cluster {
 	clusterID := GetClusterID(&workflow)
 	if clusterID == "" {
@@ -71,8 +71,8 @@ type artifactData struct {
 	Data        []byte
 }
 
-// clusterFromWorkflow converts an Argo workflow into a cluster with
-// additional, non-cluster, metadata.
+// metaClusterFromWorkflow() converts an Argo workflow into an infra cluster
+// with additional, non-cluster, metadata.
 func (s *clusterImpl) metaClusterFromWorkflow(workflow v1alpha1.Workflow) (*metaCluster, error) {
 	cluster := clusterFromWorkflow(workflow)
 	expired := isWorkflowExpired(workflow)

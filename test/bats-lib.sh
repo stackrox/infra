@@ -36,5 +36,5 @@ delete_all_workflows_by_flavor() {
 
 diag() {
   # shellcheck disable=SC2001
-  echo "$@" | sed -e 's/^/# /' >&3 ;
+  echo "$(date '+%H:%M:%S') " "$@" | sed -e 's/^/# /' >&3 ;
 }

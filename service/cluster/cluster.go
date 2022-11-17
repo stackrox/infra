@@ -331,12 +331,12 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		case v1.Status_FAILED, v1.Status_FINISHED:
 			// It should be ok to reuse failed cluster IDs.
 			log.Printf("[INFO] An existing completed argo workflow %q exists for infra cluster %q in state %s",
-				existingWorkflow.GetName(), clusterID, existingWorkflow.Status.String())
+				existingWorkflow.GetName(), clusterID, existingWorkflow.Status.Phase)
 
 		default:
 			log.Printf(
 				"[WARN] Create failed due to an existing busy argo workflow %q exists for infra cluster ID %q in state %s",
-				existingWorkflow.GetName(), clusterID, existingWorkflow.Status.String(),
+				existingWorkflow.GetName(), clusterID, existingWorkflow.Status.Phase,
 			)
 			return nil, status.Errorf(
 				codes.AlreadyExists,
@@ -560,9 +560,7 @@ func (s *clusterImpl) RegisterServiceHandler(ctx context.Context, mux *runtime.S
 }
 
 func (s *clusterImpl) getMostRecentArgoWorkflowFromClusterID(clusterID string) (*v1alpha1.Workflow, error) {
-	listOpts := &metav1.ListOptions{
-		Limit: 1,
-	}
+	listOpts := &metav1.ListOptions{}
 	labelSelector := labels.NewSelector()
 	req, _ := labels.NewRequirement(labelClusterID, selection.Equals, []string{clusterID})
 	labelSelector = labelSelector.Add(*req)
@@ -576,7 +574,7 @@ func (s *clusterImpl) getMostRecentArgoWorkflowFromClusterID(clusterID string) (
 		log.Printf("[ERROR] Failed to list workflows: %v", err)
 		return nil, err
 	}
-	if len(workflowList.Items) == 1 {
+	if len(workflowList.Items) >= 1 {
 		// Current behaviour - the cluster ID exists as a workflow label
 		return &workflowList.Items[0], nil
 	}
