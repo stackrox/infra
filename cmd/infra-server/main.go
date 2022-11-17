@@ -45,7 +45,7 @@ func mainCmd() error {
 		return nil
 	}
 
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	log.SetFlags(log.LstdFlags | log.Lshortfile | log.Lmicroseconds)
 	// Use stdout so that GCP does not view all logs as severity ERROR.
 	log.SetOutput(os.Stdout)
 
