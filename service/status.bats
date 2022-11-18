@@ -17,7 +17,7 @@ setup_file() {
   delete_status_configmap
 }
 
-@test "reset returns no active maintenance" {
+@test "status reset returns no active maintenance" {
   status="$(infractl status reset --json | jq -r '.Status')"
   assert_success
   assert_equal "$status" "{}"
@@ -26,7 +26,7 @@ setup_file() {
   assert_output --partial "[INFO] Status was reset"
 }
 
-@test "set returns active maintenance with maintainer" {
+@test "status set returns active maintenance with maintainer" {
   whoami="$(infractl whoami --json | jq -r '.Principal.ServiceAccount.Email')"
   status="$(infractl status set --json | jq -r '.Status')"
   maintenanceActive="$(echo "$status" | jq -r '.MaintenanceActive')"
@@ -39,7 +39,7 @@ setup_file() {
   assert_output --partial "[INFO] New Status was set by maintainer $maintainer"
 }
 
-@test "get returns no active maintenance after lazy initialization" {
+@test "status get returns no active maintenance after lazy initialization" {
     delete_status_configmap
     status="$(infractl status get --json | jq -r '.Status')"
     assert_success
