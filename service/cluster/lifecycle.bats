@@ -5,7 +5,7 @@
 # Notes:
 # These tests can run in parallel (bats --jobs #).
 # The 5 second create/destroy times are typically longer due to argo container
-# overhead. Hence the need for a 40 second lifespan - to test the workflow enters
+# overhead. Hence the need for a 30 second lifespan - to test the workflow enters
 # the READY state and does not move to DESTROYING before that is detected. Overall
 # run time is typically < 60 seconds.
 # If you make changes, run a repeat look to get confidence e.g.:
@@ -94,40 +94,4 @@ setup_file() {
 
 infractl() {
   "$ROOT"/bin/infractl -e localhost:8443 -k "$@"
-}
-
-assert_status_becomes() {
-  id="$1"
-  desired_status="$2"
-
-  tries=0
-  limit=40
-  while [[ "$((tries++))" -le "$limit" ]]; do
-    status="$(infractl get "$id" --json | jq -r '.Status')"
-    # diag "$id $status"
-    assert_success
-    if [[ "$status" == "$desired_status" ]]; then
-      break
-    fi
-    if [[ "$tries" -eq "$limit" ]]; then
-      assert_equal "$status" "$desired_status"
-    fi
-    sleep 1
-  done
-}
-
-assert_status_remains() {
-  id="$1"
-  status="$2"
-  try_for="$3"
-
-  tries=0
-  limit="$try_for"
-  while [[ "$((tries++))" -le "$limit" ]]; do
-    currently="$(infractl get "$id" --json | jq -r '.Status')"
-    # diag "$id $currently"
-    assert_success
-    assert_equal "$status" "$currently"
-    sleep 1
-  done
 }
