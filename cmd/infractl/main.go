@@ -32,7 +32,7 @@ func main() {
 	}
 
 	statusCommand := &cobra.Command{
-		Use:   "status get|set",
+		Use:   "status get|set|reset",
 		Short: "Modify or retrieve Server status information",
 		Long:  "Get, set or reset server status",
 	}
