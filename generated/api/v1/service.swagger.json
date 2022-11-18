@@ -72,7 +72,7 @@
           },
           {
             "name": "prefix",
-            "description": "match cluster names to this prefix.",
+            "description": "list clusters whose ID matches this prefix.",
             "in": "query",
             "required": false,
             "type": "string"

@@ -998,7 +998,7 @@ type ClusterListRequest struct {
 	// expired indicates that expired clusters should be returned, not just the
 	// ones that are launching/ready.
 	Expired bool `protobuf:"varint,2,opt,name=expired,proto3" json:"expired,omitempty"`
-	// match cluster names to this prefix
+	// list clusters whose ID matches this prefix.
 	Prefix               string   `protobuf:"bytes,3,opt,name=prefix,proto3" json:"prefix,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
