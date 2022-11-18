@@ -419,4 +419,3 @@ update-version:
 	@perl -p -i -e 's#image: (${image_regex}):(.*)#image: \1:${image_version}#g' \
 		./chart/infra-server/static/*.yaml
 	@git diff --name-status ./chart/infra-server/static/*.yaml
-
