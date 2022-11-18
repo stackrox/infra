@@ -286,7 +286,7 @@ message ClusterListRequest {
     // ones that are launching/ready.
     bool expired = 2;
 
-    // match cluster names to this prefix
+    // list clusters whose ID matches this prefix.
     string prefix = 3;
 }
 

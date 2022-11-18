@@ -48,6 +48,9 @@ func (r *Registry) addWorkflowTemplates(results []v1.Flavor) []v1.Flavor {
 }
 
 func (r *Registry) getPairFromWorkflowTemplate(id string) (*v1.Flavor, *v1alpha1.Workflow) {
+	// This short lived cache is useful for performance of list operations when
+	// there are large numbers of workflows whose flavor details need to be
+	// resolved. The GetWorkflowTemplate() call can be relatively expensive.
 	nowTimestamp := time.Now().Unix()
 	if r.workflowTemplateCacheTimestamp != nowTimestamp {
 		// invalidate the short lived templace cache

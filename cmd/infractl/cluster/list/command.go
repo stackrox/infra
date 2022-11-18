@@ -28,7 +28,7 @@ func Command() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "list",
 		Short:   "List clusters",
-		Long:    "List the infra clusters",
+		Long:    "List the available clusters",
 		Example: examples,
 		Args:    common.ArgsWithHelp(cobra.ExactArgs(0)),
 		RunE:    common.WithGRPCHandler(run),
@@ -36,7 +36,7 @@ func Command() *cobra.Command {
 
 	cmd.Flags().Bool("all", false, "include clusters not owned by you")
 	cmd.Flags().Bool("expired", false, "include expired clusters")
-	cmd.Flags().String("prefix", "", "include clusters whose names matches this prefix")
+	cmd.Flags().String("prefix", "", "only include clusters whose names matches this prefix")
 	return cmd
 }
 

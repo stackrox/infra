@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-# Tests cluster list behaviour.
+# Tests cluster list behavior.
 
 # shellcheck disable=SC1091
 source "$BATS_TEST_DIRNAME/../../test/bats-lib.sh"
