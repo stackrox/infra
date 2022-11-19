@@ -4,7 +4,19 @@
 
 To work with either of the clusters in `project=stackrox-infra` you will need to either be a member of the `team-automation` group or have someone add you as a project owner.
 
-### [Development (Staging)](https://console.cloud.google.com/kubernetes/clusters/details/us-west2/infra-development?project=stackrox-infra&organizationId=847401270788)
+### [Staging (dev.infra.rox.systems)](https://console.cloud.google.com/kubernetes/clusters/details/us-west2/infra-development?project=stackrox-infra&organizationId=847401270788)
+
+When not in use, this cluster is resized to 0.
+
+```
+gcloud container clusters --project=stackrox-infra --zone=us-west2 resize infra-development --num-nodes=0
+```
+
+To bring it back for development:
+
+```
+gcloud container clusters --project=stackrox-infra --zone=us-west2 resize infra-development --num-nodes=4
+```
 
 To connect to this cluster using kubectl, run:
 
@@ -94,7 +106,7 @@ correct tooling installed with:
 
 Use the `deploy` Github action to update development or production environments with a new release.
 
-### Development/Staging
+### Staging/(dev.infra.rox.systems)
 
 To render a copy of the charts (for inspection), run:
 
@@ -130,12 +142,12 @@ After deploying the service, browse to the appropriate endpoint to verify that y
 
 | Environment | URL |
 | --- | --- |
-| Development | http://dev.infra.rox.systems |
+| Staging | http://dev.infra.rox.systems |
 | Production | https://infra.rox.systems |
 
 Download a copy of `infractl` and export your token. Verify API connectivity:
 
 | Environment | Command |
 | --- | --- |
-| Development | `infractl -e dev.infra.rox.systems:443 whoami` |
+| Staging | `infractl -e dev.infra.rox.systems:443 whoami` |
 | Production | `infractl whoami` |
