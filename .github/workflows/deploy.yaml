@@ -61,7 +61,7 @@ jobs:
         uses: slackapi/slack-github-action@v1.23.0
         with:
           # channel-id: CVANK5K5W #infra
-          channel-id: D040QFUM2TE #myself
+          channel-id: C03KSV3N6N8 #test-release-automation
           payload: >-
             {
                 "blocks": [
