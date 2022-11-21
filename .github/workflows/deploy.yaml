@@ -63,12 +63,14 @@ jobs:
           # channel-id: CVANK5K5W #infra
           channel-id: D040QFUM2TE #myself
           payload: >-
-            { "blocks": [
-              { "type": "section", "text": {
-                "type": "mrkdwn",
-                "text":
-                    ":ship::tada: Infra (${{ inputs.environment }}) was updated to ${{ inputs.version }}.
-                    To see the latest changes, click <${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ inputs.version }}|here>."
-                }
-              },
-            ]}
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":ship::tada: Infra (${{ inputs.environment }}) was updated to ${{ inputs.version }}. To see the latest changes, click <${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ inputs.version }}|here>."
+                  },
+                },
+              ]
+            }
