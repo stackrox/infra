@@ -33,17 +33,32 @@ func GetK8sWorkflowsClient(workflowNamespace string) (workflowv1.WorkflowInterfa
 
 // GetK8sPodsClient provides access to pods
 func GetK8sPodsClient(workflowNamespace string) (k8sv1.PodInterface, error) {
+	client, err := getGenericK8sClient()
+	if err != nil {
+		return nil, err
+	}
+	return client.CoreV1().Pods(workflowNamespace), nil
+}
+
+// GetK8sConfigMapClient provides access to ConfigMaps
+func GetK8sConfigMapClient(namespace string) (k8sv1.ConfigMapInterface, error) {
+	client, err := getGenericK8sClient()
+	if err != nil {
+		return nil, err
+	}
+	return client.CoreV1().ConfigMaps(namespace), nil
+}
+
+func getGenericK8sClient() (*kubernetes.Clientset, error) {
 	config, err := restConfig()
 	if err != nil {
 		return nil, err
 	}
-
 	client, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		return nil, err
 	}
-
-	return client.CoreV1().Pods(workflowNamespace), nil
+	return client, nil
 }
 
 func restConfig() (*rest.Config, error) {

@@ -449,3 +449,36 @@ service CliService {
         };
     }
 }
+
+message InfraStatus {
+    // MaintenanceActive is an indicator whether a maintenance is ongoing.
+    bool MaintenanceActive = 1;
+    // Maintainer is the email of the person currently doing maintenance.
+    string Maintainer      = 2;
+}
+
+// InfraStatusService provides information on the status of the server.
+service InfraStatusService {
+
+    // GetStatus gets the maintenance
+    rpc GetStatus (google.protobuf.Empty) returns (InfraStatus) {
+        option (google.api.http) = {
+            get: "/v1/status"
+        };
+    }
+
+    // ResetStatus resets the maintenance
+    rpc ResetStatus (google.protobuf.Empty) returns (InfraStatus) {
+        option (google.api.http) = {
+            delete: "/v1/status"
+        };
+    }
+
+    // SetStatus sets the maintenance
+    rpc SetStatus (InfraStatus) returns (InfraStatus) {
+        option (google.api.http) = {
+            put: "/v1/status"
+        };
+    }
+
+}

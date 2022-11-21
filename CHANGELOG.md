@@ -13,6 +13,7 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 - Default names for other contexts. When `infractl create` is run without
   specifying a NAME one will be generated based on user initials, date and a
   counter to ensure uniqueness e.g. jb-10-31-1.
+- `infractl status` command manages maintenance status of an infra deployment to influence Continuous Deployment.
 
 ## [0.5.3]
 
