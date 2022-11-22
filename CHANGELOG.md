@@ -6,6 +6,8 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+## [0.6.0]
+
 - Get a QA demo with just `infractl create qa-demo`. When `infractl create
   qa-demo` is run without specifying a NAME in a stackrox/stackrox repo context
   a NAME will be generated based on user initials and the most recent commit.
