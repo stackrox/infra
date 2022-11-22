@@ -69,6 +69,13 @@
             "required": false,
             "type": "boolean",
             "format": "boolean"
+          },
+          {
+            "name": "prefix",
+            "description": "list clusters whose ID matches this prefix.",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [

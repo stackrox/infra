@@ -5,6 +5,7 @@ import (
 	"context"
 	"log"
 	"strings"
+	"time"
 
 	argov3client "github.com/argoproj/argo-workflows/v3/cmd/argo/commands/client"
 	workflowtemplatepkg "github.com/argoproj/argo-workflows/v3/pkg/apiclient/workflowtemplate"
@@ -47,14 +48,28 @@ func (r *Registry) addWorkflowTemplates(results []v1.Flavor) []v1.Flavor {
 }
 
 func (r *Registry) getPairFromWorkflowTemplate(id string) (*v1.Flavor, *v1alpha1.Workflow) {
-	template, err := r.argoWorkflowTemplatesClient.GetWorkflowTemplate(r.argoClientCtx, &workflowtemplatepkg.WorkflowTemplateGetRequest{
-		Name:      id,
-		Namespace: r.workflowTemplateNamespace,
-	})
-	if err != nil {
-		log.Printf("[WARN] Failed to get an argo workflow template: %s, %v", id, err)
-		return nil, nil
+	// This short lived cache is useful for performance of list operations when
+	// there are large numbers of workflows whose flavor details need to be
+	// resolved. The GetWorkflowTemplate() call can be relatively expensive.
+	nowTimestamp := time.Now().Unix()
+	if r.workflowTemplateCacheTimestamp != nowTimestamp {
+		// invalidate the short lived templace cache
+		r.workflowTemplateCache = make(map[string]*v1alpha1.WorkflowTemplate)
+		r.workflowTemplateCacheTimestamp = nowTimestamp
 	}
+
+	if _, found := r.workflowTemplateCache[id]; !found {
+		template, err := r.argoWorkflowTemplatesClient.GetWorkflowTemplate(r.argoClientCtx, &workflowtemplatepkg.WorkflowTemplateGetRequest{
+			Name:      id,
+			Namespace: r.workflowTemplateNamespace,
+		})
+		if err != nil {
+			log.Printf("[WARN] Failed to get an argo workflow template: %s, %v", id, err)
+			return nil, nil
+		}
+		r.workflowTemplateCache[id] = template
+	}
+	template := r.workflowTemplateCache[id]
 
 	workflow := &v1alpha1.Workflow{}
 	workflow.APIVersion = template.APIVersion

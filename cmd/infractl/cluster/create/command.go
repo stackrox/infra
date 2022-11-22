@@ -244,6 +244,7 @@ func avoidConflicts(ctx context.Context, conn *grpc.ClientConn, nameSoFar string
 	req := v1.ClusterListRequest{
 		All:     true,
 		Expired: true,
+		Prefix:  nameSoFar,
 	}
 
 	resp, err := v1.NewClusterServiceClient(conn).List(ctx, &req)

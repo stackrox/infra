@@ -36,6 +36,8 @@ import (
 	"google.golang.org/grpc/status"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apimachinery/pkg/types"
 	k8sv1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
@@ -57,6 +59,9 @@ const (
 
 	// when is a cluster considered near expiration
 	nearExpiry = 30 * time.Minute
+
+	// warn when loops take too long
+	loopDurationWarning = 5 * time.Second
 
 	// default permissions for downloaded artifacts, this corresponds to -rw-r--r--
 	artifactDefaultMode = 0o644
@@ -103,6 +108,7 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSo
 	argoWorkflowsClient := argoClient.NewWorkflowServiceClient()
 
 	if os.Getenv("TEST_MODE") == "true" {
+		log.Printf("[INFO] infra-server is running in test mode")
 		resumeExpiredClusterInterval = 5 * time.Second
 	}
 
@@ -128,17 +134,14 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSo
 
 // Info implements ClusterService.Info.
 func (s *clusterImpl) Info(ctx context.Context, clusterID *v1.ResourceByID) (*v1.Cluster, error) {
-	workflow, err := s.argoWorkflowsClient.GetWorkflow(s.argoClientCtx, &workflowpkg.WorkflowGetRequest{
-		Name:      clusterID.Id,
-		Namespace: s.workflowNamespace,
-	})
+	workflow, err := s.getMostRecentArgoWorkflowFromClusterID(clusterID.GetId())
 	if err != nil {
 		return nil, err
 	}
 
 	metacluster, err := s.metaClusterFromWorkflow(*workflow)
 	if err != nil {
-		log.Printf("[ERROR] Failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
+		log.Printf("[ERROR] Failed to convert argo workflow to infra meta-cluster: %q, %v", workflow.Name, err)
 		return nil, err
 	}
 
@@ -167,21 +170,27 @@ func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) 
 	// Loop over all of the workflows, and keep only the ones that match our
 	// request criteria.
 	for _, workflow := range workflowList.Items {
-		metacluster, err := s.metaClusterFromWorkflow(workflow)
-		if err != nil {
-			log.Printf("[ERROR] Failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
-			continue
-		}
+		workflow := workflow
 
 		// This cluster is expired, and we did not request to include expired
 		// clusters.
-		if !request.Expired && metacluster.Expired {
+		if !request.Expired && isWorkflowExpired(workflow) {
 			continue
 		}
 
 		// This cluster is not ours, and we did not request to include all
 		// clusters.
-		if !request.All && metacluster.Owner != email {
+		if !request.All && GetOwner(&workflow) != email {
+			continue
+		}
+
+		if request.Prefix != "" && !strings.HasPrefix(getClusterIDFromWorkflow(&workflow), request.Prefix) {
+			continue
+		}
+
+		metacluster, err := s.metaClusterFromWorkflow(workflow)
+		if err != nil {
+			log.Printf("[ERROR] Failed to convert argo workflow to infra meta-cluster: %q, %v", workflow.Name, err)
 			continue
 		}
 
@@ -226,7 +235,18 @@ func formatAnnotationPatch(annotationKey string, annotationValue string) ([]byte
 
 // Lifespan implements ClusterService.Lifespan.
 func (s *clusterImpl) Lifespan(ctx context.Context, req *v1.LifespanRequest) (*duration.Duration, error) {
-	log.Printf("[INFO] Received a lifespan update request for %q, %s %s", req.Id, req.Method.String(), req.Lifespan.String())
+	log.Printf("[INFO] Received a lifespan update request for infra cluster %q, %s %s", req.GetId(), req.Method.String(), req.Lifespan.String())
+
+	workflow, err := s.getMostRecentArgoWorkflowFromClusterID(req.GetId())
+	if err != nil {
+		return nil, err
+	}
+
+	return s.lifespan(ctx, req, workflow)
+}
+
+func (s *clusterImpl) lifespan(ctx context.Context, req *v1.LifespanRequest, workflow *v1alpha1.Workflow) (*duration.Duration, error) {
+	log.Printf("[INFO] Will apply a lifespan update to argo workflow %q, %s %s", workflow.GetName(), req.Method.String(), req.Lifespan.String())
 
 	lifespanRequest, _ := ptypes.Duration(req.Lifespan)
 	lifespanCurrent := time.Duration(0)
@@ -236,13 +256,6 @@ func (s *clusterImpl) Lifespan(ctx context.Context, req *v1.LifespanRequest) (*d
 	// need to know the current lifespan. Get the named workflow to obtain said
 	// current lifespan.
 	if req.Method != v1.LifespanRequest_REPLACE {
-		workflow, err := s.argoWorkflowsClient.GetWorkflow(s.argoClientCtx, &workflowpkg.WorkflowGetRequest{
-			Name:      req.Id,
-			Namespace: s.workflowNamespace,
-		})
-		if err != nil {
-			return nil, err
-		}
 		lifespanCurrent, _ = ptypes.Duration(GetLifespan(workflow))
 	}
 
@@ -268,8 +281,9 @@ func (s *clusterImpl) Lifespan(ctx context.Context, req *v1.LifespanRequest) (*d
 	}
 
 	// Submit the patch.
-	workflow, err := s.k8sWorkflowsClient.Patch(ctx, req.Id, types.JSONPatchType, payloadBytes, metav1.PatchOptions{})
+	_, err = s.k8sWorkflowsClient.Patch(ctx, workflow.GetName(), types.JSONPatchType, payloadBytes, metav1.PatchOptions{})
 	if err != nil {
+		log.Printf("[ERROR] An error occurred updating the argo workflow %q, %v", workflow.GetName(), err)
 		return nil, err
 	}
 
@@ -311,45 +325,33 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 	}
 	workflow.Spec.Arguments.Parameters = workflowParams
 
-	// Use the user supplied name as the Argo workflow name.
-	if name, ok := req.Parameters["name"]; ok {
-		workflow.ObjectMeta.Name = name
+	// Use the user supplied name as the root of Argo workflow name and the Infra cluster Id.
+	clusterID, ok := req.Parameters["name"]
+	if ok {
+		workflow.ObjectMeta.GenerateName = clusterID + "-"
 	} else {
 		return nil, fmt.Errorf("parameter 'name' was not provided")
 	}
 
-	// Make sure there is no running workflow with the same name
-	workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
-		Namespace: s.workflowNamespace,
-	})
-	if err != nil {
-		return nil, err
-	}
+	// Make sure there is no running argo workflow for infra cluster with the same ID
+	existingWorkflow, _ := s.getMostRecentArgoWorkflowFromClusterID(clusterID)
+	if existingWorkflow != nil {
+		switch workflowStatus(existingWorkflow.Status) {
+		case v1.Status_FAILED, v1.Status_FINISHED:
+			// It is ok to reuse a cluster ID from a failed or finished workflow.
+			log.Printf("[INFO] An existing completed argo workflow %q exists for infra cluster %q in state %s",
+				existingWorkflow.GetName(), clusterID, existingWorkflow.Status.Phase)
 
-	for _, existing := range workflowList.Items {
-		if workflow.ObjectMeta.Name == existing.ObjectMeta.Name {
-			switch workflowStatus(existing.Status) {
-			case v1.Status_FAILED, v1.Status_FINISHED:
-				log.Printf(
-					"[WARN] Force deleting a workflow so that its name can be reused (%v/%s)",
-					existing.ObjectMeta.Name, existing.Status.String(),
-				)
-				if err := s.forceDeleteWorkflow(workflow); err == nil {
-					break
-				}
-				fallthrough
-
-			default:
-				log.Printf(
-					"[WARN] Create failed, cannot use the name of a running workflow (%v/%s)",
-					existing.ObjectMeta.Name, existing.Status.String(),
-				)
-				return nil, status.Errorf(
-					codes.AlreadyExists,
-					"An infra workflow named %v already exists in state %s.",
-					existing.ObjectMeta.Name, workflowStatus(existing.Status).String(),
-				)
-			}
+		default:
+			log.Printf(
+				"[WARN] Create failed due to an existing busy argo workflow %q exists for infra cluster ID %q in state %s",
+				existingWorkflow.GetName(), clusterID, existingWorkflow.Status.Phase,
+			)
+			return nil, status.Errorf(
+				codes.AlreadyExists,
+				"An infra cluster ID %q already exists in state %s.",
+				clusterID, workflowStatus(existingWorkflow.Status).String(),
+			)
 		}
 	}
 
@@ -381,7 +383,11 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		annotationSlackDMKey:     slackDM,
 	})
 
-	log.Printf("[INFO] Will create a %q cluster %q for %s", flav.ID, workflow.ObjectMeta.Name, owner)
+	workflow.SetLabels(map[string]string{
+		labelClusterID: clusterID,
+	})
+
+	log.Printf("[INFO] Will create a %q infra cluster %q for %s", flav.ID, clusterID, owner)
 
 	created, err := s.argoWorkflowsClient.CreateWorkflow(s.argoClientCtx, &workflowpkg.WorkflowCreateRequest{
 		Workflow:  &workflow,
@@ -392,15 +398,14 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		return nil, err
 	}
 
-	return &v1.ResourceByID{Id: created.Name}, nil
+	log.Printf("[INFO] Created an argo workflow %q for infra cluster %q", created.GetName(), clusterID)
+
+	return &v1.ResourceByID{Id: clusterID}, nil
 }
 
 // Artifacts implements ClusterService.Artifacts.
 func (s *clusterImpl) Artifacts(ctx context.Context, clusterID *v1.ResourceByID) (*v1.ClusterArtifacts, error) {
-	workflow, err := s.argoWorkflowsClient.GetWorkflow(s.argoClientCtx, &workflowpkg.WorkflowGetRequest{
-		Name:      clusterID.Id,
-		Namespace: s.workflowNamespace,
-	})
+	workflow, err := s.getMostRecentArgoWorkflowFromClusterID(clusterID.GetId())
 	if err != nil {
 		return nil, err
 	}
@@ -474,7 +479,12 @@ func (s *clusterImpl) Access() map[string]middleware.Access {
 }
 
 func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.Empty, error) {
-	log.Printf("[INFO] Received a delete request for %q", req.Id)
+	log.Printf("[INFO] Received a delete request for infra cluster %q", req.Id)
+
+	workflow, err := s.getMostRecentArgoWorkflowFromClusterID(req.GetId())
+	if err != nil {
+		return &empty.Empty{}, err
+	}
 
 	// Set lifespan to zero so the workflow is examined in cleanupExpiredClusters().
 	lifespanReq := &v1.LifespanRequest{
@@ -483,17 +493,17 @@ func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.
 		Method:   v1.LifespanRequest_REPLACE,
 	}
 
-	if _, err := s.Lifespan(ctx, lifespanReq); err != nil {
-		log.Printf("[ERROR] failed to set lifespan to 0 for workflow %q: %v", req.Id, err)
+	if _, err := s.lifespan(ctx, lifespanReq, workflow); err != nil {
+		log.Printf("[ERROR] failed to set lifespan to 0 for argo workflow %q: %v", workflow.GetName(), err)
 		return nil, err
 	}
 
-	log.Printf("[INFO] Resuming workflow %q", req.Id)
+	log.Printf("[INFO] Resuming argo workflow %q", workflow.GetName())
 
 	// Resume the workflow so that it may move to the destroy phase without
 	// waiting for cleanupExpiredClusters() to kick in.
-	_, err := s.argoWorkflowsClient.ResumeWorkflow(s.argoClientCtx, &workflowpkg.WorkflowResumeRequest{
-		Name:      req.Id,
+	_, err = s.argoWorkflowsClient.ResumeWorkflow(s.argoClientCtx, &workflowpkg.WorkflowResumeRequest{
+		Name:      workflow.GetName(),
 		Namespace: s.workflowNamespace,
 	})
 	if err != nil {
@@ -504,10 +514,7 @@ func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.
 }
 
 func (s *clusterImpl) Logs(ctx context.Context, clusterID *v1.ResourceByID) (*v1.LogsResponse, error) {
-	workflow, err := s.argoWorkflowsClient.GetWorkflow(s.argoClientCtx, &workflowpkg.WorkflowGetRequest{
-		Name:      clusterID.Id,
-		Namespace: s.workflowNamespace,
-	})
+	workflow, err := s.getMostRecentArgoWorkflowFromClusterID(clusterID.GetId())
 	if err != nil {
 		return nil, err
 	}
@@ -561,30 +568,39 @@ func (s *clusterImpl) RegisterServiceHandler(ctx context.Context, mux *runtime.S
 	return v1.RegisterClusterServiceHandler(ctx, mux, conn)
 }
 
-func (s *clusterImpl) forceDeleteWorkflow(workflow v1alpha1.Workflow) error {
-	var gracePeriod int64
-	deletePolicy := metav1.DeletePropagationForeground
-	_, err := s.argoWorkflowsClient.DeleteWorkflow(s.argoClientCtx, &workflowpkg.WorkflowDeleteRequest{
-		Name:      workflow.Name,
-		Namespace: s.workflowNamespace,
-		DeleteOptions: &metav1.DeleteOptions{
-			GracePeriodSeconds: &gracePeriod,
-			PropagationPolicy:  &deletePolicy,
-		},
+func (s *clusterImpl) getMostRecentArgoWorkflowFromClusterID(clusterID string) (*v1alpha1.Workflow, error) {
+	listOpts := &metav1.ListOptions{}
+	labelSelector := labels.NewSelector()
+	req, _ := labels.NewRequirement(labelClusterID, selection.Equals, []string{clusterID})
+	labelSelector = labelSelector.Add(*req)
+	listOpts.LabelSelector = labelSelector.String()
+
+	workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
+		Namespace:   s.workflowNamespace,
+		ListOptions: listOpts,
 	})
 	if err != nil {
-		log.Printf("[ERROR] failed to delete workflow %q: %v", workflow.Name, err)
-		return err
+		log.Printf("[ERROR] Failed to list workflows: %v", err)
+		return nil, err
+	}
+	if len(workflowList.Items) >= 1 {
+		// Current behaviour - the cluster ID exists as a workflow label
+		return &workflowList.Items[0], nil
 	}
 
-	log.Printf("[INFO] deleted workflow %q", workflow.Name)
-	// The delete is not entirely synchronous WRT PVCs so give it 5 seconds
-	time.Sleep(5 * time.Second)
-	return nil
+	log.Printf("[INFO] Could not find an argo workflow to match infra cluster %q by label", clusterID)
+
+	// Prior behaviour - Try to find using the cluster ID mapped to the workflow name
+	return s.argoWorkflowsClient.GetWorkflow(s.argoClientCtx, &workflowpkg.WorkflowGetRequest{
+		Name:      clusterID,
+		Namespace: s.workflowNamespace,
+	})
 }
 
 func (s *clusterImpl) cleanupExpiredClusters() {
 	for ; ; time.Sleep(resumeExpiredClusterInterval) {
+		start := time.Now()
+
 		workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
 			Namespace: s.workflowNamespace,
 		})
@@ -594,28 +610,26 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 		}
 
 		for _, workflow := range workflowList.Items {
-			metacluster, err := s.metaClusterFromWorkflow(workflow)
-			if err != nil {
-				log.Printf("[ERROR] Failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
+			if workflowStatus(workflow.Status) != v1.Status_READY {
 				continue
 			}
 
-			if metacluster.Status != v1.Status_READY {
+			if !isWorkflowExpired(workflow) {
 				continue
 			}
 
-			if !metacluster.Expired {
-				continue
-			}
-
-			log.Printf("[INFO] Resuming a workflow that has expired: %q", metacluster.ID)
+			log.Printf("[INFO] Resuming an argo workflow that has expired: %q", workflow.GetName())
 			_, err = s.argoWorkflowsClient.ResumeWorkflow(s.argoClientCtx, &workflowpkg.WorkflowResumeRequest{
-				Name:      metacluster.ID,
+				Name:      workflow.GetName(),
 				Namespace: s.workflowNamespace,
 			})
 			if err != nil {
-				log.Printf("[WARN] failed to resume workflow %q: %v", metacluster.ID, err)
+				log.Printf("[WARN] failed to resume argo workflow %q: %v", workflow.GetName(), err)
 			}
+		}
+
+		if time.Since(start) > loopDurationWarning {
+			log.Printf("[WARN] Expire loop took %s", time.Since(start).String())
 		}
 	}
 }
@@ -728,6 +742,8 @@ func (s *clusterImpl) getLogs(ctx context.Context, node v1alpha1.NodeStatus) *v1
 
 func (s *clusterImpl) startSlackCheck() {
 	for ; ; time.Sleep(slackCheckInterval) {
+		start := time.Now()
+
 		workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
 			Namespace: s.workflowNamespace,
 		})
@@ -739,10 +755,18 @@ func (s *clusterImpl) startSlackCheck() {
 		for _, workflow := range workflowList.Items {
 			s.slackCheckWorkflow(workflow)
 		}
+
+		if time.Since(start) > loopDurationWarning {
+			log.Printf("[WARN] Slack loop took %s", time.Since(start).String())
+		}
 	}
 }
 
 func (s *clusterImpl) slackCheckWorkflow(workflow v1alpha1.Workflow) {
+	if slack.IsSlackComplete(slack.Status(GetSlack(&workflow))) {
+		return
+	}
+
 	metacluster, err := s.metaClusterFromWorkflow(workflow)
 	if err != nil {
 		log.Printf("[ERROR] Failed to convert workflow to meta-cluster: %q, %v", workflow.Name, err)
@@ -784,9 +808,9 @@ func (s *clusterImpl) slackCheckWorkflow(workflow v1alpha1.Workflow) {
 		}
 
 		// Submit the patch.
-		_, err = s.k8sWorkflowsClient.Patch(context.Background(), metacluster.Cluster.ID, types.JSONPatchType, payloadBytes, metav1.PatchOptions{})
+		_, err = s.k8sWorkflowsClient.Patch(context.Background(), workflow.GetName(), types.JSONPatchType, payloadBytes, metav1.PatchOptions{})
 		if err != nil {
-			log.Printf("[ERROR] Failed to patch Slack annotation for cluster %s: %v", metacluster.Cluster.ID, err)
+			log.Printf("[ERROR] Failed to patch Slack annotation for cluster %s, workflow %q: %v", metacluster.Cluster.ID, workflow.GetName(), err)
 			return
 		}
 	}

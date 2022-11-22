@@ -141,3 +141,9 @@ func FormatSlackMessage(wfStatus v1.Status, clusterIsNearingExpiry bool, slackSt
 		return slackStatus, nil
 	}
 }
+
+// IsSlackComplete once a slack status has reached any of these states it will
+// require no more updates.
+func IsSlackComplete(slackStatus Status) bool {
+	return slackStatus == StatusSkip || slackStatus == StatusFailed || slackStatus == StatusDestroyed
+}
