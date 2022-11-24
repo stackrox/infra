@@ -35,12 +35,9 @@ func checkForVersionDiff(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.
 	}
 
 	clientVersion := buildinfo.All()
-	serverVersion, err := v1.NewVersionServiceClient(conn).GetVersion(ctx, &empty.Empty{})
-	if err != nil {
-		cmd.PrintErrln("---\ncannot retrieve infra versions to compare.\n---")
-		return
-	}
-	if !areLocalVersions(clientVersion, serverVersion) && versionsDoNotMatch(cmd, clientVersion, serverVersion) {
+	serverVersion, _ := v1.NewVersionServiceClient(conn).GetVersion(ctx, &empty.Empty{})
+
+	if serverVersion != nil && !areLocalVersions(clientVersion, serverVersion) && versionsDoNotMatch(cmd, clientVersion, serverVersion) {
 		cmd.PrintErrf("---\ninfractl and infra-server versions are different.\n"+
 			"%s -v- %s\n"+
 			"You can use `infractl cli upgrade` to update.\n---\n",
