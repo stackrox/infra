@@ -25,8 +25,8 @@ func versionsDoNotMatch(cmd *cobra.Command, clientVersion *v1.Version, serverVer
 }
 
 func areLocalVersions(clientVersion *v1.Version, serverVersion *v1.Version) bool {
-	localVersionId := "local"
-	return clientVersion.GetVersion() == localVersionId || serverVersion.GetVersion() == localVersionId
+	localVersionID := "local"
+	return clientVersion.GetVersion() == localVersionID || serverVersion.GetVersion() == localVersionID
 }
 
 func checkForVersionDiff(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command) {
