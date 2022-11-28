@@ -6,6 +6,8 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+- notice CLI users only about minor or major version mismatch (previously also for patch versions).
+
 ## [0.6.0]
 
 - Get a QA demo with just `infractl create qa-demo`. When `infractl create
