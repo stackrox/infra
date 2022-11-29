@@ -104,20 +104,6 @@ jobs:
         with:
           install_components: "gke-gcloud-auth-plugin"
 
-      - name: Install Argo CLI
-        run: |
-          ARGO_VERSION=$(grep "github.com/argoproj/argo-workflows/v3" go.mod | awk '{ print $2 }')
-          curl -LO "https://github.com/argoproj/argo-workflows/releases/download/${ARGO_VERSION}/argo-linux-amd64.gz"
-          gunzip argo-linux-amd64.gz
-          chmod +x argo-linux-amd64
-          mv ./argo-linux-amd64 /usr/local/bin/argo
-          argo version
-
-      - name: Lint Argo workflows
-        # We're linting here, because Argo Lint requires a workflow server :/
-        run: |
-          make argo-workflow-lint
-
       - name: Download production infractl
         uses: stackrox/actions/infra/install-infractl@v1
 
@@ -164,6 +150,20 @@ jobs:
           fi
 
           kill %1
+
+      - name: Install Argo CLI
+        run: |
+          ARGO_VERSION=$(grep "github.com/argoproj/argo-workflows/v3" go.mod | awk '{ print $2 }')
+          curl -LO "https://github.com/argoproj/argo-workflows/releases/download/${ARGO_VERSION}/argo-linux-amd64.gz"
+          gunzip argo-linux-amd64.gz
+          chmod +x argo-linux-amd64
+          mv ./argo-linux-amd64 /usr/local/bin/argo
+          argo version
+
+      - name: Lint Argo workflows
+        # We're linting here, because Argo Lint requires a workflow server :/
+        run: |
+          make argo-workflow-lint
 
       - name: Run e2e tests
         run: |
