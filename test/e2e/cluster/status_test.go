@@ -49,6 +49,8 @@
 //   assert_output --partial "[INFO] Initialized infra status lazily"
 // }
 
+//+ build e2e
+
 package cluster_test
 
 import (
@@ -69,7 +71,7 @@ import (
 
 func PrepareCommand(cmd *cobra.Command) *bytes.Buffer {
 	common.AddCommonFlags(cmd)
-	cmd.SetArgs([]string{"--endpoint=dev.infra.rox.systems:443"})
+	cmd.SetArgs([]string{"--endpoint=localhost:8443"})
 	b := bytes.NewBufferString("")
 	cmd.SetOut(b)
 	return b
@@ -114,4 +116,7 @@ func TestResetReturnsNoActiveMaintenance(t *testing.T) {
 	assert.Contains(t, string(out), "Maintenance active: false")
 	assert.Contains(t, string(out), "Maintainer: ")
 
+	// podLogs, err := GetPodLogs("infra-server-deployment-86dd7fb475-9ljmn", "infra")
+	// assert.NoError(t, err)
+	// assert.Contains(t, podLogs, "[INFO] Initialized infra status lazily")
 }
