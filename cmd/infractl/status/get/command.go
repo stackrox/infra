@@ -13,7 +13,7 @@ import (
 )
 
 const examples = `# Print server status.
-$ infractl status`
+$ infractl status get`
 
 // Command defines the handler for infractl status get.
 func Command() *cobra.Command {
