@@ -1,3 +1,6 @@
+//go:build e2e
+// +build e2e
+
 // #!/usr/bin/env bats
 
 // # shellcheck disable=SC1091
@@ -48,8 +51,6 @@
 //   run kubectl -n infra logs -l app=infra-server
 //   assert_output --partial "[INFO] Initialized infra status lazily"
 // }
-
-//+ build e2e
 
 package cluster_test
 
