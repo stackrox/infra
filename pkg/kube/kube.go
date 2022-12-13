@@ -62,9 +62,14 @@ func getGenericK8sClient() (*kubernetes.Clientset, error) {
 }
 
 func restConfig() (*rest.Config, error) {
+	kubeconfig := os.Getenv("KUBECONFIG")
+	if kubeconfig != "" {
+		// If KUBECONFIG env var is set, we use that.
+		return clientcmd.BuildConfigFromFlags("", kubeconfig)
+	}
 	homeDir := os.Getenv("HOME")
 	if homeDir != "" {
-		// If there is a hone directory, and there is also a kubeconfig inside
+		// If there is a home directory, and there is also a kubeconfig inside
 		// that home directory, then we're running in out-of-cluster mode.
 		kubeconfig := filepath.Join(homeDir, ".kube", "config")
 		if _, err := os.Stat(kubeconfig); err == nil {
