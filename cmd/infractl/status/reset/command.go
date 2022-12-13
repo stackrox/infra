@@ -16,7 +16,7 @@ import (
 const examples = `# Resets server status.
 $ infractl status reset`
 
-// Command defines the handler for infractl status set.
+// Command defines the handler for infractl status reset.
 func Command() *cobra.Command {
 	// $ infractl status reset
 	return &cobra.Command{
