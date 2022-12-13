@@ -29,6 +29,7 @@ const (
 	AppLabels = "infra-server"
 )
 
+// PrepareCommand adds common flags and default args to a cobra.Command for test simulation.
 func PrepareCommand(cmd *cobra.Command, asJSON bool) *bytes.Buffer {
 	common.AddCommonFlags(cmd)
 
@@ -113,12 +114,12 @@ func RetrieveCommandOutput(buf *bytes.Buffer) (string, error) {
 }
 
 // RetrieveCommandOutputJSON parses the contents of a buffer to a map.
-func RetrieveCommandOutputJSON(buf *bytes.Buffer, outJson interface{}) error {
+func RetrieveCommandOutputJSON(buf *bytes.Buffer, outJSON interface{}) error {
 	data, err := io.ReadAll(buf)
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal(data, &outJson)
+	err = json.Unmarshal(data, &outJSON)
 	if err != nil {
 		return err
 	}
