@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
+	"log"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -23,15 +23,17 @@ import (
 )
 
 const (
+	// Namespace is the default K8s namespace in which infra server is deployed.
 	Namespace = "infra"
+	// AppLabels are the default K8s labels attached to the infra server deployment.
 	AppLabels = "infra-server"
 )
 
-func PrepareCommand(cmd *cobra.Command, asJson bool) *bytes.Buffer {
+func PrepareCommand(cmd *cobra.Command, asJSON bool) *bytes.Buffer {
 	common.AddCommonFlags(cmd)
 
 	defaultArgs := []string{"--endpoint=localhost:8443", "--insecure"}
-	if asJson {
+	if asJSON {
 		defaultArgs = append(defaultArgs, "--json")
 	}
 
@@ -41,6 +43,7 @@ func PrepareCommand(cmd *cobra.Command, asJson bool) *bytes.Buffer {
 	return buf
 }
 
+// FindInfraPod discovers the infra server pod.
 func FindInfraPod(ctx context.Context, namespace string, label string) (string, error) {
 	kc, err := kube.GetK8sPodsClient(namespace)
 	if err != nil {
@@ -58,7 +61,8 @@ func FindInfraPod(ctx context.Context, namespace string, label string) (string, 
 	return pods.Items[0].Name, nil
 }
 
-func GetPodLogs(namespace string, label string, testStartTime *metav1.Time) (string, error) {
+// GetPodLogs retrieves the logs for a labeled pod from a given start time.
+func GetPodLogs(namespace string, label string, startTime *metav1.Time) (string, error) {
 	ctx := context.Background()
 
 	podName, err := FindInfraPod(ctx, namespace, label)
@@ -72,7 +76,7 @@ func GetPodLogs(namespace string, label string, testStartTime *metav1.Time) (str
 	}
 
 	req := kc.GetLogs(podName, &corev1.PodLogOptions{
-		SinceTime: testStartTime,
+		SinceTime: startTime,
 	})
 	podLogs, err := req.Stream(ctx)
 	if err != nil {
@@ -85,6 +89,7 @@ func GetPodLogs(namespace string, label string, testStartTime *metav1.Time) (str
 	return buf.String(), err
 }
 
+// DeleteStatusConfigmap deletes the configmap named status in a given namespace.
 func DeleteStatusConfigmap(namespace string) error {
 	kc, err := kube.GetK8sConfigMapClient(namespace)
 	if err != nil {
@@ -97,6 +102,7 @@ func DeleteStatusConfigmap(namespace string) error {
 	return err
 }
 
+// RetrieveCommandOutput stringifies the contents of a buffer to read a command's output.
 func RetrieveCommandOutput(buf *bytes.Buffer) (string, error) {
 	data, err := io.ReadAll(buf)
 	if err != nil {
@@ -106,7 +112,8 @@ func RetrieveCommandOutput(buf *bytes.Buffer) (string, error) {
 	return string(data), nil
 }
 
-func RetrieveCommandOutputJson(buf *bytes.Buffer, outJson interface{}) error {
+// RetrieveCommandOutputJSON parses the contents of a buffer to a map.
+func RetrieveCommandOutputJSON(buf *bytes.Buffer, outJson interface{}) error {
 	data, err := io.ReadAll(buf)
 	if err != nil {
 		return err
@@ -118,6 +125,7 @@ func RetrieveCommandOutputJson(buf *bytes.Buffer, outJson interface{}) error {
 	return nil
 }
 
+// Whoami simulates the infractl whoami command and returns the principal's email.
 func Whoami() (string, error) {
 	whoamiCmd := whoami.Command()
 	buf := PrepareCommand(whoamiCmd, true)
@@ -127,24 +135,14 @@ func Whoami() (string, error) {
 	}
 
 	jsonData := WhoamiResponse{}
-	err = RetrieveCommandOutputJson(buf, &jsonData)
+	err = RetrieveCommandOutputJSON(buf, &jsonData)
 	if err != nil {
 		return "", err
 	}
 	return jsonData.Principal.ServiceAccount.Email, nil
 }
 
-// TODO: implement equivalent in Go
-// e2e_setup() {
-// 	# safety check, must be an infra-pr cluster
-// 	context="$(kubectl config current-context)"
-// 	if ! [[ "$context" =~ infra-pr-[[:digit:]]+ ]]; then
-// 	  echo "kubectl config current-context: $context"
-// 	  echo "Quitting test. This is not an infra PR development cluster."
-// 	  exit 1
-// 	fi
-//   }
-
+// CheckContext aborts an execution if the current kubectl context is not an infra-pr cluster.
 func CheckContext() {
 	cmd := exec.Command("kubectl", "config", "current-context")
 	out, err := cmd.Output()
@@ -157,8 +155,7 @@ func CheckContext() {
 	pattern := `(\w+)_infra-pr-(\d+)`
 	match, err := regexp.Match(pattern, []byte(currentContext))
 	if !match || err != nil {
-		fmt.Printf("Current kubectl context: %s\n", currentContext)
-		fmt.Println("Quitting test. This is not an infra PR development cluster.")
-		os.Exit(1)
+		log.Printf("Current kubectl context: %s\n", currentContext)
+		log.Fatalln("Quitting test. This is not an infra PR development cluster.")
 	}
 }

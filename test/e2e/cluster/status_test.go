@@ -89,7 +89,7 @@ func TestStatusCommand(t *testing.T) {
 			assert.NoError(t, err)
 
 			// getting output from command
-			err = utils.RetrieveCommandOutputJson(buf, &tc.response)
+			err = utils.RetrieveCommandOutputJSON(buf, &tc.response)
 			assert.NoError(t, err)
 
 			// assert outputs
