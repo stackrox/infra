@@ -1,123 +1,106 @@
 //go:build e2e
 // +build e2e
 
-// #!/usr/bin/env bats
-
-// # shellcheck disable=SC1091
-// source "$BATS_TEST_DIRNAME/../test/bats-lib.sh"
-// load_bats_support
-
-// delete_status_configmap() {
-//   kubectl delete configmap/status -n infra || true
-// }
-
-// infractl() {
-//   bin/infractl -e localhost:8443 -k "$@"
-// }
-
-// setup_file() {
-//   e2e_setup
-//   delete_status_configmap
-// }
-
-// @test "status reset returns no active maintenance" {
-//   status="$(infractl status reset --json | jq -r '.Status')"
-//   assert_success
-//   assert_equal "$status" "{}"
-
-//   run kubectl -n infra logs -l app=infra-server
-//   assert_output --partial "[INFO] Status was reset"
-// }
-
-// @test "status set returns active maintenance with maintainer" {
-//   whoami="$(infractl whoami --json | jq -r '.Principal.ServiceAccount.Email')"
-//   status="$(infractl status set --json | jq -r '.Status')"
-//   maintenanceActive="$(echo "$status" | jq -r '.MaintenanceActive')"
-//   maintainer="$(echo "$status" | jq -r '.Maintainer')"
-//   assert_success
-//   assert_equal "$maintenanceActive" "true"
-//   assert_equal "$maintainer" "$whoami"
-
-//   run kubectl -n infra logs -l app=infra-server
-//   assert_output --partial "[INFO] New Status was set by maintainer $maintainer"
-// }
-
-// @test "status get returns no active maintenance after lazy initialization" {
-//     delete_status_configmap
-//     status="$(infractl status get --json | jq -r '.Status')"
-//     assert_success
-//     assert_equal "$status" "{}"
-
-//   run kubectl -n infra logs -l app=infra-server
-//   assert_output --partial "[INFO] Initialized infra status lazily"
-// }
-
 package cluster_test
 
 import (
-	"bytes"
-	"context"
-	"io"
-	"io/ioutil"
+	"fmt"
 	"testing"
 
 	"github.com/spf13/cobra"
-	"github.com/stackrox/infra/cmd/infractl/common"
 	statusGet "github.com/stackrox/infra/cmd/infractl/status/get"
-	"github.com/stackrox/infra/pkg/kube"
+	statusReset "github.com/stackrox/infra/cmd/infractl/status/reset"
+	statusSet "github.com/stackrox/infra/cmd/infractl/status/set"
 	"github.com/stretchr/testify/assert"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	utils "github.com/stackrox/infra/test/e2e"
 )
 
-func PrepareCommand(cmd *cobra.Command) *bytes.Buffer {
-	common.AddCommonFlags(cmd)
-	cmd.SetArgs([]string{"--endpoint=localhost:8443"})
-	b := bytes.NewBufferString("")
-	cmd.SetOut(b)
-	return b
-}
-
-func GetPodLogs(podName string, podNamespace string) (string, error) {
-	kc, err := kube.GetK8sPodsClient(podNamespace)
-	if err != nil {
-		return "", err
-	}
-	req := kc.GetLogs(podName, &corev1.PodLogOptions{})
-	podLogs, err := req.Stream(context.Background())
-	if err != nil {
-		return "", err
-	}
-	defer podLogs.Close()
-	buf := new(bytes.Buffer)
-	if _, err := io.Copy(buf, podLogs); err != nil {
-		return "", err
-	}
-	return buf.String(), nil
-}
-
-func DeleteStatusConfigmap(namespace string) error {
-	kc, err := kube.GetK8sConfigMapClient(namespace)
-	if err != nil {
-		return err
-	}
-	err = kc.Delete(context.Background(), "status", metav1.DeleteOptions{})
-	return err
-}
-
-func TestResetReturnsNoActiveMaintenance(t *testing.T) {
-	statusGetCmd := statusGet.Command()
-	b := PrepareCommand(statusGetCmd)
-	err := statusGetCmd.Execute()
+func setup(t *testing.T) {
+	err := utils.DeleteStatusConfigmap(utils.Namespace)
 	assert.NoError(t, err)
+}
 
-	out, err := ioutil.ReadAll(b)
-	assert.NoError(t, err)
+type statusTest struct {
+	title             string
+	cmd               *cobra.Command
+	response          utils.StatusResponse
+	assertResponse    func(statusTest)
+	assertLogContents func(string)
+}
 
-	assert.Contains(t, string(out), "Maintenance active: false")
-	assert.Contains(t, string(out), "Maintainer: ")
+func TestStatusCommand(t *testing.T) {
+	utils.CheckContext()
 
-	// podLogs, err := GetPodLogs("infra-server-deployment-86dd7fb475-9ljmn", "infra")
-	// assert.NoError(t, err)
-	// assert.Contains(t, podLogs, "[INFO] Initialized infra status lazily")
+	tests := []statusTest{
+		{
+			title:    "First infractl status get initializes inactive maintenance",
+			cmd:      statusGet.Command(),
+			response: utils.StatusResponse{},
+			assertResponse: func(tc statusTest) {
+				assert.False(t, tc.response.Status.MaintenanceActive)
+				assert.Equal(t, tc.response.Status.Maintainer, "")
+			},
+			assertLogContents: func(podLogs string) {
+				assert.Contains(t, podLogs, "[INFO] Initialized infra status lazily")
+			},
+		},
+		{
+			title:    "infractl status set enables maintenance and makes caller maintainer",
+			cmd:      statusSet.Command(),
+			response: utils.StatusResponse{},
+			assertResponse: func(tc statusTest) {
+				maintainer, err := utils.Whoami()
+				assert.NoError(t, err)
+				assert.True(t, tc.response.Status.MaintenanceActive)
+				assert.Equal(t, tc.response.Status.Maintainer, maintainer)
+			},
+			assertLogContents: func(podLogs string) {
+				maintainer, err := utils.Whoami()
+				assert.NoError(t, err)
+				assert.Contains(t, podLogs, fmt.Sprintf("[INFO] New Status was set by maintainer %s", maintainer))
+			},
+		},
+		{
+			title:    "infractl status reset returns no active maintenance",
+			cmd:      statusReset.Command(),
+			response: utils.StatusResponse{},
+			assertResponse: func(tc statusTest) {
+				assert.False(t, tc.response.Status.MaintenanceActive)
+				assert.Equal(t, tc.response.Status.Maintainer, "")
+			},
+			assertLogContents: func(podLogs string) {
+				assert.Contains(t, podLogs, "[INFO] Status was reset")
+			},
+		},
+	}
+
+	setup(t)
+
+	for index, tc := range tests {
+		name := fmt.Sprintf("%d %s", index+1, tc.title)
+		t.Run(name, func(t *testing.T) {
+			testStartTime := metav1.Now()
+
+			// running command
+			buf := utils.PrepareCommand(tc.cmd, true)
+			err := tc.cmd.Execute()
+			assert.NoError(t, err)
+
+			// getting output from command
+			err = utils.RetrieveCommandOutputJson(buf, &tc.response)
+			assert.NoError(t, err)
+
+			// assert outputs
+			tc.assertResponse(tc)
+
+			// fetch infra-server logs
+			podLogs, err := utils.GetPodLogs(utils.Namespace, utils.AppLabels, &testStartTime)
+			assert.NoError(t, err)
+
+			// assert log content
+			tc.assertLogContents(podLogs)
+		})
+	}
 }
