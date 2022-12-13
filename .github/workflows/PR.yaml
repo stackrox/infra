@@ -173,8 +173,9 @@ jobs:
           $INFRACTL whoami || true
           $INFRACTL version || true
 
-          make e2e-tests || touch FAIL
+          make e2e-tests || touch FAIL_BATS_E2E
+          make go-e2e-tests || touch FAIL_GO_E2E
           kubectl -n infra logs -l app=infra-server --tail=-1
           kill %1
 
-          [[ ! -f FAIL ]]
+          [[ ! -f FAIL_BATS_E2E ]] || [[ ! -f FAIL_GO_E2E ]]
