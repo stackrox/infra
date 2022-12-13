@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -18,8 +17,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	whoami "github.com/stackrox/infra/cmd/infractl/whoami"
 )
 
 const (
@@ -57,7 +54,7 @@ func FindInfraPod(ctx context.Context, namespace string, label string) (string, 
 		return "", err
 	}
 	if len(pods.Items) != 1 {
-		return "", errors.New("could not identify infra server pod, more than one or no pods found")
+		return "", fmt.Errorf("could not identify infra server pod, more than one or no pods found for labels %s", labelSelector)
 	}
 	return pods.Items[0].Name, nil
 }
@@ -76,9 +73,7 @@ func GetPodLogs(namespace string, label string, startTime *metav1.Time) (string,
 		return "", err
 	}
 
-	req := kc.GetLogs(podName, &corev1.PodLogOptions{
-		SinceTime: startTime,
-	})
+	req := kc.GetLogs(podName, &corev1.PodLogOptions{SinceTime: startTime})
 	podLogs, err := req.Stream(ctx)
 	if err != nil {
 		return "", err
@@ -124,23 +119,6 @@ func RetrieveCommandOutputJSON(buf *bytes.Buffer, outJSON interface{}) error {
 		return err
 	}
 	return nil
-}
-
-// Whoami simulates the infractl whoami command and returns the principal's email.
-func Whoami() (string, error) {
-	whoamiCmd := whoami.Command()
-	buf := PrepareCommand(whoamiCmd, true)
-	err := whoamiCmd.Execute()
-	if err != nil {
-		return "", err
-	}
-
-	jsonData := WhoamiResponse{}
-	err = RetrieveCommandOutputJSON(buf, &jsonData)
-	if err != nil {
-		return "", err
-	}
-	return jsonData.Principal.ServiceAccount.Email, nil
 }
 
 // CheckContext aborts an execution if the current kubectl context is not an infra-pr cluster.
