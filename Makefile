@@ -98,7 +98,7 @@ unit-test: proto-generated-srcs
 	@go test -v ./...
 
 .PHONY: go-e2e-test
-go-e2e-tests:
+go-e2e-tests: proto-generated-srcs
 	@go test ./test/e2e/... -tags=e2e -v -timeout 30s -count=1
 
 # Assuming a local dev infra server is running and accessible via a port-forward
