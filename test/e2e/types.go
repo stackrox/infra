@@ -11,3 +11,10 @@ type StatusResponse struct {
 type WhoamiResponse struct {
 	Principal v1.WhoamiResponse_ServiceAccount
 }
+
+// ClusterResponse helper maps to the JSON response for infractl operations related to clusters.
+// We use this instead of v1.Cluster because Go cannot parse the Status string back to the enum.
+type ClusterResponse struct {
+	ID     string
+	Status string
+}

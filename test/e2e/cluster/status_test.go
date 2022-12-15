@@ -14,30 +14,12 @@ import (
 	statusGet "github.com/stackrox/infra/cmd/infractl/status/get"
 	statusReset "github.com/stackrox/infra/cmd/infractl/status/reset"
 	statusSet "github.com/stackrox/infra/cmd/infractl/status/set"
-	infraWhoami "github.com/stackrox/infra/cmd/infractl/whoami"
 	utils "github.com/stackrox/infra/test/e2e"
 )
 
 func setup(t *testing.T) {
 	err := utils.DeleteStatusConfigmap(utils.Namespace)
 	assert.NoError(t, err)
-}
-
-// whoami simulates the infractl whoami command and returns the principal's email.
-func whoami() (string, error) {
-	whoamiCmd := infraWhoami.Command()
-	buf := utils.PrepareCommand(whoamiCmd, true)
-	err := whoamiCmd.Execute()
-	if err != nil {
-		return "", err
-	}
-
-	jsonData := utils.WhoamiResponse{}
-	err = utils.RetrieveCommandOutputJSON(buf, &jsonData)
-	if err != nil {
-		return "", err
-	}
-	return jsonData.Principal.ServiceAccount.Email, nil
 }
 
 type statusTest struct {
@@ -69,13 +51,13 @@ func TestStatusCommand(t *testing.T) {
 			cmd:      statusSet.Command(),
 			response: utils.StatusResponse{},
 			assertResponse: func(tc statusTest) {
-				maintainer, err := whoami()
+				maintainer, err := infractlWhoami()
 				assert.NoError(t, err)
 				assert.True(t, tc.response.Status.MaintenanceActive)
 				assert.Equal(t, tc.response.Status.Maintainer, maintainer)
 			},
 			assertLogContents: func(podLogs string) {
-				maintainer, err := whoami()
+				maintainer, err := infractlWhoami()
 				assert.NoError(t, err)
 				assert.Contains(t, podLogs, fmt.Sprintf("[INFO] New Status was set by maintainer %s", maintainer))
 			},
