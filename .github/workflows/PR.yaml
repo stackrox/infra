@@ -81,7 +81,7 @@ jobs:
     container:
       image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.52
     env:
-      KUBECONFIG: artifacts/kubeconfig
+      KUBECONFIG: /github/home/artifacts/kubeconfig
       INFRA_TOKEN: ${{ secrets.INFRA_TOKEN }}
       INFRACTL: bin/infractl -k -e localhost:8443
       USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
@@ -109,7 +109,7 @@ jobs:
 
       - name: Download artifacts
         run: |
-          /github/home/.local/bin/infractl artifacts "$CLUSTER_NAME" -d artifacts >> "$GITHUB_STEP_SUMMARY"
+          /github/home/.local/bin/infractl artifacts "$CLUSTER_NAME" -d /github/home/artifacts >> "$GITHUB_STEP_SUMMARY"
           kubectl get nodes -o wide || true
 
       - name: Deploy infra to dev cluster
@@ -178,3 +178,9 @@ jobs:
           kill %1
 
           [[ ! -f FAIL ]]
+
+      - name: Run Go e2e tests
+        run: |
+          kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
+          sleep 5
+          make go-e2e-tests
