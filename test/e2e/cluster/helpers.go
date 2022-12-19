@@ -1,7 +1,7 @@
 package cluster_test
 
 import (
-	"fmt"
+	"log"
 	"testing"
 	"time"
 
@@ -20,9 +20,9 @@ const defaultTimeout = 40 * time.Second
 func assertStatusBecomesWithin(t *testing.T, clusterID string, desiredStatus string, timeout time.Duration) {
 	tick := 1 * time.Second
 	conditionMet := func() bool {
-		actualStatus, err := infractlGetStatusForId(clusterID)
+		actualStatus, err := infractlGetStatusForID(clusterID)
 		if err != nil {
-			fmt.Printf("error when requesting status for cluster: '%s'\n", err.Error())
+			log.Printf("error when requesting status for cluster: '%s'\n", err.Error())
 			return false
 		}
 		return desiredStatus == actualStatus
@@ -37,9 +37,9 @@ func assertStatusBecomes(t *testing.T, clusterID string, desiredStatus string) {
 func assertStatusRemainsFor(t *testing.T, clusterID string, desiredStatus string, timeout time.Duration) {
 	tick := 1 * time.Second
 	conditionMet := func() bool {
-		actualStatus, err := infractlGetStatusForId(clusterID)
+		actualStatus, err := infractlGetStatusForID(clusterID)
 		if err != nil {
-			fmt.Printf("error when requesting status for cluster: '%s'\n", err.Error())
+			log.Printf("error when requesting status for cluster: '%s'\n", err.Error())
 			return true
 		}
 		return desiredStatus != actualStatus
@@ -47,7 +47,7 @@ func assertStatusRemainsFor(t *testing.T, clusterID string, desiredStatus string
 	assert.Never(t, conditionMet, timeout, tick)
 }
 
-func infractlGetStatusForId(clusterID string) (string, error) {
+func infractlGetStatusForID(clusterID string) (string, error) {
 	infraClusterGetCmd := infraClusterGet.Command()
 	buf := utils.PrepareCommand(infraClusterGetCmd, true, clusterID)
 	err := infraClusterGetCmd.Execute()

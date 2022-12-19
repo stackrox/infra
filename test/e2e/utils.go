@@ -142,6 +142,7 @@ func CheckContext() {
 	}
 }
 
+// GetUniqueClusterName adds some uniqueness to a cluster name.
 func GetUniqueClusterName(baseName string) string {
 	source := rand.NewSource(time.Now().UnixNano())
 	generator := rand.New(source)
