@@ -37,18 +37,18 @@ ID: my-demo-for-me`
 	openSourceRegistry = "quay.io/stackrox-io"
 	rhacsRegistry      = "quay.io/rhacs-eng"
 
-	nameProvidedToQaDemoInStackroxContext = `NOTE: infractl no longer requires a NAME parameter when creating a cluster. 
-      qa-demo flavors created from a stackrox repo context will get a name 
+	nameProvidedToQaDemoInStackroxContext = `NOTE: infractl no longer requires a NAME parameter when creating a cluster.
+      qa-demo flavors created from a stackrox repo context will get a name
       derived from the tag of the last commit when the name is not specified.`
 
 	nameProvidedToOther = `NOTE: infractl no longer requires a NAME parameter when creating a cluster.
-      If ommitted a name will be generated using your infra user initials, a 
+      If ommitted a name will be generated using your infra user initials, a
       short date and a counter for uniqueness. e.g. jb-10-31-1`
 
-	mainImageProvidedToQaDemoInStackroxContext = `NOTE: infractl no longer requires a --arg main-image=<image> when creating 
-      a qa-demo cluster in a stackrox repo context. An image will be choosen 
-      to match the last commit. That commit should be pushed in order to ensure 
-      that the image is built. By default opensource (quay.io/stackrox-io) 
+	mainImageProvidedToQaDemoInStackroxContext = `NOTE: infractl no longer requires a --arg main-image=<image> when creating
+      a qa-demo cluster in a stackrox repo context. An image will be choosen
+      to match the last commit. That commit should be pushed in order to ensure
+      that the image is built. By default opensource (quay.io/stackrox-io)
       images are used. Pass --rhacs to get Red Hat images.`
 )
 
@@ -325,14 +325,14 @@ func displayUserNotes(cmd *cobra.Command, args []string, req *v1.CreateClusterRe
 	if len(args) >= 2 && args[1] != "" {
 		if strings.Contains(args[0], "qa-demo") &&
 			strings.Contains(workingEnvironment.gitTopLevel, "stackrox/stackrox") {
-			cmd.Println(nameProvidedToQaDemoInStackroxContext)
+			cmd.PrintErrln(nameProvidedToQaDemoInStackroxContext)
 		} else {
-			cmd.Println(nameProvidedToOther)
+			cmd.PrintErrln(nameProvidedToOther)
 		}
 	}
 	if len(args) >= 1 && strings.Contains(args[0], "qa-demo") &&
 		strings.Contains(workingEnvironment.gitTopLevel, "stackrox/stackrox") &&
 		req.Parameters["main-image"] != "" {
-		cmd.Println(mainImageProvidedToQaDemoInStackroxContext)
+		cmd.PrintErrln(mainImageProvidedToQaDemoInStackroxContext)
 	}
 }
