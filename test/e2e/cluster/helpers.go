@@ -11,6 +11,7 @@ import (
 	infraClusterDelete "github.com/stackrox/infra/cmd/infractl/cluster/delete"
 	infraClusterGet "github.com/stackrox/infra/cmd/infractl/cluster/get"
 	infraClusterLifespan "github.com/stackrox/infra/cmd/infractl/cluster/lifespan"
+	infraClusterList "github.com/stackrox/infra/cmd/infractl/cluster/list"
 	infraWhoami "github.com/stackrox/infra/cmd/infractl/whoami"
 	utils "github.com/stackrox/infra/test/e2e"
 )
@@ -87,6 +88,22 @@ func infractlLifespan(clusterID string, lifespanUpdate string) error {
 	infraClusterLifespanCmd := infraClusterLifespan.Command()
 	utils.PrepareCommand(infraClusterLifespanCmd, false, clusterID, lifespanUpdate)
 	return infraClusterLifespanCmd.Execute()
+}
+
+func infractlList(args ...string) (utils.ListClusterReponse, error) {
+	jsonData := utils.ListClusterReponse{}
+	infraClusterListCmd := infraClusterList.Command()
+	buf := utils.PrepareCommand(infraClusterListCmd, true, args...)
+	err := infraClusterListCmd.Execute()
+	if err != nil {
+		return jsonData, err
+	}
+
+	err = utils.RetrieveCommandOutputJSON(buf, &jsonData)
+	if err != nil {
+		return jsonData, err
+	}
+	return jsonData, nil
 }
 
 func infractlWhoami() (string, error) {

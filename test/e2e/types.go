@@ -18,3 +18,9 @@ type ClusterResponse struct {
 	ID     string
 	Status string
 }
+
+type ListClusterReponse struct {
+	Clusters []struct {
+		ID string
+	}
+}

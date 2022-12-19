@@ -146,5 +146,5 @@ func CheckContext() {
 func GetUniqueClusterName(baseName string) string {
 	source := rand.NewSource(time.Now().UnixNano())
 	generator := rand.New(source)
-	return fmt.Sprintf("%s-%d", baseName, generator.Intn(100))
+	return fmt.Sprintf("%s-%d", baseName, 10+generator.Intn(89))
 }
