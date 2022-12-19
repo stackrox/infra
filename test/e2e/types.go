@@ -19,7 +19,7 @@ type ClusterResponse struct {
 	Status string
 }
 
-// ListClusterresponse maps to the JSON response for infractl list operations.
+// ListClusterReponse maps to the JSON response for infractl list operations.
 type ListClusterReponse struct {
 	Clusters []struct {
 		ID string
