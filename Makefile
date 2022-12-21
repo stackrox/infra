@@ -97,7 +97,7 @@ unit-test: proto-generated-srcs
 	@echo "+ $@"
 	@go test -v ./...
 
-.PHONY: go-e2e-test
+.PHONY: go-e2e-tests
 go-e2e-tests: proto-generated-srcs
 	@kubectl apply -f workflows/
 	@go test ./test/e2e/... -tags=e2e -v -parallel 5 -count 1 -cover -timeout 1h
@@ -118,6 +118,7 @@ pull-infractl-from-dev-server:
 
 .PHONY: e2e-tests
 e2e-tests:
+	@kubectl apply -f workflows/*.yaml"
 	@bats --jobs 5 --no-parallelize-within-files --recursive .
 
 ##############
