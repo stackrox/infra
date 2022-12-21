@@ -118,7 +118,7 @@ pull-infractl-from-dev-server:
 
 .PHONY: e2e-tests
 e2e-tests:
-	@kubectl apply -f workflows/*.yaml"
+	@kubectl apply -f "workflows/*.yaml"
 	@bats --jobs 5 --no-parallelize-within-files --recursive .
 
 ##############
