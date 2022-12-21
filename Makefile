@@ -99,6 +99,7 @@ unit-test: proto-generated-srcs
 
 .PHONY: go-e2e-test
 go-e2e-tests: proto-generated-srcs
+	@kubectl apply -f workflows/
 	@go test ./test/e2e/... -tags=e2e -v -parallel 5 -count 1 -cover -timeout 1h
 
 # Assuming a local dev infra server is running and accessible via a port-forward
