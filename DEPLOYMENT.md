@@ -57,7 +57,17 @@ To download the configuration locally to `chart/infra-server/configuration`, run
 
 `make configuration-download`
 
-To upload the local configuration back to the bucket, run:
+After you change configuration run:
+
+`make create-consolidated-values`
+
+Which will e.g.:
+```
+INFO: Wed Jan 11 06:47:53 PM UTC 2023: Creating a combined values file for chart/infra-server/configuration/development files
+INFO: Wed Jan 11 06:47:53 PM UTC 2023: Creating a combined values file for chart/infra-server/configuration/production files
+```
+
+To upload the local configuration which includes the consolidated values back to the bucket, run:
 
 `make configuration-upload`
 
