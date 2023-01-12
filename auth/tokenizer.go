@@ -123,8 +123,8 @@ type oidcClaims struct {
 // Specifically, it enforces users to have verified email addresses and that
 // those email addresses are from the allowed domains.
 func (c oidcClaims) Valid() error {
-	_, ok := excludedEmails[c.Email]
-	if !ok {
+	_, isExcluded := excludedEmails[c.Email]
+	if isExcluded {
 		return errors.New("email address is excluded")
 	}
 	switch {
@@ -224,7 +224,8 @@ func (t userTokenizer) Validate(token string) (*v1.User, error) {
 type serviceAccountValidator v1.ServiceAccount
 
 func (s serviceAccountValidator) Valid() error {
-	if _, ok := excludedEmails[s.Email]; ok {
+	_, isExcluded := excludedEmails[s.Email]
+	if isExcluded {
 		return errors.New("email address is excluded")
 	}
 	switch {
