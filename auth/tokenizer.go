@@ -224,8 +224,7 @@ func (t userTokenizer) Validate(token string) (*v1.User, error) {
 type serviceAccountValidator v1.ServiceAccount
 
 func (s serviceAccountValidator) Valid() error {
-	_, ok := excludedEmails[s.Email]
-	if !ok {
+	if _, ok := excludedEmails[s.Email]; ok {
 		return errors.New("email address is excluded")
 	}
 	switch {
