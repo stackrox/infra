@@ -26,6 +26,8 @@ const (
 	emailSuffixRedHat   = "@redhat.com"
 )
 
+var excludedEmails = map[string]bool{"infra@stackrox.com": true}
+
 // createHumanUser synthesizes a v1.User struct from an oidcClaims struct.
 func createHumanUser(profile oidcClaims) *v1.User {
 	return &v1.User{
@@ -121,6 +123,10 @@ type oidcClaims struct {
 // Specifically, it enforces users to have verified email addresses and that
 // those email addresses are from the allowed domains.
 func (c oidcClaims) Valid() error {
+	_, ok := excludedEmails[c.Email]
+	if !ok {
+		return errors.New("email address is excluded")
+	}
 	switch {
 	case !c.EmailVerified:
 		return errors.New("email address is not verified")
@@ -218,6 +224,10 @@ func (t userTokenizer) Validate(token string) (*v1.User, error) {
 type serviceAccountValidator v1.ServiceAccount
 
 func (s serviceAccountValidator) Valid() error {
+	_, ok := excludedEmails[s.Email]
+	if !ok {
+		return errors.New("email address is excluded")
+	}
 	switch {
 	case s.Name == "":
 		return errors.New("name was empty")
