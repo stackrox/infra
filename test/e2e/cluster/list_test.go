@@ -12,15 +12,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// setup_file() {
-//   e2e_setup
-//   delete_all_workflows_by_name_prefix "list-"
-//   kubectl apply -f "workflows/*.yaml"
-
-//   ROOT="$(git rev-parse --show-toplevel)"
-//   export ROOT
-// }
-
 func TestListCreated(t *testing.T) {
 	utils.CheckContext()
 	clusterID, err := infractlCreateCluster(
