@@ -7,9 +7,11 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"os/exec"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/common"
@@ -27,15 +29,16 @@ const (
 )
 
 // PrepareCommand adds common flags and default args to a cobra.Command for test simulation.
-func PrepareCommand(cmd *cobra.Command, asJSON bool) *bytes.Buffer {
+func PrepareCommand(cmd *cobra.Command, asJSON bool, args ...string) *bytes.Buffer {
 	common.AddCommonFlags(cmd)
 
 	defaultArgs := []string{"--endpoint=localhost:8443", "--insecure"}
+	args = append(args, defaultArgs...)
 	if asJSON {
-		defaultArgs = append(defaultArgs, "--json")
+		args = append(args, "--json")
 	}
 
-	cmd.SetArgs(defaultArgs)
+	cmd.SetArgs(args)
 	buf := new(bytes.Buffer)
 	cmd.SetOut(buf)
 	return buf
@@ -137,4 +140,11 @@ func CheckContext() {
 		log.Printf("Current kubectl context: %s\n", currentContext)
 		log.Fatalln("Quitting test. This is not an infra PR development cluster.")
 	}
+}
+
+// GetUniqueClusterName adds some uniqueness to a cluster name.
+func GetUniqueClusterName(baseName string) string {
+	source := rand.NewSource(time.Now().UnixNano())
+	generator := rand.New(source)
+	return fmt.Sprintf("%s-%d", baseName, 10+generator.Intn(89))
 }

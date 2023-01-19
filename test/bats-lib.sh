@@ -34,12 +34,6 @@ delete_all_workflows_by_flavor() {
     xargs kubectl delete workflow || true
 }
 
-delete_all_workflows_by_name_prefix() {
-  name_prefix="$1"
-  kubectl get workflows -o json | jq -r '.items[] | select( .metadata.name | startswith("'"$name_prefix"'") ) | .metadata.name' | \
-    xargs kubectl delete workflow || true
-}
-
 diag() {
   # shellcheck disable=SC2001
   echo "$(date '+%H:%M:%S') " "$@" | sed -e 's/^/# /' >&3 ;

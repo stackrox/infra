@@ -97,9 +97,10 @@ unit-test: proto-generated-srcs
 	@echo "+ $@"
 	@go test -v ./...
 
-.PHONY: go-e2e-test
+.PHONY: go-e2e-tests
 go-e2e-tests: proto-generated-srcs
-	@go test ./test/e2e/... -tags=e2e -v -timeout 30s -count=1
+	@kubectl apply -f workflows/
+	@go test ./test/e2e/... -tags=e2e -v -parallel 5 -count 1 -cover -timeout 1h
 
 # Assuming a local dev infra server is running and accessible via a port-forward
 # i.e. nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
@@ -117,6 +118,7 @@ pull-infractl-from-dev-server:
 
 .PHONY: e2e-tests
 e2e-tests:
+	@kubectl apply -f "workflows/*.yaml"
 	@bats --jobs 5 --no-parallelize-within-files --recursive .
 
 ##############
