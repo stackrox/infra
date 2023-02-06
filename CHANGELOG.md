@@ -6,6 +6,9 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+## [0.6.2]
+- Bump demo flavors to the latest 3.73.2 release.
+
 ## [0.6.1]
 
 - Notice CLI users only about minor or major version mismatch (previously also for patch versions).
