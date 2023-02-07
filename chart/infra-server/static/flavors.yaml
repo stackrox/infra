@@ -315,6 +315,20 @@
         Opensource OKD releases are at https://github.com/openshift/okd/releases.
         For OKD use the release tag e.g. 4.7.0-0.okd-2021-02-25-144700.
 
+    - name: central-image-tag
+      description: Central container image tag
+      value: ""
+      kind: optional
+      help: |
+        Version string of the container image tag to use for the central component of RHACS
+
+    - name: central-services-helm-chart-version
+      description: Central Services Helm chart version
+      value: ""
+      kind: optional
+      help: |
+        Version string of the Helm chart to use to deploy Central Services
+
   artifacts:
     - name: admin-password
       description: Admin password for StackRox console
