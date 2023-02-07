@@ -120,7 +120,7 @@ spec:
           - name: admin-password
           - name: kubeconfig-base64
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-0.5.3-10-g3f424f6270-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-0.5.3-11-g79fb324a9b-snapshot
         imagePullPolicy: Always
         command:
           - ansible-playbook
@@ -145,8 +145,6 @@ spec:
             value: "443"
           - name: ORCHESTRATOR
             value: openshift
-          - name: IMAGE_REGISTRY
-            value: quay.io/rhacs-eng
           - name: ADMIN_PASSWORD
             value: "{{ inputs.parameters.admin-password }}"
           - name: KUBECONFIG_BASE64
