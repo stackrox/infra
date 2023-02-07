@@ -305,13 +305,6 @@
       description: cluster name
       value: example1
 
-    - name: ansible-demo-tag
-      description: Ansible-demo image tag
-      value: latest
-      kind: optional
-      help: |
-        The image tag to use for the ansible-demo provisioner. This should generally be 'latest' but is parameterized to support testing and emergency use-cases. See https://github.com/stackrox/ansible-demo for details.
-
     - name: openshift-version
       description: openshift release from OCP or OKD
       value: ocp/stable
