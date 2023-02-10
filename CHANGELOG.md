@@ -5,6 +5,7 @@ Entries in this file should be limited to:
 Please avoid adding duplicate information across this changelog and JIRA/doc input pages.
 
 ## [NEXT RELEASE]
+- Use migrated openshift-4-demo configuration.
 
 ## [0.6.2]
 - Bump demo flavors to the latest 3.73.2 release.
