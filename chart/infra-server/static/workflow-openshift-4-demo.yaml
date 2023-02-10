@@ -7,8 +7,6 @@ spec:
   arguments:
     parameters:
       - name: name
-      - name: ansible-demo-tag
-        value: ""
       - name: openshift-version
         value: ""
   volumeClaimTemplates:
@@ -122,7 +120,7 @@ spec:
           - name: admin-password
           - name: kubeconfig-base64
       container:
-        image: "us.gcr.io/rox-se/ansible-demo:{{ workflow.parameters.ansible-demo-tag }}"
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-0.6.1
         imagePullPolicy: Always
         command:
           - ansible-playbook
@@ -147,8 +145,6 @@ spec:
             value: "443"
           - name: ORCHESTRATOR
             value: openshift
-          - name: IMAGE_REGISTRY
-            value: quay.io/rhacs-eng
           - name: ADMIN_PASSWORD
             value: "{{ inputs.parameters.admin-password }}"
           - name: KUBECONFIG_BASE64
