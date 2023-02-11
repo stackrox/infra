@@ -10,7 +10,7 @@ spec:
       - name: openshift-version
         value: ""
       - name: central-image-tag
-      - name: central-helm-chart-version
+      - name: central-services-helm-chart-version
   volumeClaimTemplates:
     - metadata:
         name: data
