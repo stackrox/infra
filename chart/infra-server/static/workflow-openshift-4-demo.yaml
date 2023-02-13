@@ -122,7 +122,7 @@ spec:
           - name: admin-password
           - name: kubeconfig-base64
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-0.6.1-2-ga6cf55cb50-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-0.6.2
         imagePullPolicy: Always
         command:
           - ansible-playbook
