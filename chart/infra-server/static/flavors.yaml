@@ -272,6 +272,11 @@
       value: us-east1
       kind: optional
 
+    - name: fips-enabled
+      description: should fips be enabled
+      value: false
+      kind: optional
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
