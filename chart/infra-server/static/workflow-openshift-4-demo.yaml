@@ -152,9 +152,9 @@ spec:
           - name: KUBECONFIG_BASE64
             value: "{{ inputs.parameters.kubeconfig-base64 }}"
           - name: CENTRAL_IMAGE_TAG
-            value: "{{ inputs.parameters.central-image-tag }}"
+            value: "{{ workflow.parameters.central-image-tag }}"
           - name: CENTRAL_SERVICES_HELM_CHART_VERSION
-            value: "{{ inputs.parameters.central-services-helm-chart-version }}"
+            value: "{{ workflow.parameters.central-services-helm-chart-version }}"
           - name: ANSIBLE_STDOUT_CALLBACK
             value: debug
         volumeMounts:
