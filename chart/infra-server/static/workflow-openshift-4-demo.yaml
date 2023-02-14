@@ -9,8 +9,13 @@ spec:
       - name: name
       - name: openshift-version
         value: ""
-      - name: central-image-tag
+      - name: image-registry
+      - name: main-image-tag
+      - name: scanner-image-tag
+      - name: scanner-db-image-tag
+      - name: collector-slim-image-tag
       - name: central-services-helm-chart-version
+      - name: secured-cluster-services-helm-chart-version
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -122,7 +127,7 @@ spec:
           - name: admin-password
           - name: kubeconfig-base64
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-0.6.2
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-0.6.3
         imagePullPolicy: Always
         command:
           - ansible-playbook
@@ -151,10 +156,20 @@ spec:
             value: "{{ inputs.parameters.admin-password }}"
           - name: KUBECONFIG_BASE64
             value: "{{ inputs.parameters.kubeconfig-base64 }}"
-          - name: CENTRAL_IMAGE_TAG
-            value: "{{ workflow.parameters.central-image-tag }}"
+          - name: IMAGE_REGISTRY
+            value: "{{ workflow.parameters.image-registry }}"
+          - name: MAIN_IMAGE_TAG
+            value: "{{ workflow.parameters.main-image-tag }}"
+          - name: SCANNER_IMAGE_TAG
+            value: "{{ workflow.parameters.scanner-image-tag }}"
+          - name: SCANNER_DB_IMAGE_TAG
+            value: "{{ workflow.parameters.scanner-db-image-tag }}"
+          - name: COLLECTOR_SLIM_IMAGE_TAG
+            value: "{{ workflow.parameters.collector-slim-image-tag }}"
           - name: CENTRAL_SERVICES_HELM_CHART_VERSION
             value: "{{ workflow.parameters.central-services-helm-chart-version }}"
+          - name: SECURED_CLUSTER_SERVICES_HELM_CHART_VERSION
+            value: "{{ workflow.parameters.secured-cluster-services-helm-chart-version }}"
           - name: ANSIBLE_STDOUT_CALLBACK
             value: debug
         volumeMounts:
