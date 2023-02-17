@@ -70,7 +70,7 @@ spec:
         command: [ bash ]
         source: |
           main_image_tag="{{ workflow.parameters.main-image-tag }}"
-          if [[ -n "$main_image_tag" && ! "$main_image_tag" =~ "^[0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$" ]]; then
+          if [[ -n "$main_image_tag" && ! "$main_image_tag" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$ ]]; then
             echo >&2 "Only released version are currently support"
             exit 1
           fi
