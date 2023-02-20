@@ -315,6 +315,59 @@
         Opensource OKD releases are at https://github.com/openshift/okd/releases.
         For OKD use the release tag e.g. 4.7.0-0.okd-2021-02-25-144700.
 
+    - name: image-registry
+      description: ACS image registry
+      value: ""
+      kind: optional
+      help: |
+        URI of the image registry to use for pulling the ACS container images, e.g., quay.io/rhacs-eng. Default will be
+        derived from the Helm chart. Note that the default image pull secret is QUAY_RHACS_ENG_RO, which has access to
+        quay.io/rhacs-eng and all publicly accessible images.
+
+    - name: main-image-tag
+      description: Main container image tag
+      value: ""
+      kind: optional
+      help: |
+        Version string of the main container image tag, e.g., 3.73.0. Default will be derived from the Helm chart.
+
+    - name: scanner-image-tag
+      description: Scanner container image tag
+      value: ""
+      kind: optional
+      help: |
+        Version string of the scanner container image tag to use. Default will be derived from the Helm chart.
+
+    - name: scanner-db-image-tag
+      description: Scanner DB container image tag
+      value: ""
+      kind: optional
+      help: |
+        Version string of the scanner-db container image tag to use. Default will be derived from the Helm chart.
+
+    - name: collector-slim-image-tag
+      description: Collector Slim container image tag
+      value: ""
+      kind: optional
+      help: |
+        Version string of the collector-slim container image tag to use. Default will be derived from the Helm chart.
+
+    - name: central-services-helm-chart-version
+      description: Central Services Helm chart version
+      value: ""
+      kind: optional
+      help: |
+        Version string of the Helm chart to use to deploy Central Services, e.g., 73.0.0. Default is the latest
+        released chart.
+
+    - name: secured-cluster-services-helm-chart-version
+      description: Secured Cluster Services Helm chart version
+      value: ""
+      kind: optional
+      help: |
+        Version string of the Helm chart to use to deploy Secured Cluster Services. Default is the latest released
+        chart.
+
   artifacts:
     - name: admin-password
       description: Admin password for StackRox console
