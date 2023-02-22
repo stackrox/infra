@@ -21,6 +21,7 @@ spec:
         value: ""
       - name: pull-secret
         value: ""
+      - name: fips-enabled
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -74,7 +75,7 @@ spec:
             archive:
               tar: {}
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.3.10
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.6.5
         imagePullPolicy: Always
         command:
           - entrypoint.sh
@@ -108,6 +109,8 @@ spec:
             value: "{{workflow.parameters.worker-node-type}}"
           - name: REGION
             value: "{{workflow.parameters.region}}"
+          - name: FIPS_ENABLED
+            value: "{{workflow.parameters.fips-enabled}}"
         volumeMounts:
           - name: data
             mountPath: /data
@@ -117,7 +120,7 @@ spec:
 
     - name: destroy
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.3.10
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.6.5
         imagePullPolicy: Always
         command:
           - entrypoint.sh
