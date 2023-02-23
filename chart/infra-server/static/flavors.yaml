@@ -117,7 +117,7 @@
       value: ""
       kind: optional
       help: |
-        e.g. 1.19.12-gke.2100. Use 'gcloud container get-server-config --zone=us-central1' to see all versions.
+        e.g. 1.19.12-gke.2100. Use 'gcloud container get-server-config --zone=us-central1 --project srox-temp-dev-test' to see all versions.
 
     - name: pod-security-policy
       description: Enables the pod security policy admission controller for the cluster
