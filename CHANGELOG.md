@@ -9,6 +9,7 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 - Add functionality to set the image registry, image tags, and helm chart versions in openshift-4-demo
 - Add a FIPS toggle to the openshift-4 flavor
 - Improve ROSA cluster create logs
+- Improve help message for openshift-version in the openshift-4 flavor to explain OCP dev previews
 
 ## [0.6.2]
 - Bump demo flavors to the latest 3.73.2 release.
