@@ -3,7 +3,7 @@
 ##########
 - id: demo
   name: StackRox Demo
-  description: Demo running StackRox 3.73.2
+  description: Demo running StackRox 3.74.0
   availability: default
   workflow: configuration/workflow-demo.yaml
   parameters:
@@ -12,7 +12,7 @@
       value: example1
 
     - name: main-image
-      value: quay.io/rhacs-eng/main:3.73.2
+      value: quay.io/rhacs-eng/main:3.74.0
       kind: hardcoded
 
     - name: k8s-version
@@ -51,9 +51,9 @@
 
     - name: main-image
       description: StackRox Central image Docker name
-      value: quay.io/stackrox-io/main:3.73.2
+      value: quay.io/stackrox-io/main:3.74.0
       help: |
-        This must be a fully qualified image e.g. quay.io/stackrox-io/main:3.73.2.
+        This must be a fully qualified image e.g. quay.io/stackrox-io/main:3.74.0.
         Private images from quay.io/rhacs-eng and stackrox.io (legacy) can also be used.
         Other public images should also be OK.
 
@@ -313,14 +313,16 @@
       value: example1
 
     - name: openshift-version
-      description: openshift release from OCP or OKD
+      description: openshift release from OCP, OCP dev preview, or OKD
       value: ocp/stable
       kind: optional
       help: |
-        The latest RedHat enterprise OCP releases can be found at https://mirror.openshift.com/pub/openshift-v4/clients/ocp/.
-        For OCP use the path to one of the stable releases e.g. ocp/stable-4.
+        The latest stable Red Hat enterprise OCP releases can be found at https://mirror.openshift.com/pub/openshift-v4/clients/ocp/.
+        For officially released OCP versions, use the path to one of the stable releases, e.g., ocp/stable-4.
+        Dev preview Red Hat enterprise OCP builds can be found at https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp-dev-preview/.
+        For dev preview OCP versions, use the path to one of the dev preview releases, e.g., ocp-dev-preview/latest.
         Opensource OKD releases are at https://github.com/openshift/okd/releases.
-        For OKD use the release tag e.g. 4.7.0-0.okd-2021-02-25-144700.
+        For OKD, use the release tag, e.g., 4.7.0-0.okd-2021-02-25-144700.
 
     - name: image-registry
       description: ACS image registry
