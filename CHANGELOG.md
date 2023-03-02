@@ -5,11 +5,14 @@ Entries in this file should be limited to:
 Please avoid adding duplicate information across this changelog and JIRA/doc input pages.
 
 ## [NEXT RELEASE]
+
+## [0.6.3]
 - Use migrated openshift-4-demo configuration.
 - Add functionality to set the image registry, image tags, and helm chart versions in openshift-4-demo
 - Add a FIPS toggle to the openshift-4 flavor
 - Improve ROSA cluster create logs
 - Improve help message for openshift-version in the openshift-4 flavor to explain OCP dev previews
+- Bump demo and qa-demo to 3.74.0 (openshift-4-demo uses latest by default)
 
 ## [0.6.2]
 - Bump demo flavors to the latest 3.73.2 release.
