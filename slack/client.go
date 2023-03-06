@@ -99,14 +99,20 @@ func (s *slackClient) PostMessageToUser(user slack.User, options ...slack.MsgOpt
 }
 
 func (s *slackClient) updateUserEmailCache(ctx context.Context) error {
+	log.Printf("Get users")
 	users, err := s.client.GetUsersContext(ctx)
 	if err != nil {
+		log.Printf("Get users: %v", err)
 		return err
 	}
+	log.Printf("Got users")
 
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	for _, user := range users {
+		log.Printf("User: %v", user)
+		log.Printf("User.Profile: %v", user.Profile)
+		log.Printf("User.Profile.Email: %v", user.Profile.Email)
 		if user.Profile.Email == "" {
 			continue
 		}
