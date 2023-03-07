@@ -11,10 +11,6 @@ import (
 	"github.com/stackrox/infra/config"
 )
 
-const (
-	cacheUpdateInterval = time.Hour
-)
-
 // Slacker represents a type that can interact with the Slack API.
 type Slacker interface {
 	PostMessage(options ...slack.MsgOption) error
@@ -61,18 +57,32 @@ func New(cfg *config.SlackConfig) (Slacker, error) {
 		emailCache: make(map[string]slack.User),
 	}
 
-	// Update the Slack user cache every hour, in the background. If any of these background attempts fail, log the
-	// error and move along.
-	go client.backgroundUpdateUserEmailCache()
+	log.Printf("[INFO] Enabled Slack integration")
 
 	return client, nil
 }
 
 func (s *slackClient) LookupUser(email string) (slack.User, bool) {
 	s.lock.RLock()
-	defer s.lock.RUnlock()
 	user, found := s.emailCache[email]
-	return user, found
+	if found {
+		s.lock.RUnlock()
+		return user, found
+	}
+	s.lock.RUnlock()
+
+	log.Printf("[DEBUG] Lookup user: %s", email)
+	users, err := s.client.GetUserByEmail(email)
+	if err != nil {
+		log.Printf("[WARN] Lookup user error: %s, %v", email, err)
+		return nil, false
+	}
+	log.Printf("[DEBUG] Found user: %s", email)
+
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	s.emailCache[user.Profile.Email] = user
+	return user, true
 }
 
 func (s *slackClient) PostMessage(options ...slack.MsgOption) error {
@@ -83,39 +93,4 @@ func (s *slackClient) PostMessage(options ...slack.MsgOption) error {
 func (s *slackClient) PostMessageToUser(user slack.User, options ...slack.MsgOption) error {
 	_, _, err := s.client.PostMessage(user.ID, options...)
 	return err
-}
-
-func (s *slackClient) updateUserEmailCache(ctx context.Context) error {
-	log.Printf("Get users")
-	users, err := s.client.GetUsersContext(ctx)
-	if err != nil {
-		log.Printf("Get users error: %v", err)
-		return err
-	}
-	log.Printf("Got users")
-
-	s.lock.Lock()
-	defer s.lock.Unlock()
-	for _, user := range users {
-		log.Printf("User: %v", user)
-		log.Printf("User.Profile: %v", user.Profile)
-		log.Printf("User.Profile.Email: %v", user.Profile.Email)
-		if user.Profile.Email == "" {
-			continue
-		}
-		s.emailCache[user.Profile.Email] = user
-	}
-
-	return nil
-}
-
-func (s *slackClient) backgroundUpdateUserEmailCache() {
-	for {
-		ctx, cancel := context.WithTimeout(context.Background(), 600*time.Second)
-		if err := s.updateUserEmailCache(ctx); err != nil {
-			log.Printf("[ERROR] Failed to refresh Slack user cache: %v", err)
-		}
-		cancel()
-		time.Sleep(cacheUpdateInterval)
-	}
 }
