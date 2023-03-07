@@ -6,6 +6,9 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+## [0.6.4]
+- Fix Slack notifications after migration to Internal Red Hat.
+
 ## [0.6.3]
 - Use migrated openshift-4-demo configuration.
 - Add functionality to set the image registry, image tags, and helm chart versions in openshift-4-demo
