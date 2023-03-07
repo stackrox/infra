@@ -61,21 +61,23 @@ func New(cfg *config.SlackConfig) (Slacker, error) {
 }
 
 func (s *slackClient) LookupUser(email string) (*slack.User, bool) {
+	log.Printf("[DEBUG] Lookup user by email: %s", email)
 	s.lock.RLock()
 	user, found := s.emailCache[email]
 	if found {
 		s.lock.RUnlock()
+		log.Printf("[DEBUG] Cache hit for email: %s", email)
 		return user, found
 	}
 	s.lock.RUnlock()
 
-	log.Printf("[DEBUG] Lookup user by email: %s", email)
+	log.Printf("[DEBUG] Get user by email: %s", email)
 	user, err := s.client.GetUserByEmail(email)
 	if err != nil {
-		log.Printf("[WARN] Lookup user error: %s, %v", email, err)
+		log.Printf("[WARN] Get user error: %s, %v", email, err)
 		return nil, false
 	}
-	log.Printf("[DEBUG] Found user for email: %s", email)
+	log.Printf("[DEBUG] Got user for email: %s", email)
 
 	s.lock.RLock()
 	defer s.lock.RUnlock()
