@@ -65,7 +65,7 @@ func New(cfg *config.SlackConfig) (Slacker, error) {
 	log.Printf("Got client")
 
 	// Update the Slack user cache once, manually. If the initial attempt fails, bail out immediately.
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 	if err := client.updateUserEmailCache(ctx); err != nil {
 		log.Printf("could not get cache: %v", err)
