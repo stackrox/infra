@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/slack-go/slack"
 	"github.com/stackrox/infra/config"
 )
@@ -62,18 +61,6 @@ func New(cfg *config.SlackConfig) (Slacker, error) {
 		emailCache: make(map[string]slack.User),
 	}
 
-	log.Printf("Got client")
-
-	// Update the Slack user cache once, manually. If the initial attempt fails, bail out immediately.
-	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
-	defer cancel()
-	if err := client.updateUserEmailCache(ctx); err != nil {
-		log.Printf("could not get cache: %v", err)
-		return nil, errors.Wrap(err, "failed to refresh Slack user cache")
-	}
-
-	log.Printf("[DEBUG] Fetched %d Slack users", len(client.emailCache))
-
 	// Update the Slack user cache every hour, in the background. If any of these background attempts fail, log the
 	// error and move along.
 	go client.backgroundUpdateUserEmailCache()
@@ -102,7 +89,7 @@ func (s *slackClient) updateUserEmailCache(ctx context.Context) error {
 	log.Printf("Get users")
 	users, err := s.client.GetUsersContext(ctx)
 	if err != nil {
-		log.Printf("Get users: %v", err)
+		log.Printf("Get users error: %v", err)
 		return err
 	}
 	log.Printf("Got users")
@@ -124,11 +111,11 @@ func (s *slackClient) updateUserEmailCache(ctx context.Context) error {
 
 func (s *slackClient) backgroundUpdateUserEmailCache() {
 	for {
-		time.Sleep(cacheUpdateInterval)
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 600*time.Second)
 		if err := s.updateUserEmailCache(ctx); err != nil {
 			log.Printf("[ERROR] Failed to refresh Slack user cache: %v", err)
 		}
 		cancel()
+		time.Sleep(cacheUpdateInterval)
 	}
 }
