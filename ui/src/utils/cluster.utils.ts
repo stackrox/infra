@@ -19,9 +19,10 @@ export function generateClusterName(username = ''): string {
   // prepare to combine, but filter any empty part (only one that should ever be empty is user string)
   const nameArray = [userPart, datePart, randomPart].filter(Boolean);
 
-  // combine the 3 parts, truncate it at 29 characters, and remove a trailing '-', if any.
+  // combine the 3 parts, truncate it at 28 characters, and remove a trailing '-', if any.
   // Truncation is needed to allow generating wildcard certificates for OpenShift using Let's Encrypt: since LE insists
   // on the domain forming the Common Name of the certificate, the string '*.apps.<name>.openshift.infra.rox.systems'
   // must not exceed 64 characters. This leaves a budget of 29 characters for the <name> portion.
-  return nameArray.join('-').slice(0, 29).replace(/-$/, '');
+  // RS-171 - 29 chars raises openshift error: "openshift_public_hostname must be 63 characters or less"
+  return nameArray.join('-').slice(0, 28).replace(/-$/, '');
 }
