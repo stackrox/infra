@@ -66,7 +66,7 @@ spec:
             path: /data/dotenv
             archive:
               none: {}
-          - name: SSH_ACCESS.md
+          - name: SSH_ACCESS
             path: /data/ssh/SSH_ACCESS.md
             archive:
               none: {}
