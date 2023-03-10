@@ -67,7 +67,7 @@ spec:
             archive:
               none: {}
           - name: SSH_ACCESS
-            path: /data/SSH_ACCESS.md
+            path: /data/ssh/SSH_ACCESS.md
             archive:
               none: {}
           - name: data
@@ -75,7 +75,7 @@ spec:
             archive:
               tar: {}
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.6.5
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.6.8
         imagePullPolicy: Always
         command:
           - entrypoint.sh
@@ -120,7 +120,7 @@ spec:
 
     - name: destroy
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.6.5
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.6.8
         imagePullPolicy: Always
         command:
           - entrypoint.sh
