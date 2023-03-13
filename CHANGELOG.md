@@ -5,8 +5,11 @@ Entries in this file should be limited to:
 Please avoid adding duplicate information across this changelog and JIRA/doc input pages.
 
 ## [NEXT RELEASE]
+
+## [0.6.5]
 - ROX-1251: Restore SSH for OpenShift-4 clusters
 - ROX-15126: Add Openshift 4 flavor for testing performance and scaling 
+- Fix EKS by using the latest EKS automation-flavor.
 
 ## [0.6.4]
 - Fix Slack notifications after migration to Internal Red Hat.
