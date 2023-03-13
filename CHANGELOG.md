@@ -6,6 +6,7 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 - ROX-1251: Restore SSH for OpenShift-4 clusters
+- ROX-15126: Add Openshift 4 flavor for testing performance and scaling 
 
 ## [0.6.4]
 - Fix Slack notifications after migration to Internal Red Hat.
