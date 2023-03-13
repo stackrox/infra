@@ -400,6 +400,91 @@
     - name: dotenv
       description: Environment variables used to access the cluster and consoles
 
+############################
+#  openshift-4-perf-scale  #
+############################
+- id: openshift-4-perf-scale
+  name: OpenShift 4.x Perf&Scale
+  description: OpenShift 4.x Perf&Scale
+  availability: stable
+  workflow: configuration/workflow-openshift-4-perf-scale.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      value: example1
+
+    - name: openshift-version
+      description: openshift release from OCP, OCP dev preview, or OKD
+      value: ocp/stable
+      kind: optional
+      help: |
+        The latest stable Red Hat enterprise OCP releases can be found at https://mirror.openshift.com/pub/openshift-v4/clients/ocp/.
+        For officially released OCP versions, use the path to one of the stable releases, e.g., ocp/stable-4.
+        Dev preview Red Hat enterprise OCP builds can be found at https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp-dev-preview/.
+        For dev preview OCP versions, use the path to one of the dev preview releases, e.g., ocp-dev-preview/latest.
+        Opensource OKD releases are at https://github.com/openshift/okd/releases.
+        For OKD, use the release tag, e.g., 4.7.0-0.okd-2021-02-25-144700.
+
+    - name: pull-secret
+      description: A cloud.redhat.com pull secret
+      kind: optional
+      fromFile: true
+      help: |
+        Use this if you want to associate this cluster with a particular cloud.redhat.com account.
+        Get the pull secret from: https://cloud.redhat.com/openshift/install/pull-secret
+        You might do this for access to OpenShift Cluster Manager for example.
+        By default an infra automation account is used.
+
+    - name: master-node-type
+      description: the type of master nodes
+      value: c2d-highcpu-16
+      kind: optional
+
+    - name: master-node-count
+      description: number of master nodes
+      value: 3
+      kind: optional
+
+    - name: worker-node-type
+      description: the type of worker nodes
+      value: c2d-highcpu-8
+      kind: optional
+
+    - name: worker-node-count
+      description: number of worker nodes
+      value: 9
+      kind: optional
+
+    - name: region
+      description: Google Cloud zone to deploy infrastructure into.
+      value: us-east1
+      kind: optional
+
+    - name: fips-enabled
+      description: should fips be enabled
+      value: false
+      kind: optional
+
+  artifacts:
+    - name: kubeconfig
+      description: Kube config for connecting to this cluster
+
+    - name: kubeadmin-password
+      description: The kubeadmin user password for the openshift console
+
+    - name: url
+      description: The URL for the openshift console
+      tags: [url]
+
+    - name: SSH_ACCESS
+      description: Instructions for obtaining SSH access to instances in your cluster
+
+    - name: data
+      description: An archive that includes ssh keys to connect to cluster nodes
+
+    - name: dotenv
+      description: Environment variables used to access the cluster and consoles
+
 #####################
 #  AWS EKS          #
 #####################
