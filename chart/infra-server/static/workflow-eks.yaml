@@ -43,7 +43,7 @@ spec:
             archive:
               tar: {}
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/eks:0.2.16
+        image: quay.io/stackrox-io/ci:automation-flavors-eks-0.6.8-1-g55e1de243a-snapshot
         imagePullPolicy: Always
         command:
           - entrypoint
@@ -87,7 +87,7 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/eks:0.2.16
+        image: quay.io/stackrox-io/ci:automation-flavors-eks-0.6.8-1-g55e1de243a-snapshot
         command:
           - entrypoint
         imagePullPolicy: Always
