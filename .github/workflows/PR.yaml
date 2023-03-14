@@ -47,7 +47,7 @@ jobs:
           flavor: gke-default
           name: infra-pr-${{ github.event.pull_request.number }}
           args: machine-type=e2-medium,nodes=1,gcp-image-type=ubuntu_containerd
-          lifespan: 4h
+          lifespan: 24h
           wait: true
           token: ${{ secrets.INFRA_TOKEN }}
 
