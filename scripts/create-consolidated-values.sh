@@ -27,21 +27,13 @@ create_consolidated_values() {
     } >> "$values_file"
 
     pushd "$ROOT/chart/infra-server/configuration/$environment" > /dev/null
-    shopt -s globstar nullglob
-    for cfg_file in **; do
-        if [[ -d "$cfg_file" ]]; then
-            continue
-        fi
-        if [[ "$cfg_file" =~ (README|DS_Store) ]]; then
-            continue
-        fi
+    while IFS='' read -r cfg_file; do
+      local helm_safe_key="${cfg_file//[.-]/_}"
+      helm_safe_key="${helm_safe_key////__}"
 
-        local helm_safe_key="${cfg_file//[.-]/_}"
-        helm_safe_key="${helm_safe_key////__}"
-
-        echo "$helm_safe_key: $(base64 < "$cfg_file" | tr -d '\n')" >> "$values_file"
-        echo >> "$values_file"
-    done
+      echo "$helm_safe_key: $(base64 < "$cfg_file" | tr -d '\n')" >> "$values_file"
+      echo >> "$values_file"
+    done < <(find . -type f -not -name '*.md' -not -name '*.DS_Store' | cut -c3-)
     popd > /dev/null
 }
 
