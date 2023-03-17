@@ -186,6 +186,16 @@ spec:
             value: "{{ workflow.parameters.secured-cluster-services-helm-chart-version }}"
           - name: ANSIBLE_STDOUT_CALLBACK
             value: debug
+          - name: AUTH_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: demo-secrets
+                key: AUTH_CLIENT_ID
+          - name: AUTH_DOMAIN
+            valueFrom:
+              secretKeyRef:
+                name: demo-secrets
+                key: AUTH_DOMAIN
         volumeMounts:
           - name: data
             mountPath: /data
