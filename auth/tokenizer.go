@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"log"
 	"strings"
 	"time"
 
@@ -279,16 +278,12 @@ func (t serviceAccountTokenizer) Generate(svcacct v1.ServiceAccount) (string, er
 // Validate validates a service account JWT and returns the contained
 // v1.ServiceAccount.
 func (t serviceAccountTokenizer) Validate(token string) (v1.ServiceAccount, error) {
-	log.Printf("this is the token %s", token)
-
 	var claims serviceAccountValidator
 	if _, err := jwt.ParseWithClaims(token, &claims, func(_ *jwt.Token) (interface{}, error) {
 		return t.secret, nil
 	}); err != nil {
 		return v1.ServiceAccount{}, err
 	}
-
-	log.Printf("these are the claims %v", claims)
 
 	return v1.ServiceAccount(claims), nil
 }
