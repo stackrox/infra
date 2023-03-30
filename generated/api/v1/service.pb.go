@@ -264,7 +264,6 @@ type WhoamiResponse struct {
 	// Principal represents a possible type of authenticated principal.
 	//
 	// Types that are valid to be assigned to Principal:
-	//
 	//	*WhoamiResponse_User
 	//	*WhoamiResponse_ServiceAccount
 	Principal            isWhoamiResponse_Principal `protobuf_oneof:"principal"`
