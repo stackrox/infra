@@ -256,17 +256,18 @@ type serviceAccountTokenizer struct {
 
 // Generate generates a service account JWT containing a v1.ServiceAccount.
 func (t serviceAccountTokenizer) Generate(svcacct v1.ServiceAccount) (string, error) {
+	// Set issuing and expiration times on new ServiceAccount.
+	now := time.Now()
+	svcacct.ExpiresAt = now.Add(tokenLifetime).Unix()
+	svcacct.NotBefore = now.Unix()
+	svcacct.IssuedAt = now.Unix()
+
 	svc := serviceAccountValidator(svcacct)
 
 	// Ensure that our service account is well-formed.
 	if err := svc.Valid(); err != nil {
 		return "", errors.Wrap(err, "invalid service account")
 	}
-
-	now := time.Now()
-	svc.ExpiresAt = now.Add(tokenLifetime).Unix()
-	svc.NotBefore = now.Unix()
-	svc.IssuedAt = now.Unix()
 
 	// Generate new token object, containing the wrapped data.
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, svc)
