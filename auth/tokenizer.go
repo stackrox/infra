@@ -2,7 +2,7 @@ package auth
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -269,7 +269,7 @@ func (t serviceAccountTokenizer) Generate(svcacct v1.ServiceAccount) (string, er
 // Validate validates a service account JWT and returns the contained
 // v1.ServiceAccount.
 func (t serviceAccountTokenizer) Validate(token string) (v1.ServiceAccount, error) {
-	fmt.Println("this is the token %s", token)
+	log.Printf("this is the token %s", token)
 
 	var claims serviceAccountValidator
 	if _, err := jwt.ParseWithClaims(token, &claims, func(_ *jwt.Token) (interface{}, error) {
@@ -278,7 +278,7 @@ func (t serviceAccountTokenizer) Validate(token string) (v1.ServiceAccount, erro
 		return v1.ServiceAccount{}, err
 	}
 
-	fmt.Println("these are the claims %v", claims)
+	log.Printf("these are the claims %v", claims)
 
 	return v1.ServiceAccount(claims), nil
 }
