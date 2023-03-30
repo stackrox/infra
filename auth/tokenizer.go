@@ -131,8 +131,8 @@ func (c oidcClaims) Valid() error {
 	switch {
 	case !c.EmailVerified:
 		return errors.New("email address is not verified")
-	case !(strings.HasSuffix(c.Email, emailSuffixStackRox) || strings.HasSuffix(c.Email, emailSuffixRedHat)):
-		return errors.Errorf("%q email address does not belong to StackRox or Red Hat", c.Email)
+	case !strings.HasSuffix(c.Email, emailSuffixRedHat):
+		return errors.Errorf("%q email address does not belong to Red Hat", c.Email)
 	default:
 		c.StandardClaims.IssuedAt -= clockDriftLeeway
 		valid := c.StandardClaims.Valid()
