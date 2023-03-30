@@ -22,7 +22,7 @@ import (
 // https://github.com/dgrijalva/jwt-go/issues/314#issuecomment-494585527
 const (
 	clockDriftLeeway = int64(10 * time.Second)
-	tokenLifetime    = 1 * time.Hour
+	tokenLifetime    = 1 * time.Minute
 
 	emailSuffixRedHat = "@redhat.com"
 )
