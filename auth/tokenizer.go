@@ -214,6 +214,7 @@ func (t userTokenizer) Generate(user *v1.User) (string, error) {
 // Validate validates a user JWT and returns the contained v1.User struct.
 func (t userTokenizer) Validate(token string) (*v1.User, error) {
 	var claims userClaims
+
 	if _, err := jwt.ParseWithClaims(token, &claims, func(_ *jwt.Token) (interface{}, error) {
 		return t.secret, nil
 	}); err != nil {
@@ -229,7 +230,16 @@ func (s serviceAccountValidator) Valid() error {
 	if isExcluded {
 		return errors.New("email address is excluded")
 	}
+
+	now := time.Now().Unix()
+
 	switch {
+	case s.ExpiresAt < now:
+		return errors.New("token expired")
+	case s.NotBefore > now:
+		return errors.New("token not yet valid")
+	case s.IssuedAt > now:
+		return errors.New("token issued in the future")
 	case s.Name == "":
 		return errors.New("name was empty")
 	case s.Description == "":
