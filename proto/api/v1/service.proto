@@ -71,6 +71,15 @@ message ServiceAccount {
 
     // Email is the StackRox email address for the service account.
     string Email = 3;
+
+    // IssuedAt is the time of issuing the service account token
+    google.protobuf.Timestamp IssuedAt = 4;
+
+    // NotBefore is the beginning of service account token valid time period.
+    google.protobuf.Timestamp NotBefore = 5;
+
+     // ExpiresAt is the end of service account token valid time period.
+    google.protobuf.Timestamp ExpiresAt = 6;
 }
 
 message TokenResponse {

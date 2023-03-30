@@ -12,6 +12,7 @@ import (
 	"github.com/stackrox/infra/auth/claimrule"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"golang.org/x/oauth2"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // clockDriftLeeway is used to account for minor clock drift between our host,
@@ -21,9 +22,9 @@ import (
 // https://github.com/dgrijalva/jwt-go/issues/314#issuecomment-494585527
 const (
 	clockDriftLeeway = int64(10 * time.Second)
+	tokenLifetime    = 1 * time.Hour
 
-	emailSuffixStackRox = "@stackrox.com"
-	emailSuffixRedHat   = "@redhat.com"
+	emailSuffixRedHat = "@redhat.com"
 )
 
 var excludedEmails = map[string]bool{"infra@stackrox.com": true}
@@ -233,8 +234,8 @@ func (s serviceAccountValidator) Valid() error {
 		return errors.New("name was empty")
 	case s.Description == "":
 		return errors.New("description was empty")
-	case !(strings.HasSuffix(s.Email, emailSuffixStackRox) || strings.HasSuffix(s.Email, emailSuffixRedHat)):
-		return errors.Errorf("%q is not a StackRox or Red Hat address", s.Email)
+	case !strings.HasSuffix(s.Email, emailSuffixRedHat):
+		return errors.Errorf("%q is not a Red Hat address", s.Email)
 	default:
 		return nil
 	}
@@ -252,6 +253,11 @@ func (t serviceAccountTokenizer) Generate(svcacct v1.ServiceAccount) (string, er
 	if err := svc.Valid(); err != nil {
 		return "", errors.Wrap(err, "invalid service account")
 	}
+
+	now := time.Now()
+	svc.ExpiresAt = timestamppb.New(now.Add(tokenLifetime))
+	svc.NotBefore = timestamppb.New(now)
+	svc.IssuedAt = timestamppb.New(now)
 
 	// Generate new token object, containing the wrapped data.
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, svc)
