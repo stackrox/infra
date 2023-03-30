@@ -73,13 +73,13 @@ message ServiceAccount {
     string Email = 3;
 
     // IssuedAt is the time of issuing the service account token
-    google.protobuf.Timestamp IssuedAt = 4;
+    int64 IssuedAt = 4;
 
     // NotBefore is the beginning of service account token valid time period.
-    google.protobuf.Timestamp NotBefore = 5;
+    int64 NotBefore = 5;
 
      // ExpiresAt is the end of service account token valid time period.
-    google.protobuf.Timestamp ExpiresAt = 6;
+    int64 ExpiresAt = 6;
 }
 
 message TokenResponse {
