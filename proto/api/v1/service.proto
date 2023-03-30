@@ -1,487 +1,455 @@
 syntax = "proto3";
 
-option go_package = "v1";
+package proto.api.v1;
 
 import "google/api/annotations.proto";
 import "google/protobuf/duration.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
-package v1;
+option go_package = "api/v1";
 
 // ResourceByID represents a generic reference to a named/unique resource.
 message ResourceByID {
-    string id = 1;
+  string id = 1;
 }
 
 message Version {
-    google.protobuf.Timestamp BuildDate         = 1;
-    string GitCommit     = 2;
-    string GoVersion     = 3;
-    string Platform      = 4;
-    string Version       = 5;
-    string Workflow      = 6;
+  google.protobuf.Timestamp BuildDate = 1;
+  string GitCommit = 2;
+  string GoVersion = 3;
+  string Platform = 4;
+  string Version = 5;
+  string Workflow = 6;
 }
 
 service VersionService {
-
-    rpc GetVersion (google.protobuf.Empty) returns (Version) {
-        option (google.api.http) = {
-            get: "/v1/version"
-        };
-    }
-
+  rpc GetVersion(google.protobuf.Empty) returns (Version) {
+    option (google.api.http) = {get: "/v1/version"};
+  }
 }
 
 // WhoamiResponse represents details about the current authenticated principal.
 message WhoamiResponse {
-    // Principal represents a possible type of authenticated principal.
-    oneof principal {
-        // User represents an authenticated human.
-        User User = 1;
+  // Principal represents a possible type of authenticated principal.
+  oneof principal {
+    // User represents an authenticated human.
+    User User = 1;
 
-        // ServiceAccount represents an authenticated service account robot.
-        ServiceAccount ServiceAccount = 2;
-    }
+    // ServiceAccount represents an authenticated service account robot.
+    ServiceAccount ServiceAccount = 2;
+  }
 }
 
 // User represents an authenticated (human) principal.
 message User {
-    // Expiry is the expiration date of this user session. Used only as a hint
-    // to the user and not for enforcement.
-    google.protobuf.Timestamp Expiry         = 1;
+  // Expiry is the expiration date of this user session. Used only as a hint
+  // to the user and not for enforcement.
+  google.protobuf.Timestamp Expiry = 1;
 
-    // Name is the full name of the user.
-    string Name = 2;
+  // Name is the full name of the user.
+  string Name = 2;
 
-    // Email is the email address of the user.
-    string Email = 3;
+  // Email is the email address of the user.
+  string Email = 3;
 
-    // Picture is a URL linking to this user's profile picture, if available.
-    string Picture = 4;
+  // Picture is a URL linking to this user's profile picture, if available.
+  string Picture = 4;
 }
 
 // ServiceAccount represents an authenticated service account (robot) principal.
 message ServiceAccount {
-    // Name is a human readable name for the service account.
-    string Name = 1;
+  // Name is a human readable name for the service account.
+  string Name = 1;
 
-    // Description is a human readable description for the service account.
-    string Description = 2;
+  // Description is a human readable description for the service account.
+  string Description = 2;
 
-    // Email is the StackRox email address for the service account.
-    string Email = 3;
+  // Email is the StackRox email address for the service account.
+  string Email = 3;
 }
 
 message TokenResponse {
-    // Account is the service account the token was generated for.
-    ServiceAccount Account = 1;
+  // Account is the service account the token was generated for.
+  ServiceAccount Account = 1;
 
-    // Token is the token generated for the service account.
-    string Token = 2;
+  // Token is the token generated for the service account.
+  string Token = 2;
 }
 
 service UserService {
-    // Whoami provides information about the currently authenticated principal.
-    rpc Whoami (google.protobuf.Empty) returns (WhoamiResponse) {
-        option (google.api.http) = {
-            get: "/v1/whoami"
-        };
-    }
+  // Whoami provides information about the currently authenticated principal.
+  rpc Whoami(google.protobuf.Empty) returns (WhoamiResponse) {
+    option (google.api.http) = {get: "/v1/whoami"};
+  }
 
-    // CreateToken generates an arbitrary service account token
-    rpc CreateToken (ServiceAccount) returns (TokenResponse) {
-        option (google.api.http) = {
-            post: "/v1/token-create"
-            body: "*"
-        };
-    }
+  // CreateToken generates an arbitrary service account token
+  rpc CreateToken(ServiceAccount) returns (TokenResponse) {
+    option (google.api.http) = {
+      post: "/v1/token-create"
+      body: "*"
+    };
+  }
 
-    // Token generates a service account token for the current user.
-    rpc Token (google.protobuf.Empty) returns (TokenResponse) {
-        option (google.api.http) = {
-            post: "/v1/token"
-            body: "*"
-        };
-    }
-
+  // Token generates a service account token for the current user.
+  rpc Token(google.protobuf.Empty) returns (TokenResponse) {
+    option (google.api.http) = {
+      post: "/v1/token"
+      body: "*"
+    };
+  }
 }
 
 // Parameter represents a single parameter that is needed to launch a flavor.
 message Parameter {
-    // Name is the unique name of the parameter.
-    string Name = 1;
+  // Name is the unique name of the parameter.
+  string Name = 1;
 
-    // Description is a human readable description for the parameter.
-    string Description = 2;
+  // Description is a human readable description for the parameter.
+  string Description = 2;
 
-    // Value that this parameter could have.
-    // If the parameter is not optional, then value serves as an example.
-    // If the parameter is optional, then value serves as a default.
-    // If the parameter is internal, then value serves as a hardcoded constant.
-    string Value = 3;
+  // Value that this parameter could have.
+  // If the parameter is not optional, then value serves as an example.
+  // If the parameter is optional, then value serves as a default.
+  // If the parameter is internal, then value serves as a hardcoded constant.
+  string Value = 3;
 
-    // Optional indicates that this parameter can be optionally provided by a
-    // user. If the user does not provide a value, then Value serves as a
-    // default.
-    bool Optional = 4;
+  // Optional indicates that this parameter can be optionally provided by a
+  // user. If the user does not provide a value, then Value serves as a
+  // default.
+  bool Optional = 4;
 
-    // Internal indicates that this parameter should not be provided by a user,
-    // but rather treats Value as a hardcoded constant.
-    bool Internal = 5;
+  // Internal indicates that this parameter should not be provided by a user,
+  // but rather treats Value as a hardcoded constant.
+  bool Internal = 5;
 
-    // The relative order of importance of this parameter for when presenting in
-    // a UI for example.
-    int32 Order = 6;
+  // The relative order of importance of this parameter for when presenting in
+  // a UI for example.
+  int32 Order = 6;
 
-    string Help = 7;
+  string Help = 7;
 
-    // Indicates that the value for this parameter can be provided from the
-    // contents of a file.
-    bool FromFile = 8;
+  // Indicates that the value for this parameter can be provided from the
+  // contents of a file.
+  bool FromFile = 8;
 }
 
 // FlavorArtifact represents a single artifact that is produced by a flavor.
 message FlavorArtifact {
-    // Name is the unique name of the artifact.
-    string Name = 1;
+  // Name is the unique name of the artifact.
+  string Name = 1;
 
-    // Description is a human readable description for the artifact.
-    string Description = 2;
+  // Description is a human readable description for the artifact.
+  string Description = 2;
 
-    // Tags is a set of artifact tags.
-    map<string, google.protobuf.Empty> Tags = 3;
+  // Tags is a set of artifact tags.
+  map<string, google.protobuf.Empty> Tags = 3;
 }
 
 // Flavor represents a configured cluster flavor.
 message Flavor {
-    // ID is the unique, human type-able, ID for the flavor.
-    string ID = 1;
+  // ID is the unique, human type-able, ID for the flavor.
+  string ID = 1;
 
-    // Name is a human readable name for the flavor.
-    string Name = 2;
+  // Name is a human readable name for the flavor.
+  string Name = 2;
 
-    // Description is a human readable description for the flavor.
-    string Description = 3;
+  // Description is a human readable description for the flavor.
+  string Description = 3;
 
-    // availability represents the availability classification levels.
-    enum availability {
-        // alpha is completely experemental, and is not expected to work in any way.
-        alpha = 0;
+  // availability represents the availability classification levels.
+  enum availability {
+    // alpha is completely experemental, and is not expected to work in any way.
+    alpha = 0;
 
-        // beta is being tested, and is expected to work with minor issues.
-        beta = 1;
+    // beta is being tested, and is expected to work with minor issues.
+    beta = 1;
 
-        // stable is available for public consumption, and works without issue.
-        stable = 2;
+    // stable is available for public consumption, and works without issue.
+    stable = 2;
 
-        // default is stable, and available for customer demo consumption.
-        // Exactly 1 flavor should be configured as default.
-        default = 3;
-    }
+    // default is stable, and available for customer demo consumption.
+    // Exactly 1 flavor should be configured as default.
+    default = 3;
+  }
 
-    // Description is an availability classification for the flavor.
-    availability Availability = 4;
+  // Description is an availability classification for the flavor.
+  availability Availability = 4;
 
-    // Parameters is a map of parameters required for launching this flavor.
-    map<string, Parameter> Parameters = 5;
+  // Parameters is a map of parameters required for launching this flavor.
+  map<string, Parameter> Parameters = 5;
 
-    // Artifacts is a map of artifacts produced by this flavor.
-    map<string, FlavorArtifact> Artifacts = 6;
+  // Artifacts is a map of artifacts produced by this flavor.
+  map<string, FlavorArtifact> Artifacts = 6;
 }
 
 // FlavorListRequest represents a request to FlavorService.List.
 message FlavorListRequest {
-    // all indicates that all flavors should be returned, by default
-    // availability alpha clusters are excluded.
-    bool all = 1;
+  // all indicates that all flavors should be returned, by default
+  // availability alpha clusters are excluded.
+  bool all = 1;
 }
 
 // FlavorListResponse represents details about the available cluster flavors.
 message FlavorListResponse {
-    // Default is the flavor ID of the default cluster flavor.
-    string Default = 1;
+  // Default is the flavor ID of the default cluster flavor.
+  string Default = 1;
 
-    // Flavors is a list of all available cluster flavors.
-    repeated Flavor Flavors = 2;
+  // Flavors is a list of all available cluster flavors.
+  repeated Flavor Flavors = 2;
 }
 
 // FlavorService provides flavor based functionality.
 service FlavorService {
-    // List provides information about the available flavors.
-    rpc List (FlavorListRequest) returns (FlavorListResponse) {
-        option (google.api.http) = {
-            get: "/v1/flavor"
-        };
-    }
+  // List provides information about the available flavors.
+  rpc List(FlavorListRequest) returns (FlavorListResponse) {
+    option (google.api.http) = {get: "/v1/flavor"};
+  }
 
-    // Info provides information about a specific flavor.
-    rpc Info (ResourceByID) returns (Flavor) {
-        option (google.api.http) = {
-            get: "/v1/flavor/{id}"
-        };
-    }
-
+  // Info provides information about a specific flavor.
+  rpc Info(ResourceByID) returns (Flavor) {
+    option (google.api.http) = {get: "/v1/flavor/{id}"};
+  }
 }
 
 // Status represents the various cluster states.
 enum Status {
-    // FAILED is the state when the cluster has failed in one way or another.
-    FAILED = 0;
+  // FAILED is the state when the cluster has failed in one way or another.
+  FAILED = 0;
 
-    // CREATING is the state when the cluster is being created.
-    CREATING = 1;
+  // CREATING is the state when the cluster is being created.
+  CREATING = 1;
 
-    // READY is the state when the cluster is available and ready for use.
-    READY = 2;
+  // READY is the state when the cluster is available and ready for use.
+  READY = 2;
 
-    // DESTROYING is the state when the cluster is being destroyed.
-    DESTROYING = 3;
+  // DESTROYING is the state when the cluster is being destroyed.
+  DESTROYING = 3;
 
-    // FINISHED is the state when the cluster has been successfully destroyed.
-    FINISHED = 4;
+  // FINISHED is the state when the cluster has been successfully destroyed.
+  FINISHED = 4;
 }
 
 // Cluster represents a single cluster.
 message Cluster {
-    // ID is the unique ID for the cluster.
-    string ID = 1;
+  // ID is the unique ID for the cluster.
+  string ID = 1;
 
-    // Status is the current status for the cluster.
-    Status Status = 2;
+  // Status is the current status for the cluster.
+  Status Status = 2;
 
-    // Flavor is the original flavor ID that launched this cluster.
-    string Flavor = 3;
+  // Flavor is the original flavor ID that launched this cluster.
+  string Flavor = 3;
 
-    // Owner is the email address for the cluster owner.
-    string Owner = 4;
+  // Owner is the email address for the cluster owner.
+  string Owner = 4;
 
-    // CreatedOn is the timestamp on which the cluster started being created.
-    google.protobuf.Timestamp CreatedOn         = 5;
+  // CreatedOn is the timestamp on which the cluster started being created.
+  google.protobuf.Timestamp CreatedOn = 5;
 
-    // DestroyedOn is the timestamp on which the cluster finished being
-    // destroyed.
-    google.protobuf.Timestamp DestroyedOn         = 6;
+  // DestroyedOn is the timestamp on which the cluster finished being
+  // destroyed.
+  google.protobuf.Timestamp DestroyedOn = 6;
 
-    // Lifespan is the duration for which the cluster should be kept alive.
-    google.protobuf.Duration Lifespan = 7;
+  // Lifespan is the duration for which the cluster should be kept alive.
+  google.protobuf.Duration Lifespan = 7;
 
-    // Description is a human readable description for the cluster.
-    string Description = 8;
+  // Description is a human readable description for the cluster.
+  string Description = 8;
 
-    // URL is an optional URL for this cluster.
-    string URL = 9;
+  // URL is an optional URL for this cluster.
+  string URL = 9;
 
-    // Connect is a command to add kube connection information to kubeconfig.
-    string Connect = 10;
+  // Connect is a command to add kube connection information to kubeconfig.
+  string Connect = 10;
 }
 
 // ClusterListRequest represents a request to ClusterService.List.
 message ClusterListRequest {
-    // all indicates that all clusters should be returned, not just the ones
-    // owned by the user.
-    bool all = 1;
+  // all indicates that all clusters should be returned, not just the ones
+  // owned by the user.
+  bool all = 1;
 
-    // expired indicates that expired clusters should be returned, not just the
-    // ones that are launching/ready.
-    bool expired = 2;
+  // expired indicates that expired clusters should be returned, not just the
+  // ones that are launching/ready.
+  bool expired = 2;
 
-    // list clusters whose ID matches this prefix.
-    string prefix = 3;
+  // list clusters whose ID matches this prefix.
+  string prefix = 3;
 }
 
 // ClusterListResponse represents details about all clusters.
 message ClusterListResponse {
-    // Clusters is a list of all clusters.
-    repeated Cluster Clusters = 1;
+  // Clusters is a list of all clusters.
+  repeated Cluster Clusters = 1;
 }
 
 message LifespanRequest {
-    // ID is the unique ID for the cluster.
-    string id = 1;
+  // ID is the unique ID for the cluster.
+  string id = 1;
 
-    // Lifespan is the new lifespan.
-    google.protobuf.Duration Lifespan = 2;
+  // Lifespan is the new lifespan.
+  google.protobuf.Duration Lifespan = 2;
 
-    // method represents the various lifespan operations.
-    enum Method {
-        // REPLACE indicates that the given lifespan should replace the current
-        // lifespan.
-        REPLACE = 0;
+  // method represents the various lifespan operations.
+  enum Method {
+    // REPLACE indicates that the given lifespan should replace the current
+    // lifespan.
+    REPLACE = 0;
 
-        // ADD indicates that the given lifespan should be added to the current
-        // lifespan.
-        ADD = 1;
+    // ADD indicates that the given lifespan should be added to the current
+    // lifespan.
+    ADD = 1;
 
-        // SUBTRACT indicates that the given lifespan should be subtracted from
-        // the current lifespan.
-        SUBTRACT = 2;
-    }
+    // SUBTRACT indicates that the given lifespan should be subtracted from
+    // the current lifespan.
+    SUBTRACT = 2;
+  }
 
-    Method method = 3;
+  Method method = 3;
 }
 
 // CreateClusterRequest represents details for launching a new cluster.
 message CreateClusterRequest {
-    // ID is the flavor ID to launch.
-    string ID = 1;
+  // ID is the flavor ID to launch.
+  string ID = 1;
 
-    // Lifespan is the initial cluster lifespan.
-    google.protobuf.Duration Lifespan = 2;
+  // Lifespan is the initial cluster lifespan.
+  google.protobuf.Duration Lifespan = 2;
 
-    // Parameters is a map of launch parameter names to values.
-    map<string, string> Parameters = 3;
+  // Parameters is a map of launch parameter names to values.
+  map<string, string> Parameters = 3;
 
-    // Description is a human readable description for the cluster.
-    string Description = 4;
+  // Description is a human readable description for the cluster.
+  string Description = 4;
 
-    // NoSlack is used to skip sending Slack messages for cluster lifecycle
-    // events.
-    bool NoSlack = 5;
+  // NoSlack is used to skip sending Slack messages for cluster lifecycle
+  // events.
+  bool NoSlack = 5;
 
-    // SlackDM is used to choose direct messages for cluster lifecycle
-    // events.
-    bool SlackDM = 6;
+  // SlackDM is used to choose direct messages for cluster lifecycle
+  // events.
+  bool SlackDM = 6;
 }
 
 message Artifact {
-    string Name = 1;
+  string Name = 1;
 
-    string Description = 2;
+  string Description = 2;
 
-    string URL = 3;
+  string URL = 3;
 
-    int32 Mode = 4;
+  int32 Mode = 4;
 }
 
 message ClusterArtifacts {
-    repeated Artifact Artifacts = 1;
+  repeated Artifact Artifacts = 1;
 }
 
 // Log represents the logs from a specific pod.
 message Log {
-    // Name is the name given to this pod in the workflow.
-    string Name  = 1;
+  // Name is the name given to this pod in the workflow.
+  string Name = 1;
 
-    // Started is the time at which this pod was started. Used for ordering
-    // between pods.
-    google.protobuf.Timestamp Started = 2;
+  // Started is the time at which this pod was started. Used for ordering
+  // between pods.
+  google.protobuf.Timestamp Started = 2;
 
-    // Body is the raw pod logs.
-    bytes Body = 3;
+  // Body is the raw pod logs.
+  bytes Body = 3;
 
-    // Message surfaces step state from Argo.
-    string Message = 4;
+  // Message surfaces step state from Argo.
+  string Message = 4;
 }
 
 // LogsResponse represents a collection of logs.
 message LogsResponse {
-    // Logs are all of the logs from a cluster.
-    repeated Log Logs = 1;
+  // Logs are all of the logs from a cluster.
+  repeated Log Logs = 1;
 }
 
 // FlavorService provides flavor based functionality.
 service ClusterService {
-    // Info provides information about a specific cluster.
-    rpc Info (ResourceByID) returns (Cluster) {
-        option (google.api.http) = {
-            get: "/v1/cluster/{id}"
-        };
-    }
+  // Info provides information about a specific cluster.
+  rpc Info(ResourceByID) returns (Cluster) {
+    option (google.api.http) = {get: "/v1/cluster/{id}"};
+  }
 
-    // List provides information about the available clusters.
-    rpc List (ClusterListRequest) returns (ClusterListResponse) {
-        option (google.api.http) = {
-            get: "/v1/cluster"
-        };
-    }
+  // List provides information about the available clusters.
+  rpc List(ClusterListRequest) returns (ClusterListResponse) {
+    option (google.api.http) = {get: "/v1/cluster"};
+  }
 
-    // Lifespan updates the lifespan for a specific cluster.
-    rpc Lifespan (LifespanRequest) returns (google.protobuf.Duration) {
-        option (google.api.http) = {
-            post: "/v1/cluster/{id}/lifespan"
-            body: "*"
-        };
-    }
+  // Lifespan updates the lifespan for a specific cluster.
+  rpc Lifespan(LifespanRequest) returns (google.protobuf.Duration) {
+    option (google.api.http) = {
+      post: "/v1/cluster/{id}/lifespan"
+      body: "*"
+    };
+  }
 
-    // Create launches a new cluster.
-    rpc Create (CreateClusterRequest) returns (ResourceByID) {
-        option (google.api.http) = {
-            post: "/v1/cluster"
-            body: "*"
-        };
-    }
+  // Create launches a new cluster.
+  rpc Create(CreateClusterRequest) returns (ResourceByID) {
+    option (google.api.http) = {
+      post: "/v1/cluster"
+      body: "*"
+    };
+  }
 
-    // Artifacts returns the artifacts for a specific cluster.
-    rpc Artifacts (ResourceByID) returns (ClusterArtifacts) {
-        option (google.api.http) = {
-            get: "/v1/cluster/{id}/artifacts"
-        };
-    }
+  // Artifacts returns the artifacts for a specific cluster.
+  rpc Artifacts(ResourceByID) returns (ClusterArtifacts) {
+    option (google.api.http) = {get: "/v1/cluster/{id}/artifacts"};
+  }
 
-    // Delete deletes an existing cluster.
-    rpc Delete (ResourceByID) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-            delete: "/v1/cluster/{id}"
-        };
-    }
+  // Delete deletes an existing cluster.
+  rpc Delete(ResourceByID) returns (google.protobuf.Empty) {
+    option (google.api.http) = {delete: "/v1/cluster/{id}"};
+  }
 
-    // Logs returns the logs for a specific cluster.
-    rpc Logs (ResourceByID) returns (LogsResponse) {
-        option (google.api.http) = {
-            get: "/v1/cluster/{id}/logs"
-        };
-    }
+  // Logs returns the logs for a specific cluster.
+  rpc Logs(ResourceByID) returns (LogsResponse) {
+    option (google.api.http) = {get: "/v1/cluster/{id}/logs"};
+  }
 }
 
 message CliUpgradeRequest {
-    string os   = 1;
-    string arch = 2;
+  string os = 1;
+  string arch = 2;
 }
 
 message CliUpgradeResponse {
-    bytes fileChunk = 1;
+  bytes fileChunk = 1;
 }
 
 // CliService provides an upgrade path for the command line interface.
 service CliService {
-    // Upgrade - gets an updated binary if it exists.
-    rpc Upgrade (CliUpgradeRequest) returns (stream CliUpgradeResponse) {
-        option (google.api.http) = {
-            get: "/v1/cli/{os}/{arch}/upgrade"
-        };
-    }
+  // Upgrade - gets an updated binary if it exists.
+  rpc Upgrade(CliUpgradeRequest) returns (stream CliUpgradeResponse) {
+    option (google.api.http) = {get: "/v1/cli/{os}/{arch}/upgrade"};
+  }
 }
 
 message InfraStatus {
-    // MaintenanceActive is an indicator whether a maintenance is ongoing.
-    bool MaintenanceActive = 1;
-    // Maintainer is the email of the person currently doing maintenance.
-    string Maintainer      = 2;
+  // MaintenanceActive is an indicator whether a maintenance is ongoing.
+  bool MaintenanceActive = 1;
+  // Maintainer is the email of the person currently doing maintenance.
+  string Maintainer = 2;
 }
 
 // InfraStatusService provides information on the status of the server.
 service InfraStatusService {
+  // GetStatus gets the maintenance
+  rpc GetStatus(google.protobuf.Empty) returns (InfraStatus) {
+    option (google.api.http) = {get: "/v1/status"};
+  }
 
-    // GetStatus gets the maintenance
-    rpc GetStatus (google.protobuf.Empty) returns (InfraStatus) {
-        option (google.api.http) = {
-            get: "/v1/status"
-        };
-    }
+  // ResetStatus resets the maintenance
+  rpc ResetStatus(google.protobuf.Empty) returns (InfraStatus) {
+    option (google.api.http) = {delete: "/v1/status"};
+  }
 
-    // ResetStatus resets the maintenance
-    rpc ResetStatus (google.protobuf.Empty) returns (InfraStatus) {
-        option (google.api.http) = {
-            delete: "/v1/status"
-        };
-    }
-
-    // SetStatus sets the maintenance
-    rpc SetStatus (InfraStatus) returns (InfraStatus) {
-        option (google.api.http) = {
-            put: "/v1/status"
-        };
-    }
-
+  // SetStatus sets the maintenance
+  rpc SetStatus(InfraStatus) returns (InfraStatus) {
+    option (google.api.http) = {put: "/v1/status"};
+  }
 }

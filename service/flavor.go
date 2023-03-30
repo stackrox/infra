@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/stackrox/infra/flavor"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/service/middleware"
@@ -13,6 +13,8 @@ import (
 )
 
 type flavorImpl struct {
+	v1.UnimplementedFlavorServiceServer
+
 	registry *flavor.Registry
 }
 

@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/platform"
 	"github.com/stackrox/infra/service/middleware"
@@ -15,7 +15,9 @@ import (
 
 const bufferSize = 1000 * 1024
 
-type cliImpl struct{}
+type cliImpl struct {
+	v1.UnimplementedCliServiceServer
+}
 
 var (
 	_ middleware.APIService = (*cliImpl)(nil)

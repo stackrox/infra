@@ -1,9 +1,29 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "service.proto",
+    "title": "proto/api/v1/service.proto",
     "version": "version not set"
   },
+  "tags": [
+    {
+      "name": "VersionService"
+    },
+    {
+      "name": "UserService"
+    },
+    {
+      "name": "FlavorService"
+    },
+    {
+      "name": "ClusterService"
+    },
+    {
+      "name": "CliService"
+    },
+    {
+      "name": "InfraStatusService"
+    }
+  ],
   "consumes": [
     "application/json"
   ],
@@ -13,12 +33,28 @@
   "paths": {
     "/v1/cli/{os}/{arch}/upgrade": {
       "get": {
-        "operationId": "Upgrade",
+        "summary": "Upgrade - gets an updated binary if it exists.",
+        "operationId": "CliService_Upgrade",
         "responses": {
           "200": {
             "description": "A successful response.(streaming responses)",
             "schema": {
-              "$ref": "#/x-stream-definitions/v1CliUpgradeResponse"
+              "type": "object",
+              "properties": {
+                "result": {
+                  "$ref": "#/definitions/v1CliUpgradeResponse"
+                },
+                "error": {
+                  "$ref": "#/definitions/googlerpcStatus"
+                }
+              },
+              "title": "Stream result of v1CliUpgradeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -43,13 +79,19 @@
     },
     "/v1/cluster": {
       "get": {
-        "summary": "CreateToken generates an arbitrary service account token",
-        "operationId": "List",
+        "summary": "List provides information about the available clusters.",
+        "operationId": "ClusterService_List",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1ClusterListResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -59,16 +101,14 @@
             "description": "all indicates that all clusters should be returned, not just the ones\nowned by the user.",
             "in": "query",
             "required": false,
-            "type": "boolean",
-            "format": "boolean"
+            "type": "boolean"
           },
           {
             "name": "expired",
             "description": "expired indicates that expired clusters should be returned, not just the\nones that are launching/ready.",
             "in": "query",
             "required": false,
-            "type": "boolean",
-            "format": "boolean"
+            "type": "boolean"
           },
           {
             "name": "prefix",
@@ -84,18 +124,25 @@
       },
       "post": {
         "summary": "Create launches a new cluster.",
-        "operationId": "Create",
+        "operationId": "ClusterService_Create",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1ResourceByID"
             }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
           }
         },
         "parameters": [
           {
             "name": "body",
+            "description": "CreateClusterRequest represents details for launching a new cluster.",
             "in": "body",
             "required": true,
             "schema": {
@@ -110,12 +157,19 @@
     },
     "/v1/cluster/{id}": {
       "get": {
-        "operationId": "Info",
+        "summary": "Info provides information about a specific cluster.",
+        "operationId": "ClusterService_Info",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1Cluster"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -133,12 +187,19 @@
       },
       "delete": {
         "summary": "Delete deletes an existing cluster.",
-        "operationId": "Delete",
+        "operationId": "ClusterService_Delete",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
+              "type": "object",
               "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -158,12 +219,18 @@
     "/v1/cluster/{id}/artifacts": {
       "get": {
         "summary": "Artifacts returns the artifacts for a specific cluster.",
-        "operationId": "Artifacts",
+        "operationId": "ClusterService_Artifacts",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1ClusterArtifacts"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -182,13 +249,19 @@
     },
     "/v1/cluster/{id}/lifespan": {
       "post": {
-        "summary": "Token generates a service account token for the current user.",
-        "operationId": "Lifespan",
+        "summary": "Lifespan updates the lifespan for a specific cluster.",
+        "operationId": "ClusterService_Lifespan",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "type": "string"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -205,7 +278,16 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/v1LifespanRequest"
+              "type": "object",
+              "properties": {
+                "Lifespan": {
+                  "type": "string",
+                  "description": "Lifespan is the new lifespan."
+                },
+                "method": {
+                  "$ref": "#/definitions/LifespanRequestMethod"
+                }
+              }
             }
           }
         ],
@@ -217,12 +299,18 @@
     "/v1/cluster/{id}/logs": {
       "get": {
         "summary": "Logs returns the logs for a specific cluster.",
-        "operationId": "Logs",
+        "operationId": "ClusterService_Logs",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1LogsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -241,12 +329,19 @@
     },
     "/v1/flavor": {
       "get": {
-        "operationId": "List",
+        "summary": "List provides information about the available flavors.",
+        "operationId": "FlavorService_List",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1FlavorListResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -256,8 +351,7 @@
             "description": "all indicates that all flavors should be returned, by default\navailability alpha clusters are excluded.",
             "in": "query",
             "required": false,
-            "type": "boolean",
-            "format": "boolean"
+            "type": "boolean"
           }
         ],
         "tags": [
@@ -267,13 +361,19 @@
     },
     "/v1/flavor/{id}": {
       "get": {
-        "summary": "CreateToken generates an arbitrary service account token",
-        "operationId": "Info",
+        "summary": "Info provides information about a specific flavor.",
+        "operationId": "FlavorService_Info",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1Flavor"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -292,12 +392,19 @@
     },
     "/v1/status": {
       "get": {
-        "operationId": "GetStatus",
+        "summary": "GetStatus gets the maintenance",
+        "operationId": "InfraStatusService_GetStatus",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1InfraStatus"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -306,13 +413,19 @@
         ]
       },
       "delete": {
-        "summary": "CreateToken generates an arbitrary service account token",
-        "operationId": "ResetStatus",
+        "summary": "ResetStatus resets the maintenance",
+        "operationId": "InfraStatusService_ResetStatus",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1InfraStatus"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -321,16 +434,38 @@
         ]
       },
       "put": {
-        "summary": "Token generates a service account token for the current user.",
-        "operationId": "SetStatus",
+        "summary": "SetStatus sets the maintenance",
+        "operationId": "InfraStatusService_SetStatus",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1InfraStatus"
             }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
           }
         },
+        "parameters": [
+          {
+            "name": "MaintenanceActive",
+            "description": "MaintenanceActive is an indicator whether a maintenance is ongoing.",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "Maintainer",
+            "description": "Maintainer is the email of the person currently doing maintenance.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
         "tags": [
           "InfraStatusService"
         ]
@@ -339,12 +474,18 @@
     "/v1/token": {
       "post": {
         "summary": "Token generates a service account token for the current user.",
-        "operationId": "Token",
+        "operationId": "UserService_Token",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1TokenResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -354,6 +495,7 @@
             "in": "body",
             "required": true,
             "schema": {
+              "type": "object",
               "properties": {}
             }
           }
@@ -366,18 +508,25 @@
     "/v1/token-create": {
       "post": {
         "summary": "CreateToken generates an arbitrary service account token",
-        "operationId": "CreateToken",
+        "operationId": "UserService_CreateToken",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1TokenResponse"
             }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
           }
         },
         "parameters": [
           {
             "name": "body",
+            "description": "ServiceAccount represents an authenticated service account (robot) principal.",
             "in": "body",
             "required": true,
             "schema": {
@@ -392,12 +541,18 @@
     },
     "/v1/version": {
       "get": {
-        "operationId": "GetVersion",
+        "operationId": "VersionService_GetVersion",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1Version"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -408,12 +563,19 @@
     },
     "/v1/whoami": {
       "get": {
-        "operationId": "Whoami",
+        "summary": "Whoami provides information about the currently authenticated principal.",
+        "operationId": "UserService_Whoami",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1WhoamiResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -445,33 +607,26 @@
       "default": "REPLACE",
       "description": "method represents the various lifespan operations.\n\n - REPLACE: REPLACE indicates that the given lifespan should replace the current\nlifespan.\n - ADD: ADD indicates that the given lifespan should be added to the current\nlifespan.\n - SUBTRACT: SUBTRACT indicates that the given lifespan should be subtracted from\nthe current lifespan."
     },
-    "protobufAny": {
-      "type": "object",
-      "properties": {
-        "type_url": {
-          "type": "string"
-        },
-        "value": {
-          "type": "string",
-          "format": "byte"
-        }
-      }
+    "apiv1Status": {
+      "type": "string",
+      "enum": [
+        "FAILED",
+        "CREATING",
+        "READY",
+        "DESTROYING",
+        "FINISHED"
+      ],
+      "default": "FAILED",
+      "description": "Status represents the various cluster states.\n\n - FAILED: FAILED is the state when the cluster has failed in one way or another.\n - CREATING: CREATING is the state when the cluster is being created.\n - READY: READY is the state when the cluster is available and ready for use.\n - DESTROYING: DESTROYING is the state when the cluster is being destroyed.\n - FINISHED: FINISHED is the state when the cluster has been successfully destroyed."
     },
-    "runtimeStreamError": {
+    "googlerpcStatus": {
       "type": "object",
       "properties": {
-        "grpc_code": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "http_code": {
+        "code": {
           "type": "integer",
           "format": "int32"
         },
         "message": {
-          "type": "string"
-        },
-        "http_status": {
           "type": "string"
         },
         "details": {
@@ -481,6 +636,15 @@
           }
         }
       }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
     },
     "v1Artifact": {
       "type": "object",
@@ -517,7 +681,7 @@
           "description": "ID is the unique ID for the cluster."
         },
         "Status": {
-          "$ref": "#/definitions/v1Status",
+          "$ref": "#/definitions/apiv1Status",
           "description": "Status is the current status for the cluster."
         },
         "Flavor": {
@@ -605,12 +769,10 @@
         },
         "NoSlack": {
           "type": "boolean",
-          "format": "boolean",
           "description": "NoSlack is used to skip sending Slack messages for cluster lifecycle\nevents."
         },
         "SlackDM": {
           "type": "boolean",
-          "format": "boolean",
           "description": "SlackDM is used to choose direct messages for cluster lifecycle\nevents."
         }
       },
@@ -666,6 +828,7 @@
         "Tags": {
           "type": "object",
           "additionalProperties": {
+            "type": "object",
             "properties": {}
           },
           "description": "Tags is a set of artifact tags."
@@ -695,28 +858,11 @@
       "properties": {
         "MaintenanceActive": {
           "type": "boolean",
-          "format": "boolean",
           "description": "MaintenanceActive is an indicator whether a maintenance is ongoing."
         },
         "Maintainer": {
           "type": "string",
           "description": "Maintainer is the email of the person currently doing maintenance."
-        }
-      }
-    },
-    "v1LifespanRequest": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "ID is the unique ID for the cluster."
-        },
-        "Lifespan": {
-          "type": "string",
-          "description": "Lifespan is the new lifespan."
-        },
-        "method": {
-          "$ref": "#/definitions/LifespanRequestMethod"
         }
       }
     },
@@ -774,12 +920,10 @@
         },
         "Optional": {
           "type": "boolean",
-          "format": "boolean",
           "description": "Optional indicates that this parameter can be optionally provided by a\nuser. If the user does not provide a value, then Value serves as a\ndefault."
         },
         "Internal": {
           "type": "boolean",
-          "format": "boolean",
           "description": "Internal indicates that this parameter should not be provided by a user,\nbut rather treats Value as a hardcoded constant."
         },
         "Order": {
@@ -792,7 +936,6 @@
         },
         "FromFile": {
           "type": "boolean",
-          "format": "boolean",
           "description": "Indicates that the value for this parameter can be provided from the\ncontents of a file."
         }
       },
@@ -824,18 +967,6 @@
         }
       },
       "description": "ServiceAccount represents an authenticated service account (robot) principal."
-    },
-    "v1Status": {
-      "type": "string",
-      "enum": [
-        "FAILED",
-        "CREATING",
-        "READY",
-        "DESTROYING",
-        "FINISHED"
-      ],
-      "default": "FAILED",
-      "description": "Status represents the various cluster states.\n\n - FAILED: FAILED is the state when the cluster has failed in one way or another.\n - CREATING: CREATING is the state when the cluster is being created.\n - READY: READY is the state when the cluster is available and ready for use.\n - DESTROYING: DESTROYING is the state when the cluster is being destroyed.\n - FINISHED: FINISHED is the state when the cluster has been successfully destroyed."
     },
     "v1TokenResponse": {
       "type": "object",
@@ -910,20 +1041,6 @@
         }
       },
       "description": "WhoamiResponse represents details about the current authenticated principal."
-    }
-  },
-  "x-stream-definitions": {
-    "v1CliUpgradeResponse": {
-      "type": "object",
-      "properties": {
-        "result": {
-          "$ref": "#/definitions/v1CliUpgradeResponse"
-        },
-        "error": {
-          "$ref": "#/definitions/runtimeStreamError"
-        }
-      },
-      "title": "Stream result of v1CliUpgradeResponse"
     }
   }
 }
