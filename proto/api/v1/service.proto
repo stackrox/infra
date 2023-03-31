@@ -69,7 +69,7 @@ message ServiceAccount {
     // Description is a human readable description for the service account.
     string Description = 2;
 
-    // Email is the StackRox email address for the service account.
+    // Email is the Red Hat email address for the service account.
     string Email = 3;
 
     // IssuedAt is the time of issuing the service account token.

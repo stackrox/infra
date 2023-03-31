@@ -820,7 +820,7 @@
         },
         "Email": {
           "type": "string",
-          "description": "Email is the StackRox email address for the service account."
+          "description": "Email is the Red Hat email address for the service account."
         },
         "IssuedAt": {
           "type": "string",
