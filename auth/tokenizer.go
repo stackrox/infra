@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"log"
 	"strings"
 	"time"
 
@@ -223,6 +224,10 @@ func (t userTokenizer) Validate(token string) (*v1.User, error) {
 type serviceAccountValidator v1.ServiceAccount
 
 func (s serviceAccountValidator) Valid() error {
+
+	// TODO: something off here?
+	log.Println(s)
+
 	_, isExcluded := excludedEmails[s.Email]
 	if isExcluded {
 		return errors.New("email address is excluded")
