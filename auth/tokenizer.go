@@ -224,10 +224,6 @@ func (t userTokenizer) Validate(token string) (*v1.User, error) {
 type serviceAccountValidator v1.ServiceAccount
 
 func (s serviceAccountValidator) Valid() error {
-
-	// TODO: something off here?
-	log.Println(s)
-
 	_, isExcluded := excludedEmails[s.Email]
 	if isExcluded {
 		return errors.New("email address is excluded")
@@ -260,8 +256,6 @@ type serviceAccountTokenizer struct {
 
 // Generate generates a service account JWT containing a v1.ServiceAccount.
 func (t serviceAccountTokenizer) Generate(svcacct v1.ServiceAccount) (string, error) {
-	log.Println(svcacct)
-
 	// Set issuing and expiration times on new ServiceAccount.
 	now := time.Now()
 	svcacct.ExpiresAt = now.Add(t.lifetime).Unix()

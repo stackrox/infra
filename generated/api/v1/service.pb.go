@@ -417,7 +417,7 @@ type ServiceAccount struct {
 	Name string `protobuf:"bytes,1,opt,name=Name,proto3" json:"Name,omitempty"`
 	// Description is a human readable description for the service account.
 	Description string `protobuf:"bytes,2,opt,name=Description,proto3" json:"Description,omitempty"`
-	// Email is the StackRox email address for the service account.
+	// Email is the Red Hat email address for the service account.
 	Email string `protobuf:"bytes,3,opt,name=Email,proto3" json:"Email,omitempty"`
 	// IssuedAt is the time of issuing the service account token.
 	IssuedAt int64 `protobuf:"varint,4,opt,name=IssuedAt,proto3" json:"IssuedAt,omitempty"`
