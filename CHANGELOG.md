@@ -15,14 +15,17 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 - Bump demo and qa-demo to 3.74.1
 
 ## [0.6.5]
+
 - ROX-1251: Restore SSH for OpenShift-4 clusters
 - ROX-15126: Add Openshift 4 flavor for testing performance and scaling
 - Fix EKS by using the latest EKS automation-flavor.
 
 ## [0.6.4]
+
 - Fix Slack notifications after migration to Internal Red Hat.
 
 ## [0.6.3]
+
 - Use migrated openshift-4-demo configuration.
 - Add functionality to set the image registry, image tags, and helm chart versions in openshift-4-demo
 - Add a FIPS toggle to the openshift-4 flavor
@@ -31,6 +34,7 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 - Bump demo and qa-demo to 3.74.0 (openshift-4-demo uses latest by default)
 
 ## [0.6.2]
+
 - Bump demo flavors to the latest 3.73.2 release.
 
 ## [0.6.1]
