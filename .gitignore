@@ -21,3 +21,4 @@ configuration/
 tags
 nohup.out
 test/mocks
+__debug_bin
