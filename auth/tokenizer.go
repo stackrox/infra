@@ -21,7 +21,6 @@ import (
 // https://github.com/dgrijalva/jwt-go/issues/314#issuecomment-494585527
 const (
 	clockDriftLeeway = int64(10 * time.Second)
-	tokenLifetime    = 1 * time.Minute
 
 	emailSuffixRedHat = "@redhat.com"
 )
@@ -251,14 +250,15 @@ func (s serviceAccountValidator) Valid() error {
 }
 
 type serviceAccountTokenizer struct {
-	secret []byte
+	secret   []byte
+	lifetime time.Duration
 }
 
 // Generate generates a service account JWT containing a v1.ServiceAccount.
 func (t serviceAccountTokenizer) Generate(svcacct v1.ServiceAccount) (string, error) {
 	// Set issuing and expiration times on new ServiceAccount.
 	now := time.Now()
-	svcacct.ExpiresAt = now.Add(tokenLifetime).Unix()
+	svcacct.ExpiresAt = now.Add(t.lifetime).Unix()
 	svcacct.NotBefore = now.Unix()
 	svcacct.IssuedAt = now.Unix()
 
