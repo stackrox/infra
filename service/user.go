@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"log"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -29,6 +30,8 @@ func NewUserService(generator func(v1.ServiceAccount) (string, error)) (middlewa
 
 // CreateToken implements UserService.CreateToken.
 func (s *userImpl) CreateToken(_ context.Context, req *v1.ServiceAccount) (*v1.TokenResponse, error) {
+	log.Println(req.Email)
+
 	// Generate the service account token.
 	token, err := s.generate(*req)
 	if err != nil {
