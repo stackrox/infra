@@ -825,7 +825,7 @@
         "IssuedAt": {
           "type": "string",
           "format": "int64",
-          "title": "IssuedAt is the time of issuing the service account token"
+          "title": "IssuedAt is the time of issuing the service account token."
         },
         "NotBefore": {
           "type": "string",

@@ -212,7 +212,6 @@ func (t userTokenizer) Generate(user *v1.User) (string, error) {
 // Validate validates a user JWT and returns the contained v1.User struct.
 func (t userTokenizer) Validate(token string) (*v1.User, error) {
 	var claims userClaims
-
 	if _, err := jwt.ParseWithClaims(token, &claims, func(_ *jwt.Token) (interface{}, error) {
 		return t.secret, nil
 	}); err != nil {

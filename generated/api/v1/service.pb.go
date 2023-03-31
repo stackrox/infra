@@ -419,7 +419,7 @@ type ServiceAccount struct {
 	Description string `protobuf:"bytes,2,opt,name=Description,proto3" json:"Description,omitempty"`
 	// Email is the StackRox email address for the service account.
 	Email string `protobuf:"bytes,3,opt,name=Email,proto3" json:"Email,omitempty"`
-	// IssuedAt is the time of issuing the service account token
+	// IssuedAt is the time of issuing the service account token.
 	IssuedAt int64 `protobuf:"varint,4,opt,name=IssuedAt,proto3" json:"IssuedAt,omitempty"`
 	// NotBefore is the beginning of service account token valid time period.
 	NotBefore int64 `protobuf:"varint,5,opt,name=NotBefore,proto3" json:"NotBefore,omitempty"`

@@ -72,7 +72,7 @@ message ServiceAccount {
     // Email is the StackRox email address for the service account.
     string Email = 3;
 
-    // IssuedAt is the time of issuing the service account token
+    // IssuedAt is the time of issuing the service account token.
     int64 IssuedAt = 4;
 
     // NotBefore is the beginning of service account token valid time period.

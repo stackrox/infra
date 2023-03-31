@@ -13,7 +13,7 @@ import (
 )
 
 const examples = `# Generate a service account token.
-$ infractl token ci-robot 'CI service account' ci@stackrox.com`
+$ infractl token ci-robot 'CI service account' roxbot@redhat.com`
 
 // Command defines the handler for infractl token.
 func Command() *cobra.Command {
@@ -38,8 +38,8 @@ func args(_ *cobra.Command, args []string) error {
 		return errors.New("no description given")
 	case email == "":
 		return errors.New("no email given")
-	case !(strings.HasSuffix(email, "@stackrox.com") || strings.HasSuffix(email, "@redhat.com")):
-		return errors.Errorf("given email %q is neither a stackrox.com nor a redhat.com address", email)
+	case !strings.HasSuffix(email, "@redhat.com"):
+		return errors.Errorf("given email %q is not a redhat.com address", email)
 	default:
 		return nil
 	}
