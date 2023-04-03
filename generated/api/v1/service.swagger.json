@@ -820,7 +820,22 @@
         },
         "Email": {
           "type": "string",
-          "description": "Email is the StackRox email address for the service account."
+          "description": "Email is the Red Hat email address for the service account."
+        },
+        "IssuedAt": {
+          "type": "string",
+          "format": "int64",
+          "description": "IssuedAt is the time of issuing the service account token."
+        },
+        "NotBefore": {
+          "type": "string",
+          "format": "int64",
+          "description": "NotBefore is the beginning of service account token valid time period."
+        },
+        "ExpiresAt": {
+          "type": "string",
+          "format": "int64",
+          "description": "ExpiresAt is the end of service account token valid time period."
         }
       },
       "description": "ServiceAccount represents an authenticated service account (robot) principal."

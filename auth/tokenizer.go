@@ -22,8 +22,7 @@ import (
 const (
 	clockDriftLeeway = int64(10 * time.Second)
 
-	emailSuffixStackRox = "@stackrox.com"
-	emailSuffixRedHat   = "@redhat.com"
+	emailSuffixRedHat = "@redhat.com"
 )
 
 var excludedEmails = map[string]bool{"infra@stackrox.com": true}
@@ -130,8 +129,8 @@ func (c oidcClaims) Valid() error {
 	switch {
 	case !c.EmailVerified:
 		return errors.New("email address is not verified")
-	case !(strings.HasSuffix(c.Email, emailSuffixStackRox) || strings.HasSuffix(c.Email, emailSuffixRedHat)):
-		return errors.Errorf("%q email address does not belong to StackRox or Red Hat", c.Email)
+	case !strings.HasSuffix(c.Email, emailSuffixRedHat):
+		return errors.Errorf("%q email address does not belong to Red Hat", c.Email)
 	default:
 		c.StandardClaims.IssuedAt -= clockDriftLeeway
 		valid := c.StandardClaims.Valid()
@@ -228,24 +227,40 @@ func (s serviceAccountValidator) Valid() error {
 	if isExcluded {
 		return errors.New("email address is excluded")
 	}
+
+	now := time.Now().Unix()
+
 	switch {
+	case s.ExpiresAt < now:
+		return errors.New("token expired")
+	case s.NotBefore > now:
+		return errors.New("token not yet valid")
+	case s.IssuedAt > now:
+		return errors.New("token issued in the future")
 	case s.Name == "":
 		return errors.New("name was empty")
 	case s.Description == "":
 		return errors.New("description was empty")
-	case !(strings.HasSuffix(s.Email, emailSuffixStackRox) || strings.HasSuffix(s.Email, emailSuffixRedHat)):
-		return errors.Errorf("%q is not a StackRox or Red Hat address", s.Email)
+	case !strings.HasSuffix(s.Email, emailSuffixRedHat):
+		return errors.Errorf("%q is not a Red Hat address", s.Email)
 	default:
 		return nil
 	}
 }
 
 type serviceAccountTokenizer struct {
-	secret []byte
+	secret   []byte
+	lifetime time.Duration
 }
 
 // Generate generates a service account JWT containing a v1.ServiceAccount.
 func (t serviceAccountTokenizer) Generate(svcacct v1.ServiceAccount) (string, error) {
+	// Set issuing and expiration times on new ServiceAccount.
+	now := time.Now()
+	svcacct.ExpiresAt = now.Add(t.lifetime).Unix()
+	svcacct.NotBefore = now.Unix()
+	svcacct.IssuedAt = now.Unix()
+
 	svc := serviceAccountValidator(svcacct)
 
 	// Ensure that our service account is well-formed.

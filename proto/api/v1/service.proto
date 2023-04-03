@@ -69,8 +69,17 @@ message ServiceAccount {
     // Description is a human readable description for the service account.
     string Description = 2;
 
-    // Email is the StackRox email address for the service account.
+    // Email is the Red Hat email address for the service account.
     string Email = 3;
+
+    // IssuedAt is the time of issuing the service account token.
+    int64 IssuedAt = 4;
+
+    // NotBefore is the beginning of service account token valid time period.
+    int64 NotBefore = 5;
+
+     // ExpiresAt is the end of service account token valid time period.
+    int64 ExpiresAt = 6;
 }
 
 message TokenResponse {

@@ -37,7 +37,8 @@ func NewFromConfig(oidcConfigFile string) (*OidcAuth, error) {
 		jwtOidc:   NewOidcTokenizer(provider.Verifier(&oidc.Config{ClientID: cfg.ClientID})),
 		jwtUser:   NewUserTokenizer(time.Hour, cfg.SessionSecret),
 		jwtSvcAcct: serviceAccountTokenizer{
-			secret: []byte(cfg.SessionSecret),
+			secret:   []byte(cfg.SessionSecret),
+			lifetime: cfg.TokenLifetime.Duration(),
 		},
 		conf: &oauth2.Config{
 			ClientID:     cfg.ClientID,

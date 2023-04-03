@@ -56,6 +56,10 @@ type AuthOidcConfig struct {
 	// access token claims provided by the OIDC Provider.
 	// All claims have to be fulfilled.
 	AccessTokenClaims *claimrule.ClaimRules `json:"accessTokenClaims"`
+
+	// TokenLifeTime is the duration for which generated service account tokens
+	// shall be valid.
+	TokenLifetime JSONDuration `json:"tokenLifetime"`
 }
 
 // ServerConfig represents the configuration used for running the HTTP & GRPC

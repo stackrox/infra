@@ -6,6 +6,10 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+## [0.7.0]
+
+- ROX-14317: New INFRA_TOKEN format includes a validity period. All existing tokens will be invalid and all users (humans and robots) need to regenerate their tokens.
+
 ## [0.6.6]
 
 - Bump demo and qa-demo to 3.74.1
