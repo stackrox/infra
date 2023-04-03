@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"log"
 	"strings"
 	"time"
 
@@ -266,7 +265,6 @@ func (t serviceAccountTokenizer) Generate(svcacct v1.ServiceAccount) (string, er
 
 	// Ensure that our service account is well-formed.
 	if err := svc.Valid(); err != nil {
-		log.Println(err)
 		return "", errors.Wrap(err, "invalid service account")
 	}
 
