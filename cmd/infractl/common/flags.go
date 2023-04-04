@@ -4,7 +4,9 @@ package common
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -45,9 +47,22 @@ func ContextWithTimeout() (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), flags.timeout)
 }
 
+func doesAddressContainPort(address string) bool {
+	parts := strings.Split(address, ":")
+	return len(parts) == 2
+}
+
 // endpoint returns the given --endpoint flag value.
 func endpoint() string {
-	return flags.endpoint
+	// https:// and trailing slashes are stripped
+	endpoint := strings.TrimSuffix(flags.endpoint, "/")
+	endpoint = strings.TrimPrefix(endpoint, "https://")
+	if !doesAddressContainPort(endpoint) {
+		// missing port in address be auto-completes to :443
+		endpoint = fmt.Sprintf("%s:443", endpoint)
+	}
+
+	return endpoint
 }
 
 // insecure returns the given --insecure flag value.
