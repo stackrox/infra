@@ -58,7 +58,7 @@ func endpoint() string {
 	endpoint := strings.TrimSuffix(flags.endpoint, "/")
 	endpoint = strings.TrimPrefix(endpoint, "https://")
 	if !doesAddressContainPort(endpoint) {
-		// missing port in address be auto-completes to :443
+		// missing port in address auto-completes to :443
 		endpoint = fmt.Sprintf("%s:443", endpoint)
 	}
 
