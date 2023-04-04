@@ -6,6 +6,8 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+- --endpoint flag will now accept also URLs like https://infra.rox.systems, and addresses without a port like infra.rox.systems.
+
 ## [0.7.0]
 
 - ROX-14317: New INFRA_TOKEN format includes a validity period. All existing tokens will be invalid and all users (humans and robots) need to regenerate their tokens.
