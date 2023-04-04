@@ -13,7 +13,7 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/gogo/protobuf/jsonpb"
 	"github.com/stackrox/infra/cmd/infractl/common"
-	v1 "github.com/stackrox/infra/generated/api/v1"
+	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 )
 
 type prettyCluster struct {

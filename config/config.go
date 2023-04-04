@@ -6,7 +6,8 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
-	"github.com/stackrox/infra/auth/claimrule"
+	"github.com/stackrox/infra-auth-lib/auth/claimrule"
+	authConfig "github.com/stackrox/infra-auth-lib/config"
 )
 
 // Config represents the top-level configuration for infra-server.
@@ -27,8 +28,8 @@ type Config struct {
 // CalendarConfig represents the configuration for integrating with Google
 // Calendar.
 type CalendarConfig struct {
-	ID     string       `json:"id"`
-	Window JSONDuration `json:"window"`
+	ID     string                  `json:"id"`
+	Window authConfig.JSONDuration `json:"window"`
 }
 
 // AuthOidcConfig represents the configuration for integrating with OIDC provider.
@@ -59,7 +60,7 @@ type AuthOidcConfig struct {
 
 	// TokenLifeTime is the duration for which generated service account tokens
 	// shall be valid.
-	TokenLifetime JSONDuration `json:"tokenLifetime"`
+	TokenLifetime authConfig.JSONDuration `json:"tokenLifetime"`
 }
 
 // ServerConfig represents the configuration used for running the HTTP & GRPC

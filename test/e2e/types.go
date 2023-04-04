@@ -1,6 +1,6 @@
 package e2e
 
-import v1 "github.com/stackrox/infra/generated/api/v1"
+import v1 "github.com/stackrox/infra/generated/proto/api/v1"
 
 // StatusResponse helper maps to the JSON response for infractl status operations.
 type StatusResponse struct {

@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	v1 "github.com/stackrox/infra/generated/api/v1"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/stackrox/infra-auth-lib/service/middleware"
+	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 	"github.com/stackrox/infra/pkg/buildinfo"
-	"github.com/stackrox/infra/service/middleware"
 	"google.golang.org/grpc"
 )
 

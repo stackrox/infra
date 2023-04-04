@@ -16,13 +16,15 @@ toolchain, it is also possible to rely on CI. CI will lint, build and push the
 infra server. And then deploy it to a development cluster created using the
 production infra deployment. A
 (comment)[https://github.com/stackrox/infra/pull/711#issuecomment-1270457578]
-will appear on PRs with more detail. 
+will appear on PRs with more detail.
 
 ### Regenerate Go bindings from protos
 
 To regenerate the Go proto bindings, run:
 
-`make proto-generated-srcs`
+`make buf-generated-srcs`
+
+Note: You need to have `buf` installed for this. Do this e.g. with `make buf-install`.
 
 ### Building the server and cli
 

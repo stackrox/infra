@@ -47,4 +47,4 @@ client and models. To re-generate the sources run `make gen-src` or
 `yarn gen:src`.
 
 _Hint: for the API client to generate new Swagger definitions from protos in the
-parent dir run `make proto-generated-srcs`._
+parent dir run `make buf-generated-srcs`._

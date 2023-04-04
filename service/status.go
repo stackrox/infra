@@ -6,10 +6,10 @@ import (
 	"strconv"
 
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	v1 "github.com/stackrox/infra/generated/api/v1"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/stackrox/infra-auth-lib/service/middleware"
+	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 	"github.com/stackrox/infra/pkg/kube"
-	"github.com/stackrox/infra/service/middleware"
 	"google.golang.org/grpc"
 	corev1 "k8s.io/api/core/v1"
 	errorsv1 "k8s.io/apimachinery/pkg/api/errors"

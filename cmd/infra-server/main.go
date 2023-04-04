@@ -10,7 +10,9 @@ import (
 	"syscall"
 
 	"github.com/pkg/errors"
-	"github.com/stackrox/infra/auth"
+	"github.com/stackrox/infra-auth-lib/auth"
+	authService "github.com/stackrox/infra-auth-lib/service"
+	"github.com/stackrox/infra-auth-lib/service/middleware"
 	"github.com/stackrox/infra/calendar"
 	"github.com/stackrox/infra/config"
 	"github.com/stackrox/infra/flavor"
@@ -18,7 +20,6 @@ import (
 	"github.com/stackrox/infra/server"
 	"github.com/stackrox/infra/service"
 	"github.com/stackrox/infra/service/cluster"
-	"github.com/stackrox/infra/service/middleware"
 	"github.com/stackrox/infra/signer"
 	"github.com/stackrox/infra/slack"
 )
@@ -90,7 +91,7 @@ func mainCmd() error {
 			return service.NewFlavorService(registry)
 		},
 		func() (middleware.APIService, error) {
-			return service.NewUserService(oidc.GenerateServiceAccountToken)
+			return authService.NewUserService(oidc.GenerateServiceAccountToken)
 		},
 		service.NewCliService,
 		service.NewStatusService,
