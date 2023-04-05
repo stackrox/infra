@@ -98,7 +98,7 @@ unit-test: buf-generated-srcs
 	@go test -v ./...
 
 .PHONY: go-e2e-tests
-go-e2e-tests: buf-generated-srcs
+go-e2e-tests: buf-install buf-generated-srcs
 	@kubectl apply -f workflows/
 	@go test ./test/e2e/... -tags=e2e -v -parallel 5 -count 1 -cover -timeout 1h
 
