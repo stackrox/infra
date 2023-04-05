@@ -4,7 +4,9 @@ Entries in this file should be limited to:
 -  Obscure side-effects that are not obviously apparent based on the JIRA associated with the changes.
 Please avoid adding duplicate information across this changelog and JIRA/doc input pages.
 
-## [NEXT RELEASE]
+## [0.6.7]
+
+- --endpoint flag will now accept also URLs like https://infra.rox.systems, and addresses without a port like infra.rox.systems.
 
 ## [0.6.6]
 
