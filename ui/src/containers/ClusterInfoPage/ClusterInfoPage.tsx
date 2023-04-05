@@ -2,7 +2,7 @@ import React, { useState, useCallback, ReactElement } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Download, Trash2 } from 'react-feather';
 
-import { ClusterServiceApi, Apiv1Status } from 'generated/client';
+import { ClusterServiceApi, V1Status } from 'generated/client';
 import useApiQuery from 'client/useApiQuery';
 import configuration from 'client/configuration';
 import PageSection from 'components/PageSection';
@@ -41,7 +41,7 @@ export default function ClusterInfoPage(): ReactElement {
           <span className="lowercase">{cluster.ID}</span>
           <span>
             {cluster.Description && ` (${cluster.Description})`} -{' '}
-            {cluster.Status || Apiv1Status.Failed}
+            {cluster.Status || V1Status.Failed}
           </span>
         </div>
         {!!cluster && <MutableLifespan cluster={cluster} />}
@@ -63,7 +63,7 @@ export default function ClusterInfoPage(): ReactElement {
     </div>
   );
 
-  const clusterIsReady = cluster.Status === Apiv1Status.Ready;
+  const clusterIsReady = cluster.Status === V1Status.Ready;
 
   return (
     <>

@@ -13,69 +13,23 @@
  */
 
 
-import type { Configuration } from './configuration';
-import type { AxiosPromise, AxiosInstance, AxiosRequestConfig } from 'axios';
-import globalAxios from 'axios';
+import { Configuration } from './configuration';
+import globalAxios, { AxiosPromise, AxiosInstance } from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from './common';
-import type { RequestArgs } from './base';
-// @ts-ignore
-import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError } from './base';
-
-/**
- * Status represents the various cluster states.   - FAILED: FAILED is the state when the cluster has failed in one way or another.  - CREATING: CREATING is the state when the cluster is being created.  - READY: READY is the state when the cluster is available and ready for use.  - DESTROYING: DESTROYING is the state when the cluster is being destroyed.  - FINISHED: FINISHED is the state when the cluster has been successfully destroyed.
- * @export
- * @enum {string}
- */
-
-export const Apiv1Status = {
-    Failed: 'FAILED',
-    Creating: 'CREATING',
-    Ready: 'READY',
-    Destroying: 'DESTROYING',
-    Finished: 'FINISHED'
-} as const;
-
-export type Apiv1Status = typeof Apiv1Status[keyof typeof Apiv1Status];
-
-
-/**
- * 
- * @export
- * @interface ClusterServiceLifespanRequest
- */
-export interface ClusterServiceLifespanRequest {
-    /**
-     * Lifespan is the new lifespan.
-     * @type {string}
-     * @memberof ClusterServiceLifespanRequest
-     */
-    'Lifespan'?: string;
-    /**
-     * 
-     * @type {LifespanRequestMethod}
-     * @memberof ClusterServiceLifespanRequest
-     */
-    'method'?: LifespanRequestMethod;
-}
-
+import { BASE_PATH, COLLECTION_FORMATS, RequestArgs, BaseAPI, RequiredError } from './base';
 
 /**
  * availability represents the availability classification levels.   - alpha: alpha is completely experemental, and is not expected to work in any way.  - beta: beta is being tested, and is expected to work with minor issues.  - stable: stable is available for public consumption, and works without issue.  - default: default is stable, and available for customer demo consumption. Exactly 1 flavor should be configured as default.
  * @export
  * @enum {string}
  */
-
-export const Flavoravailability = {
-    Alpha: 'alpha',
-    Beta: 'beta',
-    Stable: 'stable',
-    Default: 'default'
-} as const;
-
-export type Flavoravailability = typeof Flavoravailability[keyof typeof Flavoravailability];
-
+export enum Flavoravailability {
+    Alpha = 'alpha',
+    Beta = 'beta',
+    Stable = 'stable',
+    Default = 'default'
+}
 
 /**
  * 
@@ -88,34 +42,49 @@ export interface GooglerpcStatus {
      * @type {number}
      * @memberof GooglerpcStatus
      */
-    'code'?: number;
+    code?: number;
     /**
      * 
      * @type {string}
      * @memberof GooglerpcStatus
      */
-    'message'?: string;
+    message?: string;
     /**
      * 
      * @type {Array<ProtobufAny>}
      * @memberof GooglerpcStatus
      */
-    'details'?: Array<ProtobufAny>;
+    details?: Array<ProtobufAny>;
+}
+/**
+ * 
+ * @export
+ * @interface InlineObject
+ */
+export interface InlineObject {
+    /**
+     * Lifespan is the new lifespan.
+     * @type {string}
+     * @memberof InlineObject
+     */
+    Lifespan?: string;
+    /**
+     * 
+     * @type {LifespanRequestMethod}
+     * @memberof InlineObject
+     */
+    method?: LifespanRequestMethod;
 }
 /**
  * method represents the various lifespan operations.   - REPLACE: REPLACE indicates that the given lifespan should replace the current lifespan.  - ADD: ADD indicates that the given lifespan should be added to the current lifespan.  - SUBTRACT: SUBTRACT indicates that the given lifespan should be subtracted from the current lifespan.
  * @export
  * @enum {string}
  */
-
-export const LifespanRequestMethod = {
-    Replace: 'REPLACE',
-    Add: 'ADD',
-    Subtract: 'SUBTRACT'
-} as const;
-
-export type LifespanRequestMethod = typeof LifespanRequestMethod[keyof typeof LifespanRequestMethod];
-
+export enum LifespanRequestMethod {
+    Replace = 'REPLACE',
+    Add = 'ADD',
+    Subtract = 'SUBTRACT'
+}
 
 /**
  * 
@@ -130,7 +99,7 @@ export interface ProtobufAny {
      * @type {string}
      * @memberof ProtobufAny
      */
-    '@type'?: string;
+    type?: string;
 }
 /**
  * 
@@ -143,13 +112,13 @@ export interface StreamResultOfV1CliUpgradeResponse {
      * @type {V1CliUpgradeResponse}
      * @memberof StreamResultOfV1CliUpgradeResponse
      */
-    'result'?: V1CliUpgradeResponse;
+    result?: V1CliUpgradeResponse;
     /**
      * 
      * @type {GooglerpcStatus}
      * @memberof StreamResultOfV1CliUpgradeResponse
      */
-    'error'?: GooglerpcStatus;
+    error?: GooglerpcStatus;
 }
 /**
  * 
@@ -162,25 +131,25 @@ export interface V1Artifact {
      * @type {string}
      * @memberof V1Artifact
      */
-    'Name'?: string;
+    Name?: string;
     /**
      * 
      * @type {string}
      * @memberof V1Artifact
      */
-    'Description'?: string;
+    Description?: string;
     /**
      * 
      * @type {string}
      * @memberof V1Artifact
      */
-    'URL'?: string;
+    URL?: string;
     /**
      * 
      * @type {number}
      * @memberof V1Artifact
      */
-    'Mode'?: number;
+    Mode?: number;
 }
 /**
  * 
@@ -193,7 +162,7 @@ export interface V1CliUpgradeResponse {
      * @type {string}
      * @memberof V1CliUpgradeResponse
      */
-    'fileChunk'?: string;
+    fileChunk?: string;
 }
 /**
  * Cluster represents a single cluster.
@@ -206,64 +175,62 @@ export interface V1Cluster {
      * @type {string}
      * @memberof V1Cluster
      */
-    'ID'?: string;
+    ID?: string;
     /**
      * 
-     * @type {Apiv1Status}
+     * @type {V1Status}
      * @memberof V1Cluster
      */
-    'Status'?: Apiv1Status;
+    Status?: V1Status;
     /**
      * Flavor is the original flavor ID that launched this cluster.
      * @type {string}
      * @memberof V1Cluster
      */
-    'Flavor'?: string;
+    Flavor?: string;
     /**
      * Owner is the email address for the cluster owner.
      * @type {string}
      * @memberof V1Cluster
      */
-    'Owner'?: string;
+    Owner?: string;
     /**
      * CreatedOn is the timestamp on which the cluster started being created.
      * @type {string}
      * @memberof V1Cluster
      */
-    'CreatedOn'?: string;
+    CreatedOn?: string;
     /**
      * DestroyedOn is the timestamp on which the cluster finished being destroyed.
      * @type {string}
      * @memberof V1Cluster
      */
-    'DestroyedOn'?: string;
+    DestroyedOn?: string;
     /**
      * Lifespan is the duration for which the cluster should be kept alive.
      * @type {string}
      * @memberof V1Cluster
      */
-    'Lifespan'?: string;
+    Lifespan?: string;
     /**
      * Description is a human readable description for the cluster.
      * @type {string}
      * @memberof V1Cluster
      */
-    'Description'?: string;
+    Description?: string;
     /**
      * URL is an optional URL for this cluster.
      * @type {string}
      * @memberof V1Cluster
      */
-    'URL'?: string;
+    URL?: string;
     /**
      * Connect is a command to add kube connection information to kubeconfig.
      * @type {string}
      * @memberof V1Cluster
      */
-    'Connect'?: string;
+    Connect?: string;
 }
-
-
 /**
  * 
  * @export
@@ -275,7 +242,7 @@ export interface V1ClusterArtifacts {
      * @type {Array<V1Artifact>}
      * @memberof V1ClusterArtifacts
      */
-    'Artifacts'?: Array<V1Artifact>;
+    Artifacts?: Array<V1Artifact>;
 }
 /**
  * ClusterListResponse represents details about all clusters.
@@ -288,7 +255,7 @@ export interface V1ClusterListResponse {
      * @type {Array<V1Cluster>}
      * @memberof V1ClusterListResponse
      */
-    'Clusters'?: Array<V1Cluster>;
+    Clusters?: Array<V1Cluster>;
 }
 /**
  * CreateClusterRequest represents details for launching a new cluster.
@@ -301,37 +268,37 @@ export interface V1CreateClusterRequest {
      * @type {string}
      * @memberof V1CreateClusterRequest
      */
-    'ID'?: string;
+    ID?: string;
     /**
      * Lifespan is the initial cluster lifespan.
      * @type {string}
      * @memberof V1CreateClusterRequest
      */
-    'Lifespan'?: string;
+    Lifespan?: string;
     /**
      * Parameters is a map of launch parameter names to values.
      * @type {{ [key: string]: string; }}
      * @memberof V1CreateClusterRequest
      */
-    'Parameters'?: { [key: string]: string; };
+    Parameters?: { [key: string]: string; };
     /**
      * Description is a human readable description for the cluster.
      * @type {string}
      * @memberof V1CreateClusterRequest
      */
-    'Description'?: string;
+    Description?: string;
     /**
      * NoSlack is used to skip sending Slack messages for cluster lifecycle events.
      * @type {boolean}
      * @memberof V1CreateClusterRequest
      */
-    'NoSlack'?: boolean;
+    NoSlack?: boolean;
     /**
      * SlackDM is used to choose direct messages for cluster lifecycle events.
      * @type {boolean}
      * @memberof V1CreateClusterRequest
      */
-    'SlackDM'?: boolean;
+    SlackDM?: boolean;
 }
 /**
  * Flavor represents a configured cluster flavor.
@@ -344,40 +311,38 @@ export interface V1Flavor {
      * @type {string}
      * @memberof V1Flavor
      */
-    'ID'?: string;
+    ID?: string;
     /**
      * Name is a human readable name for the flavor.
      * @type {string}
      * @memberof V1Flavor
      */
-    'Name'?: string;
+    Name?: string;
     /**
      * Description is a human readable description for the flavor.
      * @type {string}
      * @memberof V1Flavor
      */
-    'Description'?: string;
+    Description?: string;
     /**
      * 
      * @type {Flavoravailability}
      * @memberof V1Flavor
      */
-    'Availability'?: Flavoravailability;
+    Availability?: Flavoravailability;
     /**
      * Parameters is a map of parameters required for launching this flavor.
      * @type {{ [key: string]: V1Parameter; }}
      * @memberof V1Flavor
      */
-    'Parameters'?: { [key: string]: V1Parameter; };
+    Parameters?: { [key: string]: V1Parameter; };
     /**
      * Artifacts is a map of artifacts produced by this flavor.
      * @type {{ [key: string]: V1FlavorArtifact; }}
      * @memberof V1Flavor
      */
-    'Artifacts'?: { [key: string]: V1FlavorArtifact; };
+    Artifacts?: { [key: string]: V1FlavorArtifact; };
 }
-
-
 /**
  * FlavorArtifact represents a single artifact that is produced by a flavor.
  * @export
@@ -389,19 +354,19 @@ export interface V1FlavorArtifact {
      * @type {string}
      * @memberof V1FlavorArtifact
      */
-    'Name'?: string;
+    Name?: string;
     /**
      * Description is a human readable description for the artifact.
      * @type {string}
      * @memberof V1FlavorArtifact
      */
-    'Description'?: string;
+    Description?: string;
     /**
      * Tags is a set of artifact tags.
      * @type {{ [key: string]: object; }}
      * @memberof V1FlavorArtifact
      */
-    'Tags'?: { [key: string]: object; };
+    Tags?: { [key: string]: object; };
 }
 /**
  * FlavorListResponse represents details about the available cluster flavors.
@@ -414,13 +379,13 @@ export interface V1FlavorListResponse {
      * @type {string}
      * @memberof V1FlavorListResponse
      */
-    'Default'?: string;
+    Default?: string;
     /**
      * Flavors is a list of all available cluster flavors.
      * @type {Array<V1Flavor>}
      * @memberof V1FlavorListResponse
      */
-    'Flavors'?: Array<V1Flavor>;
+    Flavors?: Array<V1Flavor>;
 }
 /**
  * 
@@ -433,13 +398,13 @@ export interface V1InfraStatus {
      * @type {boolean}
      * @memberof V1InfraStatus
      */
-    'MaintenanceActive'?: boolean;
+    MaintenanceActive?: boolean;
     /**
      * Maintainer is the email of the person currently doing maintenance.
      * @type {string}
      * @memberof V1InfraStatus
      */
-    'Maintainer'?: string;
+    Maintainer?: string;
 }
 /**
  * Log represents the logs from a specific pod.
@@ -452,25 +417,25 @@ export interface V1Log {
      * @type {string}
      * @memberof V1Log
      */
-    'Name'?: string;
+    Name?: string;
     /**
      * Started is the time at which this pod was started. Used for ordering between pods.
      * @type {string}
      * @memberof V1Log
      */
-    'Started'?: string;
+    Started?: string;
     /**
      * Body is the raw pod logs.
      * @type {string}
      * @memberof V1Log
      */
-    'Body'?: string;
+    Body?: string;
     /**
      * Message surfaces step state from Argo.
      * @type {string}
      * @memberof V1Log
      */
-    'Message'?: string;
+    Message?: string;
 }
 /**
  * LogsResponse represents a collection of logs.
@@ -483,7 +448,7 @@ export interface V1LogsResponse {
      * @type {Array<V1Log>}
      * @memberof V1LogsResponse
      */
-    'Logs'?: Array<V1Log>;
+    Logs?: Array<V1Log>;
 }
 /**
  * Parameter represents a single parameter that is needed to launch a flavor.
@@ -496,49 +461,49 @@ export interface V1Parameter {
      * @type {string}
      * @memberof V1Parameter
      */
-    'Name'?: string;
+    Name?: string;
     /**
      * Description is a human readable description for the parameter.
      * @type {string}
      * @memberof V1Parameter
      */
-    'Description'?: string;
+    Description?: string;
     /**
      * Value that this parameter could have. If the parameter is not optional, then value serves as an example. If the parameter is optional, then value serves as a default. If the parameter is internal, then value serves as a hardcoded constant.
      * @type {string}
      * @memberof V1Parameter
      */
-    'Value'?: string;
+    Value?: string;
     /**
      * Optional indicates that this parameter can be optionally provided by a user. If the user does not provide a value, then Value serves as a default.
      * @type {boolean}
      * @memberof V1Parameter
      */
-    'Optional'?: boolean;
+    Optional?: boolean;
     /**
      * Internal indicates that this parameter should not be provided by a user, but rather treats Value as a hardcoded constant.
      * @type {boolean}
      * @memberof V1Parameter
      */
-    'Internal'?: boolean;
+    Internal?: boolean;
     /**
      * The relative order of importance of this parameter for when presenting in a UI for example.
      * @type {number}
      * @memberof V1Parameter
      */
-    'Order'?: number;
+    Order?: number;
     /**
      * 
      * @type {string}
      * @memberof V1Parameter
      */
-    'Help'?: string;
+    Help?: string;
     /**
      * Indicates that the value for this parameter can be provided from the contents of a file.
      * @type {boolean}
      * @memberof V1Parameter
      */
-    'FromFile'?: boolean;
+    FromFile?: boolean;
 }
 /**
  * ResourceByID represents a generic reference to a named/unique resource.
@@ -551,7 +516,7 @@ export interface V1ResourceByID {
      * @type {string}
      * @memberof V1ResourceByID
      */
-    'id'?: string;
+    id?: string;
 }
 /**
  * ServiceAccount represents an authenticated service account (robot) principal.
@@ -564,38 +529,51 @@ export interface V1ServiceAccount {
      * @type {string}
      * @memberof V1ServiceAccount
      */
-    'Name'?: string;
+    Name?: string;
     /**
      * Description is a human readable description for the service account.
      * @type {string}
      * @memberof V1ServiceAccount
      */
-    'Description'?: string;
+    Description?: string;
     /**
      * Email is the Red Hat email address for the service account.
      * @type {string}
      * @memberof V1ServiceAccount
      */
-    'Email'?: string;
+    Email?: string;
     /**
      * IssuedAt is the time of issuing the service account token.
      * @type {string}
      * @memberof V1ServiceAccount
      */
-    'IssuedAt'?: string;
+    IssuedAt?: string;
     /**
      * NotBefore is the beginning of service account token valid time period.
      * @type {string}
      * @memberof V1ServiceAccount
      */
-    'NotBefore'?: string;
+    NotBefore?: string;
     /**
      * ExpiresAt is the end of service account token valid time period.
      * @type {string}
      * @memberof V1ServiceAccount
      */
-    'ExpiresAt'?: string;
+    ExpiresAt?: string;
 }
+/**
+ * Status represents the various cluster states.   - FAILED: FAILED is the state when the cluster has failed in one way or another.  - CREATING: CREATING is the state when the cluster is being created.  - READY: READY is the state when the cluster is available and ready for use.  - DESTROYING: DESTROYING is the state when the cluster is being destroyed.  - FINISHED: FINISHED is the state when the cluster has been successfully destroyed.
+ * @export
+ * @enum {string}
+ */
+export enum V1Status {
+    Failed = 'FAILED',
+    Creating = 'CREATING',
+    Ready = 'READY',
+    Destroying = 'DESTROYING',
+    Finished = 'FINISHED'
+}
+
 /**
  * 
  * @export
@@ -607,13 +585,13 @@ export interface V1TokenResponse {
      * @type {V1ServiceAccount}
      * @memberof V1TokenResponse
      */
-    'Account'?: V1ServiceAccount;
+    Account?: V1ServiceAccount;
     /**
      * Token is the token generated for the service account.
      * @type {string}
      * @memberof V1TokenResponse
      */
-    'Token'?: string;
+    Token?: string;
 }
 /**
  * User represents an authenticated (human) principal.
@@ -626,25 +604,25 @@ export interface V1User {
      * @type {string}
      * @memberof V1User
      */
-    'Expiry'?: string;
+    Expiry?: string;
     /**
      * Name is the full name of the user.
      * @type {string}
      * @memberof V1User
      */
-    'Name'?: string;
+    Name?: string;
     /**
      * Email is the email address of the user.
      * @type {string}
      * @memberof V1User
      */
-    'Email'?: string;
+    Email?: string;
     /**
      * Picture is a URL linking to this user\'s profile picture, if available.
      * @type {string}
      * @memberof V1User
      */
-    'Picture'?: string;
+    Picture?: string;
 }
 /**
  * 
@@ -657,37 +635,37 @@ export interface V1Version {
      * @type {string}
      * @memberof V1Version
      */
-    'BuildDate'?: string;
+    BuildDate?: string;
     /**
      * 
      * @type {string}
      * @memberof V1Version
      */
-    'GitCommit'?: string;
+    GitCommit?: string;
     /**
      * 
      * @type {string}
      * @memberof V1Version
      */
-    'GoVersion'?: string;
+    GoVersion?: string;
     /**
      * 
      * @type {string}
      * @memberof V1Version
      */
-    'Platform'?: string;
+    Platform?: string;
     /**
      * 
      * @type {string}
      * @memberof V1Version
      */
-    'Version'?: string;
+    Version?: string;
     /**
      * 
      * @type {string}
      * @memberof V1Version
      */
-    'Workflow'?: string;
+    Workflow?: string;
 }
 /**
  * WhoamiResponse represents details about the current authenticated principal.
@@ -700,13 +678,13 @@ export interface V1WhoamiResponse {
      * @type {V1User}
      * @memberof V1WhoamiResponse
      */
-    'User'?: V1User;
+    User?: V1User;
     /**
      * 
      * @type {V1ServiceAccount}
      * @memberof V1WhoamiResponse
      */
-    'ServiceAccount'?: V1ServiceAccount;
+    ServiceAccount?: V1ServiceAccount;
 }
 
 /**
@@ -723,16 +701,20 @@ export const CliServiceApiAxiosParamCreator = function (configuration?: Configur
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        cliServiceUpgrade: async (os: string, arch: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        cliServiceUpgrade: async (os: string, arch: string, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'os' is not null or undefined
-            assertParamExists('cliServiceUpgrade', 'os', os)
+            if (os === null || os === undefined) {
+                throw new RequiredError('os','Required parameter os was null or undefined when calling cliServiceUpgrade.');
+            }
             // verify required parameter 'arch' is not null or undefined
-            assertParamExists('cliServiceUpgrade', 'arch', arch)
+            if (arch === null || arch === undefined) {
+                throw new RequiredError('arch','Required parameter arch was null or undefined when calling cliServiceUpgrade.');
+            }
             const localVarPath = `/v1/cli/{os}/{arch}/upgrade`
                 .replace(`{${"os"}}`, encodeURIComponent(String(os)))
                 .replace(`{${"arch"}}`, encodeURIComponent(String(arch)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -744,12 +726,19 @@ export const CliServiceApiAxiosParamCreator = function (configuration?: Configur
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -761,7 +750,6 @@ export const CliServiceApiAxiosParamCreator = function (configuration?: Configur
  * @export
  */
 export const CliServiceApiFp = function(configuration?: Configuration) {
-    const localVarAxiosParamCreator = CliServiceApiAxiosParamCreator(configuration)
     return {
         /**
          * 
@@ -771,9 +759,12 @@ export const CliServiceApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async cliServiceUpgrade(os: string, arch: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<StreamResultOfV1CliUpgradeResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.cliServiceUpgrade(os, arch, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async cliServiceUpgrade(os: string, arch: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<StreamResultOfV1CliUpgradeResponse>> {
+            const localVarAxiosArgs = await CliServiceApiAxiosParamCreator(configuration).cliServiceUpgrade(os, arch, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
     }
 };
@@ -783,7 +774,6 @@ export const CliServiceApiFp = function(configuration?: Configuration) {
  * @export
  */
 export const CliServiceApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-    const localVarFp = CliServiceApiFp(configuration)
     return {
         /**
          * 
@@ -794,7 +784,7 @@ export const CliServiceApiFactory = function (configuration?: Configuration, bas
          * @throws {RequiredError}
          */
         cliServiceUpgrade(os: string, arch: string, options?: any): AxiosPromise<StreamResultOfV1CliUpgradeResponse> {
-            return localVarFp.cliServiceUpgrade(os, arch, options).then((request) => request(axios, basePath));
+            return CliServiceApiFp(configuration).cliServiceUpgrade(os, arch, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -815,7 +805,7 @@ export class CliServiceApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof CliServiceApi
      */
-    public cliServiceUpgrade(os: string, arch: string, options?: AxiosRequestConfig) {
+    public cliServiceUpgrade(os: string, arch: string, options?: any) {
         return CliServiceApiFp(this.configuration).cliServiceUpgrade(os, arch, options).then((request) => request(this.axios, this.basePath));
     }
 }
@@ -834,13 +824,15 @@ export const ClusterServiceApiAxiosParamCreator = function (configuration?: Conf
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        clusterServiceArtifacts: async (id: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        clusterServiceArtifacts: async (id: string, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
-            assertParamExists('clusterServiceArtifacts', 'id', id)
+            if (id === null || id === undefined) {
+                throw new RequiredError('id','Required parameter id was null or undefined when calling clusterServiceArtifacts.');
+            }
             const localVarPath = `/v1/cluster/{id}/artifacts`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -852,12 +844,19 @@ export const ClusterServiceApiAxiosParamCreator = function (configuration?: Conf
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -868,12 +867,14 @@ export const ClusterServiceApiAxiosParamCreator = function (configuration?: Conf
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        clusterServiceCreate: async (body: V1CreateClusterRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        clusterServiceCreate: async (body: V1CreateClusterRequest, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'body' is not null or undefined
-            assertParamExists('clusterServiceCreate', 'body', body)
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling clusterServiceCreate.');
+            }
             const localVarPath = `/v1/cluster`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -887,13 +888,26 @@ export const ClusterServiceApiAxiosParamCreator = function (configuration?: Conf
     
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
+            const nonString = typeof body !== 'string';
+            const needsSerialization = nonString && configuration && configuration.isJsonMime
+                ? configuration.isJsonMime(localVarRequestOptions.headers['Content-Type'])
+                : nonString;
+            localVarRequestOptions.data =  needsSerialization
+                ? JSON.stringify(body !== undefined ? body : {})
+                : (body || "");
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -904,13 +918,15 @@ export const ClusterServiceApiAxiosParamCreator = function (configuration?: Conf
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        clusterServiceDelete: async (id: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        clusterServiceDelete: async (id: string, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
-            assertParamExists('clusterServiceDelete', 'id', id)
+            if (id === null || id === undefined) {
+                throw new RequiredError('id','Required parameter id was null or undefined when calling clusterServiceDelete.');
+            }
             const localVarPath = `/v1/cluster/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -922,12 +938,19 @@ export const ClusterServiceApiAxiosParamCreator = function (configuration?: Conf
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -938,13 +961,15 @@ export const ClusterServiceApiAxiosParamCreator = function (configuration?: Conf
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        clusterServiceInfo: async (id: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        clusterServiceInfo: async (id: string, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
-            assertParamExists('clusterServiceInfo', 'id', id)
+            if (id === null || id === undefined) {
+                throw new RequiredError('id','Required parameter id was null or undefined when calling clusterServiceInfo.');
+            }
             const localVarPath = `/v1/cluster/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -956,12 +981,19 @@ export const ClusterServiceApiAxiosParamCreator = function (configuration?: Conf
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -969,19 +1001,23 @@ export const ClusterServiceApiAxiosParamCreator = function (configuration?: Conf
          * 
          * @summary Lifespan updates the lifespan for a specific cluster.
          * @param {string} id ID is the unique ID for the cluster.
-         * @param {ClusterServiceLifespanRequest} body 
+         * @param {InlineObject} body 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        clusterServiceLifespan: async (id: string, body: ClusterServiceLifespanRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        clusterServiceLifespan: async (id: string, body: InlineObject, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
-            assertParamExists('clusterServiceLifespan', 'id', id)
+            if (id === null || id === undefined) {
+                throw new RequiredError('id','Required parameter id was null or undefined when calling clusterServiceLifespan.');
+            }
             // verify required parameter 'body' is not null or undefined
-            assertParamExists('clusterServiceLifespan', 'body', body)
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling clusterServiceLifespan.');
+            }
             const localVarPath = `/v1/cluster/{id}/lifespan`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -995,13 +1031,26 @@ export const ClusterServiceApiAxiosParamCreator = function (configuration?: Conf
     
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
+            const nonString = typeof body !== 'string';
+            const needsSerialization = nonString && configuration && configuration.isJsonMime
+                ? configuration.isJsonMime(localVarRequestOptions.headers['Content-Type'])
+                : nonString;
+            localVarRequestOptions.data =  needsSerialization
+                ? JSON.stringify(body !== undefined ? body : {})
+                : (body || "");
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1014,10 +1063,10 @@ export const ClusterServiceApiAxiosParamCreator = function (configuration?: Conf
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        clusterServiceList: async (all?: boolean, expired?: boolean, prefix?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        clusterServiceList: async (all?: boolean, expired?: boolean, prefix?: string, options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/v1/cluster`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1041,12 +1090,19 @@ export const ClusterServiceApiAxiosParamCreator = function (configuration?: Conf
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1057,13 +1113,15 @@ export const ClusterServiceApiAxiosParamCreator = function (configuration?: Conf
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        clusterServiceLogs: async (id: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        clusterServiceLogs: async (id: string, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
-            assertParamExists('clusterServiceLogs', 'id', id)
+            if (id === null || id === undefined) {
+                throw new RequiredError('id','Required parameter id was null or undefined when calling clusterServiceLogs.');
+            }
             const localVarPath = `/v1/cluster/{id}/logs`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1075,12 +1133,19 @@ export const ClusterServiceApiAxiosParamCreator = function (configuration?: Conf
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1092,7 +1157,6 @@ export const ClusterServiceApiAxiosParamCreator = function (configuration?: Conf
  * @export
  */
 export const ClusterServiceApiFp = function(configuration?: Configuration) {
-    const localVarAxiosParamCreator = ClusterServiceApiAxiosParamCreator(configuration)
     return {
         /**
          * 
@@ -1101,9 +1165,12 @@ export const ClusterServiceApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async clusterServiceArtifacts(id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1ClusterArtifacts>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.clusterServiceArtifacts(id, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async clusterServiceArtifacts(id: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1ClusterArtifacts>> {
+            const localVarAxiosArgs = await ClusterServiceApiAxiosParamCreator(configuration).clusterServiceArtifacts(id, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -1112,9 +1179,12 @@ export const ClusterServiceApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async clusterServiceCreate(body: V1CreateClusterRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1ResourceByID>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.clusterServiceCreate(body, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async clusterServiceCreate(body: V1CreateClusterRequest, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1ResourceByID>> {
+            const localVarAxiosArgs = await ClusterServiceApiAxiosParamCreator(configuration).clusterServiceCreate(body, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -1123,9 +1193,12 @@ export const ClusterServiceApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async clusterServiceDelete(id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<object>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.clusterServiceDelete(id, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async clusterServiceDelete(id: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<object>> {
+            const localVarAxiosArgs = await ClusterServiceApiAxiosParamCreator(configuration).clusterServiceDelete(id, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -1134,21 +1207,27 @@ export const ClusterServiceApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async clusterServiceInfo(id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1Cluster>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.clusterServiceInfo(id, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async clusterServiceInfo(id: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1Cluster>> {
+            const localVarAxiosArgs = await ClusterServiceApiAxiosParamCreator(configuration).clusterServiceInfo(id, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
          * @summary Lifespan updates the lifespan for a specific cluster.
          * @param {string} id ID is the unique ID for the cluster.
-         * @param {ClusterServiceLifespanRequest} body 
+         * @param {InlineObject} body 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async clusterServiceLifespan(id: string, body: ClusterServiceLifespanRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.clusterServiceLifespan(id, body, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async clusterServiceLifespan(id: string, body: InlineObject, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+            const localVarAxiosArgs = await ClusterServiceApiAxiosParamCreator(configuration).clusterServiceLifespan(id, body, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -1159,9 +1238,12 @@ export const ClusterServiceApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async clusterServiceList(all?: boolean, expired?: boolean, prefix?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1ClusterListResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.clusterServiceList(all, expired, prefix, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async clusterServiceList(all?: boolean, expired?: boolean, prefix?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1ClusterListResponse>> {
+            const localVarAxiosArgs = await ClusterServiceApiAxiosParamCreator(configuration).clusterServiceList(all, expired, prefix, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -1170,9 +1252,12 @@ export const ClusterServiceApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async clusterServiceLogs(id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1LogsResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.clusterServiceLogs(id, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async clusterServiceLogs(id: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1LogsResponse>> {
+            const localVarAxiosArgs = await ClusterServiceApiAxiosParamCreator(configuration).clusterServiceLogs(id, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
     }
 };
@@ -1182,7 +1267,6 @@ export const ClusterServiceApiFp = function(configuration?: Configuration) {
  * @export
  */
 export const ClusterServiceApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-    const localVarFp = ClusterServiceApiFp(configuration)
     return {
         /**
          * 
@@ -1192,7 +1276,7 @@ export const ClusterServiceApiFactory = function (configuration?: Configuration,
          * @throws {RequiredError}
          */
         clusterServiceArtifacts(id: string, options?: any): AxiosPromise<V1ClusterArtifacts> {
-            return localVarFp.clusterServiceArtifacts(id, options).then((request) => request(axios, basePath));
+            return ClusterServiceApiFp(configuration).clusterServiceArtifacts(id, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1202,7 +1286,7 @@ export const ClusterServiceApiFactory = function (configuration?: Configuration,
          * @throws {RequiredError}
          */
         clusterServiceCreate(body: V1CreateClusterRequest, options?: any): AxiosPromise<V1ResourceByID> {
-            return localVarFp.clusterServiceCreate(body, options).then((request) => request(axios, basePath));
+            return ClusterServiceApiFp(configuration).clusterServiceCreate(body, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1212,7 +1296,7 @@ export const ClusterServiceApiFactory = function (configuration?: Configuration,
          * @throws {RequiredError}
          */
         clusterServiceDelete(id: string, options?: any): AxiosPromise<object> {
-            return localVarFp.clusterServiceDelete(id, options).then((request) => request(axios, basePath));
+            return ClusterServiceApiFp(configuration).clusterServiceDelete(id, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1222,18 +1306,18 @@ export const ClusterServiceApiFactory = function (configuration?: Configuration,
          * @throws {RequiredError}
          */
         clusterServiceInfo(id: string, options?: any): AxiosPromise<V1Cluster> {
-            return localVarFp.clusterServiceInfo(id, options).then((request) => request(axios, basePath));
+            return ClusterServiceApiFp(configuration).clusterServiceInfo(id, options).then((request) => request(axios, basePath));
         },
         /**
          * 
          * @summary Lifespan updates the lifespan for a specific cluster.
          * @param {string} id ID is the unique ID for the cluster.
-         * @param {ClusterServiceLifespanRequest} body 
+         * @param {InlineObject} body 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        clusterServiceLifespan(id: string, body: ClusterServiceLifespanRequest, options?: any): AxiosPromise<string> {
-            return localVarFp.clusterServiceLifespan(id, body, options).then((request) => request(axios, basePath));
+        clusterServiceLifespan(id: string, body: InlineObject, options?: any): AxiosPromise<string> {
+            return ClusterServiceApiFp(configuration).clusterServiceLifespan(id, body, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1245,7 +1329,7 @@ export const ClusterServiceApiFactory = function (configuration?: Configuration,
          * @throws {RequiredError}
          */
         clusterServiceList(all?: boolean, expired?: boolean, prefix?: string, options?: any): AxiosPromise<V1ClusterListResponse> {
-            return localVarFp.clusterServiceList(all, expired, prefix, options).then((request) => request(axios, basePath));
+            return ClusterServiceApiFp(configuration).clusterServiceList(all, expired, prefix, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1255,7 +1339,7 @@ export const ClusterServiceApiFactory = function (configuration?: Configuration,
          * @throws {RequiredError}
          */
         clusterServiceLogs(id: string, options?: any): AxiosPromise<V1LogsResponse> {
-            return localVarFp.clusterServiceLogs(id, options).then((request) => request(axios, basePath));
+            return ClusterServiceApiFp(configuration).clusterServiceLogs(id, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -1275,7 +1359,7 @@ export class ClusterServiceApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof ClusterServiceApi
      */
-    public clusterServiceArtifacts(id: string, options?: AxiosRequestConfig) {
+    public clusterServiceArtifacts(id: string, options?: any) {
         return ClusterServiceApiFp(this.configuration).clusterServiceArtifacts(id, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1287,7 +1371,7 @@ export class ClusterServiceApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof ClusterServiceApi
      */
-    public clusterServiceCreate(body: V1CreateClusterRequest, options?: AxiosRequestConfig) {
+    public clusterServiceCreate(body: V1CreateClusterRequest, options?: any) {
         return ClusterServiceApiFp(this.configuration).clusterServiceCreate(body, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1299,7 +1383,7 @@ export class ClusterServiceApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof ClusterServiceApi
      */
-    public clusterServiceDelete(id: string, options?: AxiosRequestConfig) {
+    public clusterServiceDelete(id: string, options?: any) {
         return ClusterServiceApiFp(this.configuration).clusterServiceDelete(id, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1311,7 +1395,7 @@ export class ClusterServiceApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof ClusterServiceApi
      */
-    public clusterServiceInfo(id: string, options?: AxiosRequestConfig) {
+    public clusterServiceInfo(id: string, options?: any) {
         return ClusterServiceApiFp(this.configuration).clusterServiceInfo(id, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1319,12 +1403,12 @@ export class ClusterServiceApi extends BaseAPI {
      * 
      * @summary Lifespan updates the lifespan for a specific cluster.
      * @param {string} id ID is the unique ID for the cluster.
-     * @param {ClusterServiceLifespanRequest} body 
+     * @param {InlineObject} body 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ClusterServiceApi
      */
-    public clusterServiceLifespan(id: string, body: ClusterServiceLifespanRequest, options?: AxiosRequestConfig) {
+    public clusterServiceLifespan(id: string, body: InlineObject, options?: any) {
         return ClusterServiceApiFp(this.configuration).clusterServiceLifespan(id, body, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1338,7 +1422,7 @@ export class ClusterServiceApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof ClusterServiceApi
      */
-    public clusterServiceList(all?: boolean, expired?: boolean, prefix?: string, options?: AxiosRequestConfig) {
+    public clusterServiceList(all?: boolean, expired?: boolean, prefix?: string, options?: any) {
         return ClusterServiceApiFp(this.configuration).clusterServiceList(all, expired, prefix, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1350,7 +1434,7 @@ export class ClusterServiceApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof ClusterServiceApi
      */
-    public clusterServiceLogs(id: string, options?: AxiosRequestConfig) {
+    public clusterServiceLogs(id: string, options?: any) {
         return ClusterServiceApiFp(this.configuration).clusterServiceLogs(id, options).then((request) => request(this.axios, this.basePath));
     }
 }
@@ -1369,13 +1453,15 @@ export const FlavorServiceApiAxiosParamCreator = function (configuration?: Confi
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        flavorServiceInfo: async (id: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        flavorServiceInfo: async (id: string, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
-            assertParamExists('flavorServiceInfo', 'id', id)
+            if (id === null || id === undefined) {
+                throw new RequiredError('id','Required parameter id was null or undefined when calling flavorServiceInfo.');
+            }
             const localVarPath = `/v1/flavor/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1387,12 +1473,19 @@ export const FlavorServiceApiAxiosParamCreator = function (configuration?: Confi
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1403,10 +1496,10 @@ export const FlavorServiceApiAxiosParamCreator = function (configuration?: Confi
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        flavorServiceList: async (all?: boolean, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        flavorServiceList: async (all?: boolean, options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/v1/flavor`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1422,12 +1515,19 @@ export const FlavorServiceApiAxiosParamCreator = function (configuration?: Confi
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1439,7 +1539,6 @@ export const FlavorServiceApiAxiosParamCreator = function (configuration?: Confi
  * @export
  */
 export const FlavorServiceApiFp = function(configuration?: Configuration) {
-    const localVarAxiosParamCreator = FlavorServiceApiAxiosParamCreator(configuration)
     return {
         /**
          * 
@@ -1448,9 +1547,12 @@ export const FlavorServiceApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async flavorServiceInfo(id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1Flavor>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.flavorServiceInfo(id, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async flavorServiceInfo(id: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1Flavor>> {
+            const localVarAxiosArgs = await FlavorServiceApiAxiosParamCreator(configuration).flavorServiceInfo(id, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -1459,9 +1561,12 @@ export const FlavorServiceApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async flavorServiceList(all?: boolean, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1FlavorListResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.flavorServiceList(all, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async flavorServiceList(all?: boolean, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1FlavorListResponse>> {
+            const localVarAxiosArgs = await FlavorServiceApiAxiosParamCreator(configuration).flavorServiceList(all, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
     }
 };
@@ -1471,7 +1576,6 @@ export const FlavorServiceApiFp = function(configuration?: Configuration) {
  * @export
  */
 export const FlavorServiceApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-    const localVarFp = FlavorServiceApiFp(configuration)
     return {
         /**
          * 
@@ -1481,7 +1585,7 @@ export const FlavorServiceApiFactory = function (configuration?: Configuration, 
          * @throws {RequiredError}
          */
         flavorServiceInfo(id: string, options?: any): AxiosPromise<V1Flavor> {
-            return localVarFp.flavorServiceInfo(id, options).then((request) => request(axios, basePath));
+            return FlavorServiceApiFp(configuration).flavorServiceInfo(id, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1491,7 +1595,7 @@ export const FlavorServiceApiFactory = function (configuration?: Configuration, 
          * @throws {RequiredError}
          */
         flavorServiceList(all?: boolean, options?: any): AxiosPromise<V1FlavorListResponse> {
-            return localVarFp.flavorServiceList(all, options).then((request) => request(axios, basePath));
+            return FlavorServiceApiFp(configuration).flavorServiceList(all, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -1511,7 +1615,7 @@ export class FlavorServiceApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof FlavorServiceApi
      */
-    public flavorServiceInfo(id: string, options?: AxiosRequestConfig) {
+    public flavorServiceInfo(id: string, options?: any) {
         return FlavorServiceApiFp(this.configuration).flavorServiceInfo(id, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1523,7 +1627,7 @@ export class FlavorServiceApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof FlavorServiceApi
      */
-    public flavorServiceList(all?: boolean, options?: AxiosRequestConfig) {
+    public flavorServiceList(all?: boolean, options?: any) {
         return FlavorServiceApiFp(this.configuration).flavorServiceList(all, options).then((request) => request(this.axios, this.basePath));
     }
 }
@@ -1541,10 +1645,10 @@ export const InfraStatusServiceApiAxiosParamCreator = function (configuration?: 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        infraStatusServiceGetStatus: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        infraStatusServiceGetStatus: async (options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/v1/status`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1556,12 +1660,19 @@ export const InfraStatusServiceApiAxiosParamCreator = function (configuration?: 
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1571,10 +1682,10 @@ export const InfraStatusServiceApiAxiosParamCreator = function (configuration?: 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        infraStatusServiceResetStatus: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        infraStatusServiceResetStatus: async (options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/v1/status`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1586,12 +1697,19 @@ export const InfraStatusServiceApiAxiosParamCreator = function (configuration?: 
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1601,10 +1719,10 @@ export const InfraStatusServiceApiAxiosParamCreator = function (configuration?: 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        infraStatusServiceSetStatus: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        infraStatusServiceSetStatus: async (options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/v1/status`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1616,12 +1734,19 @@ export const InfraStatusServiceApiAxiosParamCreator = function (configuration?: 
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1633,7 +1758,6 @@ export const InfraStatusServiceApiAxiosParamCreator = function (configuration?: 
  * @export
  */
 export const InfraStatusServiceApiFp = function(configuration?: Configuration) {
-    const localVarAxiosParamCreator = InfraStatusServiceApiAxiosParamCreator(configuration)
     return {
         /**
          * 
@@ -1641,9 +1765,12 @@ export const InfraStatusServiceApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async infraStatusServiceGetStatus(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1InfraStatus>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.infraStatusServiceGetStatus(options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async infraStatusServiceGetStatus(options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1InfraStatus>> {
+            const localVarAxiosArgs = await InfraStatusServiceApiAxiosParamCreator(configuration).infraStatusServiceGetStatus(options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -1651,9 +1778,12 @@ export const InfraStatusServiceApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async infraStatusServiceResetStatus(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1InfraStatus>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.infraStatusServiceResetStatus(options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async infraStatusServiceResetStatus(options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1InfraStatus>> {
+            const localVarAxiosArgs = await InfraStatusServiceApiAxiosParamCreator(configuration).infraStatusServiceResetStatus(options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -1661,9 +1791,12 @@ export const InfraStatusServiceApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async infraStatusServiceSetStatus(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1InfraStatus>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.infraStatusServiceSetStatus(options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async infraStatusServiceSetStatus(options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1InfraStatus>> {
+            const localVarAxiosArgs = await InfraStatusServiceApiAxiosParamCreator(configuration).infraStatusServiceSetStatus(options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
     }
 };
@@ -1673,7 +1806,6 @@ export const InfraStatusServiceApiFp = function(configuration?: Configuration) {
  * @export
  */
 export const InfraStatusServiceApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-    const localVarFp = InfraStatusServiceApiFp(configuration)
     return {
         /**
          * 
@@ -1682,7 +1814,7 @@ export const InfraStatusServiceApiFactory = function (configuration?: Configurat
          * @throws {RequiredError}
          */
         infraStatusServiceGetStatus(options?: any): AxiosPromise<V1InfraStatus> {
-            return localVarFp.infraStatusServiceGetStatus(options).then((request) => request(axios, basePath));
+            return InfraStatusServiceApiFp(configuration).infraStatusServiceGetStatus(options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1691,7 +1823,7 @@ export const InfraStatusServiceApiFactory = function (configuration?: Configurat
          * @throws {RequiredError}
          */
         infraStatusServiceResetStatus(options?: any): AxiosPromise<V1InfraStatus> {
-            return localVarFp.infraStatusServiceResetStatus(options).then((request) => request(axios, basePath));
+            return InfraStatusServiceApiFp(configuration).infraStatusServiceResetStatus(options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1700,7 +1832,7 @@ export const InfraStatusServiceApiFactory = function (configuration?: Configurat
          * @throws {RequiredError}
          */
         infraStatusServiceSetStatus(options?: any): AxiosPromise<V1InfraStatus> {
-            return localVarFp.infraStatusServiceSetStatus(options).then((request) => request(axios, basePath));
+            return InfraStatusServiceApiFp(configuration).infraStatusServiceSetStatus(options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -1719,7 +1851,7 @@ export class InfraStatusServiceApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof InfraStatusServiceApi
      */
-    public infraStatusServiceGetStatus(options?: AxiosRequestConfig) {
+    public infraStatusServiceGetStatus(options?: any) {
         return InfraStatusServiceApiFp(this.configuration).infraStatusServiceGetStatus(options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1730,7 +1862,7 @@ export class InfraStatusServiceApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof InfraStatusServiceApi
      */
-    public infraStatusServiceResetStatus(options?: AxiosRequestConfig) {
+    public infraStatusServiceResetStatus(options?: any) {
         return InfraStatusServiceApiFp(this.configuration).infraStatusServiceResetStatus(options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1741,7 +1873,7 @@ export class InfraStatusServiceApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof InfraStatusServiceApi
      */
-    public infraStatusServiceSetStatus(options?: AxiosRequestConfig) {
+    public infraStatusServiceSetStatus(options?: any) {
         return InfraStatusServiceApiFp(this.configuration).infraStatusServiceSetStatus(options).then((request) => request(this.axios, this.basePath));
     }
 }
@@ -1760,12 +1892,14 @@ export const UserServiceApiAxiosParamCreator = function (configuration?: Configu
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        userServiceCreateToken: async (body: V1ServiceAccount, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        userServiceCreateToken: async (body: V1ServiceAccount, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'body' is not null or undefined
-            assertParamExists('userServiceCreateToken', 'body', body)
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling userServiceCreateToken.');
+            }
             const localVarPath = `/v1/token-create`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1779,13 +1913,26 @@ export const UserServiceApiAxiosParamCreator = function (configuration?: Configu
     
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
+            const nonString = typeof body !== 'string';
+            const needsSerialization = nonString && configuration && configuration.isJsonMime
+                ? configuration.isJsonMime(localVarRequestOptions.headers['Content-Type'])
+                : nonString;
+            localVarRequestOptions.data =  needsSerialization
+                ? JSON.stringify(body !== undefined ? body : {})
+                : (body || "");
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1796,12 +1943,14 @@ export const UserServiceApiAxiosParamCreator = function (configuration?: Configu
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        userServiceToken: async (body: object, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        userServiceToken: async (body: object, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'body' is not null or undefined
-            assertParamExists('userServiceToken', 'body', body)
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling userServiceToken.');
+            }
             const localVarPath = `/v1/token`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1815,13 +1964,26 @@ export const UserServiceApiAxiosParamCreator = function (configuration?: Configu
     
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
+            const nonString = typeof body !== 'string';
+            const needsSerialization = nonString && configuration && configuration.isJsonMime
+                ? configuration.isJsonMime(localVarRequestOptions.headers['Content-Type'])
+                : nonString;
+            localVarRequestOptions.data =  needsSerialization
+                ? JSON.stringify(body !== undefined ? body : {})
+                : (body || "");
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1831,10 +1993,10 @@ export const UserServiceApiAxiosParamCreator = function (configuration?: Configu
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        userServiceWhoami: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        userServiceWhoami: async (options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/v1/whoami`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1846,12 +2008,19 @@ export const UserServiceApiAxiosParamCreator = function (configuration?: Configu
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1863,7 +2032,6 @@ export const UserServiceApiAxiosParamCreator = function (configuration?: Configu
  * @export
  */
 export const UserServiceApiFp = function(configuration?: Configuration) {
-    const localVarAxiosParamCreator = UserServiceApiAxiosParamCreator(configuration)
     return {
         /**
          * 
@@ -1872,9 +2040,12 @@ export const UserServiceApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async userServiceCreateToken(body: V1ServiceAccount, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1TokenResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.userServiceCreateToken(body, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async userServiceCreateToken(body: V1ServiceAccount, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1TokenResponse>> {
+            const localVarAxiosArgs = await UserServiceApiAxiosParamCreator(configuration).userServiceCreateToken(body, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -1883,9 +2054,12 @@ export const UserServiceApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async userServiceToken(body: object, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1TokenResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.userServiceToken(body, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async userServiceToken(body: object, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1TokenResponse>> {
+            const localVarAxiosArgs = await UserServiceApiAxiosParamCreator(configuration).userServiceToken(body, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -1893,9 +2067,12 @@ export const UserServiceApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async userServiceWhoami(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1WhoamiResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.userServiceWhoami(options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async userServiceWhoami(options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1WhoamiResponse>> {
+            const localVarAxiosArgs = await UserServiceApiAxiosParamCreator(configuration).userServiceWhoami(options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
     }
 };
@@ -1905,7 +2082,6 @@ export const UserServiceApiFp = function(configuration?: Configuration) {
  * @export
  */
 export const UserServiceApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-    const localVarFp = UserServiceApiFp(configuration)
     return {
         /**
          * 
@@ -1915,7 +2091,7 @@ export const UserServiceApiFactory = function (configuration?: Configuration, ba
          * @throws {RequiredError}
          */
         userServiceCreateToken(body: V1ServiceAccount, options?: any): AxiosPromise<V1TokenResponse> {
-            return localVarFp.userServiceCreateToken(body, options).then((request) => request(axios, basePath));
+            return UserServiceApiFp(configuration).userServiceCreateToken(body, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1925,7 +2101,7 @@ export const UserServiceApiFactory = function (configuration?: Configuration, ba
          * @throws {RequiredError}
          */
         userServiceToken(body: object, options?: any): AxiosPromise<V1TokenResponse> {
-            return localVarFp.userServiceToken(body, options).then((request) => request(axios, basePath));
+            return UserServiceApiFp(configuration).userServiceToken(body, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1934,7 +2110,7 @@ export const UserServiceApiFactory = function (configuration?: Configuration, ba
          * @throws {RequiredError}
          */
         userServiceWhoami(options?: any): AxiosPromise<V1WhoamiResponse> {
-            return localVarFp.userServiceWhoami(options).then((request) => request(axios, basePath));
+            return UserServiceApiFp(configuration).userServiceWhoami(options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -1954,7 +2130,7 @@ export class UserServiceApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof UserServiceApi
      */
-    public userServiceCreateToken(body: V1ServiceAccount, options?: AxiosRequestConfig) {
+    public userServiceCreateToken(body: V1ServiceAccount, options?: any) {
         return UserServiceApiFp(this.configuration).userServiceCreateToken(body, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1966,7 +2142,7 @@ export class UserServiceApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof UserServiceApi
      */
-    public userServiceToken(body: object, options?: AxiosRequestConfig) {
+    public userServiceToken(body: object, options?: any) {
         return UserServiceApiFp(this.configuration).userServiceToken(body, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1977,7 +2153,7 @@ export class UserServiceApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof UserServiceApi
      */
-    public userServiceWhoami(options?: AxiosRequestConfig) {
+    public userServiceWhoami(options?: any) {
         return UserServiceApiFp(this.configuration).userServiceWhoami(options).then((request) => request(this.axios, this.basePath));
     }
 }
@@ -1994,10 +2170,10 @@ export const VersionServiceApiAxiosParamCreator = function (configuration?: Conf
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        versionServiceGetVersion: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        versionServiceGetVersion: async (options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/v1/version`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -2009,12 +2185,19 @@ export const VersionServiceApiAxiosParamCreator = function (configuration?: Conf
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -2026,16 +2209,18 @@ export const VersionServiceApiAxiosParamCreator = function (configuration?: Conf
  * @export
  */
 export const VersionServiceApiFp = function(configuration?: Configuration) {
-    const localVarAxiosParamCreator = VersionServiceApiAxiosParamCreator(configuration)
     return {
         /**
          * 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async versionServiceGetVersion(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1Version>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.versionServiceGetVersion(options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async versionServiceGetVersion(options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1Version>> {
+            const localVarAxiosArgs = await VersionServiceApiAxiosParamCreator(configuration).versionServiceGetVersion(options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
     }
 };
@@ -2045,7 +2230,6 @@ export const VersionServiceApiFp = function(configuration?: Configuration) {
  * @export
  */
 export const VersionServiceApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-    const localVarFp = VersionServiceApiFp(configuration)
     return {
         /**
          * 
@@ -2053,7 +2237,7 @@ export const VersionServiceApiFactory = function (configuration?: Configuration,
          * @throws {RequiredError}
          */
         versionServiceGetVersion(options?: any): AxiosPromise<V1Version> {
-            return localVarFp.versionServiceGetVersion(options).then((request) => request(axios, basePath));
+            return VersionServiceApiFp(configuration).versionServiceGetVersion(options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -2071,7 +2255,7 @@ export class VersionServiceApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof VersionServiceApi
      */
-    public versionServiceGetVersion(options?: AxiosRequestConfig) {
+    public versionServiceGetVersion(options?: any) {
         return VersionServiceApiFp(this.configuration).versionServiceGetVersion(options).then((request) => request(this.axios, this.basePath));
     }
 }
