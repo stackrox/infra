@@ -63,7 +63,7 @@ func (s *cliImpl) Upgrade(request *v1.CliUpgradeRequest, stream v1.CliService_Up
 // Access configures access for this service.
 func (s *cliImpl) Access() map[string]middleware.Access {
 	return map[string]middleware.Access{
-		"/v1.CliUpgradeService/Download": middleware.Authenticated,
+		"/api.v1.CliUpgradeService/Download": middleware.Authenticated,
 	}
 }
 

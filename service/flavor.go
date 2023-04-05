@@ -73,8 +73,8 @@ func scrubInternalParameters(flavor *v1.Flavor) {
 // Access configures access for this service.
 func (s *flavorImpl) Access() map[string]middleware.Access {
 	return map[string]middleware.Access{
-		"/v1.FlavorService/Info": middleware.Authenticated,
-		"/v1.FlavorService/List": middleware.Authenticated,
+		"/api.v1.FlavorService/Info": middleware.Authenticated,
+		"/api.v1.FlavorService/List": middleware.Authenticated,
 	}
 }
 

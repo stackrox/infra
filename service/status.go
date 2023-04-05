@@ -131,10 +131,10 @@ func (s *statusImpl) ResetStatus(ctx context.Context, _ *empty.Empty) (*v1.Infra
 // Access configures access for this service.
 func (s *statusImpl) Access() map[string]middleware.Access {
 	return map[string]middleware.Access{
-		"/v1.InfraStatusService/GetStatus": middleware.Anonymous,
+		"/api.v1.InfraStatusService/GetStatus": middleware.Anonymous,
 		// TODO: change both modifying commands to middleware.Admin
-		"/v1.InfraStatusService/ResetStatus": middleware.Authenticated,
-		"/v1.InfraStatusService/SetStatus":   middleware.Authenticated,
+		"/api.v1.InfraStatusService/ResetStatus": middleware.Authenticated,
+		"/api.v1.InfraStatusService/SetStatus":   middleware.Authenticated,
 	}
 }
 

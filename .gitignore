@@ -22,3 +22,4 @@ tags
 nohup.out
 test/mocks
 __debug_bin
+.DS_Store
