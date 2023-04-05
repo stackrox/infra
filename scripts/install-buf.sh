@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -xeuo pipefail
-
 GO_BIN_DIR="$(go env GOPATH)/bin"
 
 BUF_VERSION="1.16.0"
