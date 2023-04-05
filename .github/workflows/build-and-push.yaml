@@ -12,7 +12,7 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     container:
-      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.51
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.57
 
     steps:
       - name: Checkout
@@ -47,7 +47,7 @@ jobs:
         # This is committed at generated/ but building here ensure the make
         # targets do not go stale and that any updates are committed.
         run: |
-          make proto-generated-srcs
+          make buf-install buf-generated-srcs
           git diff --exit-code HEAD
 
       - name: Go Unit Test

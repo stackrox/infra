@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	v1 "github.com/stackrox/infra/generated/api/v1"
+	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 )
 
 type prettyLogsResponse v1.LogsResponse

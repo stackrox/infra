@@ -65,7 +65,7 @@ export default function MutableLifespan({ cluster }: Props): ReactElement {
     }
     setClientSideLifespan(`${update.asSeconds()}s`);
     clusterService
-      .lifespan(modifiedCluster.ID, { Lifespan: `${update.asSeconds()}s` })
+      .clusterServiceLifespan(modifiedCluster.ID, { Lifespan: `${update.asSeconds()}s` })
       .then(() => {
         if (clearClientSideUpdate) clearTimeout(clearClientSideUpdate);
         setClearClientSideUpdate(

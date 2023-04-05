@@ -10,7 +10,7 @@ import (
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/auth/claimrule"
-	v1 "github.com/stackrox/infra/generated/api/v1"
+	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 	"golang.org/x/oauth2"
 )
 

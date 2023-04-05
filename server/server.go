@@ -16,7 +16,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/auth"
 	"github.com/stackrox/infra/config"
@@ -114,7 +114,7 @@ func (s *server) RunServer() (<-chan error, error) {
 	}
 
 	gwMux := runtime.NewServeMux(
-		runtime.WithMarshalerOption("*", &runtime.JSONPb{Indent: "  "}),
+		runtime.WithMarshalerOption("*", &runtime.JSONPb{}),
 	)
 
 	// Register each service

@@ -18,7 +18,7 @@ const clusterService = new ClusterServiceApi(configuration);
 
 const FETCH_ALL_CLUSTERS = true;
 const fetchClusters = (): AxiosPromise<V1ClusterListResponse> =>
-  clusterService.list(FETCH_ALL_CLUSTERS);
+  clusterService.clusterServiceList(FETCH_ALL_CLUSTERS);
 
 function NoClustersMessage(): ReactElement {
   return (

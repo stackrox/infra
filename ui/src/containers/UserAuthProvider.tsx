@@ -9,7 +9,7 @@ import FullPageError from 'components/FullPageError';
 
 const userService = new UserServiceApi(configuration);
 
-const fetchWhoami = (): AxiosPromise<V1WhoamiResponse> => userService.whoami();
+const fetchWhoami = (): AxiosPromise<V1WhoamiResponse> => userService.userServiceWhoami();
 
 const logout = (): void => {
   window.location.href = '/logout';

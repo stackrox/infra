@@ -6,7 +6,7 @@ import (
 	"text/template"
 
 	"github.com/slack-go/slack"
-	v1 "github.com/stackrox/infra/generated/api/v1"
+	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 )
 
 // TemplateData represents the available context that is passed when executing

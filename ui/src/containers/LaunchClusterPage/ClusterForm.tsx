@@ -252,7 +252,7 @@ export default function ClusterForm({
     actions: FormikHelpers<FormikValues>
   ): Promise<void> => {
     try {
-      const response = await clusterService.create({
+      const response = await clusterService.clusterServiceCreate({
         ...values,
         Parameters: adjustParametersBeforeSubmit(values.Parameters),
       });
