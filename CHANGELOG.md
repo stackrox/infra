@@ -6,6 +6,7 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+- gRPC code is now generated with [buf](https://github.com/bufbuild/buf).
 - --endpoint flag will now accept also URLs like https://infra.rox.systems, and addresses without a port like infra.rox.systems.
 
 ## [0.7.0]
