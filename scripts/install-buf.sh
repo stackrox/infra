@@ -1,5 +1,11 @@
 #!/bin/bash
 
+set -xeuo pipefail
+
+go env GOPATH
+uname -s
+uname -m
+
 BUF_VERSION="1.16.0"
 INSTALLED_BUF_VERSION=$(buf --version || echo "not installed")
 if [ "$BUF_VERSION" != "${INSTALLED_BUF_VERSION}" ]; then
