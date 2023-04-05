@@ -83,9 +83,9 @@ func (s *userImpl) Whoami(ctx context.Context, _ *empty.Empty) (*v1.WhoamiRespon
 // Access configures access for this service.
 func (s *userImpl) Access() map[string]middleware.Access {
 	return map[string]middleware.Access{
-		"/api.v1.UserService/Token":       middleware.Authenticated,
-		"/api.v1.UserService/CreateToken": middleware.Admin,
-		"/api.v1.UserService/Whoami":      middleware.Anonymous,
+		"/v1.UserService/Token":       middleware.Authenticated,
+		"/v1.UserService/CreateToken": middleware.Admin,
+		"/v1.UserService/Whoami":      middleware.Anonymous,
 	}
 }
 

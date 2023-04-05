@@ -587,18 +587,6 @@
       "default": "REPLACE",
       "description": "method represents the various lifespan operations.\n\n - REPLACE: REPLACE indicates that the given lifespan should replace the current\nlifespan.\n - ADD: ADD indicates that the given lifespan should be added to the current\nlifespan.\n - SUBTRACT: SUBTRACT indicates that the given lifespan should be subtracted from\nthe current lifespan."
     },
-    "apiv1Status": {
-      "type": "string",
-      "enum": [
-        "FAILED",
-        "CREATING",
-        "READY",
-        "DESTROYING",
-        "FINISHED"
-      ],
-      "default": "FAILED",
-      "description": "Status represents the various cluster states.\n\n - FAILED: FAILED is the state when the cluster has failed in one way or another.\n - CREATING: CREATING is the state when the cluster is being created.\n - READY: READY is the state when the cluster is available and ready for use.\n - DESTROYING: DESTROYING is the state when the cluster is being destroyed.\n - FINISHED: FINISHED is the state when the cluster has been successfully destroyed."
-    },
     "googlerpcStatus": {
       "type": "object",
       "properties": {
@@ -661,7 +649,7 @@
           "description": "ID is the unique ID for the cluster."
         },
         "Status": {
-          "$ref": "#/definitions/apiv1Status",
+          "$ref": "#/definitions/v1Status",
           "description": "Status is the current status for the cluster."
         },
         "Flavor": {
@@ -961,6 +949,18 @@
         }
       },
       "description": "ServiceAccount represents an authenticated service account (robot) principal."
+    },
+    "v1Status": {
+      "type": "string",
+      "enum": [
+        "FAILED",
+        "CREATING",
+        "READY",
+        "DESTROYING",
+        "FINISHED"
+      ],
+      "default": "FAILED",
+      "description": "Status represents the various cluster states.\n\n - FAILED: FAILED is the state when the cluster has failed in one way or another.\n - CREATING: CREATING is the state when the cluster is being created.\n - READY: READY is the state when the cluster is available and ready for use.\n - DESTROYING: DESTROYING is the state when the cluster is being destroyed.\n - FINISHED: FINISHED is the state when the cluster has been successfully destroyed."
     },
     "v1TokenResponse": {
       "type": "object",

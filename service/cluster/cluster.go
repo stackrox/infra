@@ -468,13 +468,13 @@ func (s *clusterImpl) Artifacts(ctx context.Context, clusterID *v1.ResourceByID)
 // Access configures access for this service.
 func (s *clusterImpl) Access() map[string]middleware.Access {
 	return map[string]middleware.Access{
-		"/api.v1.ClusterService/Info":      middleware.Authenticated,
-		"/api.v1.ClusterService/List":      middleware.Authenticated,
-		"/api.v1.ClusterService/Lifespan":  middleware.Authenticated,
-		"/api.v1.ClusterService/Create":    middleware.Authenticated,
-		"/api.v1.ClusterService/Artifacts": middleware.Authenticated,
-		"/api.v1.ClusterService/Delete":    middleware.Authenticated,
-		"/api.v1.ClusterService/Logs":      middleware.Authenticated,
+		"/v1.ClusterService/Info":      middleware.Authenticated,
+		"/v1.ClusterService/List":      middleware.Authenticated,
+		"/v1.ClusterService/Lifespan":  middleware.Authenticated,
+		"/v1.ClusterService/Create":    middleware.Authenticated,
+		"/v1.ClusterService/Artifacts": middleware.Authenticated,
+		"/v1.ClusterService/Delete":    middleware.Authenticated,
+		"/v1.ClusterService/Logs":      middleware.Authenticated,
 	}
 }
 
