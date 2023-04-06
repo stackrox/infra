@@ -195,7 +195,7 @@ func NewFromConfig(filename string) (*Registry, error) {
 			return nil, err
 		}
 
-		var workflow *v1alpha1.Workflow
+		workflow := &v1alpha1.Workflow{}
 		if err := yaml.Unmarshal(data, workflow); err != nil {
 			return nil, err
 		}
