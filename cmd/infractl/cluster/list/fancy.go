@@ -11,7 +11,9 @@ import (
 	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 )
 
-type prettyClusterListResponse v1.ClusterListResponse
+type prettyClusterListResponse struct {
+	*v1.ClusterListResponse
+}
 
 func (p prettyClusterListResponse) PrettyPrint(cmd *cobra.Command) {
 	for _, cluster := range p.Clusters {

@@ -145,7 +145,7 @@ func (s *clusterImpl) Info(ctx context.Context, clusterID *v1.ResourceByID) (*v1
 		return nil, err
 	}
 
-	return &metacluster.Cluster, nil
+	return metacluster.Cluster, nil
 }
 
 // List implements ClusterService.List.
@@ -195,7 +195,7 @@ func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) 
 		}
 
 		// This cluster wasn't rejected, so we'll keep it for the response.
-		clusters = append(clusters, &metacluster.Cluster)
+		clusters = append(clusters, metacluster.Cluster)
 	}
 
 	resp := &v1.ClusterListResponse{
@@ -390,7 +390,7 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 	log.Printf("[INFO] Will create a %q infra cluster %q for %s", flav.ID, clusterID, owner)
 
 	created, err := s.argoWorkflowsClient.CreateWorkflow(s.argoClientCtx, &workflowpkg.WorkflowCreateRequest{
-		Workflow:  &workflow,
+		Workflow:  workflow,
 		Namespace: s.workflowNamespace,
 	})
 	if err != nil {

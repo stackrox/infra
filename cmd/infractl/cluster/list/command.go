@@ -56,5 +56,5 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []str
 		return nil, err
 	}
 
-	return prettyClusterListResponse(*resp), nil
+	return prettyClusterListResponse{resp}, nil
 }

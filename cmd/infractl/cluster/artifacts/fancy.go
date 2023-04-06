@@ -8,7 +8,9 @@ import (
 	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 )
 
-type prettyClusterArtifacts v1.ClusterArtifacts
+type prettyClusterArtifacts struct {
+	*v1.ClusterArtifacts
+}
 
 func (p prettyClusterArtifacts) PrettyPrint(cmd *cobra.Command) {
 	for _, artifact := range p.Artifacts {

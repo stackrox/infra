@@ -8,7 +8,9 @@ import (
 	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 )
 
-type id v1.ResourceByID
+type id struct {
+	*v1.ResourceByID
+}
 
 func (p id) PrettyPrint(cmd *cobra.Command) {
 	cmd.Printf("ID: %s\n", p.Id)

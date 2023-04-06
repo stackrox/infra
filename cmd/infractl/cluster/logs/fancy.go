@@ -9,7 +9,9 @@ import (
 	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 )
 
-type prettyLogsResponse v1.LogsResponse
+type prettyLogsResponse struct {
+	*v1.LogsResponse
+}
 
 func (p prettyLogsResponse) PrettyPrint(cmd *cobra.Command) {
 	for _, log := range p.Logs {

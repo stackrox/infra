@@ -20,8 +20,8 @@ import (
 
 // pair represents a tuple of an Argo workflow and a flavor.
 type pair struct {
-	workflow v1alpha1.Workflow
-	flavor   v1.Flavor
+	workflow *v1alpha1.Workflow
+	flavor   *v1.Flavor
 }
 
 // Registry represents the set of all configured flavors.
@@ -36,8 +36,8 @@ type Registry struct {
 }
 
 // Flavors returns a sorted list of all registered flavors.
-func (r *Registry) Flavors() []v1.Flavor {
-	results := make([]v1.Flavor, 0, len(r.flavors))
+func (r *Registry) Flavors() []*v1.Flavor {
+	results := make([]*v1.Flavor, 0, len(r.flavors))
 	for _, pair := range r.flavors {
 		results = append(results, pair.flavor)
 	}
@@ -54,7 +54,7 @@ func (r *Registry) Flavors() []v1.Flavor {
 }
 
 // add registers the given flavor and workflow.
-func (r *Registry) add(flavor v1.Flavor, workflow v1alpha1.Workflow) error {
+func (r *Registry) add(flavor *v1.Flavor, workflow *v1alpha1.Workflow) error {
 	// Validate that another flavor with the same ID was not already added.
 	if _, found := r.flavors[flavor.ID]; found {
 		return fmt.Errorf("duplicate flavor id %q", flavor.ID)
@@ -92,15 +92,15 @@ func (r *Registry) Default() string {
 }
 
 // Get returns the named flavor if it exists along with a paired workflow.
-func (r *Registry) Get(id string) (v1.Flavor, v1alpha1.Workflow, bool) {
+func (r *Registry) Get(id string) (*v1.Flavor, *v1alpha1.Workflow, bool) {
 	if pair, found := r.flavors[id]; found {
 		return pair.flavor, pair.workflow, true
 	}
 	if flavor, workflow := r.getPairFromWorkflowTemplate(id); flavor != nil {
-		return *flavor, *workflow, true
+		return flavor, workflow, true
 	}
 
-	return v1.Flavor{}, v1alpha1.Workflow{}, false
+	return &v1.Flavor{}, &v1alpha1.Workflow{}, false
 }
 
 // check validates that a default flavor was added.
@@ -180,7 +180,7 @@ func NewFromConfig(filename string) (*Registry, error) {
 			}
 		}
 
-		flavor := v1.Flavor{
+		flavor := &v1.Flavor{
 			ID:           flavorCfg.ID,
 			Name:         flavorCfg.Name,
 			Description:  flavorCfg.Description,
@@ -195,8 +195,8 @@ func NewFromConfig(filename string) (*Registry, error) {
 			return nil, err
 		}
 
-		var workflow v1alpha1.Workflow
-		if err := yaml.Unmarshal(data, &workflow); err != nil {
+		var workflow *v1alpha1.Workflow
+		if err := yaml.Unmarshal(data, workflow); err != nil {
 			return nil, err
 		}
 
@@ -215,7 +215,7 @@ func NewFromConfig(filename string) (*Registry, error) {
 // - All parameter names must be unique.
 //
 // - All parameters from one set must be in the other.
-func CheckWorkflowEquivalence(flavor v1.Flavor, workflow v1alpha1.Workflow) error {
+func CheckWorkflowEquivalence(flavor *v1.Flavor, workflow *v1alpha1.Workflow) error {
 	// Workflow have a list of parameters, so convert to a set.
 	workflowParamSet := make(map[string]struct{})
 	for _, param := range workflow.Spec.Arguments.Parameters {

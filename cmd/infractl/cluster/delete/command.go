@@ -35,13 +35,13 @@ func args(_ *cobra.Command, args []string) error {
 }
 
 func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []string) (common.PrettyPrinter, error) {
-	req := v1.ResourceByID{
+	req := &v1.ResourceByID{
 		Id: args[0],
 	}
 
-	if _, err := v1.NewClusterServiceClient(conn).Delete(ctx, &req); err != nil {
+	if _, err := v1.NewClusterServiceClient(conn).Delete(ctx, req); err != nil {
 		return nil, err
 	}
 
-	return id(req), nil
+	return id{req}, nil
 }

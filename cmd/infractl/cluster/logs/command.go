@@ -42,5 +42,5 @@ func run(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, args []st
 		return nil, err
 	}
 
-	return prettyLogsResponse(*resp), nil
+	return prettyLogsResponse{resp}, nil
 }
