@@ -57,7 +57,7 @@ jobs:
       - create-dev-cluster
     runs-on: ubuntu-latest
     container:
-      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.57
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.51
 
     steps:
       - name: Checkout
@@ -79,7 +79,7 @@ jobs:
       - create-dev-cluster
     runs-on: ubuntu-latest
     container:
-      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.57
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.51
     env:
       KUBECONFIG: /github/home/artifacts/kubeconfig
       INFRA_TOKEN: ${{ secrets.INFRA_TOKEN }}
