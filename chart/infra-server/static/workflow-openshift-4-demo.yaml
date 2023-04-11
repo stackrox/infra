@@ -77,7 +77,7 @@ spec:
 
     - name: create
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-0.6.10-1-g3479843403-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.3.10
         imagePullPolicy: Always
         volumeMounts:
           - name: data
@@ -141,7 +141,7 @@ spec:
           - name: admin-password
           - name: kubeconfig-base64
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-0.6.4
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-0.6.10-1-g3479843403-snapshot
         imagePullPolicy: Always
         command:
           - ansible-playbook
@@ -234,7 +234,7 @@ spec:
 
     - name: destroy
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-0.6.10-1-g3479843403-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.3.10
         imagePullPolicy: Always
         command:
           - entrypoint.sh
