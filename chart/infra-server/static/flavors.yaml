@@ -67,6 +67,14 @@
       kind: optional
       help: If unspecified, this will be derived from the central image
 
+    - name: central-db-image
+      description: StackRox Central DB image Docker name
+      kind: optional
+      help: |
+        Setting this parameter will enable PostgreSQL on central and add the appropriate configurations. If
+        unspecified, central will use rocksdb.
+        An example of this image is quay.io/rhacs-eng/central-db:<VERSION>
+
     - name: k8s-version
       description: kubernetes version
       value: default

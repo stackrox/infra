@@ -19,6 +19,7 @@ spec:
         value: ""
       - name: scanner-db-image
         value: ""
+      - name: central-db-image
       - name: k8s-version
         value: ""
 
@@ -122,6 +123,7 @@ spec:
           - "--main-image={{workflow.parameters.main-image}}"
           - "--scanner-image={{workflow.parameters.scanner-image}}"
           - "--scanner-db-image={{workflow.parameters.scanner-db-image}}"
+          - "--central-db-image={{workflow.parameters.central-db-image}}"
           - --gcp-project=srox-temp-dev-test
           - --dns-gcp-project=ultra-current-825
           - --creation-source=infra
