@@ -15,11 +15,12 @@ spec:
     parameters:
       - name: name
       - name: main-image
+      - name: central-db-image
+        value: ""
       - name: scanner-image
         value: ""
       - name: scanner-db-image
         value: ""
-      - name: central-db-image
       - name: k8s-version
         value: ""
 

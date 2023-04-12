@@ -57,6 +57,14 @@
         Private images from quay.io/rhacs-eng and stackrox.io (legacy) can also be used.
         Other public images should also be OK.
 
+    - name: central-db-image
+      description: StackRox Central DB image Docker name
+      kind: optional
+      help: |
+        Setting this parameter will enable PostgreSQL on central and add the appropriate configurations. If
+        unspecified, central will use rocksdb.
+        An example of this image is quay.io/rhacs-eng/central-db:<VERSION>
+
     - name: scanner-image
       description: StackRox Scanner image Docker name
       kind: optional
@@ -66,14 +74,6 @@
       description: StackRox Scanner DB image Docker name
       kind: optional
       help: If unspecified, this will be derived from the central image
-
-    - name: central-db-image
-      description: StackRox Central DB image Docker name
-      kind: optional
-      help: |
-        Setting this parameter will enable PostgreSQL on central and add the appropriate configurations. If
-        unspecified, central will use rocksdb.
-        An example of this image is quay.io/rhacs-eng/central-db:<VERSION>
 
     - name: k8s-version
       description: kubernetes version
