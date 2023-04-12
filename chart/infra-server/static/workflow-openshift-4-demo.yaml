@@ -45,6 +45,9 @@ spec:
         - - name: pre-install
             template: pre-install
 
+        - - name: roxctl
+            template: roxctl
+
         - - name: run-ansible-demo
             template: run-ansible-demo
             continueOn:
@@ -55,6 +58,9 @@ spec:
                 value: "{{steps.pre-install.outputs.parameters.admin-password}}"
               - name: kubeconfig-base64
                 value: "{{steps.pre-install.outputs.parameters.kubeconfig-base64}}"
+              artifacts:
+                - name: roxctl
+                  from: "{{steps.roxctl.outputs.artifacts.roxctl}}"
 
         - - name: gather
             template: gather
@@ -141,6 +147,9 @@ spec:
         parameters:
           - name: admin-password
           - name: kubeconfig-base64
+        artifacts:
+          - name: roxctl
+            path: /usr/bin/roxctl
       container:
         image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-0.6.10-2-g31dd1ed760-snapshot
         imagePullPolicy: Always
@@ -183,10 +192,10 @@ spec:
             value: "{{ workflow.parameters.collector-slim-image-tag }}"
           - name: CENTRAL_DB_IMAGE_TAG
             value: "{{ workflow.parameters.central-db-image-tag }}"
-          - name: CENTRAL_SERVICES_HELM_CHART_VERSION
-            value: "{{ workflow.parameters.central-services-helm-chart-version }}"
-          - name: SECURED_CLUSTER_SERVICES_HELM_CHART_VERSION
-            value: "{{ workflow.parameters.secured-cluster-services-helm-chart-version }}"
+          # - name: CENTRAL_SERVICES_HELM_CHART_VERSION -> if need be, we can set the roxctl step image to this value and add another one for secured-clusters...
+          #   value: "{{ workflow.parameters.central-services-helm-chart-version }}"
+          # - name: SECURED_CLUSTER_SERVICES_HELM_CHART_VERSION
+          #   value: "{{ workflow.parameters.secured-cluster-services-helm-chart-version }}"
           - name: ANSIBLE_STDOUT_CALLBACK
             value: debug
         volumeMounts:
@@ -252,3 +261,20 @@ spec:
         volumeMounts:
           - name: data
             mountPath: /data
+
+    - name: roxctl
+      activeDeadlineSeconds: 120
+      outputs:
+        artifacts:
+          - name: roxctl
+            path: /tmp/roxctl
+      container:
+        image: "quay.io/stackrox-io/main:{{ workflow.parameters.main-image-tag }}"
+        imagePullPolicy: Always
+        command:
+          - cp
+        args:
+          - --dereference
+          - -v
+          - /stackrox/roxctl
+          - /tmp/roxctl
