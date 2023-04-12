@@ -361,6 +361,14 @@
       help: |
         Version string of the collector-slim container image tag to use. Default will be derived from the Helm chart.
 
+    - name: central-db-image-tag
+      description: Central DB container image tag
+      value: ""
+      kind: optional
+      help: |
+        Version string of the central-db container image tag to use. Setting this value will enable central-db.
+        Default will be derived from the Helm chart.
+
     - name: central-services-helm-chart-version
       description: Central Services Helm chart version
       value: ""
