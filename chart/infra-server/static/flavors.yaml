@@ -3,7 +3,7 @@
 ##########
 - id: demo
   name: StackRox Demo
-  description: Demo running StackRox 3.74.1
+  description: Demo running StackRox 3.74.2
   availability: default
   workflow: configuration/workflow-demo.yaml
   parameters:
@@ -12,7 +12,7 @@
       value: example1
 
     - name: main-image
-      value: quay.io/rhacs-eng/main:3.74.1
+      value: quay.io/rhacs-eng/main:3.74.2
       kind: hardcoded
 
     - name: k8s-version
@@ -51,9 +51,9 @@
 
     - name: main-image
       description: StackRox Central image Docker name
-      value: quay.io/stackrox-io/main:3.74.1
+      value: quay.io/stackrox-io/main:3.74.2
       help: |
-        This must be a fully qualified image e.g. quay.io/stackrox-io/main:3.74.1.
+        This must be a fully qualified image e.g. quay.io/stackrox-io/main:3.74.2.
         Private images from quay.io/rhacs-eng and stackrox.io (legacy) can also be used.
         Other public images should also be OK.
 
