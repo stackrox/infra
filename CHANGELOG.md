@@ -6,6 +6,8 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+## [0.7.1]
+
 - ROX-15237: The Openshift 4 Demo flavor now supports testing of unreleased versions.
 - Bump demo flavors to 3.74.2
 - Add central-db-image parameter to qa-demo flavor

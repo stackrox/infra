@@ -60,7 +60,7 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         uses: slackapi/slack-github-action@v1.23.0
         with:
-          channel-id: CVANK5K5W #infra
+          channel-id: C01H4DC33K3 #acs-infra
           payload: >-
             {
                 "blocks": [
@@ -68,7 +68,7 @@ jobs:
                     "type": "section",
                     "text": {
                       "type": "mrkdwn",
-                      "text": ":ship::tada:*Infra (${{ inputs.environment }}) was updated to ${{ inputs.version }}.*\nTo see the latest changes, click <${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ inputs.version }}|here>."
+                      "text": ":ship::tada:*Infra (${{ inputs.environment }}) was updated to ${{ inputs.version }}.*\nTo see the latest changes, click <${{ github.server_url }}/${{ github.repository }}/blob/${{ inputs.version }}/CHANGELOG.md|here>."
                     }
                   }
                 ]
