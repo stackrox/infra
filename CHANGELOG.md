@@ -7,6 +7,7 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 ## [NEXT RELEASE]
 
 - Bump demo flavors to 3.74.2
+- Add central-db-image parameter to qa-demo flavor
 - --endpoint flag will now accept also URLs like https://infra.rox.systems, and addresses without a port like infra.rox.systems.
 
 ## [0.7.0]
