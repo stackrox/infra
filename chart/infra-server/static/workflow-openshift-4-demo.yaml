@@ -36,17 +36,17 @@ spec:
   templates:
     - name: start
       steps:
-        - - name: validate
-            template: validate
-
         - - name: create
             template: create
 
         - - name: pre-install
             template: pre-install
 
-        - - name: roxctl
-            template: roxctl
+        - - name: roxctl-central
+            template: roxctl-central
+
+        - - name: roxctl-secured-cluster-services
+            template: roxctl-secured-cluster-services
 
         - - name: run-ansible-demo
             template: run-ansible-demo
@@ -59,8 +59,10 @@ spec:
               - name: kubeconfig-base64
                 value: "{{steps.pre-install.outputs.parameters.kubeconfig-base64}}"
               artifacts:
-                - name: roxctl
-                  from: "{{steps.roxctl.outputs.artifacts.roxctl}}"
+                - name: roxctl-central
+                  from: "{{steps.roxctl-central.outputs.artifacts.roxctl-central}}"
+                - name: roxctl-secured-cluster-services
+                  from: "{{steps.roxctl-secured-cluster-services.outputs.artifacts.roxctl-secured-cluster-services}}"
 
         - - name: gather
             template: gather
@@ -71,20 +73,9 @@ spec:
         - - name: destroy
             template: destroy
 
-    - name: validate
-      script:
-        image: ubuntu:20.04
-        command: [ bash ]
-        source: |
-          main_image_tag="{{ workflow.parameters.main-image-tag }}"
-          if [[ -n "$main_image_tag" && ! "$main_image_tag" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$ ]]; then
-            echo >&2 "Only released version are currently support"
-            exit 1
-          fi
-
     - name: create
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.3.10
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.6.11
         imagePullPolicy: Always
         volumeMounts:
           - name: data
@@ -116,7 +107,7 @@ spec:
           - name: MASTER_NODE_TYPE
             value: "n1-standard-4"
           - name: WORKER_NODE_TYPE
-            value: "n1-standard-4"
+            value: "e2-standard-16"
           - name: REGION
             value: "us-east1"
 
@@ -148,10 +139,12 @@ spec:
           - name: admin-password
           - name: kubeconfig-base64
         artifacts:
-          - name: roxctl
-            path: /usr/bin/roxctl
+          - name: roxctl-central
+            path: /usr/bin/roxctl-central
+          - name: roxctl-secured-cluster-services
+            path: /usr/bin/roxctl-secured-cluster-services
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-0.6.10-4-gc96de411c4-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-0.6.11
         imagePullPolicy: Always
         command:
           - ansible-playbook
@@ -192,10 +185,6 @@ spec:
             value: "{{ workflow.parameters.collector-slim-image-tag }}"
           - name: CENTRAL_DB_IMAGE_TAG
             value: "{{ workflow.parameters.central-db-image-tag }}"
-          # - name: CENTRAL_SERVICES_HELM_CHART_VERSION -> if need be, we can set the roxctl step image to this value and add another one for secured-clusters...
-          #   value: "{{ workflow.parameters.central-services-helm-chart-version }}"
-          # - name: SECURED_CLUSTER_SERVICES_HELM_CHART_VERSION
-          #   value: "{{ workflow.parameters.secured-cluster-services-helm-chart-version }}"
           - name: ANSIBLE_STDOUT_CALLBACK
             value: debug
         volumeMounts:
@@ -246,7 +235,7 @@ spec:
 
     - name: destroy
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.3.10
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.6.11
         imagePullPolicy: Always
         command:
           - entrypoint.sh
@@ -262,14 +251,14 @@ spec:
           - name: data
             mountPath: /data
 
-    - name: roxctl
+    - name: roxctl-central
       activeDeadlineSeconds: 120
       outputs:
         artifacts:
-          - name: roxctl
-            path: /tmp/roxctl
+          - name: roxctl-central
+            path: /tmp/roxctl-central
       container:
-        image: "quay.io/stackrox-io/main:{{ workflow.parameters.main-image-tag }}"
+        image: "quay.io/stackrox-io/main:{{ workflow.parameters.central-services-helm-chart-version }}"
         imagePullPolicy: Always
         command:
           - cp
@@ -277,4 +266,21 @@ spec:
           - --dereference
           - -v
           - /stackrox/roxctl
-          - /tmp/roxctl
+          - /tmp/roxctl-central
+
+    - name: roxctl-secured-cluster-services
+      activeDeadlineSeconds: 120
+      outputs:
+        artifacts:
+          - name: roxctl-secured-cluster-services
+            path: /tmp/roxctl-secured-cluster-services
+      container:
+        image: "quay.io/stackrox-io/main:{{ workflow.parameters.secured-cluster-services-helm-chart-version }}"
+        imagePullPolicy: Always
+        command:
+          - cp
+        args:
+          - --dereference
+          - -v
+          - /stackrox/roxctl
+          - /tmp/roxctl-secured-cluster-services
