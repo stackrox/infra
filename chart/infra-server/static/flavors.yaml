@@ -312,6 +312,18 @@
       description: cluster name
       value: example1
 
+    - name: central-services-helm-chart-version
+      description: Central Services Helm chart version
+      value: "3.74.2"
+      help: |
+        Version string of the roxctl version to use to generate Central Services Helm chart, e.g., 3.74.2.
+
+    - name: secured-cluster-services-helm-chart-version
+      description: Secured Cluster Services Helm chart version
+      value: "3.74.2"
+      help: |
+        Version string of the roxctl version to use to generate Secured Cluster Services Helm chart, e.g., 3.74.2.
+
     - name: openshift-version
       description: openshift release from OCP, OCP dev preview, or OKD
       value: ocp/stable
@@ -338,7 +350,7 @@
       value: ""
       kind: optional
       help: |
-        Version string of the main container image tag, e.g., 3.73.0. Default will be derived from the Helm chart.
+        Version string of the main container image tag. Default will be derived from the Helm chart.
 
     - name: scanner-image-tag
       description: Scanner container image tag
@@ -368,22 +380,6 @@
       help: |
         Version string of the central-db container image tag to use. Setting this value will enable central-db.
         Default will be derived from the Helm chart.
-
-    - name: central-services-helm-chart-version
-      description: Central Services Helm chart version
-      value: ""
-      kind: optional
-      help: |
-        Version string of the Helm chart to use to deploy Central Services, e.g., 73.0.0. Default is the latest
-        released chart.
-
-    - name: secured-cluster-services-helm-chart-version
-      description: Secured Cluster Services Helm chart version
-      value: ""
-      kind: optional
-      help: |
-        Version string of the Helm chart to use to deploy Secured Cluster Services. Default is the latest released
-        chart.
 
   artifacts:
     - name: admin-password
