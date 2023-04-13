@@ -184,7 +184,7 @@ spec:
             path: /data/tfvars
             optional: true
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.6.10-1-g3479843403-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.6.11
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint
