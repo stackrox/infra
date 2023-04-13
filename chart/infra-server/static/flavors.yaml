@@ -322,13 +322,15 @@
 
     - name: central-services-helm-chart-version
       description: Central Services Helm chart version
-      value: "3.74.2"
+      value: 3.74.2
+      kind: optional
       help: |
         Version string of the roxctl version to use to generate Central Services Helm chart, e.g., 3.74.2.
 
     - name: secured-cluster-services-helm-chart-version
       description: Secured Cluster Services Helm chart version
-      value: "3.74.2"
+      value: 3.74.2
+      kind: optional
       help: |
         Version string of the roxctl version to use to generate Secured Cluster Services Helm chart, e.g., 3.74.2.
 
