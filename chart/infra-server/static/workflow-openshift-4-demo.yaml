@@ -75,7 +75,7 @@ spec:
 
     - name: create
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.6.11-2-g0f68c5dea4-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.6.11
         imagePullPolicy: Always
         volumeMounts:
           - name: data
@@ -144,7 +144,7 @@ spec:
           - name: roxctl-secured-cluster-services
             path: /usr/bin/roxctl-secured-cluster-services
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-0.6.11
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-0.6.11-2-g0f68c5dea4-snapshot
         imagePullPolicy: Always
         command:
           - ansible-playbook
