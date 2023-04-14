@@ -4,6 +4,10 @@ Entries in this file should be limited to:
 -  Obscure side-effects that are not obviously apparent based on the JIRA associated with the changes.
 Please avoid adding duplicate information across this changelog and JIRA/doc input pages.
 
+## [NEXT RELEASE]
+
+- Configuration of all demo contents is fixed in the Openshift 4 Demo flavor.
+
 ## [0.6.7]
 
 - ROX-15237: The Openshift 4 Demo flavor now supports testing of unreleased versions.
