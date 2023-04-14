@@ -75,7 +75,7 @@ spec:
 
     - name: create
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.6.11
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.6.11-2-g0f68c5dea4-snapshot
         imagePullPolicy: Always
         volumeMounts:
           - name: data
