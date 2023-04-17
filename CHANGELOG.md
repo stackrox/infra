@@ -6,6 +6,8 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+## [0.6.8]
+
 - Configuration of all demo contents is fixed in the Openshift 4 Demo flavor.
 
 ## [0.6.7]
