@@ -5,10 +5,12 @@ import (
 
 	"github.com/spf13/cobra"
 
-	v1 "github.com/stackrox/infra/generated/api/v1"
+	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 )
 
-type prettyFlavorListResponse v1.FlavorListResponse
+type prettyFlavorListResponse struct {
+	*v1.FlavorListResponse
+}
 
 func (p prettyFlavorListResponse) PrettyPrint(cmd *cobra.Command) {
 	for _, flavor := range p.Flavors {

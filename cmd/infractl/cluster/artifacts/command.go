@@ -15,7 +15,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/common"
-	v1 "github.com/stackrox/infra/generated/api/v1"
+	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 	"google.golang.org/grpc"
 )
 
@@ -65,25 +65,25 @@ func DownloadArtifacts(ctx context.Context, client v1.ClusterServiceClient, id s
 	// If no --download-dir flag was given, skip downloading the artifacts
 	// altogether.
 	if downloadDir == "" {
-		return prettyClusterArtifacts(*resp), nil
+		return prettyClusterArtifacts{resp}, nil
 	}
 
 	for _, artifact := range resp.Artifacts {
-		filename, err := download(downloadDir, *artifact)
+		filename, err := download(downloadDir, artifact)
 		if err != nil {
 			return nil, err
 		}
 		if strings.HasSuffix(filename, ".tgz") {
-			unpackSingleArtifact(filename, downloadDir, *artifact)
+			unpackSingleArtifact(filename, downloadDir, artifact)
 		}
 	}
 
-	return prettyClusterArtifacts(*resp), nil
+	return prettyClusterArtifacts{resp}, nil
 }
 
 // download will save the given cluster artifact to disk inside the given
 // directory.
-func download(downloadDir string, artifact v1.Artifact) (filename string, err error) {
+func download(downloadDir string, artifact *v1.Artifact) (filename string, err error) {
 	// Create the download directory if it doesn't exist. All artifacts will be
 	// downloaded into this directory.
 	if err := os.MkdirAll(downloadDir, 0755); err != nil {
@@ -134,7 +134,7 @@ func download(downloadDir string, artifact v1.Artifact) (filename string, err er
 // ignored here as the artifact is already saved.
 //
 //nolint:errcheck
-func unpackSingleArtifact(tgzFilename string, downloadDir string, artifact v1.Artifact) {
+func unpackSingleArtifact(tgzFilename string, downloadDir string, artifact *v1.Artifact) {
 	file, err := os.Open(tgzFilename)
 	if err != nil {
 		return

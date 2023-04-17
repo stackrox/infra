@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	v1 "github.com/stackrox/infra/generated/api/v1"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 	"github.com/stackrox/infra/pkg/buildinfo"
 	"github.com/stackrox/infra/service/middleware"
 	"google.golang.org/grpc"
@@ -31,7 +31,7 @@ func (s *versionImpl) GetVersion(ctx context.Context, _ *empty.Empty) (*v1.Versi
 // Access configures access for this service.
 func (s *versionImpl) Access() map[string]middleware.Access {
 	return map[string]middleware.Access{
-		"/v1.VersionService/GetVersion": middleware.Anonymous,
+		"/api.v1.VersionService/GetVersion": middleware.Anonymous,
 	}
 }
 

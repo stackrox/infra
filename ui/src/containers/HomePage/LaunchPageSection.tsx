@@ -13,8 +13,10 @@ import assertDefined from 'utils/assertDefined';
 
 const flavorService = new FlavorServiceApi(configuration);
 
-const fetchFlavors = (): AxiosPromise<V1FlavorListResponse> => flavorService.list(false);
-const fetchAllFlavors = (): AxiosPromise<V1FlavorListResponse> => flavorService.list(true);
+const fetchFlavors = (): AxiosPromise<V1FlavorListResponse> =>
+  flavorService.flavorServiceList(false);
+const fetchAllFlavors = (): AxiosPromise<V1FlavorListResponse> =>
+  flavorService.flavorServiceList(true);
 
 type FlavorCardsProps = {
   showAllFlavors: boolean;

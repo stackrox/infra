@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/coreos/go-oidc/v3/oidc"
-	v1 "github.com/stackrox/infra/generated/api/v1"
+	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 	"golang.org/x/oauth2"
 )
 
@@ -35,13 +35,13 @@ func (a OidcAuth) ValidateUser(token string) (*v1.User, error) {
 
 // GenerateServiceAccountToken generates a service account JWT containing a
 // v1.User struct.
-func (a OidcAuth) GenerateServiceAccountToken(svcacct v1.ServiceAccount) (string, error) {
+func (a OidcAuth) GenerateServiceAccountToken(svcacct *v1.ServiceAccount) (string, error) {
 	return a.jwtSvcAcct.Generate(svcacct)
 }
 
 // ValidateServiceAccountToken validates a service account JWT and returns the
 // contained v1.ServiceAccount struct.
-func (a OidcAuth) ValidateServiceAccountToken(token string) (v1.ServiceAccount, error) {
+func (a OidcAuth) ValidateServiceAccountToken(token string) (*v1.ServiceAccount, error) {
 	return a.jwtSvcAcct.Validate(token)
 }
 
@@ -56,7 +56,7 @@ func (a OidcAuth) loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	oauth2.SetAuthURLParam("response_mode", "query")
+	_ = oauth2.SetAuthURLParam("response_mode", "query")
 	redirectURL := a.conf.AuthCodeURL(stateToken)
 
 	// Redirect to authorization server so that the user can login externally.

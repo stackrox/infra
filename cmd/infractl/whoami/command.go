@@ -7,7 +7,7 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/common"
-	v1 "github.com/stackrox/infra/generated/api/v1"
+	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -40,5 +40,5 @@ func run(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, _ []strin
 		return nil, err
 	}
 
-	return prettyWhoamiResp(*resp), nil
+	return prettyWhoamiResp{resp}, nil
 }

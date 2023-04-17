@@ -6,10 +6,12 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/stackrox/infra/cmd/infractl/common"
-	v1 "github.com/stackrox/infra/generated/api/v1"
+	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 )
 
-type prettyTokenResponse v1.TokenResponse
+type prettyTokenResponse struct {
+	*v1.TokenResponse
+}
 
 func (p prettyTokenResponse) PrettyPrint(cmd *cobra.Command) {
 	cmd.Println("# Run the following command to configure your environment")

@@ -23,7 +23,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/cluster/get"
 	"github.com/stackrox/infra/cmd/infractl/common"
-	v1 "github.com/stackrox/infra/generated/api/v1"
+	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 	"github.com/stackrox/infra/pkg/buildinfo"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"

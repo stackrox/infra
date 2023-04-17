@@ -33,11 +33,12 @@ func TestSimpleName(t *testing.T) {
 	}
 
 	for index, test := range tests {
-		name := fmt.Sprintf("%d %s", index+1, test.title)
+		currentTest := test
+		name := fmt.Sprintf("%d %s", index+1, currentTest.title)
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			actual := simpleName(test.input)
-			assert.Equal(t, actual, test.expected)
+			actual := simpleName(currentTest.input)
+			assert.Equal(t, actual, currentTest.expected)
 		})
 	}
 }

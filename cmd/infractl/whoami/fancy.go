@@ -5,10 +5,12 @@ import (
 
 	"github.com/spf13/cobra"
 
-	v1 "github.com/stackrox/infra/generated/api/v1"
+	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 )
 
-type prettyWhoamiResp v1.WhoamiResponse
+type prettyWhoamiResp struct {
+	*v1.WhoamiResponse
+}
 
 func (p prettyWhoamiResp) PrettyPrint(cmd *cobra.Command) {
 	switch p := p.Principal.(type) {

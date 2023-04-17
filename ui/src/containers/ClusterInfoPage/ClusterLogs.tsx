@@ -13,7 +13,9 @@ type Props = {
 };
 
 export default function ClusterLogs({ clusterId }: Props): ReactElement {
-  const fetchClusterLogs = useCallback(() => clusterService.logs(clusterId), [clusterId]);
+  const fetchClusterLogs = useCallback(() => clusterService.clusterServiceLogs(clusterId), [
+    clusterId,
+  ]);
   const { loading, error, data } = useApiQuery(fetchClusterLogs, { pollInterval: 10000 });
 
   if (loading) {

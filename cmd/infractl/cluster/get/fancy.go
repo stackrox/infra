@@ -13,11 +13,11 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/gogo/protobuf/jsonpb"
 	"github.com/stackrox/infra/cmd/infractl/common"
-	v1 "github.com/stackrox/infra/generated/api/v1"
+	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 )
 
 type prettyCluster struct {
-	v1.Cluster
+	*v1.Cluster
 }
 
 func (p prettyCluster) PrettyPrint(cmd *cobra.Command) {
@@ -49,7 +49,7 @@ func (p prettyCluster) PrettyJSONPrint(cmd *cobra.Command) error {
 	b := new(bytes.Buffer)
 	m := jsonpb.Marshaler{EnumsAsInts: false, EmitDefaults: true, Indent: "  "}
 
-	if err := m.Marshal(b, &p.Cluster); err != nil {
+	if err := m.Marshal(b, p.Cluster); err != nil {
 		return err
 	}
 

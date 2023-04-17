@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/common"
-	v1 "github.com/stackrox/infra/generated/api/v1"
+	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 	"google.golang.org/grpc"
 )
 
@@ -42,5 +42,5 @@ func run(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, args []st
 		return nil, err
 	}
 
-	return prettyLogsResponse(*resp), nil
+	return prettyLogsResponse{resp}, nil
 }

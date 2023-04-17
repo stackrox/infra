@@ -9,7 +9,7 @@ OPENAPI_GENERATOR_CLI_IMAGE="openapitools/openapi-generator-cli:${OPENAPI_GENERA
 CLIENT_DIR="src/generated/client"
 
 # paths below are relative to the git root "infra"
-SWAGGER_FILE="generated/api/v1/service.swagger.json" 
+SWAGGER_FILE="generated/proto/api/v1/service.swagger.json"
 GENERATOR_OUTPUT_DIR="ui/${CLIENT_DIR}"
 
 set -x

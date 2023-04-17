@@ -10,7 +10,7 @@ import (
 
 	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
 	"github.com/golang/protobuf/ptypes"
-	v1 "github.com/stackrox/infra/generated/api/v1"
+	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 	"github.com/stackrox/infra/slack"
 )
 
@@ -58,7 +58,7 @@ func isNearingExpiry(workflow v1alpha1.Workflow) bool {
 }
 
 type metaCluster struct {
-	v1.Cluster
+	*v1.Cluster
 
 	EventID       string
 	Expired       bool
@@ -87,7 +87,7 @@ func (s *clusterImpl) metaClusterFromWorkflow(workflow v1alpha1.Workflow) (*meta
 	}
 
 	return &metaCluster{
-		Cluster:       *cluster,
+		Cluster:       cluster,
 		Slack:         slack.Status(GetSlack(&workflow)),
 		SlackDM:       GetSlackDM(&workflow),
 		Expired:       expired,

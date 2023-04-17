@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/cluster/artifacts"
 	"github.com/stackrox/infra/cmd/infractl/common"
-	v1 "github.com/stackrox/infra/generated/api/v1"
+	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 	"google.golang.org/grpc"
 )
 
@@ -143,7 +143,7 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 		}
 	}
 
-	return prettyResourceByID(*clusterID), nil
+	return prettyResourceByID{clusterID}, nil
 }
 
 func determineWorkingEnvironment() {

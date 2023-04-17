@@ -11,7 +11,7 @@ import { ClipLoader } from 'react-spinners';
 
 const userService = new UserServiceApi(configuration);
 
-const fetchToken = (): AxiosPromise<V1TokenResponse> => userService.token({});
+const fetchToken = (): AxiosPromise<V1TokenResponse> => userService.userServiceToken({});
 
 export default function UserServiceAccountToken(): ReactElement {
   const { loading, error, data } = useApiQuery(fetchToken);

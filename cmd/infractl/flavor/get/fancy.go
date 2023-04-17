@@ -6,11 +6,11 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/gogo/protobuf/jsonpb"
-	v1 "github.com/stackrox/infra/generated/api/v1"
+	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 )
 
 type prettyFlavor struct {
-	v1.Flavor
+	*v1.Flavor
 }
 
 func (p prettyFlavor) PrettyPrint(cmd *cobra.Command) {
@@ -43,7 +43,7 @@ func (p prettyFlavor) PrettyJSONPrint(cmd *cobra.Command) error {
 	b := new(bytes.Buffer)
 	m := jsonpb.Marshaler{EnumsAsInts: false, EmitDefaults: true, Indent: "  "}
 
-	if err := m.Marshal(b, &p.Flavor); err != nil {
+	if err := m.Marshal(b, p.Flavor); err != nil {
 		return err
 	}
 

@@ -21,12 +21,12 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/duration"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/calendar"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	"github.com/stackrox/infra/flavor"
-	v1 "github.com/stackrox/infra/generated/api/v1"
+	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 	"github.com/stackrox/infra/pkg/kube"
 	"github.com/stackrox/infra/service/middleware"
 	"github.com/stackrox/infra/signer"
@@ -145,7 +145,7 @@ func (s *clusterImpl) Info(ctx context.Context, clusterID *v1.ResourceByID) (*v1
 		return nil, err
 	}
 
-	return &metacluster.Cluster, nil
+	return metacluster.Cluster, nil
 }
 
 // List implements ClusterService.List.
@@ -195,7 +195,7 @@ func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) 
 		}
 
 		// This cluster wasn't rejected, so we'll keep it for the response.
-		clusters = append(clusters, &metacluster.Cluster)
+		clusters = append(clusters, metacluster.Cluster)
 	}
 
 	resp := &v1.ClusterListResponse{
@@ -390,7 +390,7 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 	log.Printf("[INFO] Will create a %q infra cluster %q for %s", flav.ID, clusterID, owner)
 
 	created, err := s.argoWorkflowsClient.CreateWorkflow(s.argoClientCtx, &workflowpkg.WorkflowCreateRequest{
-		Workflow:  &workflow,
+		Workflow:  workflow,
 		Namespace: s.workflowNamespace,
 	})
 	if err != nil {
@@ -468,13 +468,13 @@ func (s *clusterImpl) Artifacts(ctx context.Context, clusterID *v1.ResourceByID)
 // Access configures access for this service.
 func (s *clusterImpl) Access() map[string]middleware.Access {
 	return map[string]middleware.Access{
-		"/v1.ClusterService/Info":      middleware.Authenticated,
-		"/v1.ClusterService/List":      middleware.Authenticated,
-		"/v1.ClusterService/Lifespan":  middleware.Authenticated,
-		"/v1.ClusterService/Create":    middleware.Authenticated,
-		"/v1.ClusterService/Artifacts": middleware.Authenticated,
-		"/v1.ClusterService/Delete":    middleware.Authenticated,
-		"/v1.ClusterService/Logs":      middleware.Authenticated,
+		"/api.v1.ClusterService/Info":      middleware.Authenticated,
+		"/api.v1.ClusterService/List":      middleware.Authenticated,
+		"/api.v1.ClusterService/Lifespan":  middleware.Authenticated,
+		"/api.v1.ClusterService/Create":    middleware.Authenticated,
+		"/api.v1.ClusterService/Artifacts": middleware.Authenticated,
+		"/api.v1.ClusterService/Delete":    middleware.Authenticated,
+		"/api.v1.ClusterService/Logs":      middleware.Authenticated,
 	}
 }
 

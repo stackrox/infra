@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/stackrox/infra/flavor"
-	v1 "github.com/stackrox/infra/generated/api/v1"
+	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 	"github.com/stackrox/infra/service/middleware"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -34,12 +34,11 @@ func NewFlavorService(registry *flavor.Registry) (middleware.APIService, error) 
 func (s *flavorImpl) List(_ context.Context, request *v1.FlavorListRequest) (*v1.FlavorListResponse, error) {
 	var resp v1.FlavorListResponse
 	for _, flavor := range s.registry.Flavors() {
-		flavor := flavor
 		if !request.All && flavor.Availability == v1.Flavor_alpha {
 			continue
 		}
-		scrubInternalParameters(&flavor)
-		resp.Flavors = append(resp.Flavors, &flavor)
+		scrubInternalParameters(flavor)
+		resp.Flavors = append(resp.Flavors, flavor)
 	}
 
 	return &resp, nil
@@ -51,9 +50,9 @@ func (s *flavorImpl) Info(_ context.Context, flavorID *v1.ResourceByID) (*v1.Fla
 	if !found {
 		return nil, status.Errorf(codes.NotFound, "flavor %q not found", flavorID.Id)
 	}
-	scrubInternalParameters(&flavor)
+	scrubInternalParameters(flavor)
 
-	return &flavor, nil
+	return flavor, nil
 }
 
 // scrubInternalParameters drops any internal parameters from the given flavor,
@@ -73,8 +72,8 @@ func scrubInternalParameters(flavor *v1.Flavor) {
 // Access configures access for this service.
 func (s *flavorImpl) Access() map[string]middleware.Access {
 	return map[string]middleware.Access{
-		"/v1.FlavorService/Info": middleware.Authenticated,
-		"/v1.FlavorService/List": middleware.Authenticated,
+		"/api.v1.FlavorService/Info": middleware.Authenticated,
+		"/api.v1.FlavorService/List": middleware.Authenticated,
 	}
 }
 

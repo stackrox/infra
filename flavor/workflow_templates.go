@@ -10,7 +10,7 @@ import (
 	argov3client "github.com/argoproj/argo-workflows/v3/cmd/argo/commands/client"
 	workflowtemplatepkg "github.com/argoproj/argo-workflows/v3/pkg/apiclient/workflowtemplate"
 	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
-	v1 "github.com/stackrox/infra/generated/api/v1"
+	v1 "github.com/stackrox/infra/generated/proto/api/v1"
 )
 
 func (r *Registry) initWorkflowTemplatesClient() error {
@@ -28,7 +28,7 @@ func (r *Registry) initWorkflowTemplatesClient() error {
 	return nil
 }
 
-func (r *Registry) addWorkflowTemplates(results []v1.Flavor) []v1.Flavor {
+func (r *Registry) addWorkflowTemplates(results []*v1.Flavor) []*v1.Flavor {
 	templates, err := r.argoWorkflowTemplatesClient.ListWorkflowTemplates(r.argoClientCtx, &workflowtemplatepkg.WorkflowTemplateListRequest{
 		Namespace: r.workflowTemplateNamespace,
 	})
@@ -40,7 +40,7 @@ func (r *Registry) addWorkflowTemplates(results []v1.Flavor) []v1.Flavor {
 	for i := range templates.Items {
 		flavor := workflowTemplate2Flavor(&templates.Items[i])
 		if flavor != nil {
-			results = append(results, *flavor)
+			results = append(results, flavor)
 		}
 	}
 

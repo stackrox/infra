@@ -11,7 +11,7 @@ import useApiQuery from 'client/useApiQuery';
 
 const versionService = new VersionServiceApi(configuration);
 
-const fetchVersion = (): AxiosPromise<V1Version> => versionService.getVersion();
+const fetchVersion = (): AxiosPromise<V1Version> => versionService.versionServiceGetVersion();
 
 function TooltipContentRow(props: { label: string; value?: string }): ReactElement {
   const { label, value = 'unknown' } = props;
