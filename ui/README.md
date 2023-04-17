@@ -14,7 +14,7 @@ about the available scripts and the tooling behavior.
 ### Build Tooling
 
 - [Docker](https://www.docker.com/)
-- [Node.js](https://nodejs.org/en/) `18.15.0 LTS` or higher (it's highly
+- [Node.js](https://nodejs.org/en/) `10.15.3 LTS` or higher (it's highly
   recommended to use an LTS version, if you're managing multiple versions of
   Node.js on your machine, consider using
   [nvm](https://github.com/creationix/nvm))
