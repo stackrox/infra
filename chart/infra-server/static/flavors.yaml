@@ -3,7 +3,7 @@
 ##########
 - id: demo
   name: StackRox Demo
-  description: Demo running StackRox 3.74.1
+  description: Demo running StackRox 3.74.2
   availability: default
   workflow: configuration/workflow-demo.yaml
   parameters:
@@ -12,7 +12,7 @@
       value: example1
 
     - name: main-image
-      value: quay.io/rhacs-eng/main:3.74.1
+      value: quay.io/rhacs-eng/main:3.74.2
       kind: hardcoded
 
     - name: k8s-version
@@ -51,11 +51,19 @@
 
     - name: main-image
       description: StackRox Central image Docker name
-      value: quay.io/stackrox-io/main:3.74.1
+      value: quay.io/stackrox-io/main:3.74.2
       help: |
-        This must be a fully qualified image e.g. quay.io/stackrox-io/main:3.74.1.
+        This must be a fully qualified image e.g. quay.io/stackrox-io/main:3.74.2.
         Private images from quay.io/rhacs-eng and stackrox.io (legacy) can also be used.
         Other public images should also be OK.
+
+    - name: central-db-image
+      description: StackRox Central DB image Docker name
+      kind: optional
+      help: |
+        Setting this parameter will enable PostgreSQL on central and add the appropriate configurations. If
+        unspecified, central will use rocksdb.
+        An example of this image is quay.io/rhacs-eng/central-db:<VERSION>
 
     - name: scanner-image
       description: StackRox Scanner image Docker name
@@ -312,6 +320,20 @@
       description: cluster name
       value: example1
 
+    - name: central-services-helm-chart-version
+      description: Central Services Helm chart version
+      value: 3.74.2
+      kind: optional
+      help: |
+        Version string of the roxctl version to use to generate Central Services Helm chart, e.g., 3.74.2.
+
+    - name: secured-cluster-services-helm-chart-version
+      description: Secured Cluster Services Helm chart version
+      value: 3.74.2
+      kind: optional
+      help: |
+        Version string of the roxctl version to use to generate Secured Cluster Services Helm chart, e.g., 3.74.2.
+
     - name: openshift-version
       description: openshift release from OCP, OCP dev preview, or OKD
       value: ocp/stable
@@ -338,7 +360,7 @@
       value: ""
       kind: optional
       help: |
-        Version string of the main container image tag, e.g., 3.73.0. Default will be derived from the Helm chart.
+        Version string of the main container image tag. Default will be derived from the Helm chart.
 
     - name: scanner-image-tag
       description: Scanner container image tag
@@ -361,21 +383,13 @@
       help: |
         Version string of the collector-slim container image tag to use. Default will be derived from the Helm chart.
 
-    - name: central-services-helm-chart-version
-      description: Central Services Helm chart version
+    - name: central-db-image-tag
+      description: Central DB container image tag
       value: ""
       kind: optional
       help: |
-        Version string of the Helm chart to use to deploy Central Services, e.g., 73.0.0. Default is the latest
-        released chart.
-
-    - name: secured-cluster-services-helm-chart-version
-      description: Secured Cluster Services Helm chart version
-      value: ""
-      kind: optional
-      help: |
-        Version string of the Helm chart to use to deploy Secured Cluster Services. Default is the latest released
-        chart.
+        Version string of the central-db container image tag to use. Setting this value will enable central-db.
+        Default will be derived from the Helm chart.
 
   artifacts:
     - name: admin-password
