@@ -144,7 +144,7 @@ spec:
           - name: roxctl-secured-cluster-services
             path: /usr/bin/roxctl-secured-cluster-services
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-0.6.11
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-0.6.12
         imagePullPolicy: Always
         command:
           - ansible-playbook
@@ -210,7 +210,7 @@ spec:
             archive:
               none: {}
           - name: SSH_ACCESS
-            path: /data/SSH_ACCESS.md
+            path: /data/ssh/SSH_ACCESS.md
             archive:
               none: {}
           - name: url-openshift

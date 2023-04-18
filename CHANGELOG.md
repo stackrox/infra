@@ -6,6 +6,10 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+## [0.7.2]
+
+- Configuration of all demo contents is fixed in the Openshift 4 Demo flavor.
+
 ## [0.7.1]
 
 - ROX-15237: The Openshift 4 Demo flavor now supports testing of unreleased versions.
