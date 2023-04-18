@@ -38,7 +38,7 @@ spec:
     - name: create
       activeDeadlineSeconds: 7200
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-osd:0.2.24
+        image: quay.io/stackrox-io/ci:automation-flavors-osd-0.6.12-1-g22b21eeb0d-snapshot
         imagePullPolicy: Always
         command:
           - ./entrypoint.sh
@@ -47,6 +47,16 @@ spec:
           - create
           - "{{workflow.parameters.name}}"
         env:
+          - name: IMAGE_PULL_USER
+            valueFrom:
+              secretKeyRef:
+                name: demo-secrets
+                key: QUAY_RHACS_ENG_RO_USERNAME
+          - name: IMAGE_PULL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: demo-secrets
+                key: QUAY_RHACS_ENG_RO_PASSWORD
           - name: AWS_ACCESS_KEY_ID
             valueFrom:
               secretKeyRef:
