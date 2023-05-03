@@ -3,7 +3,7 @@ module github.com/stackrox/infra
 go 1.18
 
 require (
-	cloud.google.com/go/storage v1.28.1
+	cloud.google.com/go/storage v1.30.1
 	github.com/argoproj/argo-workflows/v3 v3.4.3
 	github.com/buger/jsonparser v1.1.1
 	github.com/coreos/go-oidc/v3 v3.4.0
