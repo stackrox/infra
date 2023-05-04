@@ -19,6 +19,10 @@
       value: default
       kind: hardcoded
 
+    - name: enable-psps
+      value: "false"
+      kind: hardcoded
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to cluster
@@ -60,10 +64,11 @@
     - name: central-db-image
       description: StackRox Central DB image Docker name
       kind: optional
+      value: quay.io/stackrox-io/central-db:4.0.0
       help: |
         Setting this parameter will enable PostgreSQL on central and add the appropriate configurations. If
-        unspecified, central will use rocksdb.
-        An example of this image is quay.io/rhacs-eng/central-db:<VERSION>
+        unspecified, central will use rocksdb for ACS 3.x.
+        Do not leave empty for ACS 4.x - that would use an image from registry.redhat.io for which there are no credentials configured.
 
     - name: scanner-image
       description: StackRox Scanner image Docker name
@@ -79,6 +84,12 @@
       description: kubernetes version
       value: default
       kind: optional
+
+    - name: enable-psps
+      description: Enable PodSecurityPolicy generation
+      value: "false"
+      kind: optional
+      help: PSPs were removed from K8s >=1.25. Enabling PSP generation on newer K8s versions will fail the deployment.
 
   artifacts:
     - name: kubeconfig
