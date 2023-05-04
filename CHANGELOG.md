@@ -6,6 +6,12 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+- Bump demo flavors to 4.0.0.
+
+## [0.7.3]
+
+- Update Go dependencies to close Dependabot alerts.
+
 ## [0.7.2]
 
 - Configuration of all demo contents is fixed in the Openshift 4 Demo flavor.

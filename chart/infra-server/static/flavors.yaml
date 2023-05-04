@@ -3,7 +3,7 @@
 ##########
 - id: demo
   name: StackRox Demo
-  description: Demo running StackRox 3.74.2
+  description: Demo running StackRox 4.0.0
   availability: default
   workflow: configuration/workflow-demo.yaml
   parameters:
@@ -12,7 +12,7 @@
       value: example1
 
     - name: main-image
-      value: quay.io/rhacs-eng/main:3.74.2
+      value: quay.io/rhacs-eng/main:4.0.0
       kind: hardcoded
 
     - name: k8s-version
@@ -51,9 +51,9 @@
 
     - name: main-image
       description: StackRox Central image Docker name
-      value: quay.io/stackrox-io/main:3.74.2
+      value: quay.io/stackrox-io/main:4.0.0
       help: |
-        This must be a fully qualified image e.g. quay.io/stackrox-io/main:3.74.2.
+        This must be a fully qualified image e.g. quay.io/stackrox-io/main:4.0.0.
         Private images from quay.io/rhacs-eng and stackrox.io (legacy) can also be used.
         Other public images should also be OK.
 
@@ -322,17 +322,17 @@
 
     - name: central-services-helm-chart-version
       description: Central Services Helm chart version
-      value: 3.74.2
+      value: 4.0.0
       kind: optional
       help: |
-        Version string of the roxctl version to use to generate Central Services Helm chart, e.g., 3.74.2.
+        Version string of the roxctl version to use to generate Central Services Helm chart, e.g., 4.0.0.
 
     - name: secured-cluster-services-helm-chart-version
       description: Secured Cluster Services Helm chart version
-      value: 3.74.2
+      value: 4.0.0
       kind: optional
       help: |
-        Version string of the roxctl version to use to generate Secured Cluster Services Helm chart, e.g., 3.74.2.
+        Version string of the roxctl version to use to generate Secured Cluster Services Helm chart, e.g., 4.0.0.
 
     - name: openshift-version
       description: openshift release from OCP, OCP dev preview, or OKD
