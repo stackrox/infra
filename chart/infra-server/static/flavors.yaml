@@ -68,11 +68,10 @@
     - name: central-db-image
       description: StackRox Central DB image Docker name
       kind: optional
-      value: quay.io/stackrox-io/central-db:4.0.0
       help: |
-        Setting this parameter will enable PostgreSQL on central and add the appropriate configurations. If
-        unspecified, central will use rocksdb for ACS 3.x.
-        Do not leave empty for ACS 4.x - that would use an image from registry.redhat.io for which there are no credentials configured.
+        Setting this parameter will enable Postgres on central and add the appropriate configurations.
+        If unspecified, for ACS 4.x this value will be derived from the central image.
+        ACS 3.x will use RocksDB if unspecified.
 
     - name: scanner-image
       description: StackRox Scanner image Docker name
