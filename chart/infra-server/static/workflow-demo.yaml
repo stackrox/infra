@@ -15,6 +15,7 @@ spec:
     parameters:
       - name: name
       - name: main-image
+      - name: central-db-image
       - name: k8s-version
       - name: enable-psps
 
@@ -119,6 +120,7 @@ spec:
           - create
           - "--name={{workflow.parameters.name}}"
           - "--main-image={{workflow.parameters.main-image}}"
+          - "--central-db-image={{workflow.parameters.central-db-image}}"
           - --gcp-project=srox-temp-sales-demos
           - --dns-gcp-project=ultra-current-825
           - --creation-source=infra

@@ -15,6 +15,10 @@
       value: quay.io/rhacs-eng/main:4.0.0
       kind: hardcoded
 
+    - name: central-db-image
+      value: quay.io/rhacs-eng/central-db:4.0.0
+      kind: hardcoded
+
     - name: k8s-version
       value: default
       kind: hardcoded
