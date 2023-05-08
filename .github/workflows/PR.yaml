@@ -167,7 +167,7 @@ jobs:
 
       - name: Run e2e tests
         env:
-          INFRA_TOKEN: ${{ secrets.INFRA_TOKEN_EXPIRING }}
+          INFRA_TOKEN: ${{ secrets.INFRA_TOKEN_DEV }}
         run: |
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
           sleep 5
@@ -183,7 +183,7 @@ jobs:
 
       - name: Run Go e2e tests
         env:
-          INFRA_TOKEN: ${{ secrets.INFRA_TOKEN_EXPIRING }}
+          INFRA_TOKEN: ${{ secrets.INFRA_TOKEN_DEV }}
         run: |
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
           sleep 5
