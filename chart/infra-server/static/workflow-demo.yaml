@@ -15,7 +15,9 @@ spec:
     parameters:
       - name: name
       - name: main-image
+      - name: central-db-image
       - name: k8s-version
+      - name: enable-psps
 
   volumes:
     - name: credentials
@@ -110,7 +112,7 @@ spec:
               none: {}
 
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.5.3
+        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.6.14
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint
@@ -118,10 +120,12 @@ spec:
           - create
           - "--name={{workflow.parameters.name}}"
           - "--main-image={{workflow.parameters.main-image}}"
+          - "--central-db-image={{workflow.parameters.central-db-image}}"
           - --gcp-project=srox-temp-sales-demos
           - --dns-gcp-project=ultra-current-825
           - --creation-source=infra
           - --k8s-version={{workflow.parameters.k8s-version}}
+          - --enable-psps={{workflow.parameters.enable-psps}}
         volumeMounts:
           - name: credentials
             mountPath: /tmp/google-credentials.json
@@ -180,7 +184,7 @@ spec:
             path: /data/tfvars
             optional: true
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.5.3
+        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.6.14
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint

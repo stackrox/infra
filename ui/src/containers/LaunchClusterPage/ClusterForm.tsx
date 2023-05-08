@@ -79,7 +79,7 @@ function createInitialParameterValues(parameters: FlavorParameters): Record<stri
   return Object.keys(parameters).reduce<Record<string, unknown>>(
     (fields, param) => ({
       ...fields,
-      [param]: parameters[param].Optional && parameters[param].Value ? parameters[param].Value : '',
+      [param]: parameters[param].Value ? parameters[param].Value : '',
     }),
     {}
   );
