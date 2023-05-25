@@ -30,7 +30,7 @@ setup_file() {
 @test "expects a description" {
   expect_count_flavor_id "missing-annotations" 0
   run kubectl -n infra logs -l app=infra-server
-  assert_output --partial "[WARN] Ignoring a workflow template without infra.stackrox.io/description annotation: missing-annotations"
+  assert_output --partial '"msg":"ignoring a workflow template without infra.stackrox.io/description annotation","template-name":"missing-annotations"'
 }
 
 @test "availability is alpha by default" {
@@ -50,7 +50,7 @@ setup_file() {
 @test "invalid availability workflows are dropped" {
   expect_count_flavor_id "invalid-availability" 0
   run kubectl -n infra logs -l app=infra-server
-  assert_output --partial "[WARN] Ignoring a workflow template with an unknown infra.stackrox.io/availability annotation: invalid-availability, woot!"
+  assert_output --partial '"msg":"ignoring a workflow template with an unknown infra.stackrox.io/availability annotation","template-name":"invalid-availability","template-availability":"woot!"'
 }
 
 # Parameters
@@ -58,7 +58,7 @@ setup_file() {
 @test "parameters must have descriptions" {
   expect_count_flavor_id "missing-parameter-descriptions" 0
   run kubectl -n infra logs -l app=infra-server
-  assert_output --partial "[WARN] Ignoring a workflow template with a parameter (pod-security-policy) that has no description: missing-parameter-descriptions"
+  assert_output --partial '"msg":"ignoring a workflow template with a parameter that has no description","template-name":"missing-parameter-descriptions","parameter":"gcp-zone"'
 }
 
 @test "a required parameter shows as such" {
