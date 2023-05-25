@@ -4,12 +4,14 @@ package calendar
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/stackrox/infra/config"
+	"github.com/stackrox/infra/pkg/logging"
 	"google.golang.org/api/calendar/v3"
 )
+
+var log = logging.CreateProductionLogger()
 
 // calendarCheckTimeout is how long to wait for the Google Calendar API to
 // return before timing out.
@@ -57,7 +59,7 @@ func (*disabledCalendar) Events() ([]Event, error) {
 // NewGoogleCalendar creates a new Google Calendar connector for fetching events.
 func NewGoogleCalendar(cfg *config.CalendarConfig) (EventSource, error) {
 	if cfg == nil {
-		log.Printf("[INFO] Disabling calendar integration")
+		log.Infow("disabling calendar integration")
 		return &disabledCalendar{}, nil
 	}
 

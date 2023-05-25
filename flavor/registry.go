@@ -5,7 +5,6 @@ package flavor
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"sort"
 
@@ -16,7 +15,10 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/config"
 	v1 "github.com/stackrox/infra/generated/api/v1"
+	"github.com/stackrox/infra/pkg/logging"
 )
+
+var log = logging.CreateProductionLogger()
 
 // pair represents a tuple of an Argo workflow and a flavor.
 type pair struct {
@@ -71,7 +73,7 @@ func (r *Registry) add(flavor v1.Flavor, workflow v1alpha1.Workflow) error {
 		workflow: workflow,
 		flavor:   flavor,
 	}
-	log.Printf("[INFO] registered flavor %q (%s)\n", flavor.ID, flavor.Name)
+	log.Infow("registered flavor", "flavor-id", flavor.GetID(), "flavor-name", flavor.GetName())
 
 	// Register a default flavor if one has not already been registered.
 	if flavor.Availability == v1.Flavor_default {
@@ -80,7 +82,7 @@ func (r *Registry) add(flavor v1.Flavor, workflow v1alpha1.Workflow) error {
 			return fmt.Errorf("both %q and %q configured as default flavors", r.defaultFlavor, flavor.ID)
 		}
 		r.defaultFlavor = flavor.ID
-		log.Printf("[INFO] registered default flavor %q (%s)\n", flavor.ID, flavor.Name)
+		log.Infow("registered default flavor", "flavor-id", flavor.GetID(), "flavor-name", flavor.GetName())
 	}
 
 	return nil

@@ -3,11 +3,11 @@ package auth
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	v1 "github.com/stackrox/infra/generated/api/v1"
+	"github.com/stackrox/infra/pkg/logging"
 	"golang.org/x/oauth2"
 )
 
@@ -15,6 +15,8 @@ const (
 	tokenCookieNew     = "token=%s"
 	tokenCookieExpired = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
 )
+
+var log = logging.CreateProductionLogger()
 
 // OidcAuth facilitates an Oauth2 login flow via http handlers.
 type OidcAuth struct {
@@ -74,7 +76,7 @@ func (a OidcAuth) callbackHandler(w http.ResponseWriter, r *http.Request) {
 	stateToken := r.URL.Query().Get("state")
 	err := a.jwtState.Validate(stateToken)
 	if err != nil {
-		log.Printf("[ERROR] Failed to validate state token: %v", err)
+		log.Errorw("failed to validate state token", "error", err)
 		http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
 		return
 	}
@@ -83,13 +85,13 @@ func (a OidcAuth) callbackHandler(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Query().Get("code")
 	rawToken, err := a.conf.Exchange(r.Context(), code)
 	if err != nil {
-		log.Printf("[ERROR] Failed to exchange code: %v", err)
+		log.Errorw("failed to exchange code", "error", err)
 		http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
 		return
 	}
 
 	if err := a.jwtAccess.Validate(r.Context(), rawToken); err != nil {
-		log.Printf("[ERROR] Failed to validate Access token: %v", err)
+		log.Errorw("failed to validate access token", "err", err)
 		http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
 		return
 	}
@@ -98,7 +100,7 @@ func (a OidcAuth) callbackHandler(w http.ResponseWriter, r *http.Request) {
 	// user struct from it.
 	user, err := a.jwtOidc.Validate(r.Context(), rawToken)
 	if err != nil {
-		log.Printf("[ERROR] Failed to validate ID token: %v", err)
+		log.Errorw("failed to validate ID token", "error", err)
 		http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
 		return
 	}
@@ -106,7 +108,7 @@ func (a OidcAuth) callbackHandler(w http.ResponseWriter, r *http.Request) {
 	// Generate token containing a user struct.
 	userToken, err := a.jwtUser.Generate(user)
 	if err != nil {
-		log.Printf("[ERROR] Failed to generate user token: %v", err)
+		log.Errorw("failed to generate user token", "error", err)
 		http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
 		return
 	}

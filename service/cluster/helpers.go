@@ -1,7 +1,6 @@
 package cluster
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -167,9 +166,11 @@ func handleArtifactMigration(workflow v1alpha1.Workflow, artifact v1alpha1.Artif
 	}
 
 	if bucket == "" || key == "" {
-		log.Printf("[WARN] Cannot figure out bucket for artifact, possibly an upgrade issue, not fatal (workflow: %q)", workflow.Name)
-		log.Printf("[INFO] Artifact: %v\n", artifact)
-		log.Printf("[INFO] ArtifactRepository: %v\n", workflow.Status.ArtifactRepositoryRef)
+		log.Warnw("cannot figure out bucket for artifact, possibly an upgrade issue, not fatal",
+			"workflow-name", workflow.Name,
+			"artifact", artifact,
+			"artifact-repository", workflow.Status.ArtifactRepositoryRef,
+		)
 		return "", ""
 	}
 
@@ -247,12 +248,4 @@ func workflowFailureDetails(workflowStatus v1alpha1.WorkflowStatus) error {
 		}
 	}
 	return errors.New("")
-}
-
-func prettyPrint(x interface{}) {
-	pretty, err := json.MarshalIndent(x, "", "  ")
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-	log.Printf("[INFO] %s\n", pretty)
 }
