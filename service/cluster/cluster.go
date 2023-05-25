@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"sort"
 	"strings"
@@ -28,6 +27,7 @@ import (
 	"github.com/stackrox/infra/flavor"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/kube"
+	"github.com/stackrox/infra/pkg/logging"
 	"github.com/stackrox/infra/service/middleware"
 	"github.com/stackrox/infra/signer"
 	"github.com/stackrox/infra/slack"
@@ -86,6 +86,8 @@ type clusterImpl struct {
 }
 
 var (
+	log = logging.CreateProductionLogger()
+
 	_ middleware.APIService   = (*clusterImpl)(nil)
 	_ v1.ClusterServiceServer = (*clusterImpl)(nil)
 )

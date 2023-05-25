@@ -2,11 +2,11 @@
 package slack
 
 import (
-	"log"
 	"sync"
 
 	"github.com/slack-go/slack"
 	"github.com/stackrox/infra/config"
+	"github.com/stackrox/infra/pkg/logging"
 )
 
 // Slacker represents a type that can interact with the Slack API.
@@ -16,8 +16,12 @@ type Slacker interface {
 	LookupUser(email string) (*slack.User, bool)
 }
 
-var _ Slacker = (*slackClient)(nil)
-var _ Slacker = (*disabledSlack)(nil)
+var (
+	log = logging.CreateProductionLogger()
+
+	_ Slacker = (*slackClient)(nil)
+	_ Slacker = (*disabledSlack)(nil)
+)
 
 type slackClient struct {
 	client     *slack.Client

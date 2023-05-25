@@ -3,7 +3,6 @@ package cluster
 import (
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"log"
 	"strconv"
 
 	"github.com/golang/protobuf/ptypes/empty"
