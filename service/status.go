@@ -93,7 +93,7 @@ func (s *statusImpl) GetStatus(ctx context.Context, _ *empty.Empty) (*v1.InfraSt
 			if err != nil {
 				return nil, err
 			}
-			log.Infow("initialized infra status lazily")
+			log.Infow("initialized infra status lazily", "maintenance-active", infraStatus.GetMaintenanceActive())
 			return infraStatus, nil
 		}
 		return nil, err
@@ -126,7 +126,7 @@ func (s *statusImpl) ResetStatus(ctx context.Context, _ *empty.Empty) (*v1.Infra
 	if err != nil {
 		return nil, err
 	}
-	log.Infow("status was reset")
+	log.Infow("status was reset", "maintenance-active", infraStatus.GetMaintenanceActive())
 	return infraStatus, nil
 }
 

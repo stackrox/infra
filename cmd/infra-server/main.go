@@ -15,6 +15,7 @@ import (
 	"github.com/stackrox/infra/config"
 	"github.com/stackrox/infra/flavor"
 	"github.com/stackrox/infra/pkg/buildinfo"
+	"github.com/stackrox/infra/pkg/logging"
 	"github.com/stackrox/infra/server"
 	"github.com/stackrox/infra/service"
 	"github.com/stackrox/infra/service/cluster"
@@ -45,11 +46,8 @@ func mainCmd() error {
 		return nil
 	}
 
-	log.SetFlags(log.LstdFlags | log.Lshortfile | log.Lmicroseconds)
-	// Use stdout so that GCP does not view all logs as severity ERROR.
-	log.SetOutput(os.Stdout)
-
-	log.Printf("[INFO] Starting infra server version %s", buildinfo.All().Version)
+	log := logging.CreateProductionLogger()
+	log.Infow("starting infra server", "version", buildinfo.All().Version)
 
 	serverConfigFile := filepath.Join(*flagConfigDir, "infra.yaml")
 	cfg, err := config.Load(serverConfigFile)
