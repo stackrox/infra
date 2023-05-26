@@ -18,7 +18,7 @@ const bufferSize = 1000 * 1024
 type cliImpl struct{}
 
 var (
-	log = logging.CreateDevelopmentLogger()
+	log = logging.CreateProductionLogger()
 
 	_ middleware.APIService = (*cliImpl)(nil)
 	_ v1.CliServiceServer   = (*cliImpl)(nil)

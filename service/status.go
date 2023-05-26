@@ -8,7 +8,6 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/kube"
-	"github.com/stackrox/infra/pkg/logging"
 	"github.com/stackrox/infra/service/middleware"
 	"google.golang.org/grpc"
 	corev1 "k8s.io/api/core/v1"
@@ -25,8 +24,6 @@ type statusImpl struct {
 }
 
 var (
-	logger = logging.CreateProductionLogger()
-
 	_ middleware.APIService       = (*statusImpl)(nil)
 	_ v1.InfraStatusServiceServer = (*statusImpl)(nil)
 )
@@ -96,7 +93,7 @@ func (s *statusImpl) GetStatus(ctx context.Context, _ *empty.Empty) (*v1.InfraSt
 			if err != nil {
 				return nil, err
 			}
-			logger.Infow("initialized infra status lazily", "maintenance-active", infraStatus.GetMaintenanceActive())
+			log.Infow("initialized infra status lazily", "maintenance-active", infraStatus.GetMaintenanceActive())
 			return infraStatus, nil
 		}
 		return nil, err
@@ -116,7 +113,7 @@ func (s *statusImpl) SetStatus(ctx context.Context, infraStatus *v1.InfraStatus)
 	if err != nil {
 		return nil, err
 	}
-	logger.Infow("new status set",
+	log.Infow("new status set",
 		"maintainer", infraStatus.GetMaintainer(),
 		"maintenance-active", infraStatus.GetMaintenanceActive(),
 	)
@@ -129,7 +126,7 @@ func (s *statusImpl) ResetStatus(ctx context.Context, _ *empty.Empty) (*v1.Infra
 	if err != nil {
 		return nil, err
 	}
-	logger.Infow("status was reset", "maintenance-active", infraStatus.GetMaintenanceActive())
+	log.Infow("status was reset", "maintenance-active", infraStatus.GetMaintenanceActive())
 	return infraStatus, nil
 }
 
