@@ -288,7 +288,7 @@
 
     - name: worker-node-count
       description: number of worker nodes
-      value: 3
+      value: 4
       kind: optional
 
     - name: region
