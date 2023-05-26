@@ -273,7 +273,7 @@
 
     - name: master-node-type
       description: the type of master nodes
-      value: n1-standard-4
+      value: e2-standard-4
       kind: optional
 
     - name: master-node-count
@@ -283,12 +283,12 @@
 
     - name: worker-node-type
       description: the type of worker nodes
-      value: n1-standard-4
+      value: e2-standard-8
       kind: optional
 
     - name: worker-node-count
       description: number of worker nodes
-      value: 4
+      value: 2
       kind: optional
 
     - name: region
