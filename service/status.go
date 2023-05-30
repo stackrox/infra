@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"log"
 	"strconv"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -94,7 +93,7 @@ func (s *statusImpl) GetStatus(ctx context.Context, _ *empty.Empty) (*v1.InfraSt
 			if err != nil {
 				return nil, err
 			}
-			log.Println("[INFO] Initialized infra status lazily")
+			log.Infow("initialized infra status lazily", "maintenance-active", infraStatus.GetMaintenanceActive())
 			return infraStatus, nil
 		}
 		return nil, err
@@ -114,7 +113,10 @@ func (s *statusImpl) SetStatus(ctx context.Context, infraStatus *v1.InfraStatus)
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("[INFO] New Status was set by maintainer %s\n", infraStatus.Maintainer)
+	log.Infow("new status set",
+		"maintainer", infraStatus.GetMaintainer(),
+		"maintenance-active", infraStatus.GetMaintenanceActive(),
+	)
 	return infraStatus, nil
 }
 
@@ -124,7 +126,7 @@ func (s *statusImpl) ResetStatus(ctx context.Context, _ *empty.Empty) (*v1.Infra
 	if err != nil {
 		return nil, err
 	}
-	log.Println("[INFO] Status was reset")
+	log.Infow("status was reset", "maintenance-active", infraStatus.GetMaintenanceActive())
 	return infraStatus, nil
 }
 

@@ -3,11 +3,11 @@ package service
 import (
 	"context"
 	"io"
-	"log"
 	"os"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	v1 "github.com/stackrox/infra/generated/api/v1"
+	"github.com/stackrox/infra/pkg/logging"
 	"github.com/stackrox/infra/pkg/platform"
 	"github.com/stackrox/infra/service/middleware"
 	"google.golang.org/grpc"
@@ -18,6 +18,8 @@ const bufferSize = 1000 * 1024
 type cliImpl struct{}
 
 var (
+	log = logging.CreateProductionLogger()
+
 	_ middleware.APIService = (*cliImpl)(nil)
 	_ v1.CliServiceServer   = (*cliImpl)(nil)
 )
@@ -30,14 +32,14 @@ func NewCliService() (middleware.APIService, error) {
 // Upgrade provides the binary for the requested OS and architecture.
 func (s *cliImpl) Upgrade(request *v1.CliUpgradeRequest, stream v1.CliService_UpgradeServer) error {
 	if err := platform.Validate(request.GetOs(), request.GetArch()); err != nil {
-		log.Println("[INFO] infractl cli upgrade:", err)
+		log.Infow("failed to validate platform for infractl upgrade", "error", err)
 		return err
 	}
 
 	filename := webRoot + "/downloads/infractl-" + request.GetOs() + "-" + request.GetArch()
 	file, err := os.Open(filename)
 	if err != nil {
-		log.Println("[ERROR] Failed to open infractl binary:", err)
+		log.Errorw("failed to open infractl binary", "error", err)
 		return err
 	}
 	defer file.Close()
@@ -48,12 +50,12 @@ func (s *cliImpl) Upgrade(request *v1.CliUpgradeRequest, stream v1.CliService_Up
 			break
 		}
 		if err != nil {
-			log.Println("[ERROR] error while reading chunk:", err)
+			log.Errorw("error while reading infractl chunk", "error", err)
 			return err
 		}
 		resp := &v1.CliUpgradeResponse{FileChunk: buff[:bytesRead]}
 		if err := stream.Send(resp); err != nil {
-			log.Println("[ERROR] error while sending chunk:", err)
+			log.Errorw("error while sending infractl chunk", "error", err)
 			return err
 		}
 	}

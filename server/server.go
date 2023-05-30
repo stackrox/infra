@@ -6,7 +6,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -20,12 +19,15 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/auth"
 	"github.com/stackrox/infra/config"
+	"github.com/stackrox/infra/pkg/logging"
 	"github.com/stackrox/infra/service/middleware"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
+
+var log = logging.CreateProductionLogger()
 
 type server struct {
 	services []middleware.APIService
@@ -82,6 +84,8 @@ func (s *server) RunServer() (<-chan error, error) {
 		apiSvc.RegisterServiceServer(server)
 	}
 
+	grpc_prometheus.Register(server)
+
 	// muxHandler is a HTTP handler that can route both HTTP/2 gRPC and HTTP1.1
 	// requests.
 	muxHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -95,7 +99,7 @@ func (s *server) RunServer() (<-chan error, error) {
 		mux.ServeHTTP(w, r)
 	})
 
-	log.Printf("[INFO] Starting gRPC server on %s", listenAddress)
+	log.Infow("starting gRPC server", "listen-address", listenAddress)
 	go func() {
 		if err := http.ListenAndServeTLS(listenAddress, s.cfg.Server.CertFile, s.cfg.Server.KeyFile, h2c.NewHandler(muxHandler, &http2.Server{})); err != nil {
 			errCh <- err
@@ -107,7 +111,7 @@ func (s *server) RunServer() (<-chan error, error) {
 		return nil, err
 	}
 
-	log.Printf("[INFO] Starting gRPC-Gateway client on %s", connectAddress)
+	log.Infow("starting gRPC-Gateway client", "connect-address", connectAddress)
 	conn, err := grpc.Dial(connectAddress, dialOption)
 	if err != nil {
 		return nil, errors.Wrap(err, "dialing gRPC")
