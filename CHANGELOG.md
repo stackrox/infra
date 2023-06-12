@@ -8,6 +8,8 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+## [0.7.5]
+
 - Bump demo flavors to 4.0.2
 
 ## [0.7.4]
