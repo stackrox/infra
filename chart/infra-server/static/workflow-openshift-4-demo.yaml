@@ -21,7 +21,7 @@ spec:
     - metadata:
         name: data
       spec:
-        accessModes: [ "ReadWriteOnce" ]
+        accessModes: ["ReadWriteOnce"]
         resources:
           requests:
             storage: 10Mi
@@ -54,10 +54,10 @@ spec:
               failed: true
             arguments:
               parameters:
-              - name: admin-password
-                value: "{{steps.pre-install.outputs.parameters.admin-password}}"
-              - name: kubeconfig-base64
-                value: "{{steps.pre-install.outputs.parameters.kubeconfig-base64}}"
+                - name: admin-password
+                  value: "{{steps.pre-install.outputs.parameters.admin-password}}"
+                - name: kubeconfig-base64
+                  value: "{{steps.pre-install.outputs.parameters.kubeconfig-base64}}"
               artifacts:
                 - name: roxctl-central
                   from: "{{steps.roxctl-central.outputs.artifacts.roxctl-central}}"
@@ -75,7 +75,7 @@ spec:
 
     - name: create
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.6.11
+        image: quay.io/stackrox-io/ci:automation-flavors-aks-0.7.5-1-g88afa40be7-snapshot
         imagePullPolicy: Always
         volumeMounts:
           - name: data
@@ -144,7 +144,7 @@ spec:
           - name: roxctl-secured-cluster-services
             path: /usr/bin/roxctl-secured-cluster-services
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-0.6.12
+        image: quay.io/stackrox-io/ci:automation-flavors-aks-0.7.5-1-g88afa40be7-snapshot
         imagePullPolicy: Always
         command:
           - ansible-playbook
@@ -235,7 +235,7 @@ spec:
 
     - name: destroy
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.6.11
+        image: quay.io/stackrox-io/ci:automation-flavors-aks-0.7.5-1-g88afa40be7-snapshot
         imagePullPolicy: Always
         command:
           - entrypoint.sh
