@@ -371,10 +371,10 @@
 
     - name: main-image-tag
       description: Main container image tag
-      value: ""
+      value: 4.0.2
       kind: optional
       help: |
-        Version string of the main container image tag. Default will be derived from the Helm chart.
+        Version string of the main container image tag.
 
     - name: scanner-image-tag
       description: Scanner container image tag
