@@ -8,6 +8,10 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+## [0.7.7]
+
+- Use latest openshift-4-demo to work with 4.1 rcs.
+
 ## [0.7.6]
 
 - Bump demo flavors to 4.0.2
