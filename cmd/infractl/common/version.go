@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-func getMajorMinorVersion(cmd *cobra.Command, version *v1.Version) string {
+func getMajorMinorVersion(_ *cobra.Command, version *v1.Version) string {
 	versionStr := version.GetVersion()
 	if regexp.MustCompile(`\d+\.\d+\.\d+`).MatchString(versionStr) {
 		return strings.Join(strings.Split(versionStr, ".")[:2], ".")

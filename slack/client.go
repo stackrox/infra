@@ -32,14 +32,14 @@ type slackClient struct {
 
 type disabledSlack struct{}
 
-func (s disabledSlack) PostMessage(options ...slack.MsgOption) error {
+func (s disabledSlack) PostMessage(_ ...slack.MsgOption) error {
 	return nil
 }
 
-func (s disabledSlack) PostMessageToUser(user *slack.User, options ...slack.MsgOption) error {
+func (s disabledSlack) PostMessageToUser(_ *slack.User, _ ...slack.MsgOption) error {
 	return nil
 }
-func (s disabledSlack) LookupUser(email string) (*slack.User, bool) {
+func (s disabledSlack) LookupUser(_ string) (*slack.User, bool) {
 	return &slack.User{}, false
 }
 

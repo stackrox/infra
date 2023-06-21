@@ -34,7 +34,7 @@ func args(_ *cobra.Command, args []string) error {
 	return nil
 }
 
-func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []string) (common.PrettyPrinter, error) {
+func run(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, args []string) (common.PrettyPrinter, error) {
 	req := v1.ResourceByID{
 		Id: args[0],
 	}
