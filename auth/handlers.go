@@ -58,7 +58,7 @@ func (a OidcAuth) loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	oauth2.SetAuthURLParam("response_mode", "query")
+	_ = oauth2.SetAuthURLParam("response_mode", "query")
 	redirectURL := a.conf.AuthCodeURL(stateToken)
 
 	// Redirect to authorization server so that the user can login externally.
