@@ -49,7 +49,7 @@ type bearerToken string
 
 var _ credentials.PerRPCCredentials = (*bearerToken)(nil)
 
-func (t bearerToken) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
+func (t bearerToken) GetRequestMetadata(_ context.Context, uri ...string) (map[string]string, error) {
 	return map[string]string{
 		"authorization": "Bearer " + string(t),
 	}, nil
