@@ -135,7 +135,7 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSo
 }
 
 // Info implements ClusterService.Info.
-func (s *clusterImpl) Info(ctx context.Context, clusterID *v1.ResourceByID) (*v1.Cluster, error) {
+func (s *clusterImpl) Info(_ context.Context, clusterID *v1.ResourceByID) (*v1.Cluster, error) {
 	workflow, err := s.getMostRecentArgoWorkflowFromClusterID(clusterID.GetId())
 	if err != nil {
 		return nil, err
@@ -425,7 +425,7 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 }
 
 // Artifacts implements ClusterService.Artifacts.
-func (s *clusterImpl) Artifacts(ctx context.Context, clusterID *v1.ResourceByID) (*v1.ClusterArtifacts, error) {
+func (s *clusterImpl) Artifacts(_ context.Context, clusterID *v1.ResourceByID) (*v1.ClusterArtifacts, error) {
 	workflow, err := s.getMostRecentArgoWorkflowFromClusterID(clusterID.GetId())
 	if err != nil {
 		return nil, err
@@ -712,9 +712,8 @@ func (s *clusterImpl) startCalendarCheck() {
 			if err != nil {
 				log.Errorw("failed to launch scheduled demo", "event-title", event.Title, "error", err)
 				continue
-			} else {
-				log.Infow("launched scheduled demo", "event-title", event.Title, "flavor-id", id.Id)
 			}
+			log.Infow("launched scheduled demo", "event-title", event.Title, "flavor-id", id.Id)
 		}
 	}
 }

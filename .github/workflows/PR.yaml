@@ -3,9 +3,9 @@ name: PR Workflow
 on:
   pull_request:
     types:
-    - opened
-    - synchronize
-    - labeled
+      - opened
+      - synchronize
+      - labeled
 
 defaults:
   run:
@@ -16,7 +16,6 @@ env:
   GH_TOKEN: ${{ secrets.ROBOT_ROX_GITHUB_TOKEN }}
 
 jobs:
-
   lint:
     uses: ./.github/workflows/lint.yaml
 
@@ -57,7 +56,7 @@ jobs:
       - create-dev-cluster
     runs-on: ubuntu-latest
     container:
-      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.51
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.51.1
 
     steps:
       - name: Checkout
@@ -79,7 +78,7 @@ jobs:
       - create-dev-cluster
     runs-on: ubuntu-latest
     container:
-      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.52
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.51.1
     env:
       KUBECONFIG: /github/home/artifacts/kubeconfig
       INFRA_TOKEN: ${{ secrets.INFRA_TOKEN }}
@@ -100,7 +99,7 @@ jobs:
           credentials_json: ${{ secrets.GCP_INFRA_CI_AUTOMATION_SA }}
 
       - name: Set up Cloud SDK
-        uses: 'google-github-actions/setup-gcloud@v0'
+        uses: "google-github-actions/setup-gcloud@v0"
         with:
           install_components: "gke-gcloud-auth-plugin"
 

@@ -24,7 +24,7 @@ func NewVersionService() (middleware.APIService, error) {
 }
 
 // GetVersion implements VersionService.GetVersion.
-func (s *versionImpl) GetVersion(ctx context.Context, _ *empty.Empty) (*v1.Version, error) {
+func (s *versionImpl) GetVersion(_ context.Context, _ *empty.Empty) (*v1.Version, error) {
 	return buildinfo.All(), nil
 }
 

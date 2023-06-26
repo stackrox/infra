@@ -8,6 +8,8 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+- Upgrade Go version to 1.20
+
 ## [0.7.7]
 
 - Use latest openshift-4-demo to work with 4.1 rcs.
