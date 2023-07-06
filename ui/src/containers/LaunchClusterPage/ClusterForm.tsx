@@ -260,7 +260,7 @@ export default function ClusterForm({
       const { id } = response.data;
       if (!id) throw new Error('Server returned empty cluster ID');
       onClusterCreated(id);
-    } catch (e) {
+    } catch (e: any) {
       setError(e);
     } finally {
       actions.setSubmitting(false);
