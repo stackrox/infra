@@ -13,7 +13,9 @@ about the available scripts and the tooling behavior.
 
 ### Build Tooling
 
-- [Docker](https://www.docker.com/)
+One easy route to current stackrox build tooling is to use
+https://github.com/stackrox/stackrox-env.
+
 - [Node.js](https://nodejs.org/en/) `10.15.3 LTS` or higher (it's highly
   recommended to use an LTS version, if you're managing multiple versions of
   Node.js on your machine, consider using
@@ -23,11 +25,23 @@ about the available scripts and the tooling behavior.
 ### GitHub Packages NPM Registry
 
 This project depends on packages with `@stackrox` scope accessible from GitHub
-Packages NPM registry. Setup your dev env by following
-[these instructions](https://docs.engineering.redhat.com/display/StackRox/Using+GitHub+Packages+with+NPM)
-to authenticate with the registry.
+Packages NPM registry. Get access with:
+
+```
+npm login --auth-type=legacy --registry=https://npm.pkg.github.com
+```
+
+Use your github username and a token with `repo` and `read:packages` rights.
+More details can be found
+[here](https://docs.engineering.redhat.com/display/StackRox/Using+GitHub+Packages+with+NPM).
 
 ### UI Dev Server
+
+To avoid a connection error with node v1.17+ set:
+
+```
+export NODE_OPTIONS=--openssl-legacy-provider
+```
 
 _If you're going to use `yarn` instead of `make` targets, make sure you've run
 `yarn install` to download dependencies._
@@ -37,8 +51,16 @@ in a browser window that will auto-refresh on any source code or CSS changes.
 
 By default UI dev server will try to proxy API requests to
 `https://dev.infra.rox.systems`. To override the API endpoint use
-`INFRA_API_ENDPOINT` env var. I.e. you can start the dev server via
-`export INFRA_API_ENDPOINT=<api_endpoint>; yarn start`.
+`INFRA_API_ENDPOINT` env var. For example if you are only changing `ui/` code
+you can interact with the production infra instance via:
+
+```
+INFRA_API_ENDPOINT=https://infra.rox.systems yarn start
+```
+
+To access the API you need to copy a `token` cookie from a session with the
+infra instance you are using to the browser window that appears when you execute
+`yarn start`.
 
 ### Generated Sources
 
