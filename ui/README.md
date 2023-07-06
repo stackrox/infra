@@ -25,10 +25,12 @@ https://github.com/stackrox/stackrox-env.
 ### GitHub Packages NPM Registry
 
 This project depends on packages with `@stackrox` scope accessible from GitHub
-Packages NPM registry. Get access with: 
+Packages NPM registry. Get access with:
+
 ```
 npm login --auth-type=legacy --registry=https://npm.pkg.github.com
 ```
+
 Use your github username and a token with `repo` and `read:packages` rights.
 More details can be found
 [here](https://docs.engineering.redhat.com/display/StackRox/Using+GitHub+Packages+with+NPM).
@@ -36,6 +38,7 @@ More details can be found
 ### UI Dev Server
 
 To avoid a connection error with node v1.17+ set:
+
 ```
 export NODE_OPTIONS=--openssl-legacy-provider
 ```
@@ -50,6 +53,7 @@ By default UI dev server will try to proxy API requests to
 `https://dev.infra.rox.systems`. To override the API endpoint use
 `INFRA_API_ENDPOINT` env var. For example if you are only changing `ui/` code
 you can interact with the production infra instance via:
+
 ```
 INFRA_API_ENDPOINT=https://infra.rox.systems yarn start
 ```
