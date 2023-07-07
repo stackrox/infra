@@ -1,8 +1,6 @@
 @import '~@stackrox/tailwind-config/light.theme.css';
 @import '~@stackrox/tailwind-config/dark.theme.css';
 
-@import '~@stackrox/ui-components/lib/ui-components.css';
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

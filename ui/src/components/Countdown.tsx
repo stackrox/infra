@@ -1,7 +1,6 @@
 import React, { ReactElement } from 'react';
 import moment from 'moment';
 import { PlusCircle, MinusCircle } from 'react-feather';
-import { Tooltip, TooltipOverlay } from '@stackrox/ui-components';
 
 function calcDuration(targetDate: Date): moment.Duration {
   return moment.duration(moment(targetDate).diff(moment()));
@@ -91,13 +90,10 @@ export default function Countdown({ targetDate, className = '', onModify }: Prop
   const duration = calcDuration(targetDate);
 
   return (
-    <Tooltip
-      placement="left"
-      content={<TooltipOverlay>{`Expiration: ${moment(targetDate).format('LLL')}`}</TooltipOverlay>}
-    >
-      <div className={className}>
-        <FormatDuration duration={duration} onModify={onModify} />
-      </div>
-    </Tooltip>
+    <div className={className}>
+      {`Expiration: ${moment(targetDate).format('LLL')}`}
+      <span>&nbsp;-&nbsp;</span>
+      <FormatDuration duration={duration} onModify={onModify} />
+    </div>
   );
 }
