@@ -19,26 +19,11 @@ jobs:
   lint:
     uses: ./.github/workflows/lint.yaml
 
-  add-dependabot-instructions:
-    if: ${{ github.actor == 'dependabot[bot]' && !contains(toJson(github.event.pull_request.labels.*.name), 'dependabot/needs-review') && !contains(toJson(github.event.pull_request.labels.*.name), 'dependabot/ok-to-test') }}
-    runs-on: ubuntu-latest
-    steps:
-      - working-directory: /home/runner/work
-        run: |
-          gh pr edit ${{ github.event.pull_request.number }} \
-            --repo stackrox/infra \
-            --add-label dependabot/needs-review
-          gh pr comment ${{ github.event.pull_request.number }} \
-            --repo stackrox/infra \
-            --body "Reviewers, please check this PR and add label \`dependabot/ok-to-test\` if you want dependabot to test the changes."
-
   build-and-push:
-    if: ${{ !contains(fromJson('["dependabot[bot]", "roxbot"]'), github.actor) || (github.actor == 'dependabot[bot]' && contains(toJson(github.event.pull_request.labels.*.name), 'dependabot/ok-to-test')) }}
     uses: ./.github/workflows/build-and-push.yaml
     secrets: inherit
 
   create-dev-cluster:
-    if: ${{ !contains(fromJson('["dependabot[bot]", "roxbot"]'), github.actor) || (github.actor == 'dependabot[bot]' && contains(toJson(github.event.pull_request.labels.*.name), 'dependabot/ok-to-test')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: stackrox/actions/infra/create-cluster@9dbae14708ef0f879614a6a417f40d3503d0aad0
