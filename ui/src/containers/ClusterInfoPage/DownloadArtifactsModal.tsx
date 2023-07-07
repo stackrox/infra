@@ -33,10 +33,9 @@ type ArtifactsProps = {
 };
 
 function Artifacts({ cluster }: ArtifactsProps): ReactElement {
-  const fetchArtifacts = useCallback(
-    () => clusterService.artifacts(cluster.ID || ''),
-    [cluster.ID]
-  );
+  const fetchArtifacts = useCallback(() => clusterService.artifacts(cluster.ID || ''), [
+    cluster.ID,
+  ]);
   const { loading, error, data: artifacts } = useApiQuery(fetchArtifacts);
 
   if (loading) {

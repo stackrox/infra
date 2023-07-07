@@ -27,7 +27,8 @@ const clusterService = new ClusterServiceApi(configuration);
 
 function helpByParameterName(name?: string): string {
   const help: { [key: string]: string } = {
-    name: "You can use the generated name, or type in your own. Only lowercase letters, numbers, and '-' allowed, must start with a letter and end with a letter or number.",
+    name:
+      "You can use the generated name, or type in your own. Only lowercase letters, numbers, and '-' allowed, must start with a letter and end with a letter or number.",
   };
 
   if (name && name in help) {
