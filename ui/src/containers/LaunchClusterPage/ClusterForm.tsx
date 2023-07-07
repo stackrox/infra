@@ -260,6 +260,7 @@ export default function ClusterForm({
       const { id } = response.data;
       if (!id) throw new Error('Server returned empty cluster ID');
       onClusterCreated(id);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       setError(e);
     } finally {
