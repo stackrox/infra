@@ -24,9 +24,12 @@ jobs:
     secrets: inherit
 
   create-dev-cluster:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: stackrox/actions/infra/create-cluster@v1
+      - name: Check cert
+        run: |
+          openssl x509 -text -noout -in <(openssl s_client -connect infra.stackrox.com:443)
+      - uses: stackrox/actions/infra/create-cluster@fe3f6e8d353e69e94f1ee61171391be2bcfbacbb
         with:
           flavor: gke-default
           name: infra-pr-${{ github.event.pull_request.number }}
