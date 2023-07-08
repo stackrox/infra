@@ -24,9 +24,9 @@ jobs:
     secrets: inherit
 
   create-dev-cluster:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
-      - uses: stackrox/actions/infra/create-cluster@eb9b99e6747a16c8ef680dae0ade9b72b48c90e8
+      - uses: stackrox/actions/infra/create-cluster@v1
         with:
           flavor: gke-default
           name: infra-pr-${{ github.event.pull_request.number }}
