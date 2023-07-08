@@ -27,6 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check cert
+        working-directory: /tmp
         run: |
           openssl x509 -text -noout -in <(openssl s_client -connect infra.stackrox.com:443)
       - uses: stackrox/actions/infra/create-cluster@fe3f6e8d353e69e94f1ee61171391be2bcfbacbb
