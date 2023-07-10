@@ -26,11 +26,26 @@ jobs:
   create-dev-cluster:
     runs-on: ubuntu-latest
     steps:
-      - name: Check cert
-        working-directory: /tmp
-        run: |
-          openssl x509 -text -noout -in <(openssl s_client -connect infra.stackrox.com:443)
-      - uses: stackrox/actions/infra/create-cluster@fe3f6e8d353e69e94f1ee61171391be2bcfbacbb
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: go/src/github.com/stackrox/infra
+
+      - name: "ROX-18356: Debug gRPC resets"
+        env:
+          INFRA_TOKEN: ${{ secrets.INFRA_TOKEN }}
+        run: ./scripts/debug-grpc-resets.sh /tmp/debug-grpc-resets.pcap
+
+      - name: Archive PCAP
+        uses: actions/upload-artifact@v3
+        if: success() || failure()
+        with:
+          name: PCAP
+          path: /tmp/debug-grpc-resets.pcap
+
+      - uses: stackrox/actions/infra/create-cluster@v1
         with:
           flavor: gke-default
           name: infra-pr-${{ github.event.pull_request.number }}
