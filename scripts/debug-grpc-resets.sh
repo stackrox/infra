@@ -36,6 +36,8 @@ debug_grpc_resets() {
         export GRPC_GO_LOG_SEVERITY_LEVEL=info
         export GRPC_GO_LOG_VERBOSITY_LEVEL=99
         bin/infractl whoami
+        # create space in the capture
+        sleep 1
         bin/infractl list --all
     ) || touch "FAIL"
 
