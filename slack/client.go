@@ -79,7 +79,11 @@ func (s *slackClient) LookupUser(email string) (*slack.User, bool) {
 	log.Debugw("get user by email", "email", email)
 	user, err := s.client.GetUserByEmail(email)
 	if err != nil {
-		log.Warnw("get user error", "email", email, "error", err)
+		if err.Error() == "users_not_found" {
+			log.Debugw("user not found", "email", email)
+		} else {
+			log.Warnw("get user error", "email", email, "error", err)
+		}
 		return nil, false
 	}
 	log.Debugw("got user for email", "email", email)
