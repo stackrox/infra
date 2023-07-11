@@ -53,12 +53,15 @@ type bearerToken string
 var _ credentials.PerRPCCredentials = (*bearerToken)(nil)
 
 func (t bearerToken) GetRequestMetadata(_ context.Context, _ ...string) (map[string]string, error) {
-	trimmed := strings.TrimRight(string(t), "\r\n")
-	if strings.ContainsAny(trimmed, "\r\n") {
+	// Avoid failure from the common mistake where tokens are stored with
+	// trailing newlines or whitespace.
+	trimmed := strings.TrimRight(string(t), "\r\n ")
+	if strings.ContainsAny(trimmed, "\r\n ") {
 		fmt.Fprintln(os.Stderr, "The auth token contains invalid characters")
 		// To help debug issues with invalid tokens in automation, dump the
-		// beginning and end. (infra tokens and typically > 300 chars but check
-		// on 100 to ensure the entire token is not printed to logs.)
+		// beginning and end. (infra tokens are typically > 300 chars, this
+		// check on 100 is to ensure the entire token is not printed to logs if
+		// they ever get <= 20 chars.)
 		if len(trimmed) > 100 {
 			fmt.Fprintf(os.Stderr, "begins: %s, end: %s\n", trimmed[0:10], trimmed[len(trimmed)-10:])
 		}
