@@ -11,7 +11,6 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/auth"
-	"github.com/stackrox/infra/calendar"
 	"github.com/stackrox/infra/config"
 	"github.com/stackrox/infra/flavor"
 	"github.com/stackrox/infra/pkg/buildinfo"
@@ -72,11 +71,6 @@ func mainCmd() error {
 		return errors.Wrapf(err, "failed to load GCS signing credentials")
 	}
 
-	eventSource, err := calendar.NewGoogleCalendar(cfg.Calendar)
-	if err != nil {
-		return errors.Wrapf(err, "failed to create Google Calendar event source")
-	}
-
 	slackClient, err := slack.New(cfg.Slack)
 	if err != nil {
 		return errors.Wrapf(err, "failed to create Slack client")
@@ -94,7 +88,7 @@ func mainCmd() error {
 		service.NewStatusService,
 		service.NewVersionService,
 		func() (middleware.APIService, error) {
-			return cluster.NewClusterService(registry, signer, eventSource, slackClient)
+			return cluster.NewClusterService(registry, signer, slackClient)
 		},
 	)
 	if err != nil {

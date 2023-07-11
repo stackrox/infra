@@ -22,7 +22,6 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/pkg/errors"
-	"github.com/stackrox/infra/calendar"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	"github.com/stackrox/infra/flavor"
 	v1 "github.com/stackrox/infra/generated/api/v1"
@@ -49,10 +48,6 @@ var (
 )
 
 const (
-	// calendarCheckInterval is how often to periodically check the calendar
-	// for scheduled demos.
-	calendarCheckInterval = 5 * time.Minute
-
 	// slackCheckInterval is how often to periodically check for workflow
 	// updates to send Slack messages.
 	slackCheckInterval = 1 * time.Minute
@@ -77,7 +72,6 @@ type clusterImpl struct {
 	k8sPodsClient       k8sv1.PodInterface
 	registry            *flavor.Registry
 	signer              *signer.Signer
-	eventSource         calendar.EventSource
 	slackClient         slack.Slacker
 	argoClient          apiclient.Client
 	argoWorkflowsClient workflowpkg.WorkflowServiceClient
@@ -93,7 +87,7 @@ var (
 )
 
 // NewClusterService creates a new ClusterService.
-func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSource calendar.EventSource, slackClient slack.Slacker) (middleware.APIService, error) {
+func NewClusterService(registry *flavor.Registry, signer *signer.Signer, slackClient slack.Slacker) (middleware.APIService, error) {
 	workflowNamespace := "default"
 
 	k8sWorkflowsClient, err := kube.GetK8sWorkflowsClient(workflowNamespace)
@@ -119,7 +113,6 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSo
 		k8sPodsClient:       k8sPodsClient,
 		registry:            registry,
 		signer:              signer,
-		eventSource:         eventSource,
 		slackClient:         slackClient,
 		argoClient:          argoClient,
 		argoWorkflowsClient: argoWorkflowsClient,
@@ -129,7 +122,6 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer, eventSo
 
 	go impl.startSlackCheck()
 	go impl.cleanupExpiredClusters()
-	go impl.startCalendarCheck()
 
 	return impl, nil
 }
@@ -661,81 +653,6 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 			log.Warnw("expire loop took %s", time.Since(start).String())
 		}
 	}
-}
-
-func (s *clusterImpl) startCalendarCheck() {
-	for ; ; time.Sleep(calendarCheckInterval) {
-		// Retrieve upcoming calendar events.
-		events, err := s.eventSource.Events()
-		if err != nil {
-			log.Errorw("failed to list calendar events", "error", err)
-			continue
-		}
-
-		// If there are no events scheduled, then there's nothing to do here.
-		if len(events) == 0 {
-			continue
-		}
-
-		// List out all of the current workflows.
-		workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
-			Namespace: s.workflowNamespace,
-		})
-		if err != nil {
-			log.Errorw("failed to list workflows", "error", err)
-			continue
-		}
-
-		// Build a lookup of current workflow IDs that were launched from
-		// calendar events.
-		existingWorkflowEventIDs := make(map[string]struct{})
-		for _, workflow := range workflowList.Items {
-			metacluster, err := s.metaClusterFromWorkflow(workflow)
-			if err != nil {
-				log.Errorw("failed to convert workflow to meta-cluster", "workflow-name", workflow.GetName(), "error", err)
-				continue
-			}
-
-			if metacluster.EventID != "" {
-				existingWorkflowEventIDs[metacluster.EventID] = struct{}{}
-			}
-		}
-
-		for _, event := range events {
-			// If there is already a workflow with this event ID
-			if _, found := existingWorkflowEventIDs[event.ID]; found {
-				log.Debugw("skipping scheduled demo because a workflow already exists", "event-title", event.Title)
-				continue
-			}
-
-			id, err := s.createFromEvent(event)
-			if err != nil {
-				log.Errorw("failed to launch scheduled demo", "event-title", event.Title, "error", err)
-				continue
-			}
-			log.Infow("launched scheduled demo", "event-title", event.Title, "flavor-id", id.Id)
-		}
-	}
-}
-
-func (s *clusterImpl) createFromEvent(event calendar.Event) (*v1.ResourceByID, error) {
-	// Lookup the default flavor.
-	defaultFlavorID := s.registry.Default()
-
-	// Set lifespan to range from right now, until 1 hour after the event ends.
-	lifespan := time.Until(event.End.Add(time.Hour))
-
-	// Build cluster creation request.
-	req := &v1.CreateClusterRequest{
-		ID:       defaultFlavorID,
-		Lifespan: ptypes.DurationProto(lifespan),
-		Parameters: map[string]string{
-			"name": simpleName(event.Title),
-		},
-		Description: event.Title,
-	}
-
-	return s.create(req, event.Email, event.ID)
 }
 
 func (s *clusterImpl) getLogs(ctx context.Context, node v1alpha1.NodeStatus) *v1.Log {
