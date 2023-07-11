@@ -12,11 +12,14 @@ debug_grpc_resets() {
     local pcap_file="$1"
 
     mkdir -p bin
-    curl --fail -sL https://infra.rox.systems/v1/cli/linux/amd64/upgrade \
-        | jq -r ".result.fileChunk" \
-        | base64 -d \
-        > bin/infractl
-    chmod +x bin/infractl
+    # curl --fail -sL https://infra.rox.systems/v1/cli/linux/amd64/upgrade \
+    #     | jq -r ".result.fileChunk" \
+    #     | base64 -d \
+    #     > bin/infractl
+    # chmod +x bin/infractl
+    make cli
+    ln -s infractl-linux-amd64 bin/infractl
+
     bin/infractl --version
 
     sudo apt-get update
@@ -33,6 +36,8 @@ debug_grpc_resets() {
         export GRPC_GO_LOG_SEVERITY_LEVEL=info
         export GRPC_GO_LOG_VERBOSITY_LEVEL=99
         bin/infractl whoami
+        # create space in the capture
+        sleep 1
         bin/infractl list --all
     ) || touch "FAIL"
 

@@ -3,6 +3,9 @@ package common
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
+	"os"
+	"strings"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -50,8 +53,19 @@ type bearerToken string
 var _ credentials.PerRPCCredentials = (*bearerToken)(nil)
 
 func (t bearerToken) GetRequestMetadata(_ context.Context, _ ...string) (map[string]string, error) {
+	trimmed := strings.TrimRight(string(t), "\r\n")
+	if strings.ContainsAny(trimmed, "\r\n") {
+		fmt.Fprintln(os.Stderr, "The auth token contains invalid characters")
+		// To help debug issues with invalid tokens in automation, dump the
+		// beginning and end. (infra tokens and typically > 300 chars but check
+		// on 100 to ensure the entire token is not printed to logs.)
+		if len(trimmed) > 100 {
+			fmt.Fprintf(os.Stderr, "begins: %s, end: %s\n", trimmed[0:10], trimmed[len(trimmed)-10:])
+		}
+		os.Exit(1)
+	}
 	return map[string]string{
-		"authorization": "Bearer " + string(t),
+		"authorization": "Bearer " + trimmed,
 	}, nil
 }
 
