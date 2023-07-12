@@ -5,21 +5,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Begin PatternFly migration. */
-
 @import '~@patternfly/react-core/dist/styles/base.css';
-.pf-c-popover__body {
-  color: #292d38 !important;
-}
-.pf-c-form__helper-text {
-  color: #c9190b !important;
-}
-.pf-c-form__label-required {
-  color: #c9190b !important;
-  @apply pr-2;
-}
-
-/* End PatternFly migration. */
+@import './infra.css';
 
 /* reset the unthinking hardcoded resets of Tailwind Forms in v2 plugin,
    https://github.com/tailwindlabs/tailwindcss-forms/blob/master/src/index.js */
