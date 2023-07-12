@@ -60,7 +60,7 @@ spec:
             valueFrom:
               path: /outputs/cluster_name
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-gke-default-0.5.3
+        image: quay.io/stackrox-io/ci:automation-flavors-gke-default-0.7.6-1-g1d384d4d42-snapshot
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint
@@ -71,6 +71,7 @@ spec:
           - "--machine-type={{workflow.parameters.machine-type}}"
           - --gcp-project=srox-temp-dev-test
           - --creation-source=infra
+          - --labels="lifespan={{workflow.annotations.infra.stackrox.com/lifespan}},"
           - --k8s-version={{workflow.parameters.k8s-version}}
           - --pod-security-policy={{workflow.parameters.pod-security-policy}}
           - --gcp-image-type={{workflow.parameters.gcp-image-type}}
