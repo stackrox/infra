@@ -1,0 +1,31 @@
+
+/* Begin changes required for PF components to work with TW dark mode */
+/* Tailwind removal */
+
+.pf-c-popover__body {
+    color: #292d38 !important;
+}
+
+.pf-c-form__helper-text {
+    color: #c9190b !important;
+}
+
+.pf-c-form__label-required {
+    color: #c9190b !important;
+}
+
+/* End changes required for PF components to work with TW dark mode */
+
+.pf-c-form__group-label {
+    /* Some more padding for the form field label help icon */
+    --pf-c-form__group-label-help--MarginLeft: var(--pf-global--spacer--sm);
+}
+
+.pf-c-form__group {
+    /* Some separation for form fields */
+    margin-bottom: var(--pf-global--spacer--md);
+}
+
+.pf-c-form__label-text {
+    text-transform: capitalize;
+}
