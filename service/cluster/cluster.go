@@ -536,6 +536,19 @@ func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.
 			"workflow-name", req.GetId(),
 			"error", err,
 		)
+		log.Infow("stopping argo workflow", "workflow-name", workflow.GetName())
+		_, err = s.argoWorkflowsClient.StopWorkflow(s.argoClientCtx, &workflowpkg.WorkflowStopRequest{
+			Name:              workflow.GetName(),
+			Namespace:         s.workflowNamespace,
+			NodeFieldSelector: "",
+			Message:           "Seeking end",
+		})
+		if err != nil {
+			log.Warnw("failed to stop workflow, this is OK if the workflow is not running",
+				"workflow-name", req.GetId(),
+				"error", err,
+			)
+		}
 	}
 
 	return &empty.Empty{}, nil
