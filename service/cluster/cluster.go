@@ -342,9 +342,8 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		)
 	}
 
-
 	// Make sure there is no running argo workflow for infra cluster with the same ID
-	existingWorkflow, _ := s.getMostRecentArgoWorkflowFromClusterID(clusterID)
+	existingWorkflow, _ = s.getMostRecentArgoWorkflowFromClusterID(clusterID)
 	if existingWorkflow != nil {
 		switch workflowStatus(existingWorkflow.Status) {
 		case v1.Status_FAILED, v1.Status_FINISHED:
