@@ -17,18 +17,8 @@ type Config struct {
 	// Server administrator password.
 	Password string `json:"password"`
 
-	// Google Calendar integration configuration.
-	Calendar *CalendarConfig `json:"calendar"`
-
 	// Slack notification configuration.
 	Slack *SlackConfig `json:"slack"`
-}
-
-// CalendarConfig represents the configuration for integrating with Google
-// Calendar.
-type CalendarConfig struct {
-	ID     string       `json:"id"`
-	Window JSONDuration `json:"window"`
 }
 
 // AuthOidcConfig represents the configuration for integrating with OIDC provider.

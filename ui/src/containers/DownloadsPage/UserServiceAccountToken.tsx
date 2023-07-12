@@ -1,7 +1,6 @@
 import React, { ReactElement } from 'react';
 import { AxiosPromise } from 'axios';
 import { useClipboard } from 'use-clipboard-copy';
-import { Tooltip, TooltipOverlay } from '@stackrox/ui-components';
 
 import { V1TokenResponse, UserServiceApi } from 'generated/client';
 import useApiQuery from 'client/useApiQuery';
@@ -30,14 +29,10 @@ export default function UserServiceAccountToken(): ReactElement {
 
   if (error || !data?.Token) {
     return (
-      <Tooltip content={<TooltipOverlay>{error?.message || 'Unknown error'}</TooltipOverlay>}>
-        <div className="inline-flex items-center">
-          <AlertCircle size={16} />
-          <span className="ml-2">
-            Unexpected error occurred while loading service account token
-          </span>
-        </div>
-      </Tooltip>
+      <div className="inline-flex items-center">
+        <AlertCircle size={16} />
+        <span className="ml-2">Unexpected error occurred while loading service account token</span>
+      </div>
     );
   }
 
@@ -67,16 +62,15 @@ export default function UserServiceAccountToken(): ReactElement {
         <p className="text-xl">Run the following in a terminal to authenticate infractl for use:</p>
         <button
           type="button"
+          title="Copy to clipboard"
           aria-label="Copy to clipboard"
           onClick={clipboard.copy}
           className="ml-2"
         >
-          <Tooltip content={<TooltipOverlay>Copy to clipboard</TooltipOverlay>}>
-            <div className="flex items-center">
-              <Clipboard size={16} />
-              {clipboard.copied && <span className="ml-2 text-success-700">Copied!</span>}
-            </div>
-          </Tooltip>
+          <div className="flex items-center">
+            <Clipboard size={16} />
+            {clipboard.copied && <span className="ml-2 text-success-700">Copied!</span>}
+          </div>
         </button>
       </div>
       <textarea

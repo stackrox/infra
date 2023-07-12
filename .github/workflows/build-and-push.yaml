@@ -8,11 +8,10 @@ defaults:
     working-directory: go/src/github.com/stackrox/infra
 
 jobs:
-
   build-and-push:
     runs-on: ubuntu-latest
     container:
-      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.51
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.51.1
 
     steps:
       - name: Checkout

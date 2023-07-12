@@ -3,7 +3,6 @@ package flavor
 
 import (
 	"context"
-	"log"
 	"strings"
 	"time"
 
@@ -33,7 +32,7 @@ func (r *Registry) addWorkflowTemplates(results []v1.Flavor) []v1.Flavor {
 		Namespace: r.workflowTemplateNamespace,
 	})
 	if err != nil {
-		log.Printf("[ERROR] failed to list argo workflow templates: %v", err)
+		log.Errorw("failed to list argo workflow templates", "error", err)
 		return results
 	}
 
@@ -64,7 +63,7 @@ func (r *Registry) getPairFromWorkflowTemplate(id string) (*v1.Flavor, *v1alpha1
 			Namespace: r.workflowTemplateNamespace,
 		})
 		if err != nil {
-			log.Printf("[WARN] Failed to get an argo workflow template: %s, %v", id, err)
+			log.Warnw("failed to get an argo workflow template", "id", id, "error", err)
 			return nil, nil
 		}
 		r.workflowTemplateCache[id] = template
@@ -88,22 +87,29 @@ func (r *Registry) getPairFromWorkflowTemplate(id string) (*v1.Flavor, *v1alpha1
 func workflowTemplate2Flavor(template *v1alpha1.WorkflowTemplate) *v1.Flavor {
 	valid := true
 	if template.ObjectMeta.Annotations["infra.stackrox.io/description"] == "" {
-		log.Printf("[WARN] Ignoring a workflow template without infra.stackrox.io/description annotation: %s", template.ObjectMeta.Name)
+		log.Warnw("ignoring a workflow template without infra.stackrox.io/description annotation",
+			"template-name", template.GetObjectMeta().GetName(),
+		)
 		valid = false
 	}
 	availability := v1.Flavor_alpha
 	if template.ObjectMeta.Annotations["infra.stackrox.io/availability"] != "" {
 		value, ok := v1.FlavorAvailability_value[template.ObjectMeta.Annotations["infra.stackrox.io/availability"]]
 		if !ok {
-			log.Printf("[WARN] Ignoring a workflow template with an unknown infra.stackrox.io/availability annotation: %s, %s",
-				template.ObjectMeta.Name, template.ObjectMeta.Annotations["infra.stackrox.io/availability"])
+			log.Warnw("ignoring a workflow template with an unknown infra.stackrox.io/availability annotation",
+				"template-name", template.GetObjectMeta().GetName(),
+				"template-availability", template.GetObjectMeta().GetAnnotations()["infra.stackrox.io/availability"],
+			)
 			valid = false
 		}
 		availability = v1.FlavorAvailability(value)
 	}
 	for _, wfParameter := range template.Spec.Arguments.Parameters {
 		if wfParameter.Description == nil {
-			log.Printf("[WARN] Ignoring a workflow template with a parameter (%s) that has no description: %s", wfParameter.Name, template.ObjectMeta.Name)
+			log.Warnw("ignoring a workflow template with a parameter that has no description",
+				"template-name", template.GetObjectMeta().GetName(),
+				"parameter", wfParameter.Name,
+			)
 			valid = false
 		}
 	}
@@ -128,7 +134,10 @@ func getParametersFromWorkflowTemplate(template *v1alpha1.WorkflowTemplate) map[
 
 	for idx, wfParameter := range template.Spec.Arguments.Parameters {
 		if wfParameter.Description == nil {
-			log.Printf("[WARN] Ignoring a workflow template with a parameter (%s) that has no description: %s", wfParameter.Name, template.ObjectMeta.Name)
+			log.Warnw("ignoring a workflow template with a parameter that has no description",
+				"template-name", template.GetObjectMeta().GetName(),
+				"parameter", wfParameter.Name,
+			)
 			continue
 		}
 		parameter := &v1.Parameter{

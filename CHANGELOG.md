@@ -1,10 +1,26 @@
 # Changelog
+
 Entries in this file should be limited to:
--  Any changes that introduce a deprecation in functionality, OR
--  Obscure side-effects that are not obviously apparent based on the JIRA associated with the changes.
+
+- Any changes that introduce a deprecation in functionality, OR
+- Obscure side-effects that are not obviously apparent based on the JIRA associated with the changes.
 Please avoid adding duplicate information across this changelog and JIRA/doc input pages.
 
 ## [NEXT RELEASE]
+
+- Upgrade Go version to 1.20
+
+## [0.7.7]
+
+- Use latest openshift-4-demo to work with 4.1 rcs.
+
+## [0.7.6]
+
+- Bump demo flavors to 4.0.2
+
+## [0.7.5]
+
+- Fix ROSA flavor by pinning CLI versions.
 
 ## [0.7.4]
 
@@ -23,7 +39,7 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 - ROX-15237: The Openshift 4 Demo flavor now supports testing of unreleased versions.
 - Bump demo flavors to 3.74.2
 - Add central-db-image parameter to qa-demo flavor
-- --endpoint flag will now accept also URLs like https://infra.rox.systems, and addresses without a port like infra.rox.systems.
+- --endpoint flag will now accept also URLs like <https://infra.rox.systems>, and addresses without a port like infra.rox.systems.
 
 ## [0.7.0]
 
@@ -87,7 +103,7 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 ## [0.5.1]
 
 - gke-default: Use the gke-gcloud-auth-plugin for kubeconfig artifact. (#719)
-  ref: https://cloud.google.com/blog/products/containers-kubernetes/kubectl-auth-changes-in-gke
+  ref: <https://cloud.google.com/blog/products/containers-kubernetes/kubectl-auth-changes-in-gke>
   This change may require users to update their gcloud SDK and install the auth plugin.
   For MacOS users: `gcloud components update && gcloud components install gke-gcloud-auth-plugin`.
 - Bump demo images to latest 3.72.1 release (#723)
@@ -96,8 +112,11 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 ## [0.5.0]
 
 ### Removed Features
+
 ### Deprecated Features
+
 ### Technical Changes
+
 - Breaking change: `infractl get` output in JSON format now contains a string for the status instead of an enum.
 - Artifacts produced by GKE and AKS clusters now come with set file permissions.
 - Migrate from Circle CI to Github Actions for continuous integration.

@@ -8,11 +8,13 @@ import (
 )
 
 func TestSimpleName(t *testing.T) {
-	tests := []struct {
+	type tableTest struct {
 		title    string
 		input    string
 		expected string
-	}{
+	}
+
+	tests := []tableTest{
 		{
 			title: "empty string",
 		},
@@ -35,9 +37,11 @@ func TestSimpleName(t *testing.T) {
 	for index, test := range tests {
 		name := fmt.Sprintf("%d %s", index+1, test.title)
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-			actual := simpleName(test.input)
-			assert.Equal(t, actual, test.expected)
+			func(current tableTest) {
+				t.Parallel()
+				actual := simpleName(current.input)
+				assert.Equal(t, actual, current.expected)
+			}(test)
 		})
 	}
 }

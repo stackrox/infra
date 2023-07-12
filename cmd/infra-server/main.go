@@ -11,10 +11,10 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/auth"
-	"github.com/stackrox/infra/calendar"
 	"github.com/stackrox/infra/config"
 	"github.com/stackrox/infra/flavor"
 	"github.com/stackrox/infra/pkg/buildinfo"
+	"github.com/stackrox/infra/pkg/logging"
 	"github.com/stackrox/infra/server"
 	"github.com/stackrox/infra/service"
 	"github.com/stackrox/infra/service/cluster"
@@ -45,11 +45,8 @@ func mainCmd() error {
 		return nil
 	}
 
-	log.SetFlags(log.LstdFlags | log.Lshortfile | log.Lmicroseconds)
-	// Use stdout so that GCP does not view all logs as severity ERROR.
-	log.SetOutput(os.Stdout)
-
-	log.Printf("[INFO] Starting infra server version %s", buildinfo.All().Version)
+	log := logging.CreateProductionLogger()
+	log.Infow("starting infra server", "version", buildinfo.All().Version)
 
 	serverConfigFile := filepath.Join(*flagConfigDir, "infra.yaml")
 	cfg, err := config.Load(serverConfigFile)
@@ -74,11 +71,6 @@ func mainCmd() error {
 		return errors.Wrapf(err, "failed to load GCS signing credentials")
 	}
 
-	eventSource, err := calendar.NewGoogleCalendar(cfg.Calendar)
-	if err != nil {
-		return errors.Wrapf(err, "failed to create Google Calendar event source")
-	}
-
 	slackClient, err := slack.New(cfg.Slack)
 	if err != nil {
 		return errors.Wrapf(err, "failed to create Slack client")
@@ -96,7 +88,7 @@ func mainCmd() error {
 		service.NewStatusService,
 		service.NewVersionService,
 		func() (middleware.APIService, error) {
-			return cluster.NewClusterService(registry, signer, eventSource, slackClient)
+			return cluster.NewClusterService(registry, signer, slackClient)
 		},
 	)
 	if err != nil {

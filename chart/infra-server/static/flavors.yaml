@@ -3,7 +3,7 @@
 ##########
 - id: demo
   name: StackRox Demo
-  description: Demo running StackRox 4.0.0
+  description: Demo running StackRox 4.0.2
   availability: default
   workflow: configuration/workflow-demo.yaml
   parameters:
@@ -12,11 +12,11 @@
       value: example1
 
     - name: main-image
-      value: quay.io/rhacs-eng/main:4.0.0
+      value: quay.io/rhacs-eng/main:4.0.2
       kind: hardcoded
 
     - name: central-db-image
-      value: quay.io/rhacs-eng/central-db:4.0.0
+      value: quay.io/rhacs-eng/central-db:4.0.2
       kind: hardcoded
 
     - name: k8s-version
@@ -59,9 +59,9 @@
 
     - name: main-image
       description: StackRox Central image Docker name
-      value: quay.io/stackrox-io/main:4.0.0
+      value: quay.io/stackrox-io/main:4.0.2
       help: |
-        This must be a fully qualified image e.g. quay.io/stackrox-io/main:4.0.0.
+        This must be a fully qualified image e.g. quay.io/stackrox-io/main:4.0.2.
         Private images from quay.io/rhacs-eng and stackrox.io (legacy) can also be used.
         Other public images should also be OK.
 
@@ -273,7 +273,7 @@
 
     - name: master-node-type
       description: the type of master nodes
-      value: n1-standard-4
+      value: e2-standard-4
       kind: optional
 
     - name: master-node-count
@@ -283,12 +283,12 @@
 
     - name: worker-node-type
       description: the type of worker nodes
-      value: n1-standard-4
+      value: e2-standard-8
       kind: optional
 
     - name: worker-node-count
       description: number of worker nodes
-      value: 3
+      value: 2
       kind: optional
 
     - name: region
@@ -336,17 +336,17 @@
 
     - name: central-services-helm-chart-version
       description: Central Services Helm chart version
-      value: 4.0.0
+      value: 4.0.2
       kind: optional
       help: |
-        Version string of the roxctl version to use to generate Central Services Helm chart, e.g., 4.0.0.
+        Version string of the roxctl version to use to generate Central Services Helm chart, e.g., 4.0.2.
 
     - name: secured-cluster-services-helm-chart-version
       description: Secured Cluster Services Helm chart version
-      value: 4.0.0
+      value: 4.0.2
       kind: optional
       help: |
-        Version string of the roxctl version to use to generate Secured Cluster Services Helm chart, e.g., 4.0.0.
+        Version string of the roxctl version to use to generate Secured Cluster Services Helm chart, e.g., 4.0.2.
 
     - name: openshift-version
       description: openshift release from OCP, OCP dev preview, or OKD

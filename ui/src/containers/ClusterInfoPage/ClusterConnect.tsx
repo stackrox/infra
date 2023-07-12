@@ -1,6 +1,5 @@
 import React, { ReactElement } from 'react';
 import { useClipboard } from 'use-clipboard-copy';
-import { Tooltip, TooltipOverlay } from '@stackrox/ui-components';
 import { Clipboard } from 'react-feather';
 
 type Props = {
@@ -22,16 +21,15 @@ export default function ClusterConnect({ connect }: Props): ReactElement {
       Connect: <span className="ml-2 font-mono">{stripComments}</span>{' '}
       <button
         type="button"
+        title="Copy to clipboard"
         aria-label="Copy to clipboard"
         onClick={() => clipboard.copy(stripComments)}
         className="ml-2"
       >
-        <Tooltip content={<TooltipOverlay>Copy to clipboard</TooltipOverlay>}>
-          <div className="flex items-center">
-            <Clipboard size={16} />
-            {clipboard.copied && <span className="ml-2 text-success-700">Copied!</span>}
-          </div>
-        </Tooltip>
+        <div className="flex items-center">
+          <Clipboard size={16} />
+          {clipboard.copied && <span className="ml-2 text-success-700">Copied!</span>}
+        </div>
       </button>
     </span>
   );

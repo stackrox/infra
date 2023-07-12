@@ -2,11 +2,11 @@
 package slack
 
 import (
-	"log"
 	"sync"
 
 	"github.com/slack-go/slack"
 	"github.com/stackrox/infra/config"
+	"github.com/stackrox/infra/pkg/logging"
 )
 
 // Slacker represents a type that can interact with the Slack API.
@@ -16,8 +16,12 @@ type Slacker interface {
 	LookupUser(email string) (*slack.User, bool)
 }
 
-var _ Slacker = (*slackClient)(nil)
-var _ Slacker = (*disabledSlack)(nil)
+var (
+	log = logging.CreateProductionLogger()
+
+	_ Slacker = (*slackClient)(nil)
+	_ Slacker = (*disabledSlack)(nil)
+)
 
 type slackClient struct {
 	client     *slack.Client
@@ -28,14 +32,14 @@ type slackClient struct {
 
 type disabledSlack struct{}
 
-func (s disabledSlack) PostMessage(options ...slack.MsgOption) error {
+func (s disabledSlack) PostMessage(_ ...slack.MsgOption) error {
 	return nil
 }
 
-func (s disabledSlack) PostMessageToUser(user *slack.User, options ...slack.MsgOption) error {
+func (s disabledSlack) PostMessageToUser(_ *slack.User, _ ...slack.MsgOption) error {
 	return nil
 }
-func (s disabledSlack) LookupUser(email string) (*slack.User, bool) {
+func (s disabledSlack) LookupUser(_ string) (*slack.User, bool) {
 	return &slack.User{}, false
 }
 
@@ -45,7 +49,7 @@ func New(cfg *config.SlackConfig) (Slacker, error) {
 	// If the config was missing a Slack configuration, disable the integration
 	// altogether.
 	if cfg == nil {
-		log.Printf("[INFO] Disabling Slack integration")
+		log.Infow("disabling Slack integration due to missing configuration")
 		return &disabledSlack{}, nil
 	}
 
@@ -55,29 +59,34 @@ func New(cfg *config.SlackConfig) (Slacker, error) {
 		emailCache: make(map[string]*slack.User),
 	}
 
-	log.Printf("[INFO] Enabled Slack integration")
+	log.Infow("enabled Slack integration")
 
 	return client, nil
 }
 
 func (s *slackClient) LookupUser(email string) (*slack.User, bool) {
-	log.Printf("[DEBUG] Lookup user by email: %s", email)
+	// TODO: do we still need all this debug logging?
+	log.Debugw("lookup user by email", "email", email)
 	s.lock.RLock()
 	user, found := s.emailCache[email]
 	if found {
 		s.lock.RUnlock()
-		log.Printf("[DEBUG] Cache hit for email: %s", email)
+		log.Debugw("cache hit for email", "email", email)
 		return user, found
 	}
 	s.lock.RUnlock()
 
-	log.Printf("[DEBUG] Get user by email: %s", email)
+	log.Debugw("get user by email", "email", email)
 	user, err := s.client.GetUserByEmail(email)
 	if err != nil {
-		log.Printf("[WARN] Get user error: %s, %v", email, err)
+		if err.Error() == "users_not_found" {
+			log.Debugw("user not found", "email", email)
+		} else {
+			log.Warnw("get user error", "email", email, "error", err)
+		}
 		return nil, false
 	}
-	log.Printf("[DEBUG] Got user for email: %s", email)
+	log.Debugw("got user for email", "email", email)
 
 	s.lock.RLock()
 	defer s.lock.RUnlock()
