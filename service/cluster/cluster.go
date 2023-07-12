@@ -333,6 +333,16 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		return nil, fmt.Errorf("parameter 'name' was not provided")
 	}
 
+	existingWorkflow, _ := s.getMostRecentArgoWorkflowFromClusterID(req.ID)
+	if existingWorkflow != nil {
+		return nil, status.Errorf(
+			codes.AlreadyExists,
+			"An infra cluster ID %q already exists in state %s.",
+			req.ID, workflowStatus(existingWorkflow.Status).String(),
+		)
+	}
+
+
 	// Make sure there is no running argo workflow for infra cluster with the same ID
 	existingWorkflow, _ := s.getMostRecentArgoWorkflowFromClusterID(clusterID)
 	if existingWorkflow != nil {
