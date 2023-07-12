@@ -60,7 +60,7 @@ spec:
             valueFrom:
               path: /outputs/cluster_name
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-gke-default-0.7.6-1-g1d384d4d42-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-gke-default-0.7.6-3-g1ce65fe441-snapshot
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint
