@@ -20,7 +20,7 @@ require (
 	github.com/slack-go/slack v0.12.2
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.4
 	golang.org/x/net v0.12.0
 	golang.org/x/oauth2 v0.9.0
 	google.golang.org/api v0.130.0
