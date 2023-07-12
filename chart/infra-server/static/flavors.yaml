@@ -142,9 +142,10 @@
         e.g. 1.19.12-gke.2100. Use 'gcloud container get-server-config --zone=us-central1 --project srox-temp-dev-test' to see all versions.
 
     - name: pod-security-policy
-      description: Enables the pod security policy admission controller for the cluster
+      description: Enable pod security policy
       value: false
       kind: optional
+      help: Enables The Pod Security Policy Admission Controller For The Cluster
 
     - name: gcp-image-type
       description: The GCP image type to use for the cluster
