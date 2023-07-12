@@ -71,7 +71,7 @@ spec:
           - "--machine-type={{workflow.parameters.machine-type}}"
           - --gcp-project=srox-temp-dev-test
           - --creation-source=infra
-          - --labels="lifespan={{workflow.annotations.infra.stackrox.com/lifespan}},"
+          - --labels=lifespan={{workflow.annotations.infra.stackrox.com/lifespan}}
           - --k8s-version={{workflow.parameters.k8s-version}}
           - --pod-security-policy={{workflow.parameters.pod-security-policy}}
           - --gcp-image-type={{workflow.parameters.gcp-image-type}}
