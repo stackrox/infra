@@ -2,6 +2,8 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: gke-default-
+  annotations:
+    infra.stackrox.com/lifespan: 0s
 spec:
   entrypoint: start
   arguments:
@@ -84,23 +86,22 @@ spec:
       suspend: {}
       sidecars:
       - name: timekeeper
-        container:
-          image: quay.io/stackrox-io/ci:automation-flavors-gke-default-0.7.6-3-g1ce65fe441-snapshot
-          imagePullPolicy: Always
-          env:
-            - name: GOOGLE_APPLICATION_CREDENTIALS
-              value: /tmp/google-credentials.json
-          command:
-            - /usr/bin/gcloud
-          args:
-            - container clusters update
-            - {{workflow.parameters.name}}
-            - --project=srox-temp-dev-test
-            - --zone={{workflow.parameters.gcp-zone}}
-            - --update-labels=lifespan={{workflow.annotations.infra.stackrox.com/lifespan}}
-          volumeMounts:
-            - name: credentials
-              mountPath: /tmp
+        image: quay.io/stackrox-io/ci:automation-flavors-gke-default-0.7.6-3-g1ce65fe441-snapshot
+        imagePullPolicy: Always
+        env:
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: /tmp/google-credentials.json
+        command:
+          - /usr/bin/gcloud
+        args:
+          - container clusters update
+          - "{{workflow.parameters.name}}"
+          - --project=srox-temp-dev-test
+          - --zone={{workflow.parameters.gcp-zone}}
+          - --update-labels=lifespan={{workflow.annotations.infra.stackrox.com/lifespan}}
+        volumeMounts:
+          - name: credentials
+            mountPath: /tmp
 
     - name: destroy
       activeDeadlineSeconds: 3600
