@@ -22,6 +22,7 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/pkg/errors"
+	"github.com/stackrox/infra/bqutil"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	"github.com/stackrox/infra/flavor"
 	v1 "github.com/stackrox/infra/generated/api/v1"
@@ -77,6 +78,7 @@ type clusterImpl struct {
 	argoWorkflowsClient workflowpkg.WorkflowServiceClient
 	argoClientCtx       context.Context
 	workflowNamespace   string
+	bqClient            *bqutil.Client
 }
 
 var (
@@ -413,6 +415,11 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		"cluster-id", clusterID,
 	)
 
+	err = s.bqClient.InsertClusterCreationRecord(context.TODO(), clusterID, flav.GetID(), owner)
+	if err != nil {
+		log.Warnw("failed to record cluster creation", "cluster-id", clusterID)
+	}
+
 	return &v1.ResourceByID{Id: clusterID}, nil
 }
 
@@ -527,6 +534,11 @@ func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.
 			"workflow-name", req.GetId(),
 			"error", err,
 		)
+	}
+
+	err = s.bqClient.InsertClusterDeletionRecord(context.TODO(), req.GetId())
+	if err != nil {
+		log.Warnw("failed to record cluster deletion", "cluster-id", req.GetId())
 	}
 
 	return &empty.Empty{}, nil
@@ -645,6 +657,12 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 			})
 			if err != nil {
 				log.Warnw("failed to resume argo workflow", "workflow-name", workflow.GetName(), "error", err)
+			}
+
+			clusterID := strings.TrimSuffix(workflow.ObjectMeta.GenerateName, "-")
+			err = s.bqClient.InsertClusterDeletionRecord(context.TODO(), clusterID)
+			if err != nil {
+				log.Warnw("failed to record cluster deletion", "cluster-id", clusterID)
 			}
 		}
 
