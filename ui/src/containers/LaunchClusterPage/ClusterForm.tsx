@@ -44,7 +44,7 @@ const schemasByParameterName: { [key: string]: yup.BaseSchema } = {
     .max(28, 'Too long')
     .matches(
       /^(?:[a-z](?:[-a-z0-9]{0,38}[a-z0-9])?)$/, // this is what GKE expects
-      'The input value does not match the criteria above. Please correct this form field.'
+      'The input value does not match its requirements. See the (?) section for details.'
     ),
   nodes: yup
     .number()

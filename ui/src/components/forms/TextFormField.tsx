@@ -1,8 +1,7 @@
 import React, { ReactElement } from 'react';
 import { useField } from 'formik';
-
-import FormFieldLabel from './FormFieldLabel';
-import FormFieldError from './FormFieldError';
+import { FormGroup, Popover, TextInput, ValidatedOptions } from '@patternfly/react-core';
+import { HelpIcon } from '@patternfly/react-icons';
 
 type Props = {
   name: string;
@@ -25,25 +24,50 @@ export default function TextFormField({
 }: Props): ReactElement {
   const [field, meta] = useField(name);
 
+  const onChange = (_value: string, event: React.FormEvent<HTMLElement>) => {
+    field.onChange(event);
+  };
+
   return (
-    <div className="flex flex-col mb-4">
-      <FormFieldLabel text={label} labelFor={id} required={required} />
-
-      {helperText.length > 0 && <span className="font-400 text-base-600 my-1">{helperText}</span>}
-
-      <input
-        {...field} // eslint-disable-line react/jsx-props-no-spreading
+    <FormGroup
+      label={label}
+      fieldId={id}
+      isRequired={required}
+      labelIcon={
+        helperText ? (
+          <Popover bodyContent={<div>{helperText}</div>}>
+            <button
+              type="button"
+              aria-label={`Help for ${name}`}
+              onClick={(e) => e.preventDefault()}
+              aria-describedby={id}
+              className="pf-c-form__group-label-help"
+            >
+              <HelpIcon noVerticalAlign />
+            </button>
+          </Popover>
+        ) : undefined
+      }
+      validated={meta.error ? ValidatedOptions.error : ValidatedOptions.default}
+      helperTextInvalid={meta.error}
+    >
+      <TextInput
         id={id}
-        type="text"
         name={name}
+        onChange={onChange}
+        type="text"
+        value={field.value} // eslint-disable-line @typescript-eslint/no-unsafe-assignment
         placeholder={placeholder}
-        disabled={disabled}
+        isRequired={required}
+        isDisabled={disabled}
+        aria-describedby={`${id}-helper`}
+        validated={meta.error ? ValidatedOptions.error : ValidatedOptions.default}
+        // Tailwind removal - These classes are to make the form field work with
+        // dark mode and can be removed with pattern fly light mode.
         className={`bg-base-100 border-2 rounded p-2 my-2 border-base-300 font-600 text-base-600 leading-normal min-h-8 ${
           disabled ? 'bg-base-200' : 'hover:border-base-400'
         }`}
       />
-
-      <FormFieldError error={meta.error} touched={meta.touched} />
-    </div>
+    </FormGroup>
   );
 }

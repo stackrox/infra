@@ -5,6 +5,9 @@
 @tailwind components;
 @tailwind utilities;
 
+@import '~@patternfly/react-core/dist/styles/base.css';
+@import './infra.css';
+
 /* reset the unthinking hardcoded resets of Tailwind Forms in v2 plugin,
    https://github.com/tailwindlabs/tailwindcss-forms/blob/master/src/index.js */
 
