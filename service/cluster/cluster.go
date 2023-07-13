@@ -537,7 +537,7 @@ func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.
 			"error", err,
 		)
 	}
-	if value, exists := v.GetLabels()["needsExit"]; exists {
+	if value, exists := workflow.GetLabels()["needsExit"]; exists {
 		log.Infow("argo workflow requires exit to stop looping", "needsExit", value)
 		log.Infow("stopping argo workflow", "workflow-name", workflow.GetName())
 		_, err = s.argoWorkflowsClient.StopWorkflow(s.argoClientCtx, &workflowpkg.WorkflowStopRequest{
