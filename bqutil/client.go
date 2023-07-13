@@ -110,5 +110,5 @@ func (c *enabledClient) InsertClusterDeletionRecord(ctx context.Context, cluster
 		DeletionTimestamp: time.Now(),
 	}
 
-	return c.creationInserter.Put(subCtx, clusterDeletionRecord)
+	return c.deletionInserter.Put(subCtx, clusterDeletionRecord)
 }
