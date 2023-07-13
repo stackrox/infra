@@ -2,6 +2,7 @@ package bqutil
 
 import (
 	"context"
+	"os"
 	"time"
 
 	"cloud.google.com/go/bigquery"
@@ -60,6 +61,11 @@ type clusterDeletionRecord struct {
 
 // NewClient returns a new BigQuery client
 func NewClient(cfg *config.BigQueryConfig) (BigQueryClient, error) {
+	if os.Getenv("TEST_MODE") == "true" {
+		log.Infow("disabling BigQuery integration because we are in TEST_MODE")
+		return &disabledClient{}, nil
+	}
+
 	// If the config was missing a BigQuery configuration, disable the integration
 	// altogether.
 	if cfg == nil {
