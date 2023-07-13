@@ -760,6 +760,14 @@ func (s *clusterImpl) slackCheckWorkflow(workflow v1alpha1.Workflow) {
 				return
 			}
 		}
+
+		if metacluster.Status == v1.Status_FAILED {
+			clusterID := getClusterIDFromWorkflow(&workflow)
+			err = s.bqClient.InsertClusterDeletionRecord(context.Background(), clusterID)
+			if err != nil {
+				log.Warnw("err", err, "failed to record cluster deletion", "cluster-id", clusterID)
+			}
+		}
 	}
 
 	// Only bother to update workflow annotation if our phase has
