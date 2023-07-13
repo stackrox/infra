@@ -416,7 +416,7 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		"cluster-id", clusterID,
 	)
 
-	err = s.bqClient.InsertClusterCreationRecord(context.TODO(), clusterID, flav.GetID(), owner)
+	err = s.bqClient.InsertClusterCreationRecord(context.Background(), clusterID, flav.GetID(), owner)
 	if err != nil {
 		log.Warnw("err", err, "failed to record cluster creation", "cluster-id", clusterID)
 	}
@@ -537,7 +537,7 @@ func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.
 		)
 	}
 
-	err = s.bqClient.InsertClusterDeletionRecord(context.TODO(), req.GetId())
+	err = s.bqClient.InsertClusterDeletionRecord(context.Background(), req.GetId())
 	if err != nil {
 		log.Warnw("err", err, "failed to record cluster deletion", "cluster-id", req.GetId())
 	}
@@ -661,7 +661,7 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 			}
 
 			clusterID := strings.TrimSuffix(workflow.ObjectMeta.GenerateName, "-")
-			err = s.bqClient.InsertClusterDeletionRecord(context.TODO(), clusterID)
+			err = s.bqClient.InsertClusterDeletionRecord(context.Background(), clusterID)
 			if err != nil {
 				log.Warnw("err", err, "failed to record cluster deletion", "cluster-id", clusterID)
 			}
