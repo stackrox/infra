@@ -15,21 +15,23 @@
 
 /* Makes NumberInput OK with Tailwind */
 
-.pf-c-number-input > .pf-c-input-group > .pf-c-button, .pf-c-number-input > .pf-c-input-group > .pf-c-form-control {
-    color: #d6dae6 !important;
+.pf-c-number-input > .pf-c-input-group > .pf-c-button,
+.pf-c-number-input > .pf-c-input-group > .pf-c-form-control {
+  color: #d6dae6 !important;
 }
 
-.pf-c-number-input > .pf-c-input-group > .pf-c-button, .pf-c-number-input > .pf-c-input-group > .pf-c-form-control {
-    background-color: #323643 !important;
-    border: 0;
+.pf-c-number-input > .pf-c-input-group > .pf-c-button,
+.pf-c-number-input > .pf-c-input-group > .pf-c-form-control {
+  background-color: #323643 !important;
+  border: 0;
 }
 
 .pf-c-number-input > .pf-c-input-group > .pf-c-button.pf-m-control::after {
-    border-radius: 4px !important;
+  border-radius: 4px !important;
 }
 
 .pf-c-number-input > .pf-c-input-group > .pf-c-button::after {
-    border-color: #4c4f57;
+  border-color: #4c4f57;
 }
 
 /* End changes required for PF components to work with TW dark mode */
