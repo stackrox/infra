@@ -32,12 +32,13 @@ spec:
             template: create
         - - name: wait
             template: wait
-        - - name: destroy
-            template: destroy
-            arguments:
-              parameters:
-                - name: name
-                  value: "{{steps.create.outputs.parameters.cluster_name}}"
+            hooks:
+              exit:
+                template: destroy
+                arguments:
+                  parameters:
+                    - name: name
+                      value: "{{steps.create.outputs.parameters.cluster_name}}"
 
     - name: create
       activeDeadlineSeconds: 3600
@@ -83,26 +84,39 @@ spec:
             mountPath: /tmp
 
     - name: wait
-      suspend: {}
-      sidecars:
-      - name: timekeeper
+      steps:
+        - - name: timeupdate
+            template: timeupdate
+        - - name: delay
+            template: delay
+        - - name: loop
+            template: wait
+
+    - name: delay
+      suspend:
+        duration: "120"
+
+    - name: timeupdate
+      script:
         image: quay.io/stackrox-io/ci:automation-flavors-gke-default-0.7.6-3-g1ce65fe441-snapshot
         imagePullPolicy: Always
         env:
           - name: GOOGLE_APPLICATION_CREDENTIALS
             value: /tmp/google-credentials.json
-        command:
-          - /usr/bin/gcloud
-        args:
-          - container clusters update
-          - "{{workflow.parameters.name}}"
-          - --project=srox-temp-dev-test
-          - --zone={{workflow.parameters.gcp-zone}}
-          - --update-labels=lifespan={{workflow.annotations.infra.stackrox.com/lifespan}}
+        command: [bash, -x]
+        source: |
+          gcloud auth activate-service-account --key-file /tmp/google-credentials.json;
+          gcloud auth list;
+          gcloud config set compute/zone "{{workflow.parameters.gcp-zone}}";
+          gcloud config set core/disable_prompts True;
+          gcloud container clusters update \
+            "{{workflow.parameters.name}}"\
+            --project=srox-temp-dev-test\
+            --update-labels=lifespan={{workflow.annotations.infra.stackrox.com/lifespan}};
         volumeMounts:
           - name: credentials
             mountPath: /tmp
-
+               
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
