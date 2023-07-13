@@ -78,7 +78,7 @@ type clusterImpl struct {
 	argoWorkflowsClient workflowpkg.WorkflowServiceClient
 	argoClientCtx       context.Context
 	workflowNamespace   string
-	bqClient            *bqutil.Client
+	bqClient            bqutil.BigQueryClient
 }
 
 var (
@@ -89,7 +89,7 @@ var (
 )
 
 // NewClusterService creates a new ClusterService.
-func NewClusterService(registry *flavor.Registry, signer *signer.Signer, slackClient slack.Slacker, bqClient *bqutil.Client) (middleware.APIService, error) {
+func NewClusterService(registry *flavor.Registry, signer *signer.Signer, slackClient slack.Slacker, bqClient bqutil.BigQueryClient) (middleware.APIService, error) {
 	workflowNamespace := "default"
 
 	k8sWorkflowsClient, err := kube.GetK8sWorkflowsClient(workflowNamespace)

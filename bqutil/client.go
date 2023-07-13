@@ -7,6 +7,7 @@ import (
 	"cloud.google.com/go/bigquery"
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/config"
+	"github.com/stackrox/infra/pkg/logging"
 	"google.golang.org/api/option"
 )
 
@@ -14,19 +15,31 @@ const (
 	bigqueryInsertTimeout = 10 * time.Second
 )
 
-// Client is a BigQuery client that operates on `IngestionRecord`s.
-type Client struct {
+// BigQueryClient is a BigQuery client that operates on `IngestionRecord`s.
+type BigQueryClient interface {
+	InsertClusterCreationRecord(ctx context.Context, clusterID, flavor, actor string) error
+	InsertClusterDeletionRecord(ctx context.Context, clusterID string) error
+}
+
+var (
+	log = logging.CreateProductionLogger()
+
+	_ BigQueryClient = (*enabledClient)(nil)
+	_ BigQueryClient = (*disabledClient)(nil)
+)
+
+type enabledClient struct {
 	creationInserter *bigquery.Inserter
 	deletionInserter *bigquery.Inserter
 }
 
 type disabledClient struct{}
 
-func (*disabledClient) InsertClusterCreationRecord(ctx context.Context, clusterID, flavor, actor string) error {
+func (*disabledClient) InsertClusterCreationRecord(_ context.Context, _, _, _ string) error {
 	return nil
 }
 
-func (*disabledClient) InsertClusterDeletionRecord(ctx context.Context, clusterID string) error {
+func (*disabledClient) InsertClusterDeletionRecord(_ context.Context, _ string) error {
 	return nil
 }
 
@@ -43,7 +56,14 @@ type clusterDeletionRecord struct {
 }
 
 // NewClient returns a new BigQuery client
-func NewClient(cfg config.BigQueryConfig) (*Client, error) {
+func NewClient(cfg *config.BigQueryConfig) (BigQueryClient, error) {
+	// If the config was missing a BigQuery configuration, disable the integration
+	// altogether.
+	if cfg == nil {
+		log.Infow("disabling BigQuery integration due to missing configuration")
+		return &disabledClient{}, nil
+	}
+
 	if cfg.CredentialsFile == "" || cfg.Project == "" || cfg.Dataset == "" || cfg.CreationTable == "" || cfg.DeletionTable == "" {
 		return nil, errors.Errorf("malformed BigQuery config: all of credentialsFile, project, dataset, table must be defined")
 	}
@@ -55,14 +75,18 @@ func NewClient(cfg config.BigQueryConfig) (*Client, error) {
 
 	creationInserter := client.Dataset(cfg.Dataset).Table(cfg.CreationTable).Inserter()
 	deletionInserter := client.Dataset(cfg.Dataset).Table(cfg.DeletionTable).Inserter()
-	return &Client{
+	bigQueryClient := &enabledClient{
 		creationInserter: creationInserter,
 		deletionInserter: deletionInserter,
-	}, nil
+	}
+
+	log.Infow("enabled BigQuery integration")
+
+	return bigQueryClient, nil
 }
 
 // InsertClusterCreationRecord inserts a new cluster creation record into BigQuery.
-func (c *Client) InsertClusterCreationRecord(ctx context.Context, clusterID, flavor, actor string) error {
+func (c *enabledClient) InsertClusterCreationRecord(ctx context.Context, clusterID, flavor, actor string) error {
 	subCtx, cancel := context.WithTimeout(ctx, bigqueryInsertTimeout)
 	defer cancel()
 
@@ -77,7 +101,7 @@ func (c *Client) InsertClusterCreationRecord(ctx context.Context, clusterID, fla
 }
 
 // InsertClusterDeletionRecord inserts a new cluster deletion record into BigQuery.
-func (c *Client) InsertClusterDeletionRecord(ctx context.Context, clusterID string) error {
+func (c *enabledClient) InsertClusterDeletionRecord(ctx context.Context, clusterID string) error {
 	subCtx, cancel := context.WithTimeout(ctx, bigqueryInsertTimeout)
 	defer cancel()
 

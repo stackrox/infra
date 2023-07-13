@@ -77,7 +77,7 @@ func mainCmd() error {
 		return errors.Wrapf(err, "failed to create Slack client")
 	}
 
-	bqClient, err := bqutil.NewClient(*cfg.BigQuery)
+	bqClient, err := bqutil.NewClient(cfg.BigQuery)
 	if err != nil {
 		return errors.Wrapf(err, "failed to create bqClient")
 	}
