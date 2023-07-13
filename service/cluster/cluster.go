@@ -89,7 +89,7 @@ var (
 )
 
 // NewClusterService creates a new ClusterService.
-func NewClusterService(registry *flavor.Registry, signer *signer.Signer, slackClient slack.Slacker) (middleware.APIService, error) {
+func NewClusterService(registry *flavor.Registry, signer *signer.Signer, slackClient slack.Slacker, bqClient *bqutil.Client) (middleware.APIService, error) {
 	workflowNamespace := "default"
 
 	k8sWorkflowsClient, err := kube.GetK8sWorkflowsClient(workflowNamespace)
@@ -120,6 +120,7 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer, slackCl
 		argoWorkflowsClient: argoWorkflowsClient,
 		argoClientCtx:       ctx,
 		workflowNamespace:   workflowNamespace,
+		bqClient:            bqClient,
 	}
 
 	go impl.startSlackCheck()

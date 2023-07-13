@@ -44,11 +44,11 @@ type clusterDeletionRecord struct {
 
 // NewClient returns a new BigQuery client
 func NewClient(cfg config.BigQueryConfig) (*Client, error) {
-	if cfg.Project == "" || cfg.Dataset == "" || cfg.CreationTable == "" || cfg.DeletionTable == "" {
-		return nil, errors.Errorf("malformed BigQuery config: all of project, dataset, table must be defined")
+	if cfg.CredentialsFile == "" || cfg.Project == "" || cfg.Dataset == "" || cfg.CreationTable == "" || cfg.DeletionTable == "" {
+		return nil, errors.Errorf("malformed BigQuery config: all of credentialsFile, project, dataset, table must be defined")
 	}
 
-	client, err := bigquery.NewClient(context.Background(), cfg.Project, option.WithCredentialsJSON())
+	client, err := bigquery.NewClient(context.Background(), cfg.Project, option.WithCredentialsFile(cfg.CredentialsFile))
 	if err != nil {
 		return nil, errors.Wrap(err, "creating BigQuery client")
 	}
