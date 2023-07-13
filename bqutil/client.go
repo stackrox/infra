@@ -29,6 +29,7 @@ var (
 )
 
 type enabledClient struct {
+	environment      string
 	creationInserter *bigquery.Inserter
 	deletionInserter *bigquery.Inserter
 }
@@ -44,6 +45,7 @@ func (*disabledClient) InsertClusterDeletionRecord(_ context.Context, _ string) 
 }
 
 type clusterCreationRecord struct {
+	Environment       string
 	ClusterID         string
 	Flavor            string
 	Actor             string
@@ -51,6 +53,7 @@ type clusterCreationRecord struct {
 }
 
 type clusterDeletionRecord struct {
+	Environment       string
 	ClusterID         string
 	DeletionTimestamp time.Time
 }
@@ -64,8 +67,8 @@ func NewClient(cfg *config.BigQueryConfig) (BigQueryClient, error) {
 		return &disabledClient{}, nil
 	}
 
-	if cfg.CredentialsFile == "" || cfg.Project == "" || cfg.Dataset == "" || cfg.CreationTable == "" || cfg.DeletionTable == "" {
-		return nil, errors.Errorf("malformed BigQuery config: all of credentialsFile, project, dataset, table must be defined")
+	if cfg.CredentialsFile == "" || cfg.Environment == "" || cfg.Project == "" || cfg.Dataset == "" || cfg.CreationTable == "" || cfg.DeletionTable == "" {
+		return nil, errors.Errorf("malformed BigQuery config: all of credentialsFile, environment, project, dataset, tables must be defined")
 	}
 
 	client, err := bigquery.NewClient(context.Background(), cfg.Project, option.WithCredentialsFile(cfg.CredentialsFile))
@@ -76,6 +79,7 @@ func NewClient(cfg *config.BigQueryConfig) (BigQueryClient, error) {
 	creationInserter := client.Dataset(cfg.Dataset).Table(cfg.CreationTable).Inserter()
 	deletionInserter := client.Dataset(cfg.Dataset).Table(cfg.DeletionTable).Inserter()
 	bigQueryClient := &enabledClient{
+		environment:      cfg.Environment,
 		creationInserter: creationInserter,
 		deletionInserter: deletionInserter,
 	}
@@ -91,6 +95,7 @@ func (c *enabledClient) InsertClusterCreationRecord(ctx context.Context, cluster
 	defer cancel()
 
 	clusterCreationRecord := &clusterCreationRecord{
+		Environment:       c.environment,
 		ClusterID:         clusterID,
 		Flavor:            flavor,
 		Actor:             actor,
@@ -106,6 +111,7 @@ func (c *enabledClient) InsertClusterDeletionRecord(ctx context.Context, cluster
 	defer cancel()
 
 	clusterDeletionRecord := &clusterDeletionRecord{
+		Environment:       c.environment,
 		ClusterID:         clusterID,
 		DeletionTimestamp: time.Now(),
 	}

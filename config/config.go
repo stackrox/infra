@@ -18,7 +18,7 @@ type Config struct {
 	Password string `json:"password"`
 
 	// Google BigQuery integration configuration
-	BigQuery *BigQueryConfig `json:"bigquery"`
+	BigQuery *BigQueryConfig `json:"bigQuery"`
 
 	// Slack notification configuration.
 	Slack *SlackConfig `json:"slack"`
@@ -28,6 +28,7 @@ type Config struct {
 // to record cluster lifetime.
 type BigQueryConfig struct {
 	CredentialsFile string `json:"credentialsFile"`
+	Environment     string `json:"environment"`
 	Project         string `json:"project"`
 	Dataset         string `json:"dataset"`
 	CreationTable   string `json:"creationTable"`
