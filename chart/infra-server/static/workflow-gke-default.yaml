@@ -6,8 +6,10 @@ metadata:
     needsExit: true
   annotations:
     infra.stackrox.com/lifespan: 0s
+    infra.stackrox.com/lifespanlast: 1s
 spec:
   entrypoint: start
+  onExit: stop
   arguments:
     parameters:
       - name: name
@@ -31,17 +33,163 @@ spec:
     - name: start
       steps:
         - - name: create
-            template: create
-        - - name: wait
+            template: echo
+            arguments:
+              parameters:
+              - name: message
+                value: "create"
+          - name: wait
             template: wait
-            hooks:
-              exit:
-                template: destroy
-                arguments:
-                  parameters:
-                    - name: name
-                      value: "{{steps.create.outputs.parameters.cluster_name}}"
+            arguments:
+              parameters:
+              - name: oldlifespan
+                value: "3h0m0s"
 
+    - name: stop
+      steps:
+        - - name: destroy
+            template: echo
+            arguments:
+              parameters:
+                - name: message
+                  value: "{{workflow.parameters.name}}"
+
+    - name: wait
+      inputs:
+        parameters:
+          - name: oldlifespan
+      steps:
+        - - name: echo1
+            template: echo
+            arguments:
+              parameters:
+              - name: message
+                value: "{{inputs.parameters.oldlifespan}} =? {{workflow.annotations.infra.stackrox.com/lifespan}}"
+        - - name: echoD
+            template: echo
+            arguments:
+              parameters:
+              - name: message
+                value: "{{=sprig.dateModify(workflow.annotations.infra.stackrox.com/lifespan, workflow.creationTimestamp)}}"
+        - - name: echoD2
+            template: echo
+            arguments:
+              parameters:
+              - name: message
+                value: "{{=sprig.dateModify('30h',workflow.creationTimestamp)}}"
+        - - name: echoD3
+            template: echo
+            arguments:
+              parameters:
+              - name: message
+                value: "{{sprig.dateModify(workflow.annotations.infra.stackrox.com/lifespan, workflow.creationTimestamp)}}"
+        - - name: delay
+            template: delay
+        - - name: echo2
+            template: echo
+            when: "'{{inputs.parameters.oldlifespan}}' =~ '{{workflow.annotations.infra.stackrox.com/lifespan}}'"
+            arguments:
+              parameters:
+              - name: message
+                value: "{{inputs.parameters.oldlifespan}} =~ {{workflow.annotations.infra.stackrox.com/lifespan}}"
+        - - name: echo3
+            template: echo
+            when: "'{{inputs.parameters.oldlifespan}}' !~ '{{workflow.annotations.infra.stackrox.com/lifespan}}'"
+            arguments:
+              parameters:
+              - name: message
+                value: "{{inputs.parameters.oldlifespan}} !~ {{workflow.annotations.infra.stackrox.com/lifespan}}"
+        - - name: echo4
+            template: echo
+            arguments:
+              parameters:
+              - name: message
+                value: "{{inputs.parameters.oldlifespan}}, {{workflow.annotations.infra.stackrox.com/lifespan}}"
+        - - name: shortloop
+            template: wait
+            when: "'{{inputs.parameters.oldlifespan}}' =~ '{{workflow.annotations.infra.stackrox.com/lifespan}}'"
+            arguments:
+              parameters:
+                - name: oldlifespan
+                  value: "{{workflow.annotations.infra.stackrox.com/lifespan}}"  # preserve value; prevent pass by reference
+        - - name: timeupdate
+            template: timeupdate
+        - - name: echoE
+            template: echo
+            arguments:
+              parameters:
+              - name: message
+                value: "{{inputs.parameters.oldlifespan}} =? {{workflow.annotations.infra.stackrox.com/lifespan}}"
+        - - name: echoE2
+            template: argosay
+            arguments:
+              parameters:
+              - name: foo
+                value: 5
+              - name: message
+                value: "{{workflow.annotations.infra.stackrox.com/lifespan}}"  # preserve value; prevent pass by reference
+        - - name: loop
+            template: wait
+            arguments:
+              parameters:
+                - name: oldlifespan
+                  value: "{{workflow.annotations.infra.stackrox.com/lifespan}}"  # preserve value; prevent pass by reference
+
+    - name: argosay
+      inputs:
+        parameters:
+          - name: foo
+          - name: message
+      container:
+        image: argoproj/argosay:v2
+        # in this example, we use `asInt` to cast a parameter (which are ALWAYS strings) to an int so we can
+        # multiply by 10
+        args:
+          - echo
+          - |
+            hello {{=asInt(inputs.parameters.foo) * 10}} @ {{=sprig.date('2006', workflow.creationTimestamp)}}
+            {{inputs.parameters.message}}
+
+    - name: echo
+      inputs:
+        parameters:
+        - name: message
+      container:
+        image: alpine:3.7
+        command: [echo, "{{inputs.parameters.message}}"]
+
+    - name: delay
+      suspend:
+        duration: "4"
+
+    - name: timeupdate
+      script:
+        image: quay.io/stackrox-io/ci:automation-flavors-gke-default-0.7.6-3-g1ce65fe441-snapshot
+        imagePullPolicy: Always
+        env:
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: /tmp/google-credentials.json
+        command: [bash, -x]
+        source: |
+          lifespan={{workflow.annotations.infra.stackrox.com/lifespan}};
+          gcloud auth activate-service-account --key-file /tmp/google-credentials.json;
+          gcloud auth list;
+          gcloud config set compute/zone "{{workflow.parameters.gcp-zone}}";
+          gcloud config set core/disable_prompts True;
+          gcloud container clusters update \
+            "{{workflow.parameters.name}}"\
+            --project=srox-temp-dev-test\
+            "--update-labels=lifespan=${lifespan}";
+          echo "$lifespan" | tee /outputs/value.txt
+        volumeMounts:
+          - name: credentials
+            mountPath: /tmp
+      outputs:
+        parameters:
+        - name: value
+          valueFrom:
+            path: /outputs/value.txt
+               
     - name: create
       activeDeadlineSeconds: 3600
       outputs:
@@ -85,40 +233,6 @@ spec:
           - name: credentials
             mountPath: /tmp
 
-    - name: wait
-      steps:
-        - - name: timeupdate
-            template: timeupdate
-        - - name: delay
-            template: delay
-        - - name: loop
-            template: wait
-
-    - name: delay
-      suspend:
-        duration: "120"
-
-    - name: timeupdate
-      script:
-        image: quay.io/stackrox-io/ci:automation-flavors-gke-default-0.7.6-3-g1ce65fe441-snapshot
-        imagePullPolicy: Always
-        env:
-          - name: GOOGLE_APPLICATION_CREDENTIALS
-            value: /tmp/google-credentials.json
-        command: [bash, -x]
-        source: |
-          gcloud auth activate-service-account --key-file /tmp/google-credentials.json;
-          gcloud auth list;
-          gcloud config set compute/zone "{{workflow.parameters.gcp-zone}}";
-          gcloud config set core/disable_prompts True;
-          gcloud container clusters update \
-            "{{workflow.parameters.name}}"\
-            --project=srox-temp-dev-test\
-            --update-labels=lifespan={{workflow.annotations.infra.stackrox.com/lifespan}};
-        volumeMounts:
-          - name: credentials
-            mountPath: /tmp
-               
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
