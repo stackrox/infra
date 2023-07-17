@@ -682,7 +682,7 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 				})
 				if err != nil {
 					log.Warnw("failed to stop workflow, this is OK if the workflow is not running",
-						"workflow-name", req.GetId(),
+						"workflow-name", workflow.GetName(),
 						"error", err,
 					)
 				}
