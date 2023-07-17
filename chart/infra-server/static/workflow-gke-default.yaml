@@ -43,7 +43,7 @@ spec:
             arguments:
               parameters:
               - name: oldlifespan
-                value: "3h0m0s"
+                value: "0h0m0s"
 
     - name: stop
       steps:
@@ -65,26 +65,18 @@ spec:
               parameters:
               - name: message
                 value: "{{inputs.parameters.oldlifespan}} =? {{workflow.annotations.infra.stackrox.com/lifespan}}"
-        - - name: echoD
+        - - name: echoDS
             template: echo
             arguments:
               parameters:
               - name: message
-                value: "{{=sprig.dateModify(workflow.annotations.infra.stackrox.com/lifespan, workflow.creationTimestamp)}}"
-        - - name: echoD2
+                value: "{{= sprig.toDate('2006-01-02T15:04:05Z07:00', workflow.creationTimestamp.RFC3339) }}"
+        - - name: echoDlife
             template: echo
             arguments:
               parameters:
               - name: message
-                value: "{{=sprig.dateModify('30h',workflow.creationTimestamp)}}"
-        - - name: echoD3
-            template: echo
-            arguments:
-              parameters:
-              - name: message
-                value: "{{sprig.dateModify(workflow.annotations.infra.stackrox.com/lifespan, workflow.creationTimestamp)}}"
-        - - name: delay
-            template: delay
+                value: "expiration={{= sprig.dateModify(inputs.parameters.lifespan, sprig.toDate('2006-01-02T15:04:05Z07:00', workflow.creationTimestamp.RFC3339)) }}"
         - - name: echo2
             template: echo
             when: "'{{inputs.parameters.oldlifespan}}' =~ '{{workflow.annotations.infra.stackrox.com/lifespan}}'"
@@ -92,19 +84,14 @@ spec:
               parameters:
               - name: message
                 value: "{{inputs.parameters.oldlifespan}} =~ {{workflow.annotations.infra.stackrox.com/lifespan}}"
-        - - name: echo3
-            template: echo
-            when: "'{{inputs.parameters.oldlifespan}}' !~ '{{workflow.annotations.infra.stackrox.com/lifespan}}'"
-            arguments:
-              parameters:
-              - name: message
-                value: "{{inputs.parameters.oldlifespan}} !~ {{workflow.annotations.infra.stackrox.com/lifespan}}"
         - - name: echo4
             template: echo
             arguments:
               parameters:
               - name: message
                 value: "{{inputs.parameters.oldlifespan}}, {{workflow.annotations.infra.stackrox.com/lifespan}}"
+        - - name: delay
+            template: delay
         - - name: shortloop
             template: wait
             when: "'{{inputs.parameters.oldlifespan}}' =~ '{{workflow.annotations.infra.stackrox.com/lifespan}}'"
@@ -114,41 +101,16 @@ spec:
                   value: "{{workflow.annotations.infra.stackrox.com/lifespan}}"  # preserve value; prevent pass by reference
         - - name: timeupdate
             template: timeupdate
-        - - name: echoE
-            template: echo
             arguments:
               parameters:
-              - name: message
-                value: "{{inputs.parameters.oldlifespan}} =? {{workflow.annotations.infra.stackrox.com/lifespan}}"
-        - - name: echoE2
-            template: argosay
-            arguments:
-              parameters:
-              - name: foo
-                value: 5
-              - name: message
-                value: "{{workflow.annotations.infra.stackrox.com/lifespan}}"  # preserve value; prevent pass by reference
+                - name: lifespan
+                  value: "{{workflow.annotations.infra.stackrox.com/lifespan}}"  # preserve value; prevent pass by reference
         - - name: loop
             template: wait
             arguments:
               parameters:
                 - name: oldlifespan
                   value: "{{workflow.annotations.infra.stackrox.com/lifespan}}"  # preserve value; prevent pass by reference
-
-    - name: argosay
-      inputs:
-        parameters:
-          - name: foo
-          - name: message
-      container:
-        image: argoproj/argosay:v2
-        # in this example, we use `asInt` to cast a parameter (which are ALWAYS strings) to an int so we can
-        # multiply by 10
-        args:
-          - echo
-          - |
-            hello {{=asInt(inputs.parameters.foo) * 10}} @ {{=sprig.date('2006', workflow.creationTimestamp)}}
-            {{inputs.parameters.message}}
 
     - name: echo
       inputs:
@@ -163,6 +125,27 @@ spec:
         duration: "4"
 
     - name: timeupdate
+      inputs:
+        parameters:
+          - name: lifespan
+      steps:
+        - - name: echo1
+            template: echo
+            arguments:
+              parameters:
+              - name: message
+                value: "expiration={{= sprig.dateModify(inputs.parameters.lifespan, sprig.toDate('2006-01-02T15:04:05Z07:00', workflow.creationTimestamp.RFC3339)) }}"
+        - - name: setlabels
+            template: label
+            arguments:
+              parameters:
+              - name: labels
+                value: "expiration={{= sprig.dateModify(inputs.parameters.lifespan, sprig.toDate('2006-01-02T15:04:05Z07:00', workflow.creationTimestamp.RFC3339)) }}"
+
+    - name: label
+      inputs:
+        parameters:
+        - name: labels
       script:
         image: quay.io/stackrox-io/ci:automation-flavors-gke-default-0.7.6-3-g1ce65fe441-snapshot
         imagePullPolicy: Always
@@ -171,7 +154,7 @@ spec:
             value: /tmp/google-credentials.json
         command: [bash, -x]
         source: |
-          lifespan={{workflow.annotations.infra.stackrox.com/lifespan}};
+          labels="{{inputs.parameters.labels}}"
           gcloud auth activate-service-account --key-file /tmp/google-credentials.json;
           gcloud auth list;
           gcloud config set compute/zone "{{workflow.parameters.gcp-zone}}";
@@ -179,8 +162,8 @@ spec:
           gcloud container clusters update \
             "{{workflow.parameters.name}}"\
             --project=srox-temp-dev-test\
-            "--update-labels=lifespan=${lifespan}";
-          echo "$lifespan" | tee /outputs/value.txt
+            "--update-labels=${labels}";
+          echo "$labels" | tee /outputs/value.txt
         volumeMounts:
           - name: credentials
             mountPath: /tmp
