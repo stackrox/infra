@@ -17,6 +17,7 @@ import (
 	workflowpkg "github.com/argoproj/argo-workflows/v3/pkg/apiclient/workflow"
 	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
 	workflowv1 "github.com/argoproj/argo-workflows/v3/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
+	workflowutil "github.com/argoproj/argo-workflows/workflow/util"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/duration"
 	"github.com/golang/protobuf/ptypes/empty"
@@ -523,7 +524,7 @@ func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.
 		return nil, err
 	}
 
-	if workflow.Spec.Suspend != nil && *workflow.Spec.Suspend {
+	if workflowutil.IsWorkflowSuspended(workflow) {
 		// Resume the workflow so that it may move to the destroy phase without
 		// waiting for cleanupExpiredClusters() to kick in.
 		log.Infow("resuming argo workflow", "workflow-name", workflow.GetName())
@@ -662,7 +663,7 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 				continue
 			}
 
-			if workflow.Spec.Suspend != nil && *workflow.Spec.Suspend {
+			if workflowutil.IsWorkflowSuspended(workflow) {
 				log.Infow("resuming an argo workflow that has expired", "workflow-name", workflow.GetName())
 				_, err = s.argoWorkflowsClient.ResumeWorkflow(s.argoClientCtx, &workflowpkg.WorkflowResumeRequest{
 					Name:      workflow.GetName(),
