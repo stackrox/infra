@@ -523,28 +523,27 @@ func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.
 		return nil, err
 	}
 
-	log.Infow("resuming argo workflow", "workflow-name", workflow.GetName())
-
-	// Resume the workflow so that it may move to the destroy phase without
-	// waiting for cleanupExpiredClusters() to kick in.
-	_, err = s.argoWorkflowsClient.ResumeWorkflow(s.argoClientCtx, &workflowpkg.WorkflowResumeRequest{
-		Name:      workflow.GetName(),
-		Namespace: s.workflowNamespace,
-	})
-	if err != nil {
-		log.Warnw("failed to resume workflow, this is OK if the workflow is not waiting",
-			"workflow-name", req.GetId(),
-			"error", err,
-		)
-	}
-	if value, exists := workflow.GetLabels()["needsExit"]; exists {
-		log.Infow("argo workflow requires exit to stop looping", "needsExit", value)
+	if workflow.Spec.Suspend != nil && *workflow.Spec.Suspend {
+		// Resume the workflow so that it may move to the destroy phase without
+		// waiting for cleanupExpiredClusters() to kick in.
+		log.Infow("resuming argo workflow", "workflow-name", workflow.GetName())
+		_, err = s.argoWorkflowsClient.ResumeWorkflow(s.argoClientCtx, &workflowpkg.WorkflowResumeRequest{
+			Name:      workflow.GetName(),
+			Namespace: s.workflowNamespace,
+		})
+		if err != nil {
+			log.Warnw("failed to resume workflow, this is OK if the workflow is not waiting",
+				"workflow-name", req.GetId(),
+				"error", err,
+			)
+		}
+	} else {
 		log.Infow("stopping argo workflow", "workflow-name", workflow.GetName())
 		_, err = s.argoWorkflowsClient.StopWorkflow(s.argoClientCtx, &workflowpkg.WorkflowStopRequest{
 			Name:              workflow.GetName(),
 			Namespace:         s.workflowNamespace,
 			NodeFieldSelector: "",
-			Message:           "Seeking end",
+			Message:           "Destroying cluster. End workflow loop.",
 		})
 		if err != nil {
 			log.Warnw("failed to stop workflow, this is OK if the workflow is not running",
@@ -663,13 +662,29 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 				continue
 			}
 
-			log.Infow("resuming an argo workflow that has expired", "workflow-name", workflow.GetName())
-			_, err = s.argoWorkflowsClient.ResumeWorkflow(s.argoClientCtx, &workflowpkg.WorkflowResumeRequest{
-				Name:      workflow.GetName(),
-				Namespace: s.workflowNamespace,
-			})
-			if err != nil {
-				log.Warnw("failed to resume argo workflow", "workflow-name", workflow.GetName(), "error", err)
+			if workflow.Spec.Suspend != nil && *workflow.Spec.Suspend {
+				log.Infow("resuming an argo workflow that has expired", "workflow-name", workflow.GetName())
+				_, err = s.argoWorkflowsClient.ResumeWorkflow(s.argoClientCtx, &workflowpkg.WorkflowResumeRequest{
+					Name:      workflow.GetName(),
+					Namespace: s.workflowNamespace,
+				})
+				if err != nil {
+					log.Warnw("failed to resume argo workflow", "workflow-name", workflow.GetName(), "error", err)
+				}
+			} else {
+				log.Infow("stopping argo workflow that expired", "workflow-name", workflow.GetName())
+				_, err = s.argoWorkflowsClient.StopWorkflow(s.argoClientCtx, &workflowpkg.WorkflowStopRequest{
+					Name:              workflow.GetName(),
+					Namespace:         s.workflowNamespace,
+					NodeFieldSelector: "",
+					Message:           "Destroying cluster. End workflow loop.",
+				})
+				if err != nil {
+					log.Warnw("failed to stop workflow, this is OK if the workflow is not running",
+						"workflow-name", req.GetId(),
+						"error", err,
+					)
+				}
 			}
 		}
 
