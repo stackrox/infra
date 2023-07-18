@@ -57,6 +57,7 @@ spec:
       inputs:
         parameters:
           - name: oldlifespan
+      failFast: false
       steps:
         - - name: delay
             inline:
