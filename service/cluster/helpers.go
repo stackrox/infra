@@ -212,9 +212,8 @@ func workflowStatus(workflowStatus v1alpha1.WorkflowStatus) v1.Status {
 			}
 			if node.GetName() == "destroy" || node.IsExitNode() {
 				return v1.Status_DESTROYING
-			} else {
-				return v1.Status_READY
 			}
+			return v1.Status_READY
 		}
 
 		// No suspend node was found, which means one hasn't been run yet, which means that this cluster is still creating.
