@@ -3,10 +3,9 @@ kind: Workflow
 metadata:
   generateName: gke-default-
   labels:
-    needsExit: true
+    needsExit: "true"
   annotations:
     infra.stackrox.com/lifespan: 0s
-    infra.stackrox.com/lifespanlast: 1s
 spec:
   entrypoint: start
   onExit: stop
@@ -38,12 +37,12 @@ spec:
               parameters:
               - name: message
                 value: "create"
-          - name: wait
+        - - name: wait
             template: wait
             arguments:
               parameters:
               - name: oldlifespan
-                value: "0h0m0s"
+                value: ""  # Force lookup and copy of lifespan
 
     - name: stop
       steps:
@@ -59,58 +58,29 @@ spec:
         parameters:
           - name: oldlifespan
       steps:
-        - - name: echo1
-            template: echo
-            arguments:
-              parameters:
-              - name: message
-                value: "{{inputs.parameters.oldlifespan}} =? {{workflow.annotations.infra.stackrox.com/lifespan}}"
-        - - name: echoDS
-            template: echo
-            arguments:
-              parameters:
-              - name: message
-                value: "{{= sprig.toDate('2006-01-02T15:04:05Z07:00', workflow.creationTimestamp.RFC3339) }}"
-        - - name: echoDlife
-            template: echo
-            arguments:
-              parameters:
-              - name: message
-                value: "expiration={{= sprig.dateModify(inputs.parameters.lifespan, sprig.toDate('2006-01-02T15:04:05Z07:00', workflow.creationTimestamp.RFC3339)) }}"
-        - - name: echo2
-            template: echo
-            when: "'{{inputs.parameters.oldlifespan}}' =~ '{{workflow.annotations.infra.stackrox.com/lifespan}}'"
-            arguments:
-              parameters:
-              - name: message
-                value: "{{inputs.parameters.oldlifespan}} =~ {{workflow.annotations.infra.stackrox.com/lifespan}}"
-        - - name: echo4
-            template: echo
-            arguments:
-              parameters:
-              - name: message
-                value: "{{inputs.parameters.oldlifespan}}, {{workflow.annotations.infra.stackrox.com/lifespan}}"
         - - name: delay
-            template: delay
+            inline:
+              suspend:
+                duration: "30"
         - - name: shortloop
             template: wait
             when: "'{{inputs.parameters.oldlifespan}}' =~ '{{workflow.annotations.infra.stackrox.com/lifespan}}'"
             arguments:
               parameters:
                 - name: oldlifespan
-                  value: "{{workflow.annotations.infra.stackrox.com/lifespan}}"  # preserve value; prevent pass by reference
+                  value: "{{workflow.annotations.infra.stackrox.com/lifespan}}"
         - - name: timeupdate
             template: timeupdate
             arguments:
               parameters:
                 - name: lifespan
-                  value: "{{workflow.annotations.infra.stackrox.com/lifespan}}"  # preserve value; prevent pass by reference
+                  value: "{{workflow.annotations.infra.stackrox.com/lifespan}}"
         - - name: loop
             template: wait
             arguments:
               parameters:
                 - name: oldlifespan
-                  value: "{{workflow.annotations.infra.stackrox.com/lifespan}}"  # preserve value; prevent pass by reference
+                  value: "{{workflow.annotations.infra.stackrox.com/lifespan}}"
 
     - name: echo
       inputs:
@@ -120,27 +90,25 @@ spec:
         image: alpine:3.7
         command: [echo, "{{inputs.parameters.message}}"]
 
-    - name: delay
-      suspend:
-        duration: "4"
-
     - name: timeupdate
       inputs:
         parameters:
           - name: lifespan
       steps:
-        - - name: echo1
-            template: echo
-            arguments:
-              parameters:
-              - name: message
-                value: "expiration={{= sprig.dateModify(inputs.parameters.lifespan, sprig.toDate('2006-01-02T15:04:05Z07:00', workflow.creationTimestamp.RFC3339)) }}"
         - - name: setlabels
             template: label
             arguments:
               parameters:
               - name: labels
-                value: "expiration={{= sprig.dateModify(inputs.parameters.lifespan, sprig.toDate('2006-01-02T15:04:05Z07:00', workflow.creationTimestamp.RFC3339)) }}"
+                value: >-
+                  flavor={{workflow.annotations.infra.stackrox.com/flavor}},
+                  owner={{workflow.annotations.infra.stackrox.com/owner}},
+                  lifespan={{workflow.annotations.infra.stackrox.com/lifespan}},
+                  expiration={{= sprig.date('2006-01-02T15:04:05Z07:00', 
+                    sprig.dateModify(inputs.parameters.lifespan,
+                    sprig.toDate('2006-01-02T15:04:05Z07:00',
+                      workflow.creationTimestamp.RFC3339)))
+                  }}
 
     - name: label
       inputs:
@@ -162,16 +130,10 @@ spec:
           gcloud container clusters update \
             "{{workflow.parameters.name}}"\
             --project=srox-temp-dev-test\
-            "--update-labels=${labels}";
-          echo "$labels" | tee /outputs/value.txt
+            "--update-labels=${labels}" || true
         volumeMounts:
           - name: credentials
             mountPath: /tmp
-      outputs:
-        parameters:
-        - name: value
-          valueFrom:
-            path: /outputs/value.txt
                
     - name: create
       activeDeadlineSeconds: 3600
