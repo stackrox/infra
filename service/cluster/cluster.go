@@ -514,9 +514,10 @@ func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.
 		return nil, err
 	}
 
+	log.Infow("resuming argo workflow", "workflow-name", workflow.GetName())
+
 	// Resume the workflow so that it may move to the destroy phase without
 	// waiting for cleanupExpiredClusters() to kick in.
-	log.Infow("resuming argo workflow", "workflow-name", workflow.GetName())
 	_, err = s.argoWorkflowsClient.ResumeWorkflow(s.argoClientCtx, &workflowpkg.WorkflowResumeRequest{
 		Name:      workflow.GetName(),
 		Namespace: s.workflowNamespace,
@@ -662,7 +663,9 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 				if err != nil {
 					log.Warnw("failed to resume argo workflow", "workflow-name", workflow.GetName(), "error", err)
 				}
-			} else {
+			}
+			if value, exists := workflow.GetLabels()["needsExit"]; exists {
+				log.Infow("argo workflow requires exit to stop looping", "needsExit", value)
 				log.Infow("stopping argo workflow that expired", "workflow-name", workflow.GetName())
 				_, err = s.argoWorkflowsClient.StopWorkflow(s.argoClientCtx, &workflowpkg.WorkflowStopRequest{
 					Name:              workflow.GetName(),
