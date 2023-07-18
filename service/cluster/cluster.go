@@ -335,17 +335,8 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		return nil, fmt.Errorf("parameter 'name' was not provided")
 	}
 
-	existingWorkflow, _ := s.getMostRecentArgoWorkflowFromClusterID(req.ID)
-	if existingWorkflow != nil {
-		return nil, status.Errorf(
-			codes.AlreadyExists,
-			"An infra cluster ID %q already exists in state %s.",
-			req.ID, workflowStatus(existingWorkflow.Status).String(),
-		)
-	}
-
 	// Make sure there is no running argo workflow for infra cluster with the same ID
-	existingWorkflow, _ = s.getMostRecentArgoWorkflowFromClusterID(clusterID)
+	existingWorkflow, _ := s.getMostRecentArgoWorkflowFromClusterID(clusterID)
 	if existingWorkflow != nil {
 		switch workflowStatus(existingWorkflow.Status) {
 		case v1.Status_FAILED, v1.Status_FINISHED:
@@ -523,21 +514,21 @@ func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.
 		return nil, err
 	}
 
-	if workflow.Spec.Suspend != nil && *workflow.Spec.Suspend {
-		// Resume the workflow so that it may move to the destroy phase without
-		// waiting for cleanupExpiredClusters() to kick in.
-		log.Infow("resuming argo workflow", "workflow-name", workflow.GetName())
-		_, err = s.argoWorkflowsClient.ResumeWorkflow(s.argoClientCtx, &workflowpkg.WorkflowResumeRequest{
-			Name:      workflow.GetName(),
-			Namespace: s.workflowNamespace,
-		})
-		if err != nil {
-			log.Warnw("failed to resume workflow, this is OK if the workflow is not waiting",
-				"workflow-name", req.GetId(),
-				"error", err,
-			)
-		}
-	} else {
+	// Resume the workflow so that it may move to the destroy phase without
+	// waiting for cleanupExpiredClusters() to kick in.
+	log.Infow("resuming argo workflow", "workflow-name", workflow.GetName())
+	_, err = s.argoWorkflowsClient.ResumeWorkflow(s.argoClientCtx, &workflowpkg.WorkflowResumeRequest{
+		Name:      workflow.GetName(),
+		Namespace: s.workflowNamespace,
+	})
+	if err != nil {
+		log.Warnw("failed to resume workflow, this is OK if the workflow is not waiting",
+			"workflow-name", req.GetId(),
+			"error", err,
+		)
+	}
+	if value, exists := workflow.GetLabels()["needsExit"]; exists {
+		log.Infow("argo workflow requires exit to stop looping", "needsExit", value)
 		log.Infow("stopping argo workflow", "workflow-name", workflow.GetName())
 		_, err = s.argoWorkflowsClient.StopWorkflow(s.argoClientCtx, &workflowpkg.WorkflowStopRequest{
 			Name:              workflow.GetName(),
