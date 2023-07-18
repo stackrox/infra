@@ -103,15 +103,15 @@ spec:
             arguments:
               parameters:
               - name: labels
-                value: >-
-                  flavor={{workflow.annotations.infra.stackrox.com/flavor}},
-                  owner={{workflow.annotations.infra.stackrox.com/owner}},
-                  lifespan={{workflow.annotations.infra.stackrox.com/lifespan}},
-                  expiration={{= sprig.date('2006-01-02T15:04:05Z07:00', 
-                    sprig.dateModify(inputs.parameters.lifespan,
-                    sprig.toDate('2006-01-02T15:04:05Z07:00',
-                      workflow.creationTimestamp.RFC3339)))
-                  }}
+                value: "\
+                  flavor={{workflow.annotations.infra.stackrox.com/flavor}},\
+                  owner={{workflow.annotations.infra.stackrox.com/owner}},\
+                  lifespan={{workflow.annotations.infra.stackrox.com/lifespan}},\
+                  expiration={{= sprig.date('2006-01-02T15:04:05Z07:00',\
+                    sprig.dateModify(inputs.parameters.lifespan,\
+                    sprig.toDate('2006-01-02T15:04:05Z07:00',\
+                      workflow.creationTimestamp.RFC3339)))\
+                  }}"
 
     - name: label
       inputs:
@@ -172,15 +172,15 @@ spec:
           - "--machine-type={{workflow.parameters.machine-type}}"
           - --gcp-project=srox-temp-dev-test
           - --creation-source=infra
-          - >-
-            --labels=flavor={{workflow.annotations.infra.stackrox.com/flavor}},
-            owner={{workflow.annotations.infra.stackrox.com/owner}},
-            lifespan={{workflow.annotations.infra.stackrox.com/lifespan}},
-            expiration={{= sprig.date('2006-01-02T15:04:05Z07:00', 
-              sprig.dateModify(inputs.parameters.lifespan,
-              sprig.toDate('2006-01-02T15:04:05Z07:00',
-                workflow.creationTimestamp.RFC3339)))
-            }}
+          - "--labels=\
+            flavor={{workflow.annotations.infra.stackrox.com/flavor}},\
+            owner={{workflow.annotations.infra.stackrox.com/owner}},\
+            lifespan={{workflow.annotations.infra.stackrox.com/lifespan}},\
+            expiration={{= sprig.date('2006-01-02T15:04:05Z07:00',\
+              sprig.dateModify(inputs.parameters.lifespan,\
+              sprig.toDate('2006-01-02T15:04:05Z07:00',\
+                workflow.creationTimestamp.RFC3339)))\
+            }}"
           - --k8s-version={{workflow.parameters.k8s-version}}
           - --pod-security-policy={{workflow.parameters.pod-security-policy}}
           - --gcp-image-type={{workflow.parameters.gcp-image-type}}
