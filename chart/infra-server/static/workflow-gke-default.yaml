@@ -6,6 +6,8 @@ metadata:
     needsExit: "true"
   annotations:
     infra.stackrox.com/lifespan: 0s
+    infra.stackrox.com/flavor: unknown
+    infra.stackrox.com/owner: unknown
 spec:
   entrypoint: start
   onExit: stop
@@ -170,7 +172,15 @@ spec:
           - "--machine-type={{workflow.parameters.machine-type}}"
           - --gcp-project=srox-temp-dev-test
           - --creation-source=infra
-          - --labels=lifespan={{workflow.annotations.infra.stackrox.com/lifespan}}
+          - >-
+            --labels=flavor={{workflow.annotations.infra.stackrox.com/flavor}},
+            owner={{workflow.annotations.infra.stackrox.com/owner}},
+            lifespan={{workflow.annotations.infra.stackrox.com/lifespan}},
+            expiration={{= sprig.date('2006-01-02T15:04:05Z07:00', 
+              sprig.dateModify(inputs.parameters.lifespan,
+              sprig.toDate('2006-01-02T15:04:05Z07:00',
+                workflow.creationTimestamp.RFC3339)))
+            }}
           - --k8s-version={{workflow.parameters.k8s-version}}
           - --pod-security-policy={{workflow.parameters.pod-security-policy}}
           - --gcp-image-type={{workflow.parameters.gcp-image-type}}
