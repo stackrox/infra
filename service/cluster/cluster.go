@@ -664,6 +664,9 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 					log.Warnw("failed to resume argo workflow", "workflow-name", workflow.GetName(), "error", err)
 				}
 			}
+			if workflow.Spec.HasExitHook() {
+				log.Infow("argo workflow has exit hook")
+			}
 			if value, exists := workflow.GetLabels()["needsExit"]; exists {
 				log.Infow("argo workflow requires exit to stop looping", "needsExit", value)
 				log.Infow("stopping argo workflow that expired", "workflow-name", workflow.GetName())
