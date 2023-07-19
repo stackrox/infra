@@ -40,11 +40,11 @@ spec:
               - name: message
                 value: "create"
         - - name: wait
-            template: wait
+            template: running
             arguments:
               parameters:
-              - name: oldlifespan
-                value: ""  # Force lookup and copy of lifespan
+              - name: lifespan
+                value: "{{workflow.annotations.infra.stackrox.com/lifespan}}"
 
     - name: stop
       steps:
@@ -55,65 +55,75 @@ spec:
                 - name: message
                   value: "{{workflow.parameters.name}}"
 
+    - name: running
+      inputs:
+        parameters:
+          - name: lifespan
+      failFast: false
+      steps:
+        - - name: label
+            template: label
+            arguments:
+              parameters:
+                - name: lifespan
+                  value: "{{inputs.parameters.lifespan}}"
+        - - name: wait
+            template: wait
+            arguments:
+              parameters:
+                - name: lifespan
+                  value: "{{inputs.parameters.lifespan}}"
+
     - name: wait
       inputs:
         parameters:
-          - name: oldlifespan
-      failFast: false
+          - name: lifespan
       steps:
         - - name: delay
             inline:
               suspend:
                 duration: "30"
-        - - name: shortloop
-            template: wait
-            when: "'{{inputs.parameters.oldlifespan}}' =~ '{{workflow.annotations.infra.stackrox.com/lifespan}}'"
+        - - name: echo
+            template: echo
             arguments:
               parameters:
-                - name: oldlifespan
-                  value: "{{workflow.annotations.infra.stackrox.com/lifespan}}"
-        - - name: timeupdate
-            template: timeupdate
+                - name: message
+                  value: "'{{inputs.parameters.lifespan}}' =~ '{{workflow.annotations.infra.stackrox.com/lifespan}}'"
+        - - name: loop
+            template: wait
+            when: "'{{inputs.parameters.lifespan}}' =~ '{{workflow.annotations.infra.stackrox.com/lifespan}}'"
+            arguments:
+              parameters:
+                - name: lifespan
+                  value: "{{inputs.parameters.lifespan}}"  # If we send the annotation, it could change between the 'when' check and sending.
+        - - name: break
+            template: running
             arguments:
               parameters:
                 - name: lifespan
                   value: "{{workflow.annotations.infra.stackrox.com/lifespan}}"
-        - - name: loop
-            template: wait
-            arguments:
-              parameters:
-                - name: oldlifespan
-                  value: "{{workflow.annotations.infra.stackrox.com/lifespan}}"
 
-    - name: echo
-      inputs:
-        parameters:
-        - name: message
-      container:
-        image: alpine:3.7
-        command: [echo, "{{inputs.parameters.message}}"]
-
-    - name: timeupdate
+    - name: label
       inputs:
         parameters:
           - name: lifespan
       steps:
-        - - name: setlabels
-            template: label
+        - - name: label
+            template: label-gke
             arguments:
               parameters:
               - name: labels
                 value: "\
                   flavor={{workflow.annotations.infra.stackrox.com/flavor}},\
                   owner={{workflow.annotations.infra.stackrox.com/owner}},\
-                  lifespan={{workflow.annotations.infra.stackrox.com/lifespan}},\
+                  lifespan={{inputs.parameters.lifespan}},\
                   expiration={{= sprig.date('2006-01-02T15:04:05Z07:00',\
                     sprig.dateModify(inputs.parameters.lifespan,\
                     sprig.toDate('2006-01-02T15:04:05Z07:00',\
                       workflow.creationTimestamp.RFC3339)))\
                   }}"
 
-    - name: label
+    - name: label-gke
       inputs:
         parameters:
         - name: labels
@@ -138,6 +148,14 @@ spec:
           - name: credentials
             mountPath: /tmp
                
+    - name: echo
+      inputs:
+        parameters:
+        - name: message
+      container:
+        image: alpine:3.7
+        command: [echo, "{{inputs.parameters.message}}"]
+
     - name: create
       activeDeadlineSeconds: 3600
       outputs:
@@ -161,7 +179,7 @@ spec:
             valueFrom:
               path: /outputs/cluster_name
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-gke-default-0.7.6-3-g1ce65fe441-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-gke-default-0.5.3
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint
@@ -172,15 +190,6 @@ spec:
           - "--machine-type={{workflow.parameters.machine-type}}"
           - --gcp-project=srox-temp-dev-test
           - --creation-source=infra
-          - "--labels=\
-            flavor={{workflow.annotations.infra.stackrox.com/flavor}},\
-            owner={{workflow.annotations.infra.stackrox.com/owner}},\
-            lifespan={{workflow.annotations.infra.stackrox.com/lifespan}},\
-            expiration={{= sprig.date('2006-01-02T15:04:05Z07:00',\
-              sprig.dateModify(inputs.parameters.lifespan,\
-              sprig.toDate('2006-01-02T15:04:05Z07:00',\
-                workflow.creationTimestamp.RFC3339)))\
-            }}"
           - --k8s-version={{workflow.parameters.k8s-version}}
           - --pod-security-policy={{workflow.parameters.pod-security-policy}}
           - --gcp-image-type={{workflow.parameters.gcp-image-type}}
