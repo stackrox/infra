@@ -528,6 +528,9 @@ func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.
 			"error", err,
 		)
 	}
+	if workflow.Spec.HasExitHook() {
+		log.Infow("argo workflow has exit hook")
+	}
 	if value, exists := workflow.GetLabels()["needsExit"]; exists {
 		log.Infow("argo workflow requires exit to stop looping", "needsExit", value)
 		log.Infow("stopping argo workflow", "workflow-name", workflow.GetName())
