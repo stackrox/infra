@@ -82,7 +82,7 @@ spec:
         - - name: delay
             inline:
               suspend:
-                duration: "30"
+                duration: "1"
         - - name: echo
             template: echo
             arguments:
