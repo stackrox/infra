@@ -29,8 +29,8 @@ export default function LinkCard({
       <Panel isScrollable variant="raised">
         <PanelHeader>{header}</PanelHeader>
         <Divider />
-        <PanelMain tabIndex={0}>
-          <PanelMainBody>{children} </PanelMainBody>
+        <PanelMain>
+          <PanelMainBody>{children}</PanelMainBody>
         </PanelMain>
         {!!footer && <PanelFooter>{footer}</PanelFooter>}
       </Panel>
