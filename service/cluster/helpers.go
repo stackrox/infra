@@ -213,7 +213,7 @@ func workflowStatus(workflowStatus v1alpha1.WorkflowStatus) v1.Status {
 			if node.GetName() == "destroy" || node.IsExitNode() {
 				return v1.Status_DESTROYING
 			}
-			if node.GetName() != "create" {
+			if node.GetName() == "create" {
 				switch node.Phase {
 				case v1alpha1.NodeError, v1alpha1.NodeFailed, v1alpha1.NodeSkipped:
 					return v1.Status_FAILED
