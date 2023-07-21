@@ -36,3 +36,21 @@
 .rhacs-logo-text {
   fill: #ffffff;
 }
+
+/* LinkCard */
+
+/* appear to be clickable */
+a:hover > .pf-c-panel {
+  background-color: var(--pf-global--BackgroundColor--200);
+}
+
+/* reset to regular font for LinkCard content */
+a > .pf-c-panel {
+  font-weight: var(--pf-global--FontWeight--normal);
+}
+
+/* LinkCard title */
+a > .pf-c-panel > .pf-c-panel__header {
+  font-weight: var(--pf-global--FontWeight--bold);
+  font-size: var(--pf-global--FontSize--lg);
+}

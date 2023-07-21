@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useState, ReactElement } from 'react';
 import { AxiosPromise } from 'axios';
+import { Gallery, GalleryItem } from '@patternfly/react-core';
 
 import { V1FlavorListResponse, FlavorServiceApi } from 'generated/client';
 import useApiQuery from 'client/useApiQuery';
@@ -34,15 +35,16 @@ function FlavorCards({ showAllFlavors = false }: FlavorCardsProps): ReactElement
   const cards = data.Flavors.map((flavor) => {
     assertDefined(flavor.ID); // swagger definitions are too permitting
     return (
-      <LinkCard
-        key={flavor.ID}
-        to={`launch/${flavor.ID}`}
-        header={flavor.Name || 'Unnamed'}
-        footer={<span className="capitalize">{flavor.Availability || 'Alpha'}</span>}
-        className="m-2"
-      >
-        <p className="text-lg">{flavor.Description}</p>
-      </LinkCard>
+      <GalleryItem>
+        <LinkCard
+          key={flavor.ID}
+          to={`launch/${flavor.ID}`}
+          header={flavor.Name || 'Unnamed'}
+          footer={<span className="capitalize">{flavor.Availability || 'Alpha'}</span>}
+        >
+          <p>{flavor.Description}</p>
+        </LinkCard>
+      </GalleryItem>
     );
   });
   return <>{cards}</>;
@@ -79,9 +81,20 @@ export default function LaunchPageSection(): ReactElement {
   );
   return (
     <PageSection header={header}>
-      <div className="flex flex-wrap -m-2">
+      <Gallery
+        hasGutter
+        minWidths={{
+          default: '100%',
+          md: '100px',
+          xl: '300px',
+        }}
+        maxWidths={{
+          md: '200px',
+          xl: '1fr',
+        }}
+      >
         <FlavorCards showAllFlavors={showAllFlavors} />
-      </div>
+      </Gallery>
     </PageSection>
   );
 }
