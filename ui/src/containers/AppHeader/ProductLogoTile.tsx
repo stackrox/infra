@@ -7,7 +7,7 @@ import Version from './Version';
 
 export default function ProductLogoTile(): ReactElement {
   return (
-    <Flex className="pf-u-align-items-center">
+    <Flex alignItems={{ default: 'alignItemsCenter' }}>
       <FlexItem>
         <Link to="/">
           <RHACSLogo />
