@@ -62,11 +62,6 @@ export default function TextFormField({
         isDisabled={disabled}
         aria-describedby={`${id}-helper`}
         validated={meta.error ? ValidatedOptions.error : ValidatedOptions.default}
-        // Tailwind removal - These classes are to make the form field work with
-        // dark mode and can be removed with pattern fly light mode.
-        className={`bg-base-100 border-2 rounded p-2 my-2 border-base-300 font-600 text-base-600 leading-normal min-h-8 ${
-          disabled ? 'bg-base-200' : 'hover:border-base-400'
-        }`}
       />
     </FormGroup>
   );
