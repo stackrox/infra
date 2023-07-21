@@ -49,3 +49,15 @@
 .pf-c-form__label-text {
   text-transform: capitalize;
 }
+
+.rhacs-logo-hat {
+  fill: #EE0000;
+}
+
+.rhacs-logo-hat-band {
+  fill: #000000;
+}
+
+.rhacs-logo-text {
+  fill: #FFFFFF;
+}
