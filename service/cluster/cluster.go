@@ -529,10 +529,10 @@ func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.
 		)
 	}
 	if workflow.Spec.HasExitHook() {
-		log.Infow("argo workflow has exit hook")
+		log.Infow("argo workflow has exit hook", "workflow-name", workflow.GetName())
 	}
-	log.Infow("labels:", "labels", workflow.GetLabels(), "workflow-name", workflow.GetName())
-	if value, exists := workflow.GetLabels()["needsExit"]; exists {
+	log.Infow("labels:", "labels", workflow.Spec.WorkflowMetadata.Labels, "workflow-name", workflow.GetName())
+	if value, exists := workflow.Spec.WorkflowMetadata.Labels["needsExit"]; exists {
 		log.Infow("argo workflow requires exit to stop looping", "needsExit", value, "workflow-name", workflow.GetName())
 		log.Infow("stopping argo workflow", "workflow-name", workflow.GetName())
 		_, err = s.argoWorkflowsClient.StopWorkflow(s.argoClientCtx, &workflowpkg.WorkflowStopRequest{
@@ -669,9 +669,10 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 				}
 			}
 			if workflow.Spec.HasExitHook() {
-				log.Infow("argo workflow has exit hook")
+				log.Infow("argo workflow has exit hook", "workflow-name", workflow.GetName())
 			}
-			if value, exists := workflow.GetLabels()["needsExit"]; exists {
+			log.Infow("labels:", "labels", workflow.Spec.WorkflowMetadata.Labels, "workflow-name", workflow.GetName())
+			if value, exists := workflow.Spec.WorkflowMetadata.Labels["needsExit"]; exists {
 				log.Infow("argo workflow requires exit to stop looping", "needsExit", value)
 				log.Infow("stopping argo workflow that expired", "workflow-name", workflow.GetName())
 				_, err = s.argoWorkflowsClient.StopWorkflow(s.argoClientCtx, &workflowpkg.WorkflowStopRequest{
