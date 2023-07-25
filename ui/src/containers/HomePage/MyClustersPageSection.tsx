@@ -2,6 +2,7 @@
 import React, { useState, ReactElement } from 'react';
 import { AxiosPromise } from 'axios';
 import moment from 'moment';
+import { Gallery, GalleryItem } from '@patternfly/react-core';
 
 import { V1ClusterListResponse, ClusterServiceApi } from 'generated/client';
 import useApiQuery from 'client/useApiQuery';
@@ -67,19 +68,19 @@ function ClusterCards({ showAllClusters = false }: ClusterCardsProps): ReactElem
 
     const extraCardClass = showAllClusters && cluster.Owner === user?.Email ? 'bg-base-200' : '';
     return (
-      <LinkCard
-        key={cluster.ID}
-        to={`cluster/${cluster.ID}`}
-        header={cluster.ID || 'No ID'}
-        footer={cluster.Status && <Lifespan cluster={cluster} />}
-        className={`m-2 h-43 ${extraCardClass}`}
-      >
-        {cluster.Description && (
-          <span className="mb-2 text-lg">Description: {cluster.Description}</span>
-        )}
-        <span className="text-lg">Status: {cluster.Status || 'FAILED'}</span>
-        <span className="text-lg">Flavor: {cluster.Flavor || 'Unknown'}</span>
-      </LinkCard>
+      <GalleryItem>
+        <LinkCard
+          key={cluster.ID}
+          to={`cluster/${cluster.ID}`}
+          header={cluster.ID || 'No ID'}
+          footer={cluster.Status && <Lifespan cluster={cluster} />}
+          className={extraCardClass}
+        >
+          {cluster.Description && <p>Description: {cluster.Description}</p>}
+          <p>Status: {cluster.Status || 'FAILED'}</p>
+          <p>Flavor: {cluster.Flavor || 'Unknown'}</p>
+        </LinkCard>
+      </GalleryItem>
     );
   });
   return <>{cards}</>;
@@ -116,9 +117,20 @@ export default function LaunchPageSection(): ReactElement {
   );
   return (
     <PageSection header={header}>
-      <div className="flex flex-wrap -m-2">
+      <Gallery
+        hasGutter
+        minWidths={{
+          default: '100%',
+          md: '100px',
+          xl: '300px',
+        }}
+        maxWidths={{
+          md: '200px',
+          xl: '1fr',
+        }}
+      >
         <ClusterCards showAllClusters={showAllClusters} />
-      </div>
+      </Gallery>
     </PageSection>
   );
 }
