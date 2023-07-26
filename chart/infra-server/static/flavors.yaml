@@ -3,7 +3,7 @@
 ##########
 - id: demo
   name: StackRox Demo
-  description: Demo running StackRox 4.1.1
+  description: Demo running StackRox 4.1.2
   availability: default
   workflow: configuration/workflow-demo.yaml
   parameters:
@@ -12,11 +12,11 @@
       value: example1
 
     - name: main-image
-      value: quay.io/rhacs-eng/main:4.1.1
+      value: quay.io/rhacs-eng/main:4.1.2
       kind: hardcoded
 
     - name: central-db-image
-      value: quay.io/rhacs-eng/central-db:4.1.1
+      value: quay.io/rhacs-eng/central-db:4.1.2
       kind: hardcoded
 
     - name: k8s-version
@@ -59,9 +59,9 @@
 
     - name: main-image
       description: StackRox Central image Docker name
-      value: quay.io/stackrox-io/main:4.1.1
+      value: quay.io/stackrox-io/main:4.1.2
       help: |
-        This must be a fully qualified image e.g. quay.io/stackrox-io/main:4.1.1.
+        This must be a fully qualified image e.g. quay.io/stackrox-io/main:4.1.2.
         Private images from quay.io/rhacs-eng and stackrox.io (legacy) can also be used.
         Other public images should also be OK.
 
@@ -337,17 +337,17 @@
 
     - name: central-services-helm-chart-version
       description: Central Services Helm chart version
-      value: 4.1.1
+      value: 4.1.2
       kind: optional
       help: |
-        Version string of the roxctl version to use to generate Central Services Helm chart, e.g., 4.1.1.
+        Version string of the roxctl version to use to generate Central Services Helm chart, e.g., 4.1.2.
 
     - name: secured-cluster-services-helm-chart-version
       description: Secured Cluster Services Helm chart version
-      value: 4.1.1
+      value: 4.1.2
       kind: optional
       help: |
-        Version string of the roxctl version to use to generate Secured Cluster Services Helm chart, e.g., 4.1.1.
+        Version string of the roxctl version to use to generate Secured Cluster Services Helm chart, e.g., 4.1.2.
 
     - name: openshift-version
       description: openshift release from OCP, OCP dev preview, or OKD

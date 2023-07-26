@@ -9,6 +9,7 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 ## [NEXT RELEASE]
 
 - Upgrade Go version to 1.20
+- Bump demo flavors to 4.1.2
 
 ## [0.7.8]
 
