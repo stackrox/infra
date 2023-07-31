@@ -10,6 +10,7 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 - Upgrade Go version to 1.20
 - Record cluster creation and deletions in BigQuery.
+- Bump demo flavors to 4.1.2
 
 ## [0.7.8]
 
