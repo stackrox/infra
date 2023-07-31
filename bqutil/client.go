@@ -18,8 +18,8 @@ const (
 
 // BigQueryClient is a BigQuery client that operates on `IngestionRecord`s.
 type BigQueryClient interface {
-	InsertClusterCreationRecord(ctx context.Context, clusterID, flavor, actor string) error
-	InsertClusterDeletionRecord(ctx context.Context, clusterID string) error
+	InsertClusterCreationRecord(ctx context.Context, clusterID, workflowName, flavor, actor string) error
+	InsertClusterDeletionRecord(ctx context.Context, clusterID, workflowName string) error
 }
 
 var (
@@ -37,17 +37,18 @@ type enabledClient struct {
 
 type disabledClient struct{}
 
-func (*disabledClient) InsertClusterCreationRecord(_ context.Context, _, _, _ string) error {
+func (*disabledClient) InsertClusterCreationRecord(_ context.Context, _, _, _, _ string) error {
 	return nil
 }
 
-func (*disabledClient) InsertClusterDeletionRecord(_ context.Context, _ string) error {
+func (*disabledClient) InsertClusterDeletionRecord(_ context.Context, _, _ string) error {
 	return nil
 }
 
 type clusterCreationRecord struct {
 	Environment       string
 	ClusterID         string
+	WorkflowName      string
 	Flavor            string
 	Actor             string
 	CreationTimestamp time.Time
@@ -56,6 +57,7 @@ type clusterCreationRecord struct {
 type clusterDeletionRecord struct {
 	Environment       string
 	ClusterID         string
+	WorkflowName      string
 	DeletionTimestamp time.Time
 }
 
@@ -96,13 +98,14 @@ func NewClient(cfg *config.BigQueryConfig) (BigQueryClient, error) {
 }
 
 // InsertClusterCreationRecord inserts a new cluster creation record into BigQuery.
-func (c *enabledClient) InsertClusterCreationRecord(ctx context.Context, clusterID, flavor, actor string) error {
+func (c *enabledClient) InsertClusterCreationRecord(ctx context.Context, clusterID, workflowName, flavor, actor string) error {
 	subCtx, cancel := context.WithTimeout(ctx, bigqueryInsertTimeout)
 	defer cancel()
 
 	clusterCreationRecord := &clusterCreationRecord{
 		Environment:       c.environment,
 		ClusterID:         clusterID,
+		WorkflowName:      workflowName,
 		Flavor:            flavor,
 		Actor:             actor,
 		CreationTimestamp: time.Now(),
@@ -112,13 +115,14 @@ func (c *enabledClient) InsertClusterCreationRecord(ctx context.Context, cluster
 }
 
 // InsertClusterDeletionRecord inserts a new cluster deletion record into BigQuery.
-func (c *enabledClient) InsertClusterDeletionRecord(ctx context.Context, clusterID string) error {
+func (c *enabledClient) InsertClusterDeletionRecord(ctx context.Context, clusterID, workflowName string) error {
 	subCtx, cancel := context.WithTimeout(ctx, bigqueryInsertTimeout)
 	defer cancel()
 
 	clusterDeletionRecord := &clusterDeletionRecord{
 		Environment:       c.environment,
 		ClusterID:         clusterID,
+		WorkflowName:      workflowName,
 		DeletionTimestamp: time.Now(),
 	}
 

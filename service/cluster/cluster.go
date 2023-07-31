@@ -416,7 +416,7 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		"cluster-id", clusterID,
 	)
 
-	err = s.bqClient.InsertClusterCreationRecord(context.Background(), clusterID, flav.GetID(), owner)
+	err = s.bqClient.InsertClusterCreationRecord(context.Background(), clusterID, created.GetName(), flav.GetID(), owner)
 	if err != nil {
 		log.Warnw("err", err, "failed to record cluster creation", "cluster-id", clusterID)
 	}
@@ -532,12 +532,13 @@ func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.
 	})
 	if err != nil {
 		log.Warnw("failed to resume workflow, this is OK if the workflow is not waiting",
-			"workflow-name", req.GetId(),
+			"cluster-id", req.GetId(),
+			"workflow-name", workflow.GetName(),
 			"error", err,
 		)
 	}
 
-	err = s.bqClient.InsertClusterDeletionRecord(context.Background(), req.GetId())
+	err = s.bqClient.InsertClusterDeletionRecord(context.Background(), req.GetId(), workflow.GetName())
 	if err != nil {
 		log.Warnw("err", err, "failed to record cluster deletion", "cluster-id", req.GetId())
 	}
@@ -661,9 +662,9 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 			}
 
 			clusterID := strings.TrimSuffix(workflow.ObjectMeta.GenerateName, "-")
-			err = s.bqClient.InsertClusterDeletionRecord(context.Background(), clusterID)
+			err = s.bqClient.InsertClusterDeletionRecord(context.Background(), clusterID, workflow.GetName())
 			if err != nil {
-				log.Warnw("err", err, "failed to record cluster deletion", "cluster-id", clusterID)
+				log.Warnw("err", err, "failed to record cluster deletion", "workflow-name", workflow.GetName())
 			}
 		}
 
@@ -763,7 +764,7 @@ func (s *clusterImpl) slackCheckWorkflow(workflow v1alpha1.Workflow) {
 
 		if metacluster.Status == v1.Status_FAILED {
 			clusterID := getClusterIDFromWorkflow(&workflow)
-			err = s.bqClient.InsertClusterDeletionRecord(context.Background(), clusterID)
+			err = s.bqClient.InsertClusterDeletionRecord(context.Background(), clusterID, workflow.GetName())
 			if err != nil {
 				log.Warnw("err", err, "failed to record cluster deletion", "cluster-id", clusterID)
 			}
