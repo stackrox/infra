@@ -11,6 +11,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/auth"
+	"github.com/stackrox/infra/bqutil"
 	"github.com/stackrox/infra/config"
 	"github.com/stackrox/infra/flavor"
 	"github.com/stackrox/infra/pkg/buildinfo"
@@ -76,6 +77,11 @@ func mainCmd() error {
 		return errors.Wrapf(err, "failed to create Slack client")
 	}
 
+	bqClient, err := bqutil.NewClient(cfg.BigQuery)
+	if err != nil {
+		return errors.Wrapf(err, "failed to create bqClient")
+	}
+
 	// Construct each individual service.
 	services, err := middleware.Services(
 		func() (middleware.APIService, error) {
@@ -88,7 +94,7 @@ func mainCmd() error {
 		service.NewStatusService,
 		service.NewVersionService,
 		func() (middleware.APIService, error) {
-			return cluster.NewClusterService(registry, signer, slackClient)
+			return cluster.NewClusterService(registry, signer, slackClient, bqClient)
 		},
 	)
 	if err != nil {

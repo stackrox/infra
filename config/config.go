@@ -17,8 +17,22 @@ type Config struct {
 	// Server administrator password.
 	Password string `json:"password"`
 
+	// Google BigQuery integration configuration
+	BigQuery *BigQueryConfig `json:"bigQuery"`
+
 	// Slack notification configuration.
 	Slack *SlackConfig `json:"slack"`
+}
+
+// BigQueryConfig represents the configuration for integrating with Google BigQuery
+// to record cluster lifetime.
+type BigQueryConfig struct {
+	CredentialsFile string `json:"credentialsFile"`
+	Environment     string `json:"environment"`
+	Project         string `json:"project"`
+	Dataset         string `json:"dataset"`
+	CreationTable   string `json:"creationTable"`
+	DeletionTable   string `json:"deletionTable"`
 }
 
 // AuthOidcConfig represents the configuration for integrating with OIDC provider.

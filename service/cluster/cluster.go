@@ -22,6 +22,7 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/pkg/errors"
+	"github.com/stackrox/infra/bqutil"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	"github.com/stackrox/infra/flavor"
 	v1 "github.com/stackrox/infra/generated/api/v1"
@@ -77,6 +78,7 @@ type clusterImpl struct {
 	argoWorkflowsClient workflowpkg.WorkflowServiceClient
 	argoClientCtx       context.Context
 	workflowNamespace   string
+	bqClient            bqutil.BigQueryClient
 }
 
 var (
@@ -87,7 +89,7 @@ var (
 )
 
 // NewClusterService creates a new ClusterService.
-func NewClusterService(registry *flavor.Registry, signer *signer.Signer, slackClient slack.Slacker) (middleware.APIService, error) {
+func NewClusterService(registry *flavor.Registry, signer *signer.Signer, slackClient slack.Slacker, bqClient bqutil.BigQueryClient) (middleware.APIService, error) {
 	workflowNamespace := "default"
 
 	k8sWorkflowsClient, err := kube.GetK8sWorkflowsClient(workflowNamespace)
@@ -118,6 +120,7 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer, slackCl
 		argoWorkflowsClient: argoWorkflowsClient,
 		argoClientCtx:       ctx,
 		workflowNamespace:   workflowNamespace,
+		bqClient:            bqClient,
 	}
 
 	go impl.startSlackCheck()
@@ -413,6 +416,11 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		"cluster-id", clusterID,
 	)
 
+	err = s.bqClient.InsertClusterCreationRecord(context.Background(), clusterID, created.GetName(), flav.GetID(), owner)
+	if err != nil {
+		log.Warnw("err", err, "failed to record cluster creation", "cluster-id", clusterID)
+	}
+
 	return &v1.ResourceByID{Id: clusterID}, nil
 }
 
@@ -524,9 +532,15 @@ func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.
 	})
 	if err != nil {
 		log.Warnw("failed to resume workflow, this is OK if the workflow is not waiting",
-			"workflow-name", req.GetId(),
+			"cluster-id", req.GetId(),
+			"workflow-name", workflow.GetName(),
 			"error", err,
 		)
+	}
+
+	err = s.bqClient.InsertClusterDeletionRecord(context.Background(), req.GetId(), workflow.GetName())
+	if err != nil {
+		log.Warnw("err", err, "failed to record cluster deletion", "cluster-id", req.GetId())
 	}
 
 	return &empty.Empty{}, nil
@@ -646,6 +660,12 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 			if err != nil {
 				log.Warnw("failed to resume argo workflow", "workflow-name", workflow.GetName(), "error", err)
 			}
+
+			clusterID := strings.TrimSuffix(workflow.ObjectMeta.GenerateName, "-")
+			err = s.bqClient.InsertClusterDeletionRecord(context.Background(), clusterID, workflow.GetName())
+			if err != nil {
+				log.Warnw("err", err, "failed to record cluster deletion", "workflow-name", workflow.GetName())
+			}
 		}
 
 		if time.Since(start) > loopDurationWarning {
@@ -739,6 +759,14 @@ func (s *clusterImpl) slackCheckWorkflow(workflow v1alpha1.Workflow) {
 			if err := s.slackClient.PostMessage(message...); err != nil {
 				log.Errorw("failed to send Slack message", "error", err)
 				return
+			}
+		}
+
+		if metacluster.Status == v1.Status_FAILED {
+			clusterID := getClusterIDFromWorkflow(&workflow)
+			err = s.bqClient.InsertClusterDeletionRecord(context.Background(), clusterID, workflow.GetName())
+			if err != nil {
+				log.Warnw("err", err, "failed to record cluster deletion", "cluster-id", clusterID)
 			}
 		}
 	}
