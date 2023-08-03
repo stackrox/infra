@@ -37,14 +37,14 @@ spec:
             template: echo
             arguments:
               parameters:
-              - name: message
-                value: "create"
+                - name: message
+                  value: "create"
         - - name: wait
             template: running
             arguments:
               parameters:
-              - name: lifespan
-                value: "{{workflow.annotations.infra.stackrox.com/lifespan}}"
+                - name: lifespan
+                  value: "{{workflow.annotations.infra.stackrox.com/lifespan}}"
 
     - name: stop
       steps:
