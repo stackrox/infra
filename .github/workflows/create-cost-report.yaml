@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  create-cost-report:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -20,6 +20,8 @@ jobs:
 
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v0'
+
+      - run: pip install -r ./scripts/cost-estimation/requirements.txt
 
       - name: Calculate costs
         run: |
