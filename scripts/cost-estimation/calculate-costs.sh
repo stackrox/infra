@@ -1,6 +1,10 @@
 #!/bin/bash
 
+set +xeuo pipefail
+
 WORKING_DIR=$(dirname "$0")
+
+ls -lisa "$WORKING_DIR"
 
 bq query \
     --nouse_legacy_sql \
