@@ -1,10 +1,8 @@
 #!/bin/bash
 
-set +xeuo pipefail
-
 WORKING_DIR=$(dirname "$0")
 
-# Hack to avoid bq initialization
+# Hack to avoid bq initialization spamming the stdout
 touch "${HOME}/.bigqueryrc"
 
 bq query \
@@ -12,5 +10,4 @@ bq query \
     --project_id stackrox-infra \
     --format prettyjson \
 < "${WORKING_DIR}/total-time-consumed.sql" \
-2>/dev/null \
 | python3 "${WORKING_DIR}/render_costs.py"

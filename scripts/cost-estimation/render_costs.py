@@ -21,14 +21,13 @@ DAILY_COST_MAP = {
 
 def read_usage_from_stdin():
     content = ""
-    print("hello")
     for line in sys.stdin:
-        print(1, line)
         content += line
 
-    print(content)
-
-    return json.loads(content)
+    try:
+        return json.loads(content)
+    except Exception as e:
+        raise("an exception occured while reading stdin:", e)
 
 def calculate_costs(usage):
     costs = []
@@ -48,12 +47,14 @@ def main():
     usage = read_usage_from_stdin()
     cost_per_flavor_env = calculate_costs(usage)
 
+    print("```")
     print(tabulate(
         cost_per_flavor_env,
         headers="keys",
-        tablefmt="simple_outline",
+        tablefmt="github",
         floatfmt=".2f"
     ))
+    print("```")
 
 
 if __name__ == "__main__":
