@@ -1,6 +1,9 @@
 name: Create cost report
 
 on:
+  push:
+    branches:
+      - tm/workflow-cluster-cost-estimation
   workflow_dispatch:
 
 jobs:
