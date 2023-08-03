@@ -4,6 +4,9 @@ set +xeuo pipefail
 
 WORKING_DIR=$(dirname "$0")
 
+# Hack to avoid bq initialization
+touch "${HOME}/.bigqueryrc"
+
 bq query \
     --nouse_legacy_sql \
     --project_id stackrox-infra \
