@@ -24,6 +24,8 @@ def read_usage_from_stdin():
     for line in sys.stdin:
         content += line
 
+    print(content)
+
     return json.loads(content)
 
 def calculate_costs(usage):
