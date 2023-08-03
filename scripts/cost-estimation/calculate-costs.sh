@@ -9,4 +9,5 @@ bq query \
     --project_id stackrox-infra \
     --format prettyjson \
 < "${WORKING_DIR}/total-time-consumed.sql" \
+2>/dev/null \
 | python3 "${WORKING_DIR}/render_costs.py"
