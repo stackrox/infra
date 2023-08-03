@@ -21,7 +21,9 @@ DAILY_COST_MAP = {
 
 def read_usage_from_stdin():
     content = ""
+    print("hello")
     for line in sys.stdin:
+        print(1, line)
         content += line
 
     print(content)
