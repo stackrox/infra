@@ -62,7 +62,7 @@
     "postcss": "^8.4.27",
     "postcss-cli": "^10.1.0",
     "prettier": "^2.2.1",
-    "react-scripts": "^4.0.1",
+    "react-scripts": "^5.0.1",
     "tailwindcss": "^2.2.9",
     "typescript": "~5.1.6",
     "wait-on": "^7.0.1"
