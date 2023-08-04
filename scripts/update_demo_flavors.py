@@ -53,7 +53,7 @@ def run(new_version):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        sys.stderr.write("usage: updater.py <NEW_VERSION>\n")
+        sys.stderr.write("usage: update_demo_flavors.py <NEW_VERSION>\n")
         sys.exit(1)
     try:
         new_version = Version(sys.argv[1])
