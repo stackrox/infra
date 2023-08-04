@@ -42,7 +42,7 @@ def update_demo_versions(last_version, new_version):
         f.truncate()
 
     with open(LAST_VERSION_FILE, "w") as f:
-        f.write(str(new_version))
+        f.write(f"{new_version}\n")
 
 
 def run(new_version):
