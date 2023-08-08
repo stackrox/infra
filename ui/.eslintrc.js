@@ -22,6 +22,8 @@ module.exports = {
     'react/prop-types': 'off',
     'react/require-default-props': 'off',
 
+    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+
     'import/no-extraneous-dependencies': [
       'error',
       {
