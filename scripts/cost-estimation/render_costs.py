@@ -3,6 +3,7 @@ import sys
 
 from tabulate import tabulate
 
+# Estimation based on flavor defaults
 DAILY_COST_MAP = {
     "demo": 33,
     "gke-default": 10,

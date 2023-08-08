@@ -10,3 +10,5 @@ If you have access privileges to BigQuery in the `stackrox-infra` project, you m
 ```
 
 If you want to update the query (e.g. to exclude environments, change the observation window, ...), you may do this in the `total-time-consumed.sql` file.
+
+The `DAILY_COST_MAP` are estimations based on the flavor default values, for more details see [this spreadsheet](https://docs.google.com/spreadsheets/d/1NsaEOOfJ2pMqgR-1-j-as1lb6qJqYOhCD4PW569AWkY/edit#gid=0).
