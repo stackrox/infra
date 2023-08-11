@@ -85,7 +85,7 @@ func (l *Logger) Log(logLevel LogLevel, msg string, keysAndValues ...interface{}
 		method = l.Errorw
 	}
 
-	method(msg, keysAndValues)
+	method(msg, keysAndValues...)
 }
 
 // AuditLog is a prepared wrapper to harmonize the audit logging format.
