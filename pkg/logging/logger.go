@@ -7,12 +7,20 @@ import (
 	"go.uber.org/zap"
 )
 
+// LogLevel enumerates log levels
 type LogLevel int
 
 const (
+	// DEBUG is the equivalent of zap.DebugLevel
 	DEBUG LogLevel = iota
+
+	// INFO is the equivalent of zap.InfoLevel
 	INFO
+
+	// WARN is the equivalent of zap.WarnLevel
 	WARN
+
+	// ERROR is the equivalent of zap.ErrorLevel
 	ERROR
 )
 
