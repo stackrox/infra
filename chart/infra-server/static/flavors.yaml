@@ -279,7 +279,7 @@
 
     - name: master-node-count
       description: number of master nodes
-      value: 3
+      value: 1
       kind: optional
 
     - name: worker-node-type
