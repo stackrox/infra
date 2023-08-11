@@ -64,14 +64,14 @@ type clusterDeletionRecord struct {
 // NewClient returns a new BigQuery client
 func NewClient(cfg *config.BigQueryConfig) (BigQueryClient, error) {
 	if os.Getenv("TEST_MODE") == "true" {
-		log.Infow("disabling BigQuery integration because we are in TEST_MODE")
+		log.Log(logging.INFO, "disabling BigQuery integration because we are in TEST_MODE")
 		return &disabledClient{}, nil
 	}
 
 	// If the config was missing a BigQuery configuration, disable the integration
 	// altogether.
 	if cfg == nil {
-		log.Infow("disabling BigQuery integration due to missing configuration")
+		log.Log(logging.INFO, "disabling BigQuery integration due to missing configuration")
 		return &disabledClient{}, nil
 	}
 
@@ -92,7 +92,7 @@ func NewClient(cfg *config.BigQueryConfig) (BigQueryClient, error) {
 		deletionInserter: deletionInserter,
 	}
 
-	log.Infow("enabled BigQuery integration")
+	log.Log(logging.INFO, "enabled BigQuery integration")
 
 	return bigQueryClient, nil
 }

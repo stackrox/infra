@@ -47,7 +47,7 @@ func mainCmd() error {
 	}
 
 	log := logging.CreateProductionLogger()
-	log.Infow("starting infra server", "version", buildinfo.All().Version)
+	log.Log(logging.INFO, "starting infra server", "version", buildinfo.All().Version)
 
 	serverConfigFile := filepath.Join(*flagConfigDir, "infra.yaml")
 	cfg, err := config.Load(serverConfigFile)

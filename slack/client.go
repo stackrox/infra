@@ -49,7 +49,7 @@ func New(cfg *config.SlackConfig) (Slacker, error) {
 	// If the config was missing a Slack configuration, disable the integration
 	// altogether.
 	if cfg == nil {
-		log.Infow("disabling Slack integration due to missing configuration")
+		log.Log(logging.INFO, "disabling Slack integration due to missing configuration")
 		return &disabledSlack{}, nil
 	}
 
@@ -59,34 +59,29 @@ func New(cfg *config.SlackConfig) (Slacker, error) {
 		emailCache: make(map[string]*slack.User),
 	}
 
-	log.Infow("enabled Slack integration")
+	log.Log(logging.INFO, "enabled Slack integration")
 
 	return client, nil
 }
 
 func (s *slackClient) LookupUser(email string) (*slack.User, bool) {
-	// TODO: do we still need all this debug logging?
-	log.Debugw("lookup user by email", "email", email)
 	s.lock.RLock()
 	user, found := s.emailCache[email]
 	if found {
 		s.lock.RUnlock()
-		log.Debugw("cache hit for email", "email", email)
 		return user, found
 	}
 	s.lock.RUnlock()
 
-	log.Debugw("get user by email", "email", email)
 	user, err := s.client.GetUserByEmail(email)
 	if err != nil {
 		if err.Error() == "users_not_found" {
-			log.Debugw("user not found", "email", email)
+			log.Log(logging.DEBUG, "slack user not found by email", "email", email)
 		} else {
-			log.Warnw("get user error", "email", email, "error", err)
+			log.Log(logging.WARN, "slack generic get user by email error", "email", email, "error", err)
 		}
 		return nil, false
 	}
-	log.Debugw("got user for email", "email", email)
 
 	s.lock.RLock()
 	defer s.lock.RUnlock()

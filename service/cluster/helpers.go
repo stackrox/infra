@@ -9,6 +9,7 @@ import (
 	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
 	"github.com/golang/protobuf/ptypes"
 	v1 "github.com/stackrox/infra/generated/api/v1"
+	"github.com/stackrox/infra/pkg/logging"
 	"github.com/stackrox/infra/slack"
 )
 
@@ -165,7 +166,7 @@ func handleArtifactMigration(workflow v1alpha1.Workflow, artifact v1alpha1.Artif
 	}
 
 	if bucket == "" || key == "" {
-		log.Warnw("cannot figure out bucket for artifact, possibly an upgrade issue, not fatal",
+		log.Log(logging.WARN, "cannot figure out bucket for artifact, possibly an upgrade issue, not fatal",
 			"workflow-name", workflow.Name,
 			"artifact", artifact,
 			"artifact-repository", workflow.Status.ArtifactRepositoryRef,

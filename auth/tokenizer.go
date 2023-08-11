@@ -11,6 +11,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/auth/claimrule"
 	v1 "github.com/stackrox/infra/generated/api/v1"
+	"github.com/stackrox/infra/pkg/logging"
 	"golang.org/x/oauth2"
 )
 
@@ -124,13 +125,19 @@ type oidcClaims struct {
 func (c oidcClaims) Valid() error {
 	_, isExcluded := excludedEmails[c.Email]
 	if isExcluded {
-		return errors.New("email address is excluded")
+		errMsg := "email address is excluded"
+		log.AuditLog(logging.INFO, "oidc-claim-validation", errMsg, "email", c.Email)
+		return errors.New(errMsg)
 	}
 	switch {
 	case !c.EmailVerified:
-		return errors.New("email address is not verified")
+		errMsg := "email address is not verified"
+		log.AuditLog(logging.INFO, "oidc-claim-validation", errMsg, "email", c.Email)
+		return errors.New(errMsg)
 	case !strings.HasSuffix(c.Email, emailSuffixRedHat):
-		return errors.Errorf("%q email address does not belong to Red Hat", c.Email)
+		errMsg := "email address does not belong to Red Hat"
+		log.AuditLog(logging.INFO, "oidc-claim-validation", errMsg, "email", c.Email)
+		return errors.Errorf(errMsg)
 	default:
 		c.StandardClaims.IssuedAt -= clockDriftLeeway
 		valid := c.StandardClaims.Valid()
@@ -265,6 +272,7 @@ func (t serviceAccountTokenizer) Generate(svcacct v1.ServiceAccount) (string, er
 
 	// Ensure that our service account is well-formed.
 	if err := svc.Valid(); err != nil {
+		log.AuditLog(logging.INFO, "service-account-validation", err.Error(), "email", svc.Email)
 		return "", errors.Wrap(err, "invalid service account")
 	}
 
