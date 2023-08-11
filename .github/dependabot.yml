@@ -12,11 +12,8 @@ updates:
       day: "thursday"
     open-pull-requests-limit: 10
     reviewers:
-      - "alwayshooin"
-      - "gavin-stackrox"
-      - "pedrottimark"
-      - "sachaudh"
-      - "vjwilson"
+      - 'stackrox/ui-dep-updaters'
+      - 'stackrox/infra'
 
   - package-ecosystem: 'gomod'
     directory: '/'
@@ -25,8 +22,4 @@ updates:
       day: 'wednesday'
     open-pull-requests-limit: 3
     reviewers:
-      - 'gavin-stackrox'
-      - 'RTann'
-      - 'BradLugo'
-      - 'house-d'
-      - 'tommartensen'
+      - 'stackrox/infra'
