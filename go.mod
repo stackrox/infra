@@ -5,7 +5,7 @@ go 1.20
 require (
 	cloud.google.com/go/bigquery v1.53.0
 	cloud.google.com/go/storage v1.31.0
-	github.com/argoproj/argo-workflows/v3 v3.4.8
+	github.com/argoproj/argo-workflows/v3 v3.4.9
 	github.com/buger/jsonparser v1.1.1
 	github.com/coreos/go-oidc/v3 v3.6.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
