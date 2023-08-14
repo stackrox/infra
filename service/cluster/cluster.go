@@ -232,9 +232,12 @@ func formatAnnotationPatch(annotationKey string, annotationValue string) ([]byte
 
 // Lifespan implements ClusterService.Lifespan.
 func (s *clusterImpl) Lifespan(ctx context.Context, req *v1.LifespanRequest) (*duration.Duration, error) {
-	user, _ := middleware.UserFromContext(ctx)
+	owner, err := getOwnerFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 	log.AuditLog(logging.INFO, "cluster-lifespan", "received a lifespan update request for infra cluster",
-		"actor", user.GetEmail(),
+		"actor", owner,
 		"cluster-id", req.GetId(),
 		"lifespan-update-method", req.GetMethod().String(),
 		"lifespan", req.GetLifespan().String(),
@@ -299,14 +302,7 @@ func (s *clusterImpl) lifespan(ctx context.Context, req *v1.LifespanRequest, wor
 	return ptypes.DurationProto(remaining), nil
 }
 
-// Create implements ClusterService.Create.
-func (s *clusterImpl) Create(ctx context.Context, req *v1.CreateClusterRequest) (*v1.ResourceByID, error) {
-	user, _ := middleware.UserFromContext(ctx)
-	log.AuditLog(logging.INFO, "cluster-create", "received a create request for flavor",
-		"actor", user.GetEmail(),
-		"flavor-id", req.GetID(),
-	)
-
+func getOwnerFromContext(ctx context.Context) (string, error) {
 	// Determine the owner for this cluster, which is derived from information
 	// about the current authenticated user stored in the request context.
 	var owner string
@@ -315,9 +311,23 @@ func (s *clusterImpl) Create(ctx context.Context, req *v1.CreateClusterRequest) 
 	} else if svcacct, found := middleware.ServiceAccountFromContext(ctx); found {
 		owner = svcacct.GetEmail()
 	} else {
-		return nil, errors.New("could not determine owner")
+		return "", errors.New("could not determine owner")
 	}
 
+	return owner, nil
+}
+
+// Create implements ClusterService.Create.
+func (s *clusterImpl) Create(ctx context.Context, req *v1.CreateClusterRequest) (*v1.ResourceByID, error) {
+	owner, err := getOwnerFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	log.AuditLog(logging.INFO, "cluster-create", "received a create request for flavor",
+		"actor", owner,
+		"flavor-id", req.GetID(),
+	)
 	return s.create(req, owner, "")
 }
 
