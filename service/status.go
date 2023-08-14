@@ -95,9 +95,13 @@ func (s *statusImpl) GetStatus(ctx context.Context, _ *empty.Empty) (*v1.InfraSt
 				return nil, err
 			}
 
-			user, _ := middleware.UserFromContext(ctx)
+			actor, err := middleware.GetOwnerFromContext(ctx)
+			if err != nil {
+				return nil, err
+			}
+
 			log.AuditLog(logging.INFO, "infra-status", "initialized infra status lazily",
-				"actor", user.GetEmail(),
+				"actor", actor,
 				"maintenance-active", infraStatus.GetMaintenanceActive(),
 			)
 			return infraStatus, nil
@@ -120,9 +124,12 @@ func (s *statusImpl) SetStatus(ctx context.Context, infraStatus *v1.InfraStatus)
 		return nil, err
 	}
 
-	user, _ := middleware.UserFromContext(ctx)
+	actor, err := middleware.GetOwnerFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 	log.AuditLog(logging.INFO, "infra-status", "new status set",
-		"actor", user.GetEmail(),
+		"actor", actor,
 		"maintainer", infraStatus.GetMaintainer(),
 		"maintenance-active", infraStatus.GetMaintenanceActive(),
 	)
@@ -136,9 +143,12 @@ func (s *statusImpl) ResetStatus(ctx context.Context, _ *empty.Empty) (*v1.Infra
 		return nil, err
 	}
 
-	user, _ := middleware.UserFromContext(ctx)
+	actor, err := middleware.GetOwnerFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 	log.AuditLog(logging.INFO, "infra-status", "status was reset",
-		"actor", user.GetEmail(),
+		"actor", actor,
 		"maintenance-active", infraStatus.GetMaintenanceActive(),
 	)
 	return infraStatus, nil

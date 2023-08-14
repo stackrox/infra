@@ -21,7 +21,6 @@ import (
 	"github.com/golang/protobuf/ptypes/duration"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/pkg/errors"
 	"github.com/stackrox/infra/bqutil"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	"github.com/stackrox/infra/flavor"
@@ -232,7 +231,7 @@ func formatAnnotationPatch(annotationKey string, annotationValue string) ([]byte
 
 // Lifespan implements ClusterService.Lifespan.
 func (s *clusterImpl) Lifespan(ctx context.Context, req *v1.LifespanRequest) (*duration.Duration, error) {
-	owner, err := getOwnerFromContext(ctx)
+	owner, err := middleware.GetOwnerFromContext(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -302,24 +301,9 @@ func (s *clusterImpl) lifespan(ctx context.Context, req *v1.LifespanRequest, wor
 	return ptypes.DurationProto(remaining), nil
 }
 
-func getOwnerFromContext(ctx context.Context) (string, error) {
-	// Determine the owner for this cluster, which is derived from information
-	// about the current authenticated user stored in the request context.
-	var owner string
-	if user, found := middleware.UserFromContext(ctx); found {
-		owner = user.GetEmail()
-	} else if svcacct, found := middleware.ServiceAccountFromContext(ctx); found {
-		owner = svcacct.GetEmail()
-	} else {
-		return "", errors.New("could not determine owner")
-	}
-
-	return owner, nil
-}
-
 // Create implements ClusterService.Create.
 func (s *clusterImpl) Create(ctx context.Context, req *v1.CreateClusterRequest) (*v1.ResourceByID, error) {
-	owner, err := getOwnerFromContext(ctx)
+	owner, err := middleware.GetOwnerFromContext(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -516,7 +500,7 @@ func (s *clusterImpl) Access() map[string]middleware.Access {
 }
 
 func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.Empty, error) {
-	owner, err := getOwnerFromContext(ctx)
+	owner, err := middleware.GetOwnerFromContext(ctx)
 	if err != nil {
 		return nil, err
 	}

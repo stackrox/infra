@@ -5,6 +5,7 @@ package middleware
 import (
 	"context"
 
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -87,4 +88,18 @@ func isAccessAllowed(method string, policy map[string]Access, access Access) boo
 	default:
 		panic("unknown required access level")
 	}
+}
+
+// GetOwnerFromContext finds the email of the authenticated user or service account from the request context.
+func GetOwnerFromContext(ctx context.Context) (string, error) {
+	var owner string
+	if user, found := UserFromContext(ctx); found {
+		owner = user.GetEmail()
+	} else if svcacct, found := ServiceAccountFromContext(ctx); found {
+		owner = svcacct.GetEmail()
+	} else {
+		return "", errors.New("could not determine owner")
+	}
+
+	return owner, nil
 }
