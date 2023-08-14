@@ -516,9 +516,12 @@ func (s *clusterImpl) Access() map[string]middleware.Access {
 }
 
 func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.Empty, error) {
-	user, _ := middleware.UserFromContext(ctx)
+	owner, err := getOwnerFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 	log.AuditLog(logging.INFO, "cluster-delete", "received a delete request for infra cluster",
-		"actor", user.GetEmail(),
+		"actor", owner,
 		"cluster-id", req.GetId(),
 	)
 
