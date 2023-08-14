@@ -43,7 +43,7 @@ func TestStatusCommand(t *testing.T) {
 				assert.Equal(t, tc.response.Status.Maintainer, "")
 			},
 			assertLogContents: func(podLogs string) {
-				assert.Contains(t, podLogs, "\"msg\":\"initialized infra status lazily\",\"maintenance-active\":false")
+				assert.Contains(t, podLogs, "\"msg\":\"initialized infra status lazily\",\"actor\":\"roxbot+infra-gha@redhat.com\",\"maintenance-active\":false")
 			},
 		},
 		{
@@ -59,7 +59,7 @@ func TestStatusCommand(t *testing.T) {
 			assertLogContents: func(podLogs string) {
 				maintainer, err := infractlWhoami()
 				assert.NoError(t, err)
-				assert.Contains(t, podLogs, fmt.Sprintf("\"msg\":\"new status set\",\"maintainer\":\"%s\",\"maintenance-active\":true", maintainer))
+				assert.Contains(t, podLogs, fmt.Sprintf("\"msg\":\"new status set\",\"actor\":\"roxbot+infra-gha@redhat.com\",\"maintainer\":\"%s\",\"maintenance-active\":true", maintainer))
 			},
 		},
 		{
@@ -71,7 +71,7 @@ func TestStatusCommand(t *testing.T) {
 				assert.Equal(t, tc.response.Status.Maintainer, "")
 			},
 			assertLogContents: func(podLogs string) {
-				assert.Contains(t, podLogs, "\"msg\":\"status was reset\",\"maintenance-active\":false")
+				assert.Contains(t, podLogs, "\"msg\":\"status was reset\",\"actor\":\"roxbot+infra-gha@redhat.com\",\"maintenance-active\":false")
 			},
 		},
 	}
