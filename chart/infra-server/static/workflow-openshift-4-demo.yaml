@@ -101,7 +101,7 @@ spec:
           - name: OPENSHIFT_VERSION
             value: "{{workflow.parameters.openshift-version}}"
           - name: MASTER_NODE_COUNT
-            value: "3"
+            value: "1"
           - name: WORKER_NODE_COUNT
             value: "3"
           - name: MASTER_NODE_TYPE
