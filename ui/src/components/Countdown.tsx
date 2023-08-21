@@ -1,4 +1,5 @@
 import React, { ReactElement } from 'react';
+import { Button } from '@patternfly/react-core';
 import moment from 'moment';
 import { PlusCircle, MinusCircle } from 'react-feather';
 
@@ -24,26 +25,32 @@ function ModifiableTimeUnit({
   onChange = (): void => {},
 }: ModifiableTimeUnitProps): ReactElement {
   return (
-    <span className="inline-flex flex-col items-center">
+    <span className="pf-u-display-inline-flex pf-u-flex-direction-column pf-u-align-items-center">
       <span>
         {`${value}`.padStart(2, '0')}
         {notation}
       </span>
-      <span className="inline-flex text-sm normal-case select-none">
-        <PlusCircle
-          className="cursor-pointer mr-2"
-          size={12}
+      <span className="pf-u-display-inline-flex">
+        <Button
+          variant="plain"
+          className="pf-u-mr-sm pf-u-p-0"
+          aria-label="Increment"
           onClick={(): void => {
             onChange(notation, 'inc');
           }}
-        />
-        <MinusCircle
-          className="cursor-pointer"
-          size={12}
+        >
+          <PlusCircle size={12} />
+        </Button>
+        <Button
+          variant="plain"
+          className="pf-u-p-0"
+          aria-label="Decrement"
           onClick={(): void => {
             onChange(notation, 'dec');
           }}
-        />
+        >
+          <MinusCircle size={12} />
+        </Button>
       </span>
     </span>
   );
