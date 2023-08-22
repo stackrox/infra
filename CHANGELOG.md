@@ -8,6 +8,7 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 - Reduce the master node count of openshift-4 and openshift-4-demo flavors from 3 to 1
+- Bump demo flavors to 4.1.3
 
 ## [0.7.9]
 
