@@ -204,18 +204,27 @@ func workflowStatus(workflowStatus v1alpha1.WorkflowStatus) v1.Status {
 				}
 			} else if node.Type == v1alpha1.NodeTypeSuspend {
 				switch node.Phase {
-				case v1alpha1.NodeSucceeded:
-					return v1.Status_DESTROYING
 				case v1alpha1.NodeError, v1alpha1.NodeFailed, v1alpha1.NodeSkipped:
 					panic("a suspend should not be able to fail?")
 				case v1alpha1.NodeRunning, v1alpha1.NodePending:
 					return v1.Status_READY
 				}
 			}
+			if node.GetName() == "destroy" || node.IsExitNode() {
+				return v1.Status_DESTROYING
+			}
+			if node.GetName() == "create" {
+				switch node.Phase {
+				case v1alpha1.NodeError, v1alpha1.NodeFailed, v1alpha1.NodeSkipped:
+					return v1.Status_FAILED
+				case v1alpha1.NodeRunning, v1alpha1.NodePending:
+					return v1.Status_CREATING
+				}
+			}
 		}
 
-		// No suspend node was found, which means one hasn't been run yet, which means that this cluster is still creating.
-		return v1.Status_CREATING
+		// If no "create" or "destroy"/onExit node active, then we're ready.
+		return v1.Status_READY
 
 	case "":
 		return v1.Status_CREATING

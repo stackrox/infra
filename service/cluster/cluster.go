@@ -537,6 +537,21 @@ func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.
 			"error", err,
 		)
 	}
+	if workflow.Spec.HasExitHook() {
+		log.Infow("stopping argo workflow", "workflow-name", workflow.GetName())
+		_, err = s.argoWorkflowsClient.StopWorkflow(s.argoClientCtx, &workflowpkg.WorkflowStopRequest{
+			Name:              workflow.GetName(),
+			Namespace:         s.workflowNamespace,
+			NodeFieldSelector: "",
+			Message:           "Destroying cluster. End workflow loop.",
+		})
+		if err != nil {
+			log.Warnw("failed to stop workflow, this is OK if the workflow is not running",
+				"workflow-name", req.GetId(),
+				"error", err,
+			)
+		}
+	}
 
 	err = s.bqClient.InsertClusterDeletionRecord(context.Background(), req.GetId(), workflow.GetName())
 	if err != nil {
@@ -652,13 +667,30 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 				continue
 			}
 
-			log.Infow("resuming an argo workflow that has expired", "workflow-name", workflow.GetName())
-			_, err = s.argoWorkflowsClient.ResumeWorkflow(s.argoClientCtx, &workflowpkg.WorkflowResumeRequest{
-				Name:      workflow.GetName(),
-				Namespace: s.workflowNamespace,
-			})
-			if err != nil {
-				log.Warnw("failed to resume argo workflow", "workflow-name", workflow.GetName(), "error", err)
+			if workflow.Spec.Suspend != nil && *workflow.Spec.Suspend {
+				log.Infow("resuming an argo workflow that has expired", "workflow-name", workflow.GetName())
+				_, err = s.argoWorkflowsClient.ResumeWorkflow(s.argoClientCtx, &workflowpkg.WorkflowResumeRequest{
+					Name:      workflow.GetName(),
+					Namespace: s.workflowNamespace,
+				})
+				if err != nil {
+					log.Warnw("failed to resume argo workflow", "workflow-name", workflow.GetName(), "error", err)
+				}
+			}
+			if workflow.Spec.HasExitHook() {
+				log.Infow("stopping argo workflow with exit hook", "workflow-name", workflow.GetName())
+				_, err = s.argoWorkflowsClient.StopWorkflow(s.argoClientCtx, &workflowpkg.WorkflowStopRequest{
+					Name:              workflow.GetName(),
+					Namespace:         s.workflowNamespace,
+					NodeFieldSelector: "",
+					Message:           "Destroying cluster. End workflow loop.",
+				})
+				if err != nil {
+					log.Warnw("failed to stop workflow, this is OK if the workflow is not running",
+						"workflow-name", workflow.GetName(),
+						"error", err,
+					)
+				}
 			}
 
 			clusterID := strings.TrimSuffix(workflow.ObjectMeta.GenerateName, "-")

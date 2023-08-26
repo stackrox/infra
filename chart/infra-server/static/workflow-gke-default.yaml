@@ -2,8 +2,15 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: gke-default-
+  labels:
+    needsExit: "true"
+  annotations:
+    infra.stackrox.com/lifespan: 0s
+    infra.stackrox.com/flavor: unknown
+    infra.stackrox.com/owner: unknown
 spec:
   entrypoint: start
+  onExit: stop
   arguments:
     parameters:
       - name: name
@@ -27,15 +34,127 @@ spec:
     - name: start
       steps:
         - - name: create
-            template: create
-        - - name: wait
-            template: wait
-        - - name: destroy
-            template: destroy
+            template: echo
             arguments:
               parameters:
-                - name: name
-                  value: "{{steps.create.outputs.parameters.cluster_name}}"
+                - name: message
+                  value: "create"
+        - - name: wait
+            template: running
+            arguments:
+              parameters:
+                - name: lifespan
+                  value: "{{workflow.annotations.infra.stackrox.com/lifespan}}"
+
+    - name: stop
+      steps:
+        - - name: destroy
+            template: echo
+            arguments:
+              parameters:
+                - name: message
+                  value: "{{workflow.parameters.name}}"
+
+    - name: running
+      inputs:
+        parameters:
+          - name: lifespan
+      failFast: false
+      steps:
+        - - name: label
+            template: label
+            arguments:
+              parameters:
+                - name: lifespan
+                  value: "{{inputs.parameters.lifespan}}"
+        - - name: wait
+            template: wait
+            arguments:
+              parameters:
+                - name: lifespan
+                  value: "{{inputs.parameters.lifespan}}"
+
+    - name: wait
+      inputs:
+        parameters:
+          - name: lifespan
+      steps:
+        - - name: delay
+            inline:
+              suspend:
+                duration: "1"
+        - - name: echo
+            template: echo
+            arguments:
+              parameters:
+                - name: message
+                  value: "'{{inputs.parameters.lifespan}}' =~ '{{workflow.annotations.infra.stackrox.com/lifespan}}'"
+        - - name: loop
+            template: wait
+            when: "'{{inputs.parameters.lifespan}}' =~ '{{workflow.annotations.infra.stackrox.com/lifespan}}'"
+            arguments:
+              parameters:
+                - name: lifespan
+                  value: "{{inputs.parameters.lifespan}}"  # If we send the annotation, it could change between the 'when' check and sending.
+        - - name: break
+            template: running
+            arguments:
+              parameters:
+                - name: lifespan
+                  value: "{{workflow.annotations.infra.stackrox.com/lifespan}}"
+
+    - name: label
+      inputs:
+        parameters:
+          - name: lifespan
+      steps:
+        - - name: label
+            template: label-gke
+            arguments:
+              parameters:
+              - name: labels
+                value: "\
+                  flavor={{workflow.annotations.infra.stackrox.com/flavor}},\
+                  owner={{workflow.annotations.infra.stackrox.com/owner}},\
+                  lifespan={{inputs.parameters.lifespan}},\
+                  expiration={{= sprig.date('2006-01-02T15:04:05Z07:00',\
+                    sprig.dateModify(inputs.parameters.lifespan,\
+                    sprig.toDate('2006-01-02T15:04:05Z07:00',\
+                      workflow.creationTimestamp.RFC3339)))\
+                  }}"
+
+    - name: label-gke
+      inputs:
+        parameters:
+        - name: labels
+      script:
+        image: quay.io/stackrox-io/ci:automation-flavors-gke-default-0.7.6-3-g1ce65fe441-snapshot
+        imagePullPolicy: Always
+        env:
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: /tmp/google-credentials.json
+        command: [bash, -x]
+        source: |
+          labels="{{inputs.parameters.labels}}"
+          gcloud auth activate-service-account --key-file /tmp/google-credentials.json;
+          gcloud auth list;
+          gcloud config set compute/zone "{{workflow.parameters.gcp-zone}}";
+          gcloud config set core/disable_prompts True;
+          gcloud container clusters update \
+            "{{workflow.parameters.name}}"\
+            --project=srox-temp-dev-test\
+            "--update-labels=${labels}" || true
+        volumeMounts:
+          - name: credentials
+            mountPath: /tmp
+               
+    - name: echo
+      inputs:
+        parameters:
+        - name: message
+      container:
+        image: alpine:3.7
+        command: [echo, "{{inputs.parameters.message}}"]
 
     - name: create
       activeDeadlineSeconds: 3600
@@ -78,9 +197,6 @@ spec:
         volumeMounts:
           - name: credentials
             mountPath: /tmp
-
-    - name: wait
-      suspend: {}
 
     - name: destroy
       activeDeadlineSeconds: 3600
