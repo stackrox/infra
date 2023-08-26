@@ -7,8 +7,13 @@ Entries in this file should be limited to:
 Please avoid adding duplicate information across this changelog and JIRA/doc input pages.
 
 ## [NEXT RELEASE]
-- Reduce the master node count of openshift-4 and openshift-4-demo flavors from 3 to 1
+
+## [0.7.10]
+- Fix for openshift-4-demo 4.2+ installs
+- Reduce the master node count of openshift-4 and openshift-4-demo flavors from
+  3 to 1
 - Bump demo flavors to 4.1.3
+- More pattern fly UI components
 
 ## [0.7.9]
 
