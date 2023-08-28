@@ -7,6 +7,23 @@ import (
 	"go.uber.org/zap"
 )
 
+// LogLevel enumerates log levels
+type LogLevel int
+
+const (
+	// DEBUG is the equivalent of zap.DebugLevel
+	DEBUG LogLevel = iota
+
+	// INFO is the equivalent of zap.InfoLevel
+	INFO
+
+	// WARN is the equivalent of zap.WarnLevel
+	WARN
+
+	// ERROR is the equivalent of zap.ErrorLevel
+	ERROR
+)
+
 // Logger wraps a zap.SugaredLogger.
 type Logger struct {
 	*zap.SugaredLogger
@@ -52,4 +69,27 @@ func CreateProductionLogger() *Logger {
 // CreateDevelopmentLogger creates a new development logger.
 func CreateDevelopmentLogger() *Logger {
 	return createLogger(DevelopmentLogger)
+}
+
+// Log is a prepared wrapper to harmonize the logging entrypoint.
+func (l *Logger) Log(logLevel LogLevel, msg string, keysAndValues ...interface{}) {
+	var method func(msg string, keysAndValues ...interface{})
+	switch logLevel {
+	case DEBUG:
+		method = l.Debugw
+	case INFO:
+		method = l.Infow
+	case WARN:
+		method = l.Warnw
+	case ERROR:
+		method = l.Errorw
+	}
+
+	method(msg, keysAndValues...)
+}
+
+// AuditLog is a prepared wrapper to harmonize the audit logging format.
+func (l *Logger) AuditLog(logLevel LogLevel, phase string, msg string, keysAndValues ...interface{}) {
+	keysAndValues = append(keysAndValues, "log-type", "audit", "phase", phase)
+	l.Log(logLevel, msg, keysAndValues...)
 }

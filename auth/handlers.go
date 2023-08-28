@@ -71,12 +71,14 @@ func (a OidcAuth) loginHandler(w http.ResponseWriter, r *http.Request) {
 // profile is then obtained from OIDC provider that includes details about the
 // newly logged-in user. This user information is then stored in a cookie.
 func (a OidcAuth) callbackHandler(w http.ResponseWriter, r *http.Request) {
+	logPhase := "auth-callback"
+
 	// Get the value of the "state" HTTP GET param, and validate that it is
 	// legitimate.
 	stateToken := r.URL.Query().Get("state")
 	err := a.jwtState.Validate(stateToken)
 	if err != nil {
-		log.Errorw("failed to validate state token", "error", err)
+		log.AuditLog(logging.ERROR, logPhase, "failed to validate state token", "error", err)
 		http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
 		return
 	}
@@ -85,13 +87,13 @@ func (a OidcAuth) callbackHandler(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Query().Get("code")
 	rawToken, err := a.conf.Exchange(r.Context(), code)
 	if err != nil {
-		log.Errorw("failed to exchange code", "error", err)
+		log.AuditLog(logging.ERROR, logPhase, "failed to exchange code", "error", err)
 		http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
 		return
 	}
 
 	if err := a.jwtAccess.Validate(r.Context(), rawToken); err != nil {
-		log.Errorw("failed to validate access token", "err", err)
+		log.AuditLog(logging.ERROR, logPhase, "failed to validate access token", "err", err)
 		http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
 		return
 	}
@@ -100,7 +102,7 @@ func (a OidcAuth) callbackHandler(w http.ResponseWriter, r *http.Request) {
 	// user struct from it.
 	user, err := a.jwtOidc.Validate(r.Context(), rawToken)
 	if err != nil {
-		log.Errorw("failed to validate ID token", "error", err)
+		log.AuditLog(logging.ERROR, logPhase, "failed to validate ID token", "error", err)
 		http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
 		return
 	}
@@ -108,7 +110,7 @@ func (a OidcAuth) callbackHandler(w http.ResponseWriter, r *http.Request) {
 	// Generate token containing a user struct.
 	userToken, err := a.jwtUser.Generate(user)
 	if err != nil {
-		log.Errorw("failed to generate user token", "error", err)
+		log.AuditLog(logging.ERROR, logPhase, "failed to generate user token", "error", err)
 		http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
 		return
 	}
