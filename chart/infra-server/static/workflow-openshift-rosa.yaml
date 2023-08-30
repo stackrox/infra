@@ -7,6 +7,8 @@ spec:
   arguments:
     parameters:
       - name: name
+      - name: aws-region
+        value: "us-east-2"
       - name: managed-cp
         value: false
       - name: nodes
@@ -68,6 +70,8 @@ spec:
               secretKeyRef:
                 name: osd-access-secrets
                 key: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
+          - name: AWS_REGION
+            value: "{{workflow.parameters.aws-region}}"
           - name: MANAGED_CP
             value: "{{workflow.parameters.managed-cp}}"
           - name: NODE_COUNT

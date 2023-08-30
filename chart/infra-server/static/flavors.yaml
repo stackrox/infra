@@ -654,6 +654,11 @@
       value: "4"
       kind: optional
 
+    - name: aws-region
+      description: aws region for cluster
+      value: "us-east-2"
+      kind: optional
+
     - name: managed-cp
       description: Use managed control-plane?
       value: "false"
