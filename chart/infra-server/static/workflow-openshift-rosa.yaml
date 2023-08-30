@@ -42,7 +42,7 @@ spec:
     - name: create
       activeDeadlineSeconds: 7200
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-rosa-0.7.6-4-gdb1ab168f7-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-rosa-0.7.6-5-g20f9b183c0-snapshot 
         imagePullPolicy: Always
         command:
           - ./entrypoint.sh
@@ -113,7 +113,7 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-rosa-0.7.6-4-gdb1ab168f7-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-rosa-0.7.6-5-g20f9b183c0-snapshot 
         imagePullPolicy: Always
         command:
           - ./entrypoint.sh
@@ -121,6 +121,8 @@ spec:
           - destroy
           - "{{workflow.parameters.name}}"
         env:
+          - name: AWS_REGION
+            value: "{{workflow.parameters.aws-region}}"
           - name: AWS_ACCESS_KEY_ID
             valueFrom:
               secretKeyRef:
