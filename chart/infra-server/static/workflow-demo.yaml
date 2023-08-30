@@ -112,7 +112,7 @@ spec:
               none: {}
 
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.6.14
+        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.7.10-1-g380141d7bc-snapshot
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint
@@ -169,6 +169,10 @@ spec:
               secretKeyRef:
                 name: demo-secrets
                 key: SLACK_WEBHOOK
+          - name: GCP_CLOUD_DNS_ZONE_NAME
+            value: "demos-rox-systems"
+          - name: DOMAIN_NAME
+            value: "demos.rox.systems"
 
     - name: wait
       suspend: {}
@@ -184,7 +188,7 @@ spec:
             path: /data/tfvars
             optional: true
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.6.14
+        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.7.10-1-g380141d7bc-snapshot
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint
