@@ -170,9 +170,9 @@ spec:
                 name: demo-secrets
                 key: SLACK_WEBHOOK
           - name: GCP_CLOUD_DNS_ZONE_NAME
-            value: "demos-rox-systems"
+            value: "demo-stackrox-com"
           - name: DOMAIN_NAME
-            value: "demos.rox.systems"
+            value: "demo.stackrox.com"
 
     - name: wait
       suspend: {}
