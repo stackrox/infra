@@ -654,6 +654,12 @@
       value: "4"
       kind: optional
 
+    - name: managed-cp
+      description: Use managed control-plane?
+      value: "false"
+      kind: optional
+      help: ROSA will switch to managed control-plane (Hypershift) by default around the end of 2023.
+
     - name: machine-type
       description: node machine type
       value: m5.xlarge
