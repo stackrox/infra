@@ -127,8 +127,8 @@ spec:
           - "--scanner-image={{workflow.parameters.scanner-image}}"
           - "--scanner-db-image={{workflow.parameters.scanner-db-image}}"
           - "--central-db-image={{workflow.parameters.central-db-image}}"
-          - --gcp-project=srox-temp-dev-test
-          - --dns-gcp-project=ultra-current-825
+          - --gcp-project=acs-team-temp-dev
+          - --dns-gcp-project=acs-team-temp-dev
           - --creation-source=infra
           - --k8s-version={{workflow.parameters.k8s-version}}
           - --enable-psps={{workflow.parameters.enable-psps}}

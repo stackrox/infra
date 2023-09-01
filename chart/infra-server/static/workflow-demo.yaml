@@ -121,8 +121,8 @@ spec:
           - "--name={{workflow.parameters.name}}"
           - "--main-image={{workflow.parameters.main-image}}"
           - "--central-db-image={{workflow.parameters.central-db-image}}"
-          - --gcp-project=srox-temp-sales-demos
-          - --dns-gcp-project=ultra-current-825
+          - --gcp-project=acs-team-temp-dev
+          - --dns-gcp-project=acs-team-temp-dev
           - --creation-source=infra
           - --k8s-version={{workflow.parameters.k8s-version}}
           - --enable-psps={{workflow.parameters.enable-psps}}
