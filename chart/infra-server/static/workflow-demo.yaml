@@ -78,7 +78,7 @@ spec:
             path: /certs/cert.pem
             gcs:
               bucket: sr-demo-files
-              key: certs/demos.rox.systems/privkey-plus-fullchain.pem
+              key: certs/demo.stackrox.com/privkey-plus-fullchain.pem
               serviceAccountKeySecret:
                 name: google-credentials-demo
                 key: google-credentials.json
@@ -170,9 +170,9 @@ spec:
                 name: demo-secrets
                 key: SLACK_WEBHOOK
           - name: GCP_CLOUD_DNS_ZONE_NAME
-            value: "demos-rox-systems"
+            value: "demo-stackrox-com"
           - name: DOMAIN_NAME
-            value: "demos.rox-systems"
+            value: "demo.stackrox.com"
 
     - name: wait
       suspend: {}
