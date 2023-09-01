@@ -112,7 +112,7 @@ spec:
               none: {}
 
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.7.11
+        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.7.11-1-g03bfbaf15e-snapshot
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint
