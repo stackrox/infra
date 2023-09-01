@@ -9,6 +9,8 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 ## [NEXT RELEASE]
 
 - Make the domain for GKE based demos configurable.
+- Revert the change that reduced the master node count of openshift-4 and openshift-4-demo flavors from
+  3 to 1 (default is now 3 again).
 
 ## [0.7.10]
 - Fix for openshift-4-demo 4.2+ installs
