@@ -1,51 +1,3 @@
-
-apiVersion: v1
-kind: Secret
-type: Opaque
-
-metadata:
-  name: demo-certifier-credentials
-  namespace: infra
-
-data:
-  google-credentials.json: |-
-    {{ required ".Values.demo__demo_cert_bot_json is undefined" .Values.demo__demo_cert_bot_json }}
-
----
-
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  name: demo-certifier
-  namespace: infra
-spec:
-  schedule: "@weekly"
-  jobTemplate:
-    spec:
-      template:
-        spec:
-          containers:
-          - name: certifier
-            image: us.gcr.io/stackrox-infra/certifier:0.0.0-5
-            imagePullPolicy: IfNotPresent
-            args:
-              - --common-name=*.demos.rox.systems
-              - --cert-name=demos.rox.systems
-              - --gcs-bucket=sr-demo-files
-              - --gcs-prefix=certs
-            env:
-              - name: GOOGLE_APPLICATION_CREDENTIALS
-                value: /configuration/google-credentials.json
-            volumeMounts:
-              - mountPath: /configuration
-                name: configuration
-                readOnly: true
-          restartPolicy: Never
-          volumes:
-            - name: configuration
-              secret:
-                secretName: demo-certifier-credentials
-
 {{ if eq .Values.deployment "production" -}}
 
 apiVersion: v1
@@ -80,6 +32,41 @@ spec:
             args:
               - --common-name=*.demo.stackrox.com
               - --cert-name=demo.stackrox.com
+              - --gcs-bucket=sr-demo-files
+              - --gcs-prefix=certs
+            env:
+              - name: GOOGLE_APPLICATION_CREDENTIALS
+                value: /configuration/google-credentials.json
+            volumeMounts:
+              - mountPath: /configuration
+                name: configuration
+                readOnly: true
+          restartPolicy: Never
+          volumes:
+            - name: configuration
+              secret:
+                secretName: demo-certifier-credentials
+
+---
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: demo-certifier-demos-rox-systems
+  namespace: infra
+spec:
+  schedule: "@weekly"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: certifier
+            image: us.gcr.io/stackrox-infra/certifier:0.0.0-5
+            imagePullPolicy: IfNotPresent
+            args:
+              - --common-name=*.demos.rox.systems
+              - --cert-name=demos.rox.systems
               - --gcs-bucket=sr-demo-files
               - --gcs-prefix=certs
             env:
