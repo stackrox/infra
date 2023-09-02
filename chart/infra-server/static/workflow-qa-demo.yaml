@@ -137,8 +137,8 @@ spec:
             mountPath: /tmp/google-credentials.json
             subPath: google-credentials.json
           - name: credentials
-            mountPath: /tmp/google-scanner-credentials.json
-            subPath: google-scanner-credentials.json
+            mountPath: /tmp/image-read-google-credentials.json
+            subPath: image-read-google-credentials.json
         env:
           - name: QUAY_RHACS_ENG_RO_USERNAME
             valueFrom:
