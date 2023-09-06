@@ -161,3 +161,12 @@ Download a copy of `infractl` and export your token. Verify API connectivity:
 | --- | --- |
 | Staging | `infractl -e dev.infra.rox.systems:443 whoami` |
 | Production | `infractl whoami` |
+
+## Logging
+
+The infra server logs are captured automatically by GCP.
+
+- [Logs Explorer: Staging](https://cloudlogging.app.goo.gl/uSmEsjAmYR8Uyvyx9)
+- [Logs Explorer: Production](https://cloudlogging.app.goo.gl/KqgSyE2mSq83M5Xs9)
+
+Adding `jsonPayload."log-type"="audit"` to the query will filter for audit logs.
