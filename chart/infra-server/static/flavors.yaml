@@ -665,6 +665,11 @@
       kind: optional
       help: ROSA will switch to managed control-plane (Hypershift) by default around the end of 2023.
 
+    - name: rosa-args
+      description: additional rosa cli args
+      value: ""
+      kind: optional
+
     - name: machine-type
       description: node machine type
       value: m5.xlarge

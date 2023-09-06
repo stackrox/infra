@@ -7,6 +7,8 @@ spec:
   arguments:
     parameters:
       - name: name
+      - name: rosa-args
+        value: ""
       - name: aws-region
         value: "us-east-2"
       - name: managed-cp
@@ -42,7 +44,7 @@ spec:
     - name: create
       activeDeadlineSeconds: 7200
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-rosa-0.7.6-12-g57d06ec668-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-rosa-0.7.6-16-ga2e06ac410-snapshot
         imagePullPolicy: Always
         command:
           - ./entrypoint.sh
@@ -115,7 +117,7 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-rosa-0.7.6-12-g57d06ec668-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-rosa-0.7.6-16-ga2e06ac410-snapshot
         imagePullPolicy: Always
         command:
           - ./entrypoint.sh
@@ -123,6 +125,8 @@ spec:
           - destroy
           - "{{workflow.parameters.name}}"
         env:
+          - name: ROSA_ARGS
+            value: "{{workflow.parameters.rosa-args}}"
           - name: AWS_DEFAULT_REGION
             value: "{{workflow.parameters.aws-region}}"
           - name: AWS_REGION
