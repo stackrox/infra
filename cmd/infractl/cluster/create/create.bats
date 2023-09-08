@@ -123,6 +123,16 @@ setup() {
   assert_output --partial "parameter \"main-image\" was not provided"
 }
 
+@test "provided name is too short" {
+  run infractl create test-qa-demo ab
+  assert_failure
+  assert_output --partial "Error: cluster name too short"
+}
+
+# @test "provided name is too long"
+
+# @test "provided name does not match regex"
+
 infractl() {
   "$ROOT"/bin/infractl -e localhost:8443 -k "$@"
 }
