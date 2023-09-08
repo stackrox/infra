@@ -164,7 +164,7 @@ func validateName(name string) error {
 		return err
 	}
 	if !match {
-		return errors.New("The name does not match its requirements. Only lowercase letters, numbers, and '-' allowed, must start with a letter and end with a letter or number.")
+		return errors.New("The name does not match the requirements. Only lowercase letters, numbers, and '-' allowed, must start with a letter and end with a letter or number.")
 	}
 
 	return nil

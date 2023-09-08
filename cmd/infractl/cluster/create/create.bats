@@ -138,7 +138,7 @@ setup() {
 @test "provided name failed validation because does not match regex" {
   run infractl create test-qa-demo THIS-IN-INVALID
   assert_failure
-  assert_output --partial "Error: The name does not match its requirements."
+  assert_output --partial "Error: The name does not match the requirements."
 }
 
 infractl() {
