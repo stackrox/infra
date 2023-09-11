@@ -79,6 +79,10 @@ image: server cli ui clean-image
 	@cp bin/infractl-linux-amd64 image/static/downloads
 	docker build -t $(IMAGE) image
 
+.PHONY: multi-image
+multi-image:
+	docker build . -t $(IMAGE) -f image/Dockerfile.multi --secret id=npmrc,src=${HOME}/.npmrc
+
 .PHONY: push
 push:
 	docker push $(IMAGE) | cat
