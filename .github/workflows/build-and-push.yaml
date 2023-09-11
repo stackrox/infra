@@ -33,15 +33,6 @@ jobs:
           PATH="${PATH}:${GOPATH}/bin"
           echo PATH="${PATH}" >> "$GITHUB_ENV"
 
-      - name: Cache Go dependencies
-        uses: ./go/src/github.com/stackrox/infra/.github/actions/cache-go-dependencies
-
-      - name: Create UI cache lock
-        uses: ./go/src/github.com/stackrox/infra/.github/actions/create-concatenated-ui-monorepo-lock
-
-      - name: Cache UI dependencies
-        uses: ./go/src/github.com/stackrox/infra/.github/actions/cache-ui-dependencies
-
       - name: Generate src
         # This is committed at generated/ but building here ensure the make
         # targets do not go stale and that any updates are committed.
@@ -58,14 +49,12 @@ jobs:
           make multi-image
 
       - name: Login for image push
-        env:
-          INFRA_IMAGE_PUSH: ${{ secrets.INFRA_IMAGE_PUSH }}
-        run: docker login -u _json_key --password-stdin <<<"$INFRA_IMAGE_PUSH" https://us.gcr.io
+        uses: docker/login-action@v2
+        with:
+          registry: us.gcr.io
+          username: _json_key
+          password: ${{ secrets.INFRA_IMAGE_PUSH }}
 
       - name: Push
         run: |
           make push
-
-      - name: Logout
-        run: |
-          docker logout https://us.gcr.io
