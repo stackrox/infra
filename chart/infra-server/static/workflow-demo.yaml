@@ -106,6 +106,12 @@ spec:
             archive:
               none: {}
 
+          - name: admin-password
+            path: /data/admin_password
+            optional: true
+            archive:
+              none: {}
+
           - name: SSH_ACCESS
             path: /data/SSH_ACCESS.md
             archive:
@@ -154,16 +160,6 @@ spec:
               secretKeyRef:
                 name: demo-secrets
                 key: STACKROX_IO_PASSWORD
-          - name: AUTH_CLIENT_ID
-            valueFrom:
-              secretKeyRef:
-                name: demo-secrets
-                key: AUTH_CLIENT_ID
-          - name: AUTH_DOMAIN
-            valueFrom:
-              secretKeyRef:
-                name: demo-secrets
-                key: AUTH_DOMAIN
           - name: SLACK_WEBHOOK
             valueFrom:
               secretKeyRef:
