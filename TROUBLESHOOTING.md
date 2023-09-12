@@ -10,10 +10,6 @@ GCP infra.rox.systems Zone
 
 https://console.cloud.google.com/net-services/dns/zones/infra-rox-systems?project=stackrox-infra&organizationId=847401270788
 
-Auth0 Application
-
-https://manage.auth0.com/dashboard/us/sr-dev/applications/AsyLUYxwV2GX2oG0PjwTXhMlxHuI7qmE/settings
-
 Argo Releases and CLI
 
 https://github.com/argoproj/argo/releases
@@ -64,16 +60,16 @@ Status:              Running
 Created:             Mon Jun 01 13:43:12 -0700 (42 seconds ago)
 Started:             Mon Jun 01 13:43:12 -0700 (42 seconds ago)
 Duration:            42 seconds
-Parameters:          
+Parameters:
   name:              june1demo1
   main-image:        stackrox.io/main:3.0.43.1
   scanner-image:     stackrox.io/scanner:2.2.6
   scanner-db-image:  stackrox.io/scanner-db:2.2.6
 
 STEP                    PODNAME                DURATION  ARTIFACTS  MESSAGE
- ● demo-mxgf9 (start)                                               
- ├---✔ roxctl (roxctl)  demo-mxgf9-522422286   9s        roxctl     
- └---● create (create)  demo-mxgf9-3875809567  32s     
+ ● demo-mxgf9 (start)
+ ├---✔ roxctl (roxctl)  demo-mxgf9-522422286   9s        roxctl
+ └---● create (create)  demo-mxgf9-3875809567  32s
 ```
 
 To get logs from a step, run:

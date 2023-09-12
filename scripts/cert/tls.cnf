@@ -1,9 +1,8 @@
 # This is the configuration required to build the self signed cert used for SSL
-# between the load balancer and infra server. i.e. to create tls-key.pem and 
-# tls-cert.pem.
+# for gRPC gateway.
 
 # To renew:
-# openssl genrsa -out tls-key.pem 2048
+# openssl genrsa -out tls-key.pem 4096
 # openssl req -nodes -new -x509 -sha256 -days 3650 -config tls.conf -extensions 'req_ext' -key tls-key.pem -out tls-cert.pem
 
 [ req ]
@@ -12,16 +11,16 @@ prompt = no
 default_md = sha256
 req_extensions = req_ext
 distinguished_name = dn
- 
+
 [ dn ]
 C = US
 ST = California
 L = Mountain View
 O = StackRox
 CN = localhost
- 
+
 [ req_ext ]
 subjectAltName = @alt_names
- 
+
 [ alt_names ]
 DNS.1 = localhost
