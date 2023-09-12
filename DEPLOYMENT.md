@@ -71,6 +71,11 @@ To upload the local configuration which includes the consolidated values back to
 
 `make configuration-upload`
 
+## Regenerating the localhost certificates for the gRPC gateway
+
+The connection for the gRPC gateway is secured by a self-generated "localhost" certificate.
+To regenerate the certificate, run: `./scripts/cert/renew.sh <local|development|production>`.
+
 ## Creating a Tag for Release
 
 To create a full GitHub release, draft a new release from the console.
