@@ -111,7 +111,7 @@ spec:
             optional: true
 
           - name: admin-password
-            path: /data/admin_password
+            path: /data/central/password
             optional: true
             archive:
               none: {}
@@ -122,7 +122,7 @@ spec:
               none: {}
 
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.7.11-3-g0ce5aa7da8-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.7.12-4-g934d698e3f-snapshot
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint
@@ -190,7 +190,7 @@ spec:
             path: /data/tfvars
             optional: true
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.7.11-3-g0ce5aa7da8-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.7.12-4-g934d698e3f-snapshot
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint
