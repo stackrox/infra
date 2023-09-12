@@ -69,28 +69,12 @@ ui:
 	@make -C ui all
 
 .PHONY: image
-image: server cli ui clean-image
-	@echo "+ $@"
-	@cp -f bin/infra-server-linux-amd64 image/infra-server
-	@mkdir -p image/static/downloads
-	@cp -R ui/build/* image/static/
-	@cp bin/infractl-darwin-amd64 image/static/downloads
-	@cp bin/infractl-darwin-arm64 image/static/downloads
-	@cp bin/infractl-linux-amd64 image/static/downloads
-	docker build -t $(IMAGE) image
-
-.PHONY: multi-image
-multi-image:
-	docker build . -t $(IMAGE) -f image/Dockerfile.multi --secret id=npmrc,src=${HOME}/.npmrc
+image:
+	docker build . -t $(IMAGE) -f image/Dockerfile --secret id=npmrc,src=${HOME}/.npmrc
 
 .PHONY: push
 push:
 	docker push $(IMAGE) | cat
-
-.PHONY: clean-image
-clean-image:
-	@echo "+ $@"
-	@rm -rf image/infra-server image/static
 
 #############
 ## Testing ##
