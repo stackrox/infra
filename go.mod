@@ -23,7 +23,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/net v0.15.0
-	golang.org/x/oauth2 v0.11.0
+	golang.org/x/oauth2 v0.12.0
 	google.golang.org/api v0.136.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20230803162519-f966b187b2e5
 	google.golang.org/grpc v1.57.0
