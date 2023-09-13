@@ -372,6 +372,9 @@ spec:
       runAfter:
       - build-container
       taskSpec:
+        workspaces:
+        - name: custom-secret
+          workspace: custom-secret
         steps:
         - name: default
           image: ubuntu
@@ -379,8 +382,11 @@ spec:
             - name: "ENV_VAR"
               value: "VALUE"
           script: |
+            set +x
             echo $(params.message)
             echo "${ENV_VAR}"
+            ls -lisa
+            pwd
       when:
       - input: $(params.skip-checks)
         operator: in
@@ -389,6 +395,8 @@ spec:
     workspaces:
     - name: workspace
     - name: git-auth
+      optional: true
+    - name: custom-secret
       optional: true
   workspaces:
   - name: workspace
@@ -405,4 +413,7 @@ spec:
   - name: git-auth
     secret:
       secretName: '{{ git_auth_secret }}'
+  - name: custom-secret
+    secret:
+      secretName: custom-secret
 status: {}
