@@ -382,23 +382,27 @@ spec:
             - name: "ENV_VAR"
               value: "VALUE"
           script: |
-            set +x
             echo $(params.message)
             echo "${ENV_VAR}"
             ls -lisa $(workspaces.custom-secret.path)
 
             echo "Secret content:"
             cat $(workspaces.custom-secret.path)/test.txt
-      when:
-      - input: $(params.skip-checks)
-        operator: in
-        values:
-        - "false"
-    workspaces:
-    - name: workspace
-    - name: git-auth
-      optional: true
-    - name: custom-secret
+    - name: unit-tests
+      runAfter:
+      - clone-repository
+      workspaces:
+      - name: source
+        workspace: workspace
+      taskSpec:
+        steps:
+        - name: Run unit tests
+          image: golang:1.20.8
+          script:
+            cd $(workspaces.source.path)
+            ls -lisa
+            pwd
+            go test -v ./...
   workspaces:
   - name: workspace
     volumeClaimTemplate:
