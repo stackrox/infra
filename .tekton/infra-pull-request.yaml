@@ -396,13 +396,14 @@ spec:
         workspace: workspace
       taskSpec:
         steps:
-        - name: Run unit tests
+        - name: default
           image: golang:1.20.8
           script: |
             cd $(workspaces.source.path)
             ls -lisa
             pwd
             go test -v ./...
+
   workspaces:
   - name: workspace
     volumeClaimTemplate:
