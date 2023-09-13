@@ -368,13 +368,13 @@ spec:
     - name: custom-task
       params:
       - name: message
-        value: $(tasks.build-container.results.IMAGE_URL)
+        value: "hello, world"
       runAfter:
-      - build-container
+      - clone-repository
+      workspaces:
+      - name: custom-secret
+        workspace: custom-secret
       taskSpec:
-        workspaces:
-        - name: custom-secret
-          workspace: custom-secret
         steps:
         - name: default
           image: ubuntu
@@ -385,6 +385,7 @@ spec:
             set +x
             echo $(params.message)
             echo "${ENV_VAR}"
+            echo $(workspaces.custom-secret.path)
             ls -lisa
             pwd
       when:
@@ -397,7 +398,6 @@ spec:
     - name: git-auth
       optional: true
     - name: custom-secret
-      optional: true
   workspaces:
   - name: workspace
     volumeClaimTemplate:
