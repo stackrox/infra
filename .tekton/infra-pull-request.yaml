@@ -385,9 +385,10 @@ spec:
             set +x
             echo $(params.message)
             echo "${ENV_VAR}"
-            echo $(workspaces.custom-secret.path)
-            ls -lisa
-            pwd
+            ls -lisa $(workspaces.custom-secret.path)
+
+            echo "Secret content:"
+            cat $(workspaces.custom-secret.path)/test.txt
       when:
       - input: $(params.skip-checks)
         operator: in
