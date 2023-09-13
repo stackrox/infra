@@ -1,0 +1,34 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: custom-taskref-check
+spec:
+  description: This is a custom taskref check implementation.
+  params:
+    - description: An message to print.
+      name: MESSAGE
+      type: string
+  results:
+    - description: Tekton task test output.
+      name: TEST_OUTPUT
+  steps:
+    - env:
+        - name: MESSAGE
+          value: $(params.MESSAGE)
+      image: ubuntu:latest
+      name: custom-taskref-check
+      script: |
+        #!/usr/bin/env bash
+        echo "${MESSAGE}"
+        TEST_OUTPUT="{\"output\": \"${MESSAGE}\"}"
+      securityContext:
+        capabilities:
+          add:
+            - SETFCAP
+        runAsUser: 0
+      volumeMounts:
+        - mountPath: /shared
+          name: shared
+  volumes:
+    - emptyDir: {}
+      name: shared

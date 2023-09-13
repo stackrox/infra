@@ -388,6 +388,21 @@ spec:
 
             echo "Secret content:"
             cat $(workspaces.custom-secret.path)/test.txt
+    - name: custom-taskref
+      runAfter:
+      - clone-repository
+      params:
+      - name: MESSAGE
+        value: Hello world from taskRef
+      taskRef:
+        params:
+        - name: name
+          value: custom-taskref-check
+        - name: bundle
+          value: quay.io/tommartensen/rhtap-tasks:0.1
+        - name: kind
+          value: task
+        resolver: bundles
     - name: unit-tests
       runAfter:
       - clone-repository
@@ -400,10 +415,7 @@ spec:
           image: golang:1.20.8
           script: |
             cd $(workspaces.source.path)
-            ls -lisa
-            pwd
             go test -v ./...
-
   workspaces:
   - name: workspace
     volumeClaimTemplate:
