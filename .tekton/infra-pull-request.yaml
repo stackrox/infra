@@ -368,9 +368,9 @@ spec:
     - name: custom-task
       params:
       - name: message
-        value: "Hello world"
+        value: $(tasks.build-container.results.IMAGE_URL)
       runAfter:
-      - prefetch-dependencies
+      - build-container
       taskSpec:
         steps:
         - name: default
