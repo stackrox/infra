@@ -23,7 +23,7 @@ spec:
   - name: git-url
     value: '{{repo_url}}'
   - name: image-expires-after
-    value: 5d
+    value: 1w
   - name: output-image
     value: quay.io/redhat-user-workloads/rh-acs-tenant/infra/infra:on-pr-{{revision}}
   - name: path-context
