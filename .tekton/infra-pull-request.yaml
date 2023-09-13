@@ -365,6 +365,26 @@ spec:
         operator: in
         values:
         - "false"
+    - name: custom-task
+      params:
+      - name: message
+        value: "Hello world"
+      runAfter:
+      - prefetch-dependencies
+      taskSpec:
+        - name: default
+          image: ubuntu
+          env:
+            - name: "ENV_VAR"
+              value: "VALUE"
+          script: |
+            echo $(params.message)
+            echo "${ENV_VAR}"
+      when:
+      - input: $(params.skip-checks)
+        operator: in
+        values:
+        - "false"
     workspaces:
     - name: workspace
     - name: git-auth
