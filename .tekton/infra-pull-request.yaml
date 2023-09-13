@@ -372,6 +372,7 @@ spec:
       runAfter:
       - prefetch-dependencies
       taskSpec:
+        steps:
         - name: default
           image: ubuntu
           env:
