@@ -21,6 +21,8 @@ COPY --from=golang-builder /go/src/github.com/stackrox/infra/bin/infra-server-li
 
 # COPY --from=ui-builder /ui/build /etc/infra/static
 
+USER 4000:4000
+
 COPY --from=golang-builder /go/src/github.com/stackrox/infra/bin/infractl-* /etc/infra/static/downloads/
 
 ENTRYPOINT ["/infra-server"]
