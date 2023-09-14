@@ -13,8 +13,6 @@ spec:
       default: Hello world
     - name: SNAPSHOT
       type: string
-    - name: NAMESPACE
-      type: string
   results:
     - name: TEST_OUTPUT
       value: "$(tasks.verify.results.TEST_OUTPUT)"
@@ -25,8 +23,6 @@ spec:
           value: "$(params.MESSAGE)"
         - name: SNAPSHOT
           value: $(params.SNAPSHOT)
-        - name: NAMESPACE
-          value: $(params.NAMESPACE)
       taskSpec:
         results:
         - description: Short summary of the policy evaluation for each image
@@ -39,8 +35,6 @@ spec:
                 value: $(params.MESSAGE)
               - name: SNAPSHOT
                 value: $(params.SNAPSHOT)
-              - name: NAMESPACE
-                value: $(params.NAMESPACE)
             script: |
               #!/usr/bin/env bash
 
@@ -48,9 +42,6 @@ spec:
 
               echo "SNAPSHOT:"
               echo "${SNAPSHOT}" |jq
-
-              echo "NAMESPACE"
-              echo "${NAMESPACE}"
 
               TEST_OUTPUT="{\"output\": \"${MESSAGE}\"}"
               echo "${TEST_OUTPUT}" | tee $(results.TEST_OUTPUT.path)
