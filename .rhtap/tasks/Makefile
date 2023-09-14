@@ -1,3 +1,4 @@
+# https://vinamra-jain.medium.com/publishing-tekton-resources-as-bundles-on-oci-registry-c4644d2af83f
+
 all:
-	docker build . -t quay.io/tommartensen/rhtap-tasks:0.1
-	docker push quay.io/tommartensen/rhtap-tasks:0.1
+	tkn bundle push quay.io/tommartensen/rhtap-tasks:0.1 -f custom-taskref-check.yaml
