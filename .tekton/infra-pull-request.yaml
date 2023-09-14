@@ -30,6 +30,10 @@ spec:
     value: .
   - name: revision
     value: '{{revision}}'
+  - name: hermetic
+    value: "true"
+  - name: prefetch-input
+    value: '{"type": "gomod", "path": "."}'
   pipelineSpec:
     finally:
     - name: show-sbom
@@ -365,10 +369,57 @@ spec:
         operator: in
         values:
         - "false"
-    workspaces:
-    - name: workspace
-    - name: git-auth
-      optional: true
+    - name: custom-task
+      params:
+      - name: message
+        value: "hello, world"
+      runAfter:
+      - clone-repository
+      workspaces:
+      - name: custom-secret
+        workspace: custom-secret
+      taskSpec:
+        steps:
+        - name: default
+          image: ubuntu
+          env:
+            - name: "ENV_VAR"
+              value: "VALUE"
+          script: |
+            echo $(params.message)
+            echo "${ENV_VAR}"
+            ls -lisa $(workspaces.custom-secret.path)
+
+            echo "Secret content:"
+            cat $(workspaces.custom-secret.path)/test.txt
+    - name: custom-taskref
+      runAfter:
+      - clone-repository
+      params:
+      - name: MESSAGE
+        value: Hello world from taskRef
+      taskRef:
+        params:
+        - name: name
+          value: custom-taskref-check
+        - name: bundle
+          value: quay.io/tommartensen/rhtap-tasks:0.1
+        - name: kind
+          value: task
+        resolver: bundles
+    - name: unit-tests
+      runAfter:
+      - clone-repository
+      workspaces:
+      - name: source
+        workspace: workspace
+      taskSpec:
+        steps:
+        - name: default
+          image: golang:1.20.8
+          script: |
+            cd $(workspaces.source.path)
+            go test -v ./...
   workspaces:
   - name: workspace
     volumeClaimTemplate:
@@ -384,4 +435,7 @@ spec:
   - name: git-auth
     secret:
       secretName: '{{ git_auth_secret }}'
+  - name: custom-secret
+    secret:
+      secretName: custom-secret
 status: {}
