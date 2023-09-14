@@ -1,0 +1,34 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: dummy-integration-tests
+  labels:
+    build.appstudio.redhat.com/pipeline: "dummy-integration"
+spec:
+  params:
+    - name: MESSAGE
+      type: string
+      description: |
+        A message to send to the components at test.
+  results:
+    - name: TEST_OUTPUT
+      value: "$(tasks.verify.results.TEST_OUTPUT)"
+  tasks:
+    - name: verify
+      params:
+        - name: MESSAGE
+          value: "$(params.MESSAGE)"
+      taskSpec:
+        results:
+        - description: Short summary of the policy evaluation for each image
+          name: TEST_OUTPUT
+        steps:
+          - name: verification
+            image: ubuntu:latest
+            env:
+              - name: MESSAGE
+                value: $(params.MESSAGE)
+            script: |
+              #!/usr/bin/env bash
+              TEST_OUTPUT="{\"output\": \"${MESSAGE}\"}"
+              echo "${TEST_OUTPUT}" | tee $(results.TEST_OUTPUT.path)
