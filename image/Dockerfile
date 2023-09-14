@@ -6,6 +6,8 @@ COPY . .
 
 RUN make server cli
 
+RUN git log > /gitlog
+
 # FROM node:16.20.2 as ui-builder
 
 # COPY ui ui
@@ -19,5 +21,7 @@ COPY --from=golang-builder /go/src/github.com/stackrox/infra/bin/infra-server-li
 # COPY --from=ui-builder /ui/build /etc/infra/static
 
 COPY --from=golang-builder /go/src/github.com/stackrox/infra/bin/infractl-* /etc/infra/static/downloads/
+
+COPY --from=golang-builder /gitlog /gitlog
 
 ENTRYPOINT ["/infra-server"]
