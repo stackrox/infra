@@ -19,8 +19,8 @@ spec:
       name: custom-taskref-check
       script: |
         #!/usr/bin/env bash
-        echo "${MESSAGE}"
         TEST_OUTPUT="{\"output\": \"${MESSAGE}\"}"
+        echo "${TEST_OUTPUT}" | tee $(results.TEST_OUTPUT.path)
       securityContext:
         capabilities:
           add:
