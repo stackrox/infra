@@ -8,8 +8,9 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
-## [0.7.12]
+## [0.8.0]
 
+- Switch GKE based flavors (gke-default, demo, qa-demo) to use a RH project (ROX-17123,ROX-19217)
 - CLI: Add client-side cluster name validation
 - Bump demo flavors to 4.2.0
 

@@ -78,10 +78,10 @@ spec:
             path: /certs/cert.pem
             gcs:
               bucket: sr-demo-files
-              key: certs/demo.stackrox.com/privkey-plus-fullchain.pem
+              key: certs/demos.rox.systems/privkey-plus-fullchain.pem
               serviceAccountKeySecret:
                 name: google-credentials-demo
-                key: google-credentials.json
+                key: read-certs-google-credentials.json
       outputs:
         artifacts:
           - name: kubeconfig
@@ -106,13 +106,19 @@ spec:
             archive:
               none: {}
 
+          - name: admin-password
+            path: /data/central/password
+            optional: true
+            archive:
+              none: {}
+
           - name: SSH_ACCESS
             path: /data/SSH_ACCESS.md
             archive:
               none: {}
 
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.7.11
+        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.8.0
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint
@@ -121,8 +127,8 @@ spec:
           - "--name={{workflow.parameters.name}}"
           - "--main-image={{workflow.parameters.main-image}}"
           - "--central-db-image={{workflow.parameters.central-db-image}}"
-          - --gcp-project=srox-temp-sales-demos
-          - --dns-gcp-project=ultra-current-825
+          - --gcp-project=acs-team-temp-dev
+          - --dns-gcp-project=acs-team-temp-dev
           - --creation-source=infra
           - --k8s-version={{workflow.parameters.k8s-version}}
           - --enable-psps={{workflow.parameters.enable-psps}}
@@ -131,8 +137,8 @@ spec:
             mountPath: /tmp/google-credentials.json
             subPath: google-credentials.json
           - name: credentials
-            mountPath: /tmp/google-scanner-credentials.json
-            subPath: google-scanner-credentials.json
+            mountPath: /tmp/image-read-google-credentials.json
+            subPath: image-read-google-credentials.json
         env:
           - name: QUAY_RHACS_ENG_RO_USERNAME
             valueFrom:
@@ -154,25 +160,15 @@ spec:
               secretKeyRef:
                 name: demo-secrets
                 key: STACKROX_IO_PASSWORD
-          - name: AUTH_CLIENT_ID
-            valueFrom:
-              secretKeyRef:
-                name: demo-secrets
-                key: AUTH_CLIENT_ID
-          - name: AUTH_DOMAIN
-            valueFrom:
-              secretKeyRef:
-                name: demo-secrets
-                key: AUTH_DOMAIN
           - name: SLACK_WEBHOOK
             valueFrom:
               secretKeyRef:
                 name: demo-secrets
                 key: SLACK_WEBHOOK
           - name: GCP_CLOUD_DNS_ZONE_NAME
-            value: "demo-stackrox-com"
+            value: "demos-rox-systems"
           - name: DOMAIN_NAME
-            value: "demo.stackrox.com"
+            value: "demos.rox.systems"
 
     - name: wait
       suspend: {}
@@ -188,7 +184,7 @@ spec:
             path: /data/tfvars
             optional: true
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.7.11
+        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.8.0
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint

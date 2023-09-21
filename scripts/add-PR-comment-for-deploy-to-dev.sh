@@ -28,7 +28,7 @@ CI will attempt to deploy {{.Env.IMAGE_NAME}} to it.
 
 :electric_plug: You can **connect** to this cluster with:
 \`\`\`
-gcloud container clusters get-credentials {{.Env.DEV_CLUSTER_NAME}} --zone us-central1-a --project srox-temp-dev-test
+gcloud container clusters get-credentials {{.Env.DEV_CLUSTER_NAME}} --zone us-central1-a --project acs-team-temp-dev
 \`\`\`
 
 :hammer_and_wrench: And pull **infractl** from the deployed dev infra-server with:
@@ -56,10 +56,10 @@ make install-local
 
 ### Logs
 
-Logs for the development infra depending on your @stackrox.com authuser:
-- [authuser=0](https://console.cloud.google.com/logs/query;query=resource.labels.cluster_name%3D%22{{.Env.DEV_CLUSTER_NAME}}%22%0Aresource.labels.container_name%3D%22infra-server%22?project=srox-temp-dev-test&authuser=0)
-- [authuser=1](https://console.cloud.google.com/logs/query;query=resource.labels.cluster_name%3D%22{{.Env.DEV_CLUSTER_NAME}}%22%0Aresource.labels.container_name%3D%22infra-server%22?project=srox-temp-dev-test&authuser=1)
-- [authuser=2](https://console.cloud.google.com/logs/query;query=resource.labels.cluster_name%3D%22{{.Env.DEV_CLUSTER_NAME}}%22%0Aresource.labels.container_name%3D%22infra-server%22?project=srox-temp-dev-test&authuser=2)
+Logs for the development infra depending on your @redhat.com authuser:
+- [authuser=0](https://console.cloud.google.com/logs/query;query=resource.labels.cluster_name%3D%22{{.Env.DEV_CLUSTER_NAME}}%22%0Aresource.labels.container_name%3D%22infra-server%22?project=acs-team-temp-dev&authuser=0)
+- [authuser=1](https://console.cloud.google.com/logs/query;query=resource.labels.cluster_name%3D%22{{.Env.DEV_CLUSTER_NAME}}%22%0Aresource.labels.container_name%3D%22infra-server%22?project=acs-team-temp-dev&authuser=1)
+- [authuser=2](https://console.cloud.google.com/logs/query;query=resource.labels.cluster_name%3D%22{{.Env.DEV_CLUSTER_NAME}}%22%0Aresource.labels.container_name%3D%22infra-server%22?project=acs-team-temp-dev&authuser=2)
 
 Or: 
 \`\`\`

@@ -75,7 +75,7 @@ spec:
           - "--name={{workflow.parameters.name}}"
           - "--nodes={{workflow.parameters.nodes}}"
           - "--machine-type={{workflow.parameters.machine-type}}"
-          - --gcp-project=srox-temp-dev-test
+          - --gcp-project=acs-team-temp-dev
           - --creation-source=infra
           - --k8s-version={{workflow.parameters.k8s-version}}
           - --pod-security-policy={{workflow.parameters.pod-security-policy}}
@@ -98,7 +98,7 @@ spec:
         args:
           - destroy
           - "--name={{workflow.parameters.name}}"
-          - --gcp-project=srox-temp-dev-test
+          - --gcp-project=acs-team-temp-dev
           - --gcp-zone={{workflow.parameters.gcp-zone}}
         volumeMounts:
           - name: credentials
