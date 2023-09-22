@@ -16,11 +16,21 @@ type ArtifactsListProps = {
 function ArtifactsList({ artifacts }: ArtifactsListProps): ReactElement {
   return (
     <List className="pf-u-mb-md">
-      {artifacts.map((artifact) => (
-        <ListItem key={artifact.Name}>
-          <a href={artifact.URL}>{artifact.Name}</a> - {artifact.Description}
-        </ListItem>
-      ))}
+      {artifacts
+        .sort((a, b) => {
+          if (a.Description && !b.Description) {
+            return -1;
+          }
+          if (!a.Description && b.Description) {
+            return 1;
+          }
+          return a.Name && b.Name ? a.Name.localeCompare(b.Name) : 0;
+        })
+        .map((artifact) => (
+          <ListItem key={artifact.Name}>
+            <a href={artifact.URL}>{artifact.Name}</a> - {artifact.Description}
+          </ListItem>
+        ))}
     </List>
   );
 }
