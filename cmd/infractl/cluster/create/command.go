@@ -118,12 +118,7 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 	displayUserNotes(cmd, args, &req)
 
 	if len(args) > 1 {
-		name := args[1]
-		err := validateName(name)
-		if err != nil {
-			return nil, err
-		}
-		req.Parameters["name"] = name
+		req.Parameters["name"] = args[1]
 	} else {
 		name, err := determineName(ctx, conn, args[0])
 		if err != nil {
@@ -149,25 +144,6 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 	}
 
 	return prettyResourceByID(*clusterID), nil
-}
-
-func validateName(name string) error {
-	if len(name) < 3 {
-		return errors.New("cluster name too short")
-	}
-	if len(name) > 28 {
-		return errors.New("cluster name too long")
-	}
-
-	match, err := regexp.MatchString(`^(?:[a-z](?:[-a-z0-9]{0,28}[a-z0-9])?)$`, name)
-	if err != nil {
-		return err
-	}
-	if !match {
-		return errors.New("The name does not match the requirements. Only lowercase letters, numbers, and '-' allowed, must start with a letter and end with a letter or number.")
-	}
-
-	return nil
 }
 
 func determineWorkingEnvironment() {
