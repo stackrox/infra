@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import { AlertCircle, CheckCircle } from 'react-feather';
+import { Button } from '@patternfly/react-core';
 import { ClipLoader } from 'react-spinners';
 
 import { V1Cluster, ClusterServiceApi } from 'generated/client';
@@ -27,16 +27,14 @@ export default function DeleteClusterModal({ cluster, onCancel, onDeleted }: Pro
 
   if (!called) {
     // waiting for user confirmation
-    const buttons = (
-      <>
-        <button type="button" className="btn btn-base mr-2" onClick={deleteCluster}>
-          Yes
-        </button>
-        <button type="button" className="btn btn-base" onClick={onCancel}>
-          Cancel
-        </button>
-      </>
-    );
+    const buttons = [
+      <Button variant="warning" onClick={deleteCluster}>
+        Yes
+      </Button>,
+      <Button variant="secondary" onClick={onCancel}>
+        Cancel
+      </Button>,
+    ];
 
     return (
       <Modal
@@ -45,7 +43,9 @@ export default function DeleteClusterModal({ cluster, onCancel, onDeleted }: Pro
         header={`Are you sure you want to delete ${cluster.ID}?`}
         buttons={buttons}
       >
-        <span className="text-xl">This action cannot be undone.</span>
+        <span className="pf-u-warning-color-100 pf-u-font-size-2xl">
+          This action cannot be undone.
+        </span>
       </Modal>
     );
   }
@@ -54,9 +54,7 @@ export default function DeleteClusterModal({ cluster, onCancel, onDeleted }: Pro
     // waiting for server response
     return (
       <Modal isOpen onRequestClose={(): void => {}} header={`Deleting ${cluster.ID}...`}>
-        <div className="flex mb-4 w-64 items-center justify-center">
-          <ClipLoader size={32} color="currentColor" />
-        </div>
+        <ClipLoader size={32} color="currentColor" />
       </Modal>
     );
   }
@@ -66,10 +64,7 @@ export default function DeleteClusterModal({ cluster, onCancel, onDeleted }: Pro
     const message = `Cannot delete cluster. Server error occurred: "${error.message}".`;
     return (
       <InformationalModal header={`Failed to delete ${cluster.ID}!`} onAcknowledged={onCancel}>
-        <div className="flex items-center">
-          <AlertCircle size={16} className="mr-2 text-alert-600" />
-          <span className="text-lg text-alert-600">{message}</span>
-        </div>
+        <span className="pf-u-warning-color-100 pf-u-font-size-2xl">{message}</span>
       </InformationalModal>
     );
   }
@@ -78,10 +73,7 @@ export default function DeleteClusterModal({ cluster, onCancel, onDeleted }: Pro
   const message = `Cluster ${cluster.ID} is being destroyed now.`;
   return (
     <InformationalModal header={`Successfully deleted ${cluster.ID}!`} onAcknowledged={onDeleted}>
-      <div className="flex items-center">
-        <CheckCircle size={16} className="mr-2 text-success-600" />
-        <span className="text-lg text-success-600">{message}</span>
-      </div>
+      <span className="pf-u-success-color-100 pf-u-font-size-2xl">{message}</span>
     </InformationalModal>
   );
 }

@@ -5,7 +5,6 @@ import Lifespan, { lifespanToDuration } from 'components/Lifespan';
 import { V1Cluster, ClusterServiceApi } from 'generated/client';
 import configuration from 'client/configuration';
 import InformationalModal from 'components/InformationalModal';
-import { AlertCircle } from 'react-feather';
 
 const clusterService = new ClusterServiceApi(configuration);
 
@@ -27,10 +26,7 @@ export default function MutableLifespan({ cluster }: Props): ReactElement {
         header="Cannot change the cluster lifespan"
         onAcknowledged={(): void => setError(null)}
       >
-        <div className="flex items-center">
-          <AlertCircle size={16} className="mr-2 text-alert-600" />
-          <span className="text-lg text-alert-600">{message}</span>
-        </div>
+        <span className="pf-u-warning-color-100 pf-u-font-size-2xl">{message}</span>
       </InformationalModal>
     );
   }
