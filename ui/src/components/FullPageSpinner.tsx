@@ -3,9 +3,9 @@ import { RingLoader } from 'react-spinners';
 
 export default function FullPageSpinner(): ReactElement {
   return (
-    <div className="flex flex-col flex-1 w-full h-full items-center justify-center bg-base-0">
+    <div className="pf-u-display-flex pf-u-flex-direction-column pf-u-align-items-center pf-u-justify-content-center pf-u-h-100">
       <RingLoader loading size={128} color="currentColor" />
-      <span className="text-6xl pt-10">Loading...</span>
+      <span className="pf-u-font-size-4xl">Loading...</span>
     </div>
   );
 }
