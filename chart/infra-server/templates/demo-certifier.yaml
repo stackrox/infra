@@ -104,6 +104,7 @@ spec:
               - --cert-name=internal-registry.ci.rox.systems
               - --gcs-bucket=sr-demo-files
               - --gcs-prefix=certs
+              - --gcp-project-name=stackrox-ci
             env:
               - name: GOOGLE_APPLICATION_CREDENTIALS
                 value: /configuration/google-credentials.json
