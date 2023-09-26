@@ -62,4 +62,4 @@ jobs:
       - name: Push
         run: |
           make push
-          cd certifer && make push
+          cd certifier && make push
