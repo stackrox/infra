@@ -44,10 +44,14 @@ jobs:
         run: |
           make unit-test
 
-      - name: Build
+      - name: Build Infra Server
         run: |
           make image
 
+      - name: Build Certifier
+        run: |
+          cd certifier && make image
+  
       - name: Login for image push
         uses: docker/login-action@v2
         with:
@@ -58,3 +62,4 @@ jobs:
       - name: Push
         run: |
           make push
+          cd certifer && make push
