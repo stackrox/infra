@@ -97,7 +97,7 @@ spec:
         spec:
           containers:
           - name: certifier
-            image: us.gcr.io/stackrox-infra/certifier:0.0.0-5
+            image: us.gcr.io/stackrox-infra/certifier:0.8.0-11-ga083b2097a
             imagePullPolicy: IfNotPresent
             args:
               - --common-name=*.internal-registry.ci.rox.systems
