@@ -73,8 +73,16 @@ export default function MutableLifespan({ cluster }: Props): ReactElement {
         );
       })
       .catch((err) => {
-        setError(err);
-        setClientSideLifespan('');
+        if (err instanceof Error) {
+          setError(err);
+          setClientSideLifespan('');
+        } else {
+          // TODO what are we even suppose to do here?
+          throw err;
+          // TODO(blugo): maybe this?
+          // setError(new Error('Unknown error'));
+          // setClientSideLifespan('');
+        }
       });
   };
 

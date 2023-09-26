@@ -230,7 +230,8 @@ export default function ClusterForm({
   const initialParameterValues = createInitialParameterValues(flavorParameters);
 
   const { user } = useUserAuth();
-  initialParameterValues.name = generateClusterName(user?.Name || '');
+  const username = user?.Name || '';
+  initialParameterValues.name = generateClusterName(username);
 
   const initialValues: FormikValues = {
     ID: flavorId,
@@ -254,15 +255,17 @@ export default function ClusterForm({
     try {
       const response = await clusterService.create({
         ...values,
-        Parameters: adjustParametersBeforeSubmit(values.Parameters),
+        Parameters: adjustParametersBeforeSubmit(values),
       });
 
       const { id } = response.data;
+      // TODO(blugo) what's going on here?
       if (!id) throw new Error('Server returned empty cluster ID');
       onClusterCreated(id);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (e: any) {
-      setError(e);
+    } catch (err: any) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setError(err);
     } finally {
       actions.setSubmitting(false);
     }
