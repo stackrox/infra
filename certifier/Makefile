@@ -1,6 +1,3 @@
-SHELL := /usr/bin/env bash
-export GO111MODULE=on
-
 .PHONY: all
 all: image
 
@@ -25,8 +22,8 @@ image-name:
 
 .PHONY: image
 image:
-	GOOS=linux GOARCH=amd64 go build -o certifier -ldflags='-s -w' *.go
-	docker build . -t $(IMAGE)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o certifier -ldflags='-s -w' *.go
+	docker build -t $(IMAGE) .
 
 .PHONY: push
 push:
