@@ -1,4 +1,4 @@
-FROM certbot/dns-google:v0.38.0
+FROM certbot/dns-google:v2.6.0
 
 COPY certifier /usr/local/bin/certifier
 
