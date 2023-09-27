@@ -17,6 +17,7 @@ spec:
       - name: central-db-image-tag
       - name: central-services-helm-chart-version
       - name: secured-cluster-services-helm-chart-version
+      - name: trusted-certs-enabled
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -75,7 +76,7 @@ spec:
 
     - name: create
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.6.11
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.0-1-gd92b417d7f-snapshot
         imagePullPolicy: Always
         volumeMounts:
           - name: data
@@ -110,6 +111,8 @@ spec:
             value: "e2-standard-16"
           - name: REGION
             value: "us-east1"
+          - name: TRUSTED_CERTS_ENABLED
+            value: "{{workflow.parameters.trusted-certs-enabled}}"
 
     - name: pre-install
       script:
@@ -235,7 +238,7 @@ spec:
 
     - name: destroy
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.6.11
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.0-1-gd92b417d7f-snapshot
         imagePullPolicy: Always
         command:
           - entrypoint.sh
