@@ -26,7 +26,7 @@ export default function MutableLifespan({ cluster }: Props): ReactElement {
         header="Cannot change the cluster lifespan"
         onAcknowledged={(): void => setError(null)}
       >
-        <span className="pf-u-warning-color-100 pf-u-font-size-2xl">{message}</span>
+        <span className="pf-u-danger-color-100 pf-u-font-size-2xl">{message}</span>
       </InformationalModal>
     );
   }

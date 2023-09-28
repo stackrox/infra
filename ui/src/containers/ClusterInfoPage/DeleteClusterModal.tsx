@@ -28,10 +28,10 @@ export default function DeleteClusterModal({ cluster, onCancel, onDeleted }: Pro
   if (!called) {
     // waiting for user confirmation
     const buttons = [
-      <Button variant="warning" onClick={deleteCluster}>
+      <Button variant="danger" onClick={deleteCluster}>
         Yes
       </Button>,
-      <Button variant="secondary" onClick={onCancel}>
+      <Button variant="link" onClick={onCancel}>
         Cancel
       </Button>,
     ];
@@ -43,7 +43,7 @@ export default function DeleteClusterModal({ cluster, onCancel, onDeleted }: Pro
         header={`Are you sure you want to delete ${cluster.ID}?`}
         buttons={buttons}
       >
-        <span className="pf-u-warning-color-100 pf-u-font-size-2xl">
+        <span className="pf-u-danger-color-100 pf-u-font-size-2xl">
           This action cannot be undone.
         </span>
       </Modal>
