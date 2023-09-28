@@ -1,5 +1,5 @@
 import React, { ReactElement, ReactNode } from 'react';
-import { Modal as PatternFlyModal, ModalVariant } from '@patternfly/react-core';
+import { Modal, ModalVariant } from '@patternfly/react-core';
 
 type Props = {
   isOpen: boolean;
@@ -9,7 +9,7 @@ type Props = {
   buttons?: ReactNode;
 };
 
-export default function Modal({
+export default function ({
   isOpen,
   onRequestClose,
   header,
@@ -17,7 +17,7 @@ export default function Modal({
   buttons,
 }: Props): ReactElement {
   return (
-    <PatternFlyModal
+    <Modal
       actions={buttons}
       isOpen={isOpen}
       onClose={onRequestClose}
@@ -25,6 +25,6 @@ export default function Modal({
       variant={ModalVariant.medium}
     >
       {children}
-    </PatternFlyModal>
+    </Modal>
   );
 }
