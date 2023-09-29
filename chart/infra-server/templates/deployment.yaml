@@ -30,7 +30,7 @@ spec:
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /configuration/google-credentials.json
             - name: TEST_MODE
-              value: "{{ eq .Values.deployment "local" }}"
+              value: "{{ eq .Values.environment "local" }}"
           readinessProbe:
             httpGet:
               path: /
@@ -56,7 +56,7 @@ spec:
           secret:
             secretName: infra-server-secrets
 
-{{ if eq .Values.deployment "local" }}
+{{ if eq .Values.environment "development" }}
 
       imagePullSecrets:
         - name: infra-image-registry-pull-secret

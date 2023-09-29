@@ -1,6 +1,8 @@
 SHELL := /usr/bin/env bash
 export GO111MODULE=on
 
+# Add check that cluster name is not infra-prod or deployment
+
 .PHONY: all
 all: image
 
@@ -12,6 +14,13 @@ ifneq (,$(TAGGED))
 else
 	# We're on a dev/PR branch
 	VERSION := $(TAG)
+endif
+
+LOCAL_VALUES_FILE=chart/infra-server/configuration/infra-values-${ENVIRONMENT}.yaml
+LOCAL_COMBINED_VALUES_FILE=chart/infra-server/configuration/infra-values-from-files-${ENVIRONMENT}.yaml
+
+ifeq '$(SECRET_VERSION)' ''
+SECRET_VERSION := latest
 endif
 
 .PHONY: tag
@@ -194,46 +203,19 @@ proto-generated-srcs: protoc-tools
 		--swagger_out=logtostderr=true:$(PROTO_OUTPUT_DIR) \
 		$(PROTO_FILES)
 
+
 ##########
 ## Kube ##
 ##########
-dev_context = gke_stackrox-infra_us-west2_infra-development
-prod_context = gke_stackrox-infra_us-west2_infra-production
-this_context = $(shell kubectl config current-context)
 
 ## Meta
 .PHONY: pre-check
 pre-check:
-ifndef DEPLOYMENT
-	$(error DEPLOYMENT is undefined)
-endif
 ifndef ENVIRONMENT
 	$(error ENVIRONMENT is undefined)
 endif
-	@if [[ "${DEPLOYMENT}" == "local" && ("${this_context}" == "${dev_context}" || "${this_context}" == "${prod_context}") ]]; then \
-		echo "Your kube context is not set to a local infra!"; \
-		exit 1; \
-	fi
-	@if [[ "${DEPLOYMENT}" == "development" && "${this_context}" != "${dev_context}" ]]; then \
-		echo -e "Your kube context is not set to development infra:\n\tkubectl config use-context ${dev_context}"; \
-		exit 1; \
-	fi
-	@if [[ "${DEPLOYMENT}" == "production" && "${this_context}" != "${prod_context}" ]]; then \
-		echo -e "Your kube context is not set to production infra:\n\tkubectl config use-context ${prod_context}"; \
-		exit 1; \
-	fi
 
-.PHONY: setup-kc
-setup-kc: pre-check
-	$(info DEPLOYMENT: ${DEPLOYMENT}, ENVIRONMENT: ${ENVIRONMENT})
-ifeq ($(DEPLOYMENT), local)
-kc=kubectl
-else ifeq ($(DEPLOYMENT), development)
-kc=kubectl --context gke_stackrox-infra_us-west2_infra-development
-else ifeq ($(DEPLOYMENT), production)
-kc=kubectl --context gke_stackrox-infra_us-west2_infra-production
-endif
-
+# TODO: this needs to be re-done for GCP secrets manger
 ## Configuration
 .PHONY: configuration-download
 configuration-download:
@@ -255,94 +237,10 @@ configuration-upload:
 create-consolidated-values:
 	@./scripts/create-consolidated-values.sh
 
-## Render
-.PHONY: clean-render
-clean-render:
-	@rm -rf chart-rendered
-
-.PHONY: render
-render: pre-check clean-render create-consolidated-values
-	@if [[ ! -e chart/infra-server/configuration ]]; then \
-		echo chart/infra-server/configuration is absent. Try:; \
-		echo make configuration-download; \
-		exit 1; \
-	fi
-	@mkdir -p chart-rendered
-	helm template chart/infra-server \
-	    --output-dir chart-rendered \
-		--set deployment="${DEPLOYMENT}" \
-		--set tag="$(VERSION)" \
-		--values chart/infra-server/configuration/${ENVIRONMENT}-values.yaml \
-		--values chart/infra-server/configuration/${ENVIRONMENT}-values-from-files.yaml
-
-.PHONY: render-local
-render-local:
-	DEPLOYMENT=local ENVIRONMENT=development make render
-
-.PHONY: render-development
-render-development:
-	DEPLOYMENT=development ENVIRONMENT=development make render
-
-.PHONY: render-production
-render-production:
-	DEPLOYMENT=production ENVIRONMENT=production make render
-
 ## Common install targets
 bounce-infra-pods: setup-kc
 	$(kc) -n infra rollout restart deploy/infra-server-deployment
 	$(kc) -n infra rollout status deploy/infra-server-deployment --watch --timeout=3m
-
-install-common: setup-kc
-	@if ! $(kc) get ns argo 2> /dev/null; then \
-		$(kc) create namespace argo; \
-	fi
-	$(kc) apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/v3.3.9/install.yaml;
-	@if ! $(kc) get ns infra 2> /dev/null; then \
-		$(kc) apply -f chart/infra-server/templates/namespace.yaml; \
-	fi
-
-## Install (without write)
-install: setup-kc install-common
-	gsutil cat gs://infra-configuration/latest/configuration/$(ENVIRONMENT)-values.yaml \
-               gs://infra-configuration/latest/configuration/$(ENVIRONMENT)-values-from-files.yaml | \
-	helm template chart/infra-server \
-		--set deployment="$(DEPLOYMENT)" \
-		--set tag="$(VERSION)" \
-		--values - | \
-	$(kc) apply -R \
-	    -f -
-	@sleep 10
-	make bounce-infra-pods
-
-.PHONY: install-local
-install-local:
-	DEPLOYMENT=local ENVIRONMENT=development make install-common install
-
-.PHONY: install-development
-install-development:
-	DEPLOYMENT=development ENVIRONMENT=development make install-common install
-
-.PHONY: install-production
-install-production:
-	DEPLOYMENT=production ENVIRONMENT=production make install-common install
-
-## Install (with rendered)
-.PHONY: install-with-rendered
-install-with-rendered: setup-kc install-common
-	$(kc) apply -R \
-	    -f chart-rendered/infra-server
-
-.PHONY: install-local
-install-local-with-rendered:
-	DEPLOYMENT=local ENVIRONMENT=development make render install-with-rendered
-
-.PHONY: install-development
-install-development-with-rendered:
-	DEPLOYMENT=development ENVIRONMENT=development make render install-with-rendered
-
-.PHONY: install-production
-install-production-with-rendered:
-	DEPLOYMENT=production ENVIRONMENT=production make render install-with-rendered
 
 ## Diff
 .PHONY: diff
@@ -354,48 +252,6 @@ diff: setup-kc
 		--set tag="$(VERSION)" \
 		--values - | \
 	$(kc) diff -R -f -
-
-.PHONY: diff-local
-diff-local:
-	DEPLOYMENT=local ENVIRONMENT=development make diff
-
-.PHONY: diff-development
-diff-development:
-	DEPLOYMENT=development ENVIRONMENT=development make diff
-
-.PHONY: diff-production
-diff-production:
-	DEPLOYMENT=production ENVIRONMENT=production make diff
-
-## Clean
-.PHONY: clean-infra
-clean-infra:
-	$(kc) delete namespace infra || true
-
-.PHONY: clean-argo
-clean-argo:
-	$(kc) delete namespace argo || true
-
-.PHONY: clean-local
-clean-local:
-	DEPLOYMENT=local ENVIRONMENT=development make setup-kc clean-infra clean-argo
-
-.PHONY: clean-development
-clean-development:
-	DEPLOYMENT=development ENVIRONMENT=development make setup-kc clean-infra
-
-## Deploy
-.PHONY: deploy-local
-deploy-local: push install-local
-	@echo "All done!"
-
-.PHONY: deploy-development
-deploy-development: push install-development
-	@echo "All done!"
-
-.PHONY: deploy-production
-deploy-production: push install-production
-	@echo "All done!"
 
 ##########
 ## Misc ##
@@ -413,3 +269,14 @@ update-version:
 	@perl -p -i -e 's#image: (${image_regex}):(.*)#image: \1:${image_version}#g' \
 		./chart/infra-server/static/*.yaml
 	@git diff --name-status ./chart/infra-server/static/*.yaml
+
+.PHONY: install-argo
+install-argo:
+	helm repo add argo https://argoproj.github.io/argo-helm
+	helm upgrade \
+		argo-workflows \
+		argo/argo-workflows \
+		--version 0.16.9 \
+		--install \
+		--create-namespace \
+		--namespace argo

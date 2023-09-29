@@ -735,7 +735,7 @@
     - name: data
       description: An archive that includes ssh keys to connect to cluster nodes
 
-{{ if ne .Values.deployment "production" -}}
+{{ if ne .Values.environment "production" -}}
 #################
 #  URL artifact #
 #################

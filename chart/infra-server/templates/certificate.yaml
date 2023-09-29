@@ -1,4 +1,4 @@
-{{ if ne .Values.deployment "local" -}}
+{{ if ne .Values.environment "local" -}}
 ---
 
 apiVersion: networking.gke.io/v1
