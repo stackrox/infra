@@ -9,22 +9,14 @@ type Props = {
   buttons?: ReactNode;
 };
 
-export default function ({
-  isOpen,
-  onRequestClose,
-  header,
-  children,
-  buttons,
-}: Props): ReactElement {
-  return (
-    <Modal
-      actions={buttons}
-      isOpen={isOpen}
-      onClose={onRequestClose}
-      title={header}
-      variant={ModalVariant.medium}
-    >
-      {children}
-    </Modal>
-  );
-}
+export default ({ isOpen, onRequestClose, header, children, buttons }: Props): ReactElement => (
+  <Modal
+    actions={buttons}
+    isOpen={isOpen}
+    onClose={onRequestClose}
+    title={header}
+    variant={ModalVariant.medium}
+  >
+    {children}
+  </Modal>
+);
