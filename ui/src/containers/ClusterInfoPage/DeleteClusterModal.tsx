@@ -64,7 +64,7 @@ export default function DeleteClusterModal({ cluster, onCancel, onDeleted }: Pro
     const message = `Cannot delete cluster. Server error occurred: "${error.message}".`;
     return (
       <InformationalModal header={`Failed to delete ${cluster.ID}!`} onAcknowledged={onCancel}>
-        <span className="pf-u-warning-color-100 pf-u-font-size-2xl">{message}</span>
+        <span className="pf-u-danger-color-100 pf-u-font-size-2xl">{message}</span>
       </InformationalModal>
     );
   }
