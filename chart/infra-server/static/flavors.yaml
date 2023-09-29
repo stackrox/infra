@@ -707,6 +707,15 @@
     - name: data
       description: An archive that includes ssh keys to connect to cluster nodes
 
+    - name: cluster-console-url
+      description: The URL for the openshift console
+
+    - name: cluster-console-username
+      description: The username to login at the openshift console
+
+    - name: cluster-console-password
+      description: The password to login at the openshift console
+
 #########################
 #  Openshift OSD on AWS #
 #########################
