@@ -1,4 +1,5 @@
 import React, { ReactElement, ReactNode } from 'react';
+import { Button } from '@patternfly/react-core';
 
 import Modal from 'components/Modal';
 
@@ -22,13 +23,13 @@ export default function InformationalModal({
   onAcknowledged,
 }: Props): ReactElement {
   const button = (
-    <button type="button" className="btn btn-base" onClick={onAcknowledged}>
+    <Button variant="primary" onClick={onAcknowledged}>
       OK
-    </button>
+    </Button>
   );
 
   return (
-    <Modal isOpen onRequestClose={onAcknowledged} header={header} buttons={button}>
+    <Modal isOpen onRequestClose={onAcknowledged} header={header} buttons={[button]}>
       {children}
     </Modal>
   );
