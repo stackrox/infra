@@ -28,7 +28,7 @@ const clusterService = new ClusterServiceApi(configuration);
 function helpByParameterName(name?: string): string {
   const help: { [key: string]: string } = {
     name:
-      "You can use the generated name, or type in your own. Only lowercase letters, numbers, and '-' allowed, must start with a letter and end with a letter or number. The name must be between 3 and 27 characters long.",
+      "You can use the generated name, or type in your own. Only lowercase letters, numbers, and '-' allowed, must start with a letter and end with a letter or number. The name must be between 3 and 28 characters long.",
   };
 
   if (name && name in help) {
@@ -42,9 +42,9 @@ const schemasByParameterName: { [key: string]: yup.BaseSchema } = {
   name: yup
     .string()
     .min(3, 'Too short')
-    .max(27, 'Too long')
+    .max(28, 'Too long')
     .matches(
-      /^(?:[a-z](?:[a-z0-9-]{1,25}[a-z0-9]))$/,
+      /^(?:[a-z](?:[a-z0-9-]{1,26}[a-z0-9]))$/,
       'The input value does not match its requirements. See the (?) section for details.'
     ),
   nodes: yup
