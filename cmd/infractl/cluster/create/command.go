@@ -264,9 +264,10 @@ func getNameForQaDemoFlavor() string {
 	name := strings.TrimSuffix(workingEnvironment.tag, "-dirty")
 	name = strings.ReplaceAll(name, ".", "-")
 
-	// Ensure that the generated name is a maximum of 27 characters long.
+	// Ensure that the generated name is a maximum of 27 characters long and does not end with hyphen.
 	if len(name) > 27 {
 		name = name[:27]
+		name = strings.TrimSuffix(name, "-")
 	}
 
 	return name
