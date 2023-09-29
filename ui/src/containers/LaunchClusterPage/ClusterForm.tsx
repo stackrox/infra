@@ -38,12 +38,13 @@ function helpByParameterName(name?: string): string {
 }
 
 const schemasByParameterName: { [key: string]: yup.BaseSchema } = {
+  // name length is restricted by certificate generation
   name: yup
     .string()
     .min(3, 'Too short')
     .max(27, 'Too long')
     .matches(
-      /^(?:[a-z](?:[-a-z0-9]{1,25}[a-z0-9]))$/, // this is what GKE expects
+      /^(?:[a-z](?:[a-z0-9-]{1,25}[a-z0-9]))$/,
       'The input value does not match its requirements. See the (?) section for details.'
     ),
   nodes: yup
