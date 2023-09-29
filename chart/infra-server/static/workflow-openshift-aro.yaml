@@ -82,10 +82,15 @@ spec:
             mountPath: /data
 
     - name: gather
-      container:
+      script:
         image: busybox
-        imagePullPolicy: Always
-        command: [echo, "gathering artifacts"]
+        command: [sh]
+        source: |
+          cd /data
+          . ./dotenv
+          echo "${CONSOLE_ENDPOINT}" > cluster-console-url
+          echo "${CONSOLE_USER}" > cluster-console-username
+          echo "${CONSOLE_PASSWORD}" > cluster-console-password
         volumeMounts:
           - name: data
             mountPath: /data
@@ -103,6 +108,18 @@ spec:
             path: /data
             archive:
               tar: {}
+          - name: cluster-console-url
+            path: /data/cluster-console-url
+            archive:
+              none: {}
+          - name: cluster-console-username
+            path: /data/cluster-console-username
+            archive:
+              none: {}
+          - name: cluster-console-password
+            path: /data/cluster-console-password
+            archive:
+              none: {}
 
     - name: wait
       suspend: {}

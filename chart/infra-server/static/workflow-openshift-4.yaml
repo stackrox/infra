@@ -41,6 +41,9 @@ spec:
         - - name: create
             template: create
 
+        - - name: gather
+            template: gather
+
         - - name: wait
             template: wait
 
@@ -115,7 +118,7 @@ spec:
           - name: data
             mountPath: /data
 
-    - name: gather more
+    - name: gather
       script:
         image: busybox
         command: [sh]
