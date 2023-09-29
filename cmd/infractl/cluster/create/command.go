@@ -155,16 +155,19 @@ func validateName(name string) error {
 	if len(name) < 3 {
 		return errors.New("cluster name too short")
 	}
-	if len(name) > 28 {
+	if len(name) > 27 {
 		return errors.New("cluster name too long")
 	}
 
-	match, err := regexp.MatchString(`^(?:[a-z](?:[-a-z0-9]{0,28}[a-z0-9])?)$`, name)
+	match, err := regexp.MatchString(`^(?:[a-z](?:[-a-z0-9]{1,25}[a-z0-9]))$`, name)
 	if err != nil {
 		return err
 	}
 	if !match {
-		return errors.New("The name does not match the requirements. Only lowercase letters, numbers, and '-' allowed, must start with a letter and end with a letter or number.")
+		return errors.New(
+			"The name does not match the requirements. " +
+				"Only lowercase letters, numbers, and '-' allowed, must start with a letter and end with a letter or number. " +
+				"A minimum length of 3 characters and a maximum length of 27 is allowed.")
 	}
 
 	return nil
