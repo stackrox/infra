@@ -1,7 +1,7 @@
 SHELL := /usr/bin/env bash
 export GO111MODULE=on
 
-# Add check that cluster name is not infra-prod or deployment
+# TODO: Add check that cluster name is not infra-prod or deployment
 
 .PHONY: all
 all: image
@@ -31,92 +31,6 @@ IMAGE=us.gcr.io/stackrox-infra/infra-server:$(VERSION)
 .PHONY: image-name
 image-name:
 	@echo $(IMAGE)
-
-#############
-## Linting ##
-#############
-
-.PHONY: argo-workflow-lint
-argo-workflow-lint:
-	@argo lint ./chart/infra-server/static/workflow*.yaml
-
-.PHONY: shellcheck
-shellcheck:
-	@shellcheck -x -- **/*.{bats,sh}
-
-###########
-## Build ##
-###########
-
-# server - Builds the infra-server binary
-# When run locally, a Darwin binary is built and installed into the user's GOPATH bin.
-# When run in CI, a Darwin and Linux binary is built.
-.PHONY: server
-server:
-	@echo "+ $@"
-	GOARCH=amd64 GOOS=linux ./scripts/go-build -o bin/infra-server-linux-amd64 ./cmd/infra-server
-
-# cli - Builds the infractl client binary
-# When run in CI or when preparing an image, a Darwin and Linux binary is built.
-.PHONY: cli
-cli:
-	@echo "+ $@"
-	GOARCH=amd64 GOOS=darwin ./scripts/go-build -o bin/infractl-darwin-amd64 ./cmd/infractl
-	GOARCH=arm64 GOOS=darwin ./scripts/go-build -o bin/infractl-darwin-arm64 ./cmd/infractl
-	GOARCH=amd64 GOOS=linux  ./scripts/go-build -o bin/infractl-linux-amd64  ./cmd/infractl
-
-# cli-local - Builds the infractl client binary
-# When run locally, a Darwin binary is built and installed into the user's GOPATH bin.
-.PHONY: cli-local
-cli-local:
-	@echo "+ $@"
-	./scripts/go-build -o $(GOPATH)/bin/infractl  ./cmd/infractl
-
-.PHONY: ui
-ui:
-	@echo "+ $@"
-	@make -C ui all
-
-.PHONY: image
-image:
-	docker build . -t $(IMAGE) -f image/Dockerfile --secret id=npmrc,src=${HOME}/.npmrc
-
-.PHONY: push
-push:
-	docker push $(IMAGE) | cat
-
-#############
-## Testing ##
-#############
-
-.PHONY: unit-test
-unit-test: proto-generated-srcs
-	@echo "+ $@"
-	@go test -v ./...
-
-.PHONY: go-e2e-tests
-go-e2e-tests: proto-generated-srcs
-	@kubectl apply -f workflows/
-	@go test ./test/e2e/... -tags=e2e -v -parallel 5 -count 1 -cover -timeout 1h
-
-# Assuming a local dev infra server is running and accessible via a port-forward
-# i.e. nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
-.PHONY: pull-infractl-from-dev-server
-pull-infractl-from-dev-server:
-	@mkdir -p bin
-	@rm -f bin/infractl
-	set -o pipefail; \
-	curl --retry 3 --insecure --silent --show-error --fail --location https://localhost:8443/v1/cli/linux/amd64/upgrade \
-          | jq -r ".result.fileChunk" \
-          | base64 -d \
-          > bin/infractl
-	chmod +x bin/infractl
-	bin/infractl -k -e localhost:8443 version
-
-.PHONY: e2e-tests
-e2e-tests:
-	@kubectl apply -f "workflows/*.yaml"
-	@bats --jobs 5 --no-parallelize-within-files --recursive .
 
 ##############
 ## Protobuf ##
@@ -203,6 +117,91 @@ proto-generated-srcs: protoc-tools
 		--swagger_out=logtostderr=true:$(PROTO_OUTPUT_DIR) \
 		$(PROTO_FILES)
 
+###########
+## Build ##
+###########
+
+# server - Builds the infra-server binary
+# When run locally, a Darwin binary is built and installed into the user's GOPATH bin.
+# When run in CI, a Darwin and Linux binary is built.
+.PHONY: server
+server:
+	@echo "+ $@"
+	GOARCH=amd64 GOOS=linux ./scripts/go-build -o bin/infra-server-linux-amd64 ./cmd/infra-server
+
+# cli - Builds the infractl client binary
+# When run in CI or when preparing an image, a Darwin and Linux binary is built.
+.PHONY: cli
+cli:
+	@echo "+ $@"
+	GOARCH=amd64 GOOS=darwin ./scripts/go-build -o bin/infractl-darwin-amd64 ./cmd/infractl
+	GOARCH=arm64 GOOS=darwin ./scripts/go-build -o bin/infractl-darwin-arm64 ./cmd/infractl
+	GOARCH=amd64 GOOS=linux  ./scripts/go-build -o bin/infractl-linux-amd64  ./cmd/infractl
+
+# cli-local - Builds the infractl client binary
+# When run locally, a Darwin binary is built and installed into the user's GOPATH bin.
+.PHONY: cli-local
+cli-local:
+	@echo "+ $@"
+	./scripts/go-build -o $(GOPATH)/bin/infractl  ./cmd/infractl
+
+.PHONY: ui
+ui:
+	@echo "+ $@"
+	@make -C ui all
+
+.PHONY: image
+image:
+	docker build . -t $(IMAGE) -f image/Dockerfile --secret id=npmrc,src=${HOME}/.npmrc
+
+.PHONY: push
+push:
+	docker push $(IMAGE) | cat
+
+#############
+## Linting ##
+#############
+
+.PHONY: argo-workflow-lint
+argo-workflow-lint:
+	@argo lint ./chart/infra-server/static/workflow*.yaml
+
+.PHONY: shellcheck
+shellcheck:
+	@shellcheck -x -- **/*.{bats,sh}
+
+#############
+## Testing ##
+#############
+
+.PHONY: unit-test
+unit-test: proto-generated-srcs
+	@echo "+ $@"
+	@go test -v ./...
+
+.PHONY: bats-e2e-tests
+bats-e2e-tests:
+	@kubectl apply -f "workflows/*.yaml"
+	@bats --jobs 5 --no-parallelize-within-files --recursive .
+
+.PHONY: go-e2e-tests
+go-e2e-tests: proto-generated-srcs
+	@kubectl apply -f workflows/
+	@go test ./test/e2e/... -tags=e2e -v -parallel 5 -count 1 -cover -timeout 1h
+
+# Assuming a local dev infra server is running and accessible via a port-forward
+# i.e. nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
+.PHONY: pull-infractl-from-dev-server
+pull-infractl-from-dev-server:
+	@mkdir -p bin
+	@rm -f bin/infractl
+	set -o pipefail; \
+	curl --retry 3 --insecure --silent --show-error --fail --location https://localhost:8443/v1/cli/linux/amd64/upgrade \
+          | jq -r ".result.fileChunk" \
+          | base64 -d \
+          > bin/infractl
+	chmod +x bin/infractl
+	bin/infractl -k -e localhost:8443 version
 
 ##########
 ## Kube ##
@@ -215,13 +214,14 @@ ifndef ENVIRONMENT
 	$(error ENVIRONMENT is undefined)
 endif
 
-# TODO: this needs to be re-done for GCP secrets manger
+# TODO: this needs to be re-done for GCP secrets manager
 ## Configuration
 .PHONY: configuration-download
 configuration-download:
 	@echo "Downloading configuration from gs://infra-configuration"
 	gsutil -m cp -R "gs://infra-configuration/latest/configuration" "chart/infra-server/"
 
+# TODO: this needs to be re-done for GCP secrets manager
 .PHONY: configuration-upload
 configuration-upload: CONST_DATESTAMP := $(shell date '+%Y-%m-%d-%H-%M-%S')
 configuration-upload:
@@ -230,6 +230,7 @@ configuration-upload:
 	@echo "Uploading configuration to gs://infra-configuration/latest/"
 	gsutil -m cp -R chart/infra-server/configuration "gs://infra-configuration/latest/"
 
+# TODO: this needs to be re-done for GCP secrets manager
 # Combines configuration/{development,production} files into single helm value.yaml files
 # (configuration/{development,production}-values-from-files.yaml) that can be used in template
 # rendering.
@@ -238,38 +239,31 @@ create-consolidated-values:
 	@./scripts/create-consolidated-values.sh
 
 ## Common install targets
-bounce-infra-pods: setup-kc
+.PHONY: bounce-infra-pods
+bounce-infra-pods:
 	$(kc) -n infra rollout restart deploy/infra-server-deployment
 	$(kc) -n infra rollout status deploy/infra-server-deployment --watch --timeout=3m
 
+# TODO: this needs to check the context
 ## Diff
 .PHONY: diff
-diff: setup-kc
-	gsutil cat gs://infra-configuration/latest/configuration/$(ENVIRONMENT)-values.yaml \
-               gs://infra-configuration/latest/configuration/$(ENVIRONMENT)-values-from-files.yaml | \
-	helm template chart/infra-server \
-		--set deployment="$(DEPLOYMENT)" \
-		--set tag="$(VERSION)" \
-		--values - | \
-	$(kc) diff -R -f -
+diff:
+	@./scripts/deploy/helm.sh diff $(VERSION) $(SECRET_VERSION)
 
-##########
-## Misc ##
-##########
-.PHONY: gotags
-gotags:
-	@gotags -R . > tags
-	@echo "GoTags written to $(PWD)/tags"
+# TODO: this needs to check the context
+.PHONY: deploy
+deploy:
+	@./scripts/deploy/helm deploy $(VERSION) $(SECRET_VERSION)
 
-.PHONY: update-version
-update-version: image_regex   := gcr.io/stackrox-infra/automation-flavors/.*
-update-version: image_version := 0.2.16
-update-version:
-	@echo 'Updating automation-flavor image versions to "${image_version}"'
-	@perl -p -i -e 's#image: (${image_regex}):(.*)#image: \1:${image_version}#g' \
-		./chart/infra-server/static/*.yaml
-	@git diff --name-status ./chart/infra-server/static/*.yaml
+# TODO: this needs to check the context
+.PHONY: template
+template:
+	@./scripts/deploy/helm template $(VERSION) $(SECRET_VERSION)
 
+##################
+## Dependencies ##
+##################
+# TODO: this needs to check the context
 .PHONY: install-argo
 install-argo:
 	helm repo add argo https://argoproj.github.io/argo-helm

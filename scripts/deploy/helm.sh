@@ -54,5 +54,24 @@ deploy() {
     )
 }
 
+diff() {
+    helm template \
+		infra-server \
+		chart/infra-server \
+		--debug \
+		--namespace infra \
+		--set tag="${TAG}" \
+        --set environment="${ENVIRONMENT}" \
+		--values - \
+    < <(gcloud secrets versions access "${SECRET_VERSION}" \
+        --secret "infra-values-${ENVIRONMENT}" \
+        --project stackrox-infra \
+    && gcloud secrets versions access "${SECRET_VERSION}" \
+        --secret "infra-values-from-files-${ENVIRONMENT}" \
+        --project stackrox-infra \
+    ) | \
+	kubectl diff -R -f -
+}
+
 check_not_empty TAG ENVIRONMENT SECRET_VERSION
 eval "$TASK"
