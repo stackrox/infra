@@ -24,7 +24,7 @@ function ArtifactsList({ artifacts }: ArtifactsListProps): ReactElement {
           if (!a.Description && b.Description) {
             return 1;
           }
-          return a.Name && b.Name ? a.Name.localeCompare(b.Name) : 0;
+          return 0;
         })
         .map((artifact) => (
           <ListItem key={artifact.Name}>
