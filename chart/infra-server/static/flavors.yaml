@@ -302,6 +302,11 @@
       value: false
       kind: optional
 
+    - name: trusted-certs-enabled
+      description: Should trusted certificates be created
+      value: false
+      kind: optional
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
@@ -406,6 +411,11 @@
         Version string of the central-db container image tag to use. Setting this value will enable central-db.
         Default will be derived from the Helm chart.
 
+    - name: trusted-certs-enabled
+      description: Should trusted certificates be created
+      value: false
+      kind: optional
+
   artifacts:
     - name: admin-password
       description: Admin password for StackRox console
@@ -491,6 +501,11 @@
 
     - name: fips-enabled
       description: should fips be enabled
+      value: false
+      kind: optional
+
+    - name: trusted-certs-enabled
+      description: Should trusted certificates be created
       value: false
       kind: optional
 
