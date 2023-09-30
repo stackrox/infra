@@ -76,7 +76,7 @@ spec:
 
     - name: create
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.0-1-gd92b417d7f-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.1
         imagePullPolicy: Always
         volumeMounts:
           - name: data
@@ -238,7 +238,7 @@ spec:
 
     - name: destroy
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.0-1-gd92b417d7f-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.1
         imagePullPolicy: Always
         command:
           - entrypoint.sh
