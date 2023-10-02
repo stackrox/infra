@@ -29,7 +29,7 @@ spec:
   volumes:
     - name: credentials
       secret:
-        secretName: google-credentials-openshift-4
+        secretName: openshift-4-gcp-service-account
     - name: demo-secrets
       secret:
         secretName: demo-secrets
@@ -86,13 +86,13 @@ spec:
         args:
           - create
           - "{{workflow.parameters.name}}"
-          - srox-temp-dev-test
-          - openshift.infra.rox.systems
+          - acs-team-temp-dev
+          - ocp.infra.rox.systems
         env:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
               secretKeyRef:
-                name: google-credentials-openshift-4
+                name: openshift-4-gcp-service-account
                 key: google-credentials.json
           - name: PULL_SECRET
             valueFrom:
@@ -124,7 +124,7 @@ spec:
         source: |
           openssl rand -base64 32 | tr "+/" "_#"  | cut -c 1-20 > /data/admin_password
           base64 /data/auth/kubeconfig | tr -d "\n" > /data/auth/kubeconfig_base64
-          subdomain="apps.{{workflow.parameters.name}}.openshift.infra.rox.systems"
+          subdomain="apps.{{workflow.parameters.name}}.ocp.infra.rox.systems"
           echo "https://console-openshift-console.${subdomain}" > /data/url-openshift
           echo "https://central-stackrox.${subdomain}" > /data/url-stackrox
       outputs:
@@ -166,7 +166,7 @@ spec:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
               secretKeyRef:
-                name: google-credentials-openshift-4
+                name: openshift-4-gcp-service-account
                 key: google-credentials.json
           - name: CENTRAL_PORT
             value: "443"
@@ -265,7 +265,7 @@ spec:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
               secretKeyRef:
-                name: google-credentials-openshift-4
+                name: openshift-4-gcp-service-account
                 key: google-credentials.json
         volumeMounts:
           - name: data

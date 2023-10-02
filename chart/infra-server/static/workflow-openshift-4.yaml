@@ -34,7 +34,7 @@ spec:
   volumes:
     - name: credentials
       secret:
-        secretName: google-credentials-openshift-4
+        secretName: openshift-4-gcp-service-account
 
   templates:
     - name: start
@@ -86,13 +86,13 @@ spec:
         args:
           - create
           - "{{workflow.parameters.name}}"
-          - srox-temp-dev-test
-          - openshift.infra.rox.systems
+          - acs-team-temp-dev
+          - ocp.infra.rox.systems
         env:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
               secretKeyRef:
-                name: google-credentials-openshift-4
+                name: openshift-4-gcp-service-account
                 key: google-credentials.json
           - name: PULL_SECRET
             valueFrom:
@@ -164,7 +164,7 @@ spec:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
               secretKeyRef:
-                name: google-credentials-openshift-4
+                name: openshift-4-gcp-service-account
                 key: google-credentials.json
         volumeMounts:
           - name: data

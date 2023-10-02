@@ -55,7 +55,7 @@ spec:
         args:
           - create
           - "{{workflow.parameters.name}}"
-          - srox-temp-dev-test
+          - acs-team-temp-dev
         env:
           - name: AZURE_SP_USERNAME
             valueFrom:
@@ -103,7 +103,7 @@ spec:
         args:
           - destroy
           - "{{workflow.parameters.name}}"
-          - srox-temp-dev-test
+          - acs-team-temp-dev
         env:
           - name: AZURE_SP_USERNAME
             valueFrom:
