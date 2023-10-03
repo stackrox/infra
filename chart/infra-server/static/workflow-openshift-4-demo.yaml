@@ -76,7 +76,7 @@ spec:
 
     - name: create
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.1
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.1-4-g85c5c37504-snapshot
         imagePullPolicy: Always
         volumeMounts:
           - name: data
@@ -86,7 +86,6 @@ spec:
         args:
           - create
           - "{{workflow.parameters.name}}"
-          - acs-team-temp-dev
           - ocp.infra.rox.systems
         env:
           - name: GOOGLE_CREDENTIALS
@@ -94,6 +93,8 @@ spec:
               secretKeyRef:
                 name: openshift-4-gcp-service-account
                 key: google-credentials.json
+          - name: GCP_PROJECT
+            value : "acs-team-temp-dev"
           - name: PULL_SECRET
             valueFrom:
               secretKeyRef:
@@ -255,7 +256,7 @@ spec:
 
     - name: destroy
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.1
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.1-4-g85c5c37504-snapshot
         imagePullPolicy: Always
         command:
           - entrypoint.sh
@@ -267,6 +268,8 @@ spec:
               secretKeyRef:
                 name: openshift-4-gcp-service-account
                 key: google-credentials.json
+          - name: GCP_PROJECT
+            value : "acs-team-temp-dev"
         volumeMounts:
           - name: data
             mountPath: /data
