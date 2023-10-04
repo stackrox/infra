@@ -4,8 +4,11 @@ set -euo pipefail
 
 TASK="$1"
 TAG="$2"
-ENVIRONMENT="$3"
-SECRET_VERSION="$4"
+SECRET_VERSION="$3"
+
+PROJECT="stackrox-infra"
+RELEASE_NAMESPACE="infra"
+RELEASE_NAME="infra-server"
 
 check_not_empty() {
     for V in "$@"; do
@@ -19,56 +22,56 @@ check_not_empty() {
 
 template() {
     helm template \
-		infra-server \
+		"${RELEASE_NAME}" \
 		chart/infra-server \
 		--debug \
-		--namespace infra \
+		--namespace "${RELEASE_NAMESPACE}" \
 		--set tag="${TAG}" \
         --set environment="${ENVIRONMENT}" \
 		--values - \
     < <(gcloud secrets versions access "${SECRET_VERSION}" \
         --secret "infra-values-${ENVIRONMENT}" \
-        --project stackrox-infra \
+        --project "${PROJECT}" \
     && gcloud secrets versions access "${SECRET_VERSION}" \
         --secret "infra-values-from-files-${ENVIRONMENT}" \
-        --project stackrox-infra \
+        --project "${PROJECT}" \
     )
 }
 
 deploy() {
     helm upgrade \
-        infra-server \
+        "${RELEASE_NAME}" \
         chart/infra-server \
         --install \
         --create-namespace \
-        --namespace infra \
+        --namespace "${RELEASE_NAMESPACE}" \
         --set tag="${TAG}" \
         --set environment="${ENVIRONMENT}" \
         --values - \
     < <(gcloud secrets versions access "${SECRET_VERSION}" \
         --secret "infra-values-${ENVIRONMENT}" \
-        --project stackrox-infra \
+        --project "${PROJECT}" \
     && gcloud secrets versions access "${SECRET_VERSION}" \
         --secret "infra-values-from-files-${ENVIRONMENT}" \
-        --project stackrox-infra \
+        --project "${PROJECT}" \
     )
 }
 
 diff() {
     helm template \
-		infra-server \
+		"${RELEASE_NAME}" \
 		chart/infra-server \
 		--debug \
-		--namespace infra \
+		--namespace "${RELEASE_NAMESPACE}" \
 		--set tag="${TAG}" \
         --set environment="${ENVIRONMENT}" \
 		--values - \
     < <(gcloud secrets versions access "${SECRET_VERSION}" \
         --secret "infra-values-${ENVIRONMENT}" \
-        --project stackrox-infra \
+        --project "${PROJECT}" \
     && gcloud secrets versions access "${SECRET_VERSION}" \
         --secret "infra-values-from-files-${ENVIRONMENT}" \
-        --project stackrox-infra \
+        --project "${PROJECT}" \
     ) | \
 	kubectl diff -R -f -
 }

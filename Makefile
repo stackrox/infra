@@ -1,8 +1,6 @@
 SHELL := /usr/bin/env bash
 export GO111MODULE=on
 
-# TODO: Add check that cluster name is not infra-prod or deployment
-
 .PHONY: all
 all: image
 
@@ -206,6 +204,9 @@ pull-infractl-from-dev-server:
 ##########
 ## Kube ##
 ##########
+dev_context = gke_stackrox-infra_us-west2_infra-development
+prod_context = gke_stackrox-infra_us-west2_infra-production
+this_context = $(shell kubectl config current-context)
 
 ## Meta
 .PHONY: pre-check
@@ -213,6 +214,14 @@ pre-check:
 ifndef ENVIRONMENT
 	$(error ENVIRONMENT is undefined)
 endif
+	@if [[ "${ENVIRONMENT}" == "development" && "${this_context}" == "${prod_context}" ]]; then \
+		echo -e "Your kube context is not set to a development infra. Use the following for dev cluster or set it to your PR cluster\n\tkubectl config use-context ${dev_context}\n"; \
+		exit 1; \
+	fi
+	@if [[ "${ENVIRONMENT}" == "production" && "${this_context}" != "${prod_context}" ]]; then \
+		echo -e "Your kube context is not set to production infra:\n\tkubectl config use-context ${prod_context}"; \
+		exit 1; \
+	fi
 
 # TODO: this needs to be re-done for GCP secrets manager
 ## Configuration
@@ -238,34 +247,32 @@ configuration-upload:
 create-consolidated-values:
 	@./scripts/create-consolidated-values.sh
 
-## Common install targets
+## Render template
+.PHONY: template
+template: pre-check
+	@./scripts/deploy/helm template $(VERSION) $(SECRET_VERSION)
+
+## Deploy
+.PHONY: deploy
+deploy: pre-check
+	@./scripts/deploy/helm deploy $(VERSION) $(SECRET_VERSION)
+
+## Diff
+.PHONY: diff
+diff: pre-check
+	@./scripts/deploy/helm.sh diff $(VERSION) $(SECRET_VERSION)
+
+## Bounce pods
 .PHONY: bounce-infra-pods
 bounce-infra-pods:
 	$(kc) -n infra rollout restart deploy/infra-server-deployment
 	$(kc) -n infra rollout status deploy/infra-server-deployment --watch --timeout=3m
 
-# TODO: this needs to check the context
-## Diff
-.PHONY: diff
-diff:
-	@./scripts/deploy/helm.sh diff $(VERSION) $(SECRET_VERSION)
-
-# TODO: this needs to check the context
-.PHONY: deploy
-deploy:
-	@./scripts/deploy/helm deploy $(VERSION) $(SECRET_VERSION)
-
-# TODO: this needs to check the context
-.PHONY: template
-template:
-	@./scripts/deploy/helm template $(VERSION) $(SECRET_VERSION)
-
 ##################
 ## Dependencies ##
 ##################
-# TODO: this needs to check the context
 .PHONY: install-argo
-install-argo:
+install-argo: pre-check
 	helm repo add argo https://argoproj.github.io/argo-helm
 	helm upgrade \
 		argo-workflows \
