@@ -79,7 +79,7 @@ spec:
             archive:
               tar: {}
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.1-4-g85c5c37504-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.2
         imagePullPolicy: Always
         command:
           - entrypoint.sh
@@ -155,7 +155,7 @@ spec:
 
     - name: destroy
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.1-4-g85c5c37504-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.2
         imagePullPolicy: Always
         command:
           - entrypoint.sh
