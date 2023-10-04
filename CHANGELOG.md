@@ -8,6 +8,8 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+- Fix: CLI and UI now consistently enforce restrictions on the cluster name format and length
+
 ## [0.8.0]
 
 - Switch GKE based flavors (gke-default, demo, qa-demo) to use a RH project (ROX-17123,ROX-19217)
