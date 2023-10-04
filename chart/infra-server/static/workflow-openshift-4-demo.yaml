@@ -17,6 +17,7 @@ spec:
       - name: central-db-image-tag
       - name: central-services-helm-chart-version
       - name: secured-cluster-services-helm-chart-version
+      - name: trusted-certs-enabled
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -75,7 +76,7 @@ spec:
 
     - name: create
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.6.11
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.1
         imagePullPolicy: Always
         volumeMounts:
           - name: data
@@ -110,6 +111,8 @@ spec:
             value: "e2-standard-16"
           - name: REGION
             value: "us-east1"
+          - name: TRUSTED_CERTS_ENABLED
+            value: "{{workflow.parameters.trusted-certs-enabled}}"
 
     - name: pre-install
       script:
@@ -192,10 +195,15 @@ spec:
             mountPath: /data
 
     - name: gather
-      container:
+      script:
         image: busybox
-        imagePullPolicy: Always
-        command: [echo, "gathering artifacts"]
+        command: [sh]
+        source: |
+          cd /data
+          . ./dotenv
+          echo "${OPENSHIFT_CONSOLE_URL}" > cluster-console-url
+          echo "${OPENSHIFT_CONSOLE_USERNAME}" > cluster-console-username
+          echo "${OPENSHIFT_CONSOLE_PASSWORD}" > cluster-console-password
         volumeMounts:
           - name: data
             mountPath: /data
@@ -229,13 +237,25 @@ spec:
             path: /data
             archive:
               tar: {}
+          - name: cluster-console-url
+            path: /data/cluster-console-url
+            archive:
+              none: {}
+          - name: cluster-console-username
+            path: /data/cluster-console-username
+            archive:
+              none: {}
+          - name: cluster-console-password
+            path: /data/cluster-console-password
+            archive:
+              none: {}
 
     - name: wait
       suspend: {}
 
     - name: destroy
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.6.11
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.1
         imagePullPolicy: Always
         command:
           - entrypoint.sh

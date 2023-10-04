@@ -1,10 +1,10 @@
 import React, { ReactElement, useCallback } from 'react';
+import { Button, List, ListItem } from '@patternfly/react-core';
 
 import { V1Cluster, ClusterServiceApi, V1Artifact } from 'generated/client';
 import configuration from 'client/configuration';
 import Modal from 'components/Modal';
 import useApiQuery from 'client/useApiQuery';
-import { X } from 'react-feather';
 import assertDefined from 'utils/assertDefined';
 
 const clusterService = new ClusterServiceApi(configuration);
@@ -15,16 +15,23 @@ type ArtifactsListProps = {
 
 function ArtifactsList({ artifacts }: ArtifactsListProps): ReactElement {
   return (
-    <ul className="list-disc ml-5 pb-5">
-      {artifacts.map((artifact) => (
-        <li key={artifact.Name}>
-          <a href={artifact.URL} className="underline text-blue-500">
-            {artifact.Name}
-          </a>{' '}
-          - {artifact.Description}
-        </li>
-      ))}
-    </ul>
+    <List className="pf-u-mb-md">
+      {artifacts
+        .sort((a, b) => {
+          if (a.Description && !b.Description) {
+            return -1;
+          }
+          if (!a.Description && b.Description) {
+            return 1;
+          }
+          return 0;
+        })
+        .map((artifact) => (
+          <ListItem key={artifact.Name}>
+            <a href={artifact.URL}>{artifact.Name}</a> - {artifact.Description}
+          </ListItem>
+        ))}
+    </List>
   );
 }
 
@@ -50,8 +57,11 @@ function Artifacts({ cluster }: ArtifactsProps): ReactElement {
     return (
       <div>
         <ArtifactsList artifacts={artifacts.Artifacts} />
-        <p>Note: You can download all artifacts at the command line with:</p>
-        <code>infractl artifacts --download-dir=&lt;some dir&gt; {cluster.ID}</code>
+        <p>
+          Note: You can download all artifacts at the command line with:
+          <br />
+          <code>infractl artifacts --download-dir=&lt;some dir&gt; {cluster.ID}</code>
+        </p>
       </div>
     );
   }
@@ -68,9 +78,9 @@ export default function DownloadArtifactsModal({ cluster, onClose }: Props): Rea
   assertDefined(cluster.ID);
 
   const closeButton = (
-    <button type="button" className="btn btn-base" onClick={onClose}>
-      <X size={16} className="mr-2" /> Close
-    </button>
+    <Button variant="primary" onClick={onClose}>
+      Close
+    </Button>
   );
 
   return (
@@ -78,7 +88,7 @@ export default function DownloadArtifactsModal({ cluster, onClose }: Props): Rea
       isOpen
       onRequestClose={onClose}
       header={`Artifacts for ${cluster.ID}`}
-      buttons={closeButton}
+      buttons={[closeButton]}
     >
       <Artifacts cluster={cluster} />
     </Modal>

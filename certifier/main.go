@@ -28,6 +28,7 @@ type config struct {
 	GCSBucket             string
 	GCSPrefix             string
 	GoogleCredentialsFile string
+	GoogleProject         string
 	RenewalDays           int
 }
 
@@ -47,6 +48,7 @@ func mainCmd() error {
 	flag.StringVar(&cfg.GCSBucket, "gcs-bucket", "", "")
 	flag.StringVar(&cfg.GCSPrefix, "gcs-prefix", "", "")
 	flag.IntVar(&cfg.RenewalDays, "renewal-days", 15, "")
+	flag.StringVar(&cfg.GoogleProject, "gcp-project-name", "", "")
 	flag.Parse()
 
 	googleCredentialsFile, found := os.LookupEnv("GOOGLE_APPLICATION_CREDENTIALS")
@@ -163,6 +165,10 @@ func buildCertbotCommand(cfg config) *exec.Cmd {
 
 	if len(cfg.AlternativeNames) != 0 {
 		args = append(args, "--domains", cfg.AlternativeNames)
+	}
+
+	if cfg.GoogleProject != "" {
+		args = append(args, "--dns-google-project", cfg.GoogleProject)
 	}
 
 	cmd := exec.Command("certbot", args...)

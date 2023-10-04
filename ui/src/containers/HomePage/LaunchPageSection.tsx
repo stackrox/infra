@@ -1,5 +1,6 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import React, { useState, ReactElement } from 'react';
+import React, { ReactElement } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { AxiosPromise } from 'axios';
 import { Gallery, GalleryItem } from '@patternfly/react-core';
 
@@ -51,10 +52,13 @@ function FlavorCards({ showAllFlavors = false }: FlavorCardsProps): ReactElement
 }
 
 export default function LaunchPageSection(): ReactElement {
-  const [showAllFlavors, setShowAllFlavors] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const showAllFlavors = searchParams.get('showAllFlavors') === 'true';
 
   function toggleFlavorFilter() {
-    setShowAllFlavors(!showAllFlavors);
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set('showAllFlavors', (!showAllFlavors).toString());
+    setSearchParams(newSearchParams);
   }
 
   const headerText = showAllFlavors ? 'All Flavors' : 'My Flavors';
