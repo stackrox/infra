@@ -21,7 +21,6 @@ export function generateClusterName(username = ''): string {
 
   // ROX-15492
   //   - OCP 3.11 flavor allows us a maximum of up to 28 characters to fulfil: "openshift_public_hostname must be 63 characters or less".
-  //   - OCP 4 demo: Let's Encrypt allows common names of up to 63 characters. With the format '*.apps.<name>.openshift.infra.rox.systems', 28 characters remain for the name.
   // Combine the 3 parts, truncate it at 28 characters, and remove a trailing '-', if any.
   return nameArray.join('-').slice(0, 28).replace(/-$/, '');
 }

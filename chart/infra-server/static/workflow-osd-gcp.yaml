@@ -61,9 +61,9 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: osd-access-secrets
-                key: GCP_SA_CREDS_JSON_BASE64
+                key: GCP_SERVICE_ACCOUNT_KEY_BASE64
           - name: GCP_PROJECT
-            value: "srox-temp-dev-test"
+            value: "acs-team-temp-dev"
           - name: NODE_COUNT
             value: "{{workflow.parameters.nodes}}"
           - name: INSTANCE_TYPE
@@ -143,9 +143,9 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: osd-access-secrets
-                key: GCP_SA_CREDS_JSON_BASE64
+                key: GCP_SERVICE_ACCOUNT_KEY_BASE64
           - name: GCP_PROJECT
-            value: "srox-temp-dev-test"
+            value: "acs-team-temp-dev"
         volumeMounts:
           - name: data
             mountPath: /data
