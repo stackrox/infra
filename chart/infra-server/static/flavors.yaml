@@ -495,7 +495,7 @@
 
     - name: master-node-type
       description: the type of master nodes
-      value: c2d-highcpu-16
+      value: n1-standard-16
       kind: optional
 
     - name: master-node-count
@@ -505,7 +505,7 @@
 
     - name: worker-node-type
       description: the type of worker nodes
-      value: c2d-highcpu-8
+      value: n1-standard-8
       kind: optional
 
     - name: worker-node-count
