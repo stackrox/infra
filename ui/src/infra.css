@@ -8,6 +8,14 @@
   margin-bottom: var(--pf-global--spacer--md);
 }
 
+/* Remove padding from homepage bottom panel */
+.home-page .pf-c-drawer__body {
+  --pf-c-drawer--child--PaddingTop: 0;
+  --pf-c-drawer--child--PaddingLeft: 0;
+  --pf-c-drawer--child--PaddingBottom: 0;
+  --pf-c-drawer--child--PaddingRight: 0;
+}
+
 .pf-c-form__label-text {
   text-transform: capitalize;
 }
