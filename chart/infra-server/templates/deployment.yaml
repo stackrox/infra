@@ -55,3 +55,9 @@ spec:
         - name: configuration
           secret:
             secretName: infra-server-secrets
+
+{{ if eq .Values.deployment "local" }}
+
+      imagePullSecrets:
+        - name: infra-image-registry-pull-secret
+{{ end }}

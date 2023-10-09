@@ -48,6 +48,8 @@ def main():
     usage = read_usage_from_stdin()
     cost_per_flavor_env = calculate_costs(usage)
 
+    cost_per_flavor_env.sort(key=lambda x: x["flavor"])
+
     print("```")
     print(tabulate(
         cost_per_flavor_env,

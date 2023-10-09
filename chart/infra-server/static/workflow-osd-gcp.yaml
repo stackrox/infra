@@ -38,7 +38,7 @@ spec:
     - name: create
       activeDeadlineSeconds: 7200
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-osd:0.2.24
+        image: quay.io/stackrox-io/ci:automation-flavors-osd-0.2.24
         imagePullPolicy: Always
         command:
           - ./entrypoint.sh
@@ -61,9 +61,9 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: osd-access-secrets
-                key: GCP_SA_CREDS_JSON_BASE64
+                key: GCP_SERVICE_ACCOUNT_KEY_BASE64
           - name: GCP_PROJECT
-            value: "srox-temp-dev-test"
+            value: "acs-team-temp-dev"
           - name: NODE_COUNT
             value: "{{workflow.parameters.nodes}}"
           - name: INSTANCE_TYPE
@@ -75,10 +75,15 @@ spec:
             mountPath: /data
 
     - name: gather
-      container:
+      script:
         image: busybox
-        imagePullPolicy: Always
-        command: [echo, "gathering artifacts"]
+        command: [sh]
+        source: |
+          cd /data
+          . ./dotenv
+          echo "${CLUSTER_CONSOLE_ENDPOINT}" > cluster-console-url
+          echo "${CLUSTER_USERNAME}" > cluster-console-username
+          echo "${CLUSTER_PASSWORD}" > cluster-console-password
         volumeMounts:
           - name: data
             mountPath: /data
@@ -96,6 +101,18 @@ spec:
             path: /data
             archive:
               tar: {}
+          - name: cluster-console-url
+            path: /data/cluster-console-url
+            archive:
+              none: {}
+          - name: cluster-console-username
+            path: /data/cluster-console-username
+            archive:
+              none: {}
+          - name: cluster-console-password
+            path: /data/cluster-console-password
+            archive:
+              none: {}
 
     - name: wait
       suspend: {}
@@ -103,7 +120,7 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/openshift-osd:0.2.24
+        image: quay.io/stackrox-io/ci:automation-flavors-osd-0.2.24
         imagePullPolicy: Always
         command:
           - ./entrypoint.sh
@@ -126,9 +143,9 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: osd-access-secrets
-                key: GCP_SA_CREDS_JSON_BASE64
+                key: GCP_SERVICE_ACCOUNT_KEY_BASE64
           - name: GCP_PROJECT
-            value: "srox-temp-dev-test"
+            value: "acs-team-temp-dev"
         volumeMounts:
           - name: data
             mountPath: /data

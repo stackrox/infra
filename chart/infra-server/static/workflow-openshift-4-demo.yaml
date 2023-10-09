@@ -17,6 +17,7 @@ spec:
       - name: central-db-image-tag
       - name: central-services-helm-chart-version
       - name: secured-cluster-services-helm-chart-version
+      - name: trusted-certs-enabled
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -28,7 +29,7 @@ spec:
   volumes:
     - name: credentials
       secret:
-        secretName: google-credentials-openshift-4
+        secretName: openshift-4-gcp-service-account
     - name: demo-secrets
       secret:
         secretName: demo-secrets
@@ -75,7 +76,7 @@ spec:
 
     - name: create
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.6.11
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.2
         imagePullPolicy: Always
         volumeMounts:
           - name: data
@@ -85,14 +86,15 @@ spec:
         args:
           - create
           - "{{workflow.parameters.name}}"
-          - srox-temp-dev-test
-          - openshift.infra.rox.systems
+          - ocp.infra.rox.systems
         env:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
               secretKeyRef:
-                name: google-credentials-openshift-4
+                name: openshift-4-gcp-service-account
                 key: google-credentials.json
+          - name: GCP_PROJECT
+            value : "acs-team-temp-dev"
           - name: PULL_SECRET
             valueFrom:
               secretKeyRef:
@@ -101,7 +103,7 @@ spec:
           - name: OPENSHIFT_VERSION
             value: "{{workflow.parameters.openshift-version}}"
           - name: MASTER_NODE_COUNT
-            value: "1"
+            value: "3"
           - name: WORKER_NODE_COUNT
             value: "3"
           - name: MASTER_NODE_TYPE
@@ -110,6 +112,8 @@ spec:
             value: "e2-standard-16"
           - name: REGION
             value: "us-east1"
+          - name: TRUSTED_CERTS_ENABLED
+            value: "{{workflow.parameters.trusted-certs-enabled}}"
 
     - name: pre-install
       script:
@@ -121,7 +125,7 @@ spec:
         source: |
           openssl rand -base64 32 | tr "+/" "_#"  | cut -c 1-20 > /data/admin_password
           base64 /data/auth/kubeconfig | tr -d "\n" > /data/auth/kubeconfig_base64
-          subdomain="apps.{{workflow.parameters.name}}.openshift.infra.rox.systems"
+          subdomain="apps.{{workflow.parameters.name}}.ocp.infra.rox.systems"
           echo "https://console-openshift-console.${subdomain}" > /data/url-openshift
           echo "https://central-stackrox.${subdomain}" > /data/url-stackrox
       outputs:
@@ -163,7 +167,7 @@ spec:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
               secretKeyRef:
-                name: google-credentials-openshift-4
+                name: openshift-4-gcp-service-account
                 key: google-credentials.json
           - name: CENTRAL_PORT
             value: "443"
@@ -192,10 +196,15 @@ spec:
             mountPath: /data
 
     - name: gather
-      container:
+      script:
         image: busybox
-        imagePullPolicy: Always
-        command: [echo, "gathering artifacts"]
+        command: [sh]
+        source: |
+          cd /data
+          . ./dotenv
+          echo "${OPENSHIFT_CONSOLE_URL}" > cluster-console-url
+          echo "${OPENSHIFT_CONSOLE_USERNAME}" > cluster-console-username
+          echo "${OPENSHIFT_CONSOLE_PASSWORD}" > cluster-console-password
         volumeMounts:
           - name: data
             mountPath: /data
@@ -229,13 +238,25 @@ spec:
             path: /data
             archive:
               tar: {}
+          - name: cluster-console-url
+            path: /data/cluster-console-url
+            archive:
+              none: {}
+          - name: cluster-console-username
+            path: /data/cluster-console-username
+            archive:
+              none: {}
+          - name: cluster-console-password
+            path: /data/cluster-console-password
+            archive:
+              none: {}
 
     - name: wait
       suspend: {}
 
     - name: destroy
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.6.11
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.2
         imagePullPolicy: Always
         command:
           - entrypoint.sh
@@ -245,8 +266,10 @@ spec:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
               secretKeyRef:
-                name: google-credentials-openshift-4
+                name: openshift-4-gcp-service-account
                 key: google-credentials.json
+          - name: GCP_PROJECT
+            value : "acs-team-temp-dev"
         volumeMounts:
           - name: data
             mountPath: /data

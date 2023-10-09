@@ -22,6 +22,7 @@ spec:
       - name: pull-secret
         value: ""
       - name: fips-enabled
+      - name: trusted-certs-enabled
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -33,13 +34,16 @@ spec:
   volumes:
     - name: credentials
       secret:
-        secretName: google-credentials-openshift-4
+        secretName: openshift-4-gcp-service-account
 
   templates:
     - name: start
       steps:
         - - name: create
             template: create
+
+        - - name: gather
+            template: gather
 
         - - name: wait
             template: wait
@@ -75,21 +79,22 @@ spec:
             archive:
               tar: {}
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.6.8
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.2
         imagePullPolicy: Always
         command:
           - entrypoint.sh
         args:
           - create
           - "{{workflow.parameters.name}}"
-          - srox-temp-dev-test
-          - openshift.infra.rox.systems
+          - ocp.infra.rox.systems
         env:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
               secretKeyRef:
-                name: google-credentials-openshift-4
+                name: openshift-4-gcp-service-account
                 key: google-credentials.json
+          - name: GCP_PROJECT
+            value : "acs-team-temp-dev"
           - name: PULL_SECRET
             valueFrom:
               secretKeyRef:
@@ -111,16 +116,46 @@ spec:
             value: "{{workflow.parameters.region}}"
           - name: FIPS_ENABLED
             value: "{{workflow.parameters.fips-enabled}}"
+          - name: TRUSTED_CERTS_ENABLED
+            value: "{{workflow.parameters.trusted-certs-enabled}}"
         volumeMounts:
           - name: data
             mountPath: /data
+
+    - name: gather
+      script:
+        image: busybox
+        command: [sh]
+        source: |
+          cd /data
+          . ./dotenv
+          echo "${OPENSHIFT_CONSOLE_URL}" > cluster-console-url
+          echo "${OPENSHIFT_CONSOLE_USERNAME}" > cluster-console-username
+          echo "${OPENSHIFT_CONSOLE_PASSWORD}" > cluster-console-password
+        volumeMounts:
+          - name: data
+            mountPath: /data
+      outputs:
+        artifacts:
+          - name: cluster-console-url
+            path: /data/cluster-console-url
+            archive:
+              none: {}
+          - name: cluster-console-username
+            path: /data/cluster-console-username
+            archive:
+              none: {}
+          - name: cluster-console-password
+            path: /data/cluster-console-password
+            archive:
+              none: {}
 
     - name: wait
       suspend: {}
 
     - name: destroy
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.6.8
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.2
         imagePullPolicy: Always
         command:
           - entrypoint.sh
@@ -130,8 +165,10 @@ spec:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
               secretKeyRef:
-                name: google-credentials-openshift-4
+                name: openshift-4-gcp-service-account
                 key: google-credentials.json
+          - name: GCP_PROJECT
+            value : "acs-team-temp-dev"
         volumeMounts:
           - name: data
             mountPath: /data

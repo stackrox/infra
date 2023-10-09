@@ -71,6 +71,11 @@ To upload the local configuration which includes the consolidated values back to
 
 `make configuration-upload`
 
+## Regenerating the localhost certificates for the gRPC gateway
+
+The connection for the gRPC gateway is secured by a self-generated "localhost" certificate.
+To regenerate the certificate, run: `./scripts/cert/renew.sh <local|development|production>`.
+
 ## Creating a Tag for Release
 
 To create a full GitHub release, draft a new release from the console.
@@ -161,3 +166,12 @@ Download a copy of `infractl` and export your token. Verify API connectivity:
 | --- | --- |
 | Staging | `infractl -e dev.infra.rox.systems:443 whoami` |
 | Production | `infractl whoami` |
+
+## Logging
+
+The infra server logs are captured automatically by GCP.
+
+- [Logs Explorer: Staging](https://cloudlogging.app.goo.gl/uSmEsjAmYR8Uyvyx9)
+- [Logs Explorer: Production](https://cloudlogging.app.goo.gl/KqgSyE2mSq83M5Xs9)
+
+Adding `jsonPayload."log-type"="audit"` to the query will filter for audit logs.

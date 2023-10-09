@@ -46,4 +46,75 @@ spec:
             - name: configuration
               secret:
                 secretName: demo-certifier-credentials
+
+---
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: demo-certifier-demos-rox-systems
+  namespace: infra
+spec:
+  schedule: "@weekly"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: certifier
+            image: us.gcr.io/stackrox-infra/certifier:0.0.0-5
+            imagePullPolicy: IfNotPresent
+            args:
+              - --common-name=*.demos.rox.systems
+              - --cert-name=demos.rox.systems
+              - --gcs-bucket=sr-demo-files
+              - --gcs-prefix=certs
+            env:
+              - name: GOOGLE_APPLICATION_CREDENTIALS
+                value: /configuration/google-credentials.json
+            volumeMounts:
+              - mountPath: /configuration
+                name: configuration
+                readOnly: true
+          restartPolicy: Never
+          volumes:
+            - name: configuration
+              secret:
+                secretName: demo-certifier-credentials
+
+---
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: demo-certifier-internal-registry-ci-rox-systems
+  namespace: infra
+spec:
+  schedule: "@weekly"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: certifier
+            image: us.gcr.io/stackrox-infra/certifier:0.8.0-11-ga083b2097a
+            imagePullPolicy: IfNotPresent
+            args:
+              - --common-name=*.internal-registry.ci.rox.systems
+              - --cert-name=internal-registry.ci.rox.systems
+              - --gcs-bucket=sr-demo-files
+              - --gcs-prefix=certs
+              - --gcp-project-name=stackrox-ci
+            env:
+              - name: GOOGLE_APPLICATION_CREDENTIALS
+                value: /configuration/google-credentials.json
+            volumeMounts:
+              - mountPath: /configuration
+                name: configuration
+                readOnly: true
+          restartPolicy: Never
+          volumes:
+            - name: configuration
+              secret:
+                secretName: demo-certifier-credentials
 {{ end }}

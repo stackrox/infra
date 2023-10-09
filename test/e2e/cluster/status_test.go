@@ -33,6 +33,9 @@ type statusTest struct {
 func TestStatusCommand(t *testing.T) {
 	utils.CheckContext()
 
+	maintainer, err := infractlWhoami()
+	assert.NoError(t, err)
+
 	tests := []statusTest{
 		{
 			title:    "First infractl status get initializes inactive maintenance",
@@ -43,7 +46,7 @@ func TestStatusCommand(t *testing.T) {
 				assert.Equal(t, tc.response.Status.Maintainer, "")
 			},
 			assertLogContents: func(podLogs string) {
-				assert.Contains(t, podLogs, "\"msg\":\"initialized infra status lazily\",\"actor\":\"roxbot+infra-gha@redhat.com\",\"maintenance-active\":false")
+				assert.Contains(t, podLogs, fmt.Sprintf("\"msg\":\"initialized infra status lazily\",\"actor\":\"%s\",\"maintenance-active\":false", maintainer))
 			},
 		},
 		{
@@ -57,9 +60,7 @@ func TestStatusCommand(t *testing.T) {
 				assert.Equal(t, tc.response.Status.Maintainer, maintainer)
 			},
 			assertLogContents: func(podLogs string) {
-				maintainer, err := infractlWhoami()
-				assert.NoError(t, err)
-				assert.Contains(t, podLogs, fmt.Sprintf("\"msg\":\"new status set\",\"actor\":\"roxbot+infra-gha@redhat.com\",\"maintainer\":\"%s\",\"maintenance-active\":true", maintainer))
+				assert.Contains(t, podLogs, fmt.Sprintf("\"msg\":\"new status set\",\"actor\":\"%s\",\"maintainer\":\"%s\",\"maintenance-active\":true", maintainer, maintainer))
 			},
 		},
 		{
@@ -71,7 +72,7 @@ func TestStatusCommand(t *testing.T) {
 				assert.Equal(t, tc.response.Status.Maintainer, "")
 			},
 			assertLogContents: func(podLogs string) {
-				assert.Contains(t, podLogs, "\"msg\":\"status was reset\",\"actor\":\"roxbot+infra-gha@redhat.com\",\"maintenance-active\":false")
+				assert.Contains(t, podLogs, fmt.Sprintf("\"msg\":\"status was reset\",\"actor\":\"%s\",\"maintenance-active\":false", maintainer))
 			},
 		},
 	}

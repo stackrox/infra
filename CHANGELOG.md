@@ -8,7 +8,31 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+## [0.8.2]
+
+- Hackathon '23:
+  - Adding all clusters to url and drag/drop window split screen
+  - ROX-17295: trusted certificates for openshift-4
+- Fix: CLI and UI now consistently enforce restrictions on the cluster name format and length
+- Change: ROX-19218, etc: Move GCP based OCP flavors in infra to a RH project
+- Change: Use more consistent artifact naming for openshift clusters
+- Chore: Misc tailwind -> patternfly
+- Chore: Bump demo versions to 4.2.1
+
+## [0.8.0]
+
+- Switch GKE based flavors (gke-default, demo, qa-demo) to use a RH project (ROX-17123,ROX-19217)
+- CLI: Add client-side cluster name validation
+- Bump demo flavors to 4.2.0
+
+## [0.7.11]
+
+- Make the domain for GKE based demos configurable.
+- Revert the change that reduced the master node count of openshift-4 and openshift-4-demo flavors from
+  3 to 1 (default is now 3 again).
+
 ## [0.7.10]
+
 - Fix for openshift-4-demo 4.2+ installs
 - Reduce the master node count of openshift-4 and openshift-4-demo flavors from
   3 to 1
