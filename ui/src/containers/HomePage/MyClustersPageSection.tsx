@@ -1,5 +1,6 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import React, { useState, ReactElement } from 'react';
+import React, { ReactElement } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { AxiosPromise } from 'axios';
 import moment from 'moment';
 import { Gallery, GalleryItem } from '@patternfly/react-core';
@@ -86,11 +87,13 @@ function ClusterCards({ showAllClusters = false }: ClusterCardsProps): ReactElem
   return <>{cards}</>;
 }
 
-export default function LaunchPageSection(): ReactElement {
-  const [showAllClusters, setShowAllClusters] = useState(false);
-
+export default function MyClustersPageSection(): ReactElement {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const showAllClusters = searchParams.get('showAllClusters') === 'true';
   function toggleClusterFilter() {
-    setShowAllClusters(!showAllClusters);
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set('showAllClusters', (!showAllClusters).toString());
+    setSearchParams(newSearchParams);
   }
 
   const headerText = showAllClusters ? 'All Clusters' : 'My Clusters';

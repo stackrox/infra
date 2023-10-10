@@ -302,10 +302,16 @@
       value: false
       kind: optional
 
+    - name: trusted-certs-enabled
+      description: Should trusted certificates be created
+      value: false
+      kind: optional
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
 
+    # (deprecated by cluster-console-password)
     - name: kubeadmin-password
       description: The kubeadmin user password for the openshift console
 
@@ -321,6 +327,15 @@
 
     - name: dotenv
       description: Environment variables used to access the cluster and consoles
+
+    - name: cluster-console-url
+      description: The URL for the openshift console
+
+    - name: cluster-console-username
+      description: The username to login at the openshift console
+
+    - name: cluster-console-password
+      description: The password to login at the openshift console
 
 ######################
 #  openshift-4-demo  #
@@ -406,6 +421,11 @@
         Version string of the central-db container image tag to use. Setting this value will enable central-db.
         Default will be derived from the Helm chart.
 
+    - name: trusted-certs-enabled
+      description: Should trusted certificates be created
+      value: false
+      kind: optional
+
   artifacts:
     - name: admin-password
       description: Admin password for StackRox console
@@ -428,6 +448,15 @@
 
     - name: dotenv
       description: Environment variables used to access the cluster and consoles
+
+    - name: cluster-console-url
+      description: The URL for the openshift console
+
+    - name: cluster-console-username
+      description: The username to login at the openshift console
+
+    - name: cluster-console-password
+      description: The password to login at the openshift console
 
 ############################
 #  openshift-4-perf-scale  #
@@ -466,7 +495,7 @@
 
     - name: master-node-type
       description: the type of master nodes
-      value: c2d-highcpu-16
+      value: n1-standard-16
       kind: optional
 
     - name: master-node-count
@@ -476,7 +505,7 @@
 
     - name: worker-node-type
       description: the type of worker nodes
-      value: c2d-highcpu-8
+      value: n1-standard-8
       kind: optional
 
     - name: worker-node-count
@@ -494,10 +523,16 @@
       value: false
       kind: optional
 
+    - name: trusted-certs-enabled
+      description: Should trusted certificates be created
+      value: false
+      kind: optional
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
 
+    # (deprecated by cluster-console-password)
     - name: kubeadmin-password
       description: The kubeadmin user password for the openshift console
 
@@ -513,6 +548,15 @@
 
     - name: dotenv
       description: Environment variables used to access the cluster and consoles
+
+    - name: cluster-console-url
+      description: The URL for the openshift console
+
+    - name: cluster-console-username
+      description: The username to login at the openshift console
+
+    - name: cluster-console-password
+      description: The password to login at the openshift console
 
 #####################
 #  AWS EKS          #
@@ -636,6 +680,16 @@
     - name: data
       description: An archive that includes ssh keys to connect to cluster nodes
 
+    - name: cluster-console-url
+      description: The URL for the openshift console
+      tags: [url]
+
+    - name: cluster-console-username
+      description: The username to login at the openshift console
+
+    - name: cluster-console-password
+      description: The password to login at the openshift console
+
 #####################
 #  Openshift ROSA   #
 #####################
@@ -668,6 +722,16 @@
 
     - name: data
       description: An archive that includes ssh keys to connect to cluster nodes
+
+    - name: cluster-console-url
+      description: The URL for the openshift console
+      tags: [url]
+
+    - name: cluster-console-username
+      description: The username to login at the openshift console
+
+    - name: cluster-console-password
+      description: The password to login at the openshift console
 
 #########################
 #  Openshift OSD on AWS #
@@ -702,6 +766,16 @@
     - name: data
       description: An archive that includes ssh keys to connect to cluster nodes
 
+    - name: cluster-console-url
+      description: The URL for the openshift console
+      tags: [url]
+
+    - name: cluster-console-username
+      description: The username to login at the openshift console
+
+    - name: cluster-console-password
+      description: The password to login at the openshift console
+
 #########################
 #  Openshift OSD on GCP #
 #########################
@@ -734,6 +808,16 @@
 
     - name: data
       description: An archive that includes ssh keys to connect to cluster nodes
+
+    - name: cluster-console-url
+      description: The URL for the openshift console
+      tags: [url]
+
+    - name: cluster-console-username
+      description: The username to login at the openshift console
+
+    - name: cluster-console-password
+      description: The password to login at the openshift console
 
 {{ if ne .Values.environment "production" -}}
 #################
