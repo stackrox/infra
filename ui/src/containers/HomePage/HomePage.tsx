@@ -12,7 +12,7 @@ import MyClustersPageSection from './MyClustersPageSection';
 
 export default function HomePage(): ReactElement {
   return (
-    <Drawer isExpanded isInline position="bottom">
+    <Drawer isExpanded isInline position="bottom" className="home-page">
       <DrawerContent
         panelContent={
           <DrawerPanelContent isResizable defaultSize="50%" minSize="150px">
