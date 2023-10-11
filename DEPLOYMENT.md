@@ -132,6 +132,12 @@ To then apply that chart to the cluster, run:
 
 `ENVIRONMENT=<development,production> SECRET_VERSION=<latest,1,2,3, ...> make helm-deploy`
 
+#### Test Mode
+
+Use the environment variable `TEST_MODE` to disable certain infra service behavior, like:
+
+`TEST_MODE=true ENVIRONMENT=development SECRET_VERSION=latest make helm-deploy`
+
 ## Verification
 
 After deploying the service, browse to the appropriate endpoint to verify that you can login and view the UI.
