@@ -60,8 +60,7 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         uses: slackapi/slack-github-action@v1.23.0
         with:
-          channel-id: C03KSV3N6N8 #acs-release-automation-testing
-          # channel-id: CVANK5K5W #acs-infra
+          channel-id: CVANK5K5W #acs-infra
           payload: >-
             {
                 "blocks": [
