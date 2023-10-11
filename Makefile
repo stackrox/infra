@@ -226,12 +226,12 @@ endif
 ## Render template
 .PHONY: helm-template
 helm-template: pre-check
-	@./scripts/deploy/helm template $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
+	@./scripts/deploy/helm.sh template $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
 
 ## Deploy
 .PHONY: helm-deploy
 helm-deploy: pre-check
-	@./scripts/deploy/helm deploy $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
+	@./scripts/deploy/helm.sh deploy $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
 
 ## Diff
 .PHONY: helm-diff
