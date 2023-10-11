@@ -261,7 +261,11 @@ secrets-show: pre-check
 
 .PHONY: secrets-edit
 secrets-edit: pre-check
-	./scripts/deploy/secrets.sh edit $(ENVIRONMENT) $(SECRET_VERSION)
+	@./scripts/deploy/secrets.sh edit $(ENVIRONMENT) $(SECRET_VERSION)
+
+.PHONY: secrets-revert
+secrets-revert: pre-check
+	@./scripts/deploy/secrets.sh revert $(ENVIRONMENT) $(SECRET_VERSION)
 
 ##################
 ## Dependencies ##
