@@ -1,4 +1,4 @@
-{{ if ne .Values.environment "local" -}}
+{{- if .Capabilities.APIVersions.Has "networking.gke.io/v1/ManagedCertificate" -}}
 ---
 
 apiVersion: networking.gke.io/v1

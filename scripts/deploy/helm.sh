@@ -4,7 +4,12 @@ set -euo pipefail
 
 TASK="$1"
 TAG="$2"
-SECRET_VERSION="$3"
+ENVIRONMENT="$3"
+SECRET_VERSION="${4:-latest}"
+
+# Enables TEST_MODE in chart.
+# Cannot use CI, because then CD with GHA would not be possible.
+TEST_MODE="${TEST_MODE:-false}"
 
 PROJECT="stackrox-infra"
 RELEASE_NAMESPACE="infra"
@@ -21,32 +26,17 @@ check_not_empty() {
 }
 
 template() {
-    helm template \
-		"${RELEASE_NAME}" \
-		chart/infra-server \
-		--debug \
-		--namespace "${RELEASE_NAMESPACE}" \
-		--set tag="${TAG}" \
-        --set environment="${ENVIRONMENT}" \
-		--values - \
-    < <(gcloud secrets versions access "${SECRET_VERSION}" \
-        --secret "infra-values-${ENVIRONMENT}" \
-        --project "${PROJECT}" \
-    && gcloud secrets versions access "${SECRET_VERSION}" \
-        --secret "infra-values-from-files-${ENVIRONMENT}" \
-        --project "${PROJECT}" \
-    )
-}
-
-deploy() {
+    # Need to use helm upgrade --dry-run to have .Capabilities context available
     helm upgrade \
         "${RELEASE_NAME}" \
         chart/infra-server \
         --install \
         --create-namespace \
+        --dry-run \
         --namespace "${RELEASE_NAMESPACE}" \
         --set tag="${TAG}" \
         --set environment="${ENVIRONMENT}" \
+        --set testMode="${TEST_MODE}" \
         --values - \
     < <(gcloud secrets versions access "${SECRET_VERSION}" \
         --secret "infra-values-${ENVIRONMENT}" \
@@ -57,24 +47,53 @@ deploy() {
     )
 }
 
-diff() {
-    helm template \
-		"${RELEASE_NAME}" \
-		chart/infra-server \
-		--debug \
-		--namespace "${RELEASE_NAMESPACE}" \
-		--set tag="${TAG}" \
+# deploy upgrades the Helm release with
+deploy() {
+    helm upgrade \
+        "${RELEASE_NAME}" \
+        chart/infra-server \
+        --install \
+        --create-namespace \
+        --timeout 5m \
+        --wait \
+        --namespace "${RELEASE_NAMESPACE}" \
+        --set tag="${TAG}" \
         --set environment="${ENVIRONMENT}" \
-		--values - \
+        --set testMode="${TEST_MODE}" \
+        --values - \
     < <(gcloud secrets versions access "${SECRET_VERSION}" \
         --secret "infra-values-${ENVIRONMENT}" \
         --project "${PROJECT}" \
     && gcloud secrets versions access "${SECRET_VERSION}" \
         --secret "infra-values-from-files-${ENVIRONMENT}" \
         --project "${PROJECT}" \
-    ) | \
-	kubectl diff -R -f -
+    )
 }
 
-check_not_empty TAG ENVIRONMENT SECRET_VERSION
+# diff renders the Helm chart and compares the deployed resources to show what would change on next deployment.
+diff() {
+    # Need to use helm upgrade --dry-run to have .Capabilities context available
+    helm upgrade \
+        "${RELEASE_NAME}" \
+        chart/infra-server \
+        --install \
+        --create-namespace \
+        --dry-run \
+        --namespace "${RELEASE_NAMESPACE}" \
+        --set tag="${TAG}" \
+        --set environment="${ENVIRONMENT}" \
+        --set testMode="${TEST_MODE}" \
+        --values - \
+    < <(gcloud secrets versions access "${SECRET_VERSION}" \
+        --secret "infra-values-${ENVIRONMENT}" \
+        --project "${PROJECT}" \
+    && gcloud secrets versions access "${SECRET_VERSION}" \
+        --secret "infra-values-from-files-${ENVIRONMENT}" \
+        --project "${PROJECT}" \
+    ) \
+    | sed -n '/---/,$p' \
+    | kubectl diff -R -f -
+}
+
+check_not_empty TASK TAG ENVIRONMENT
 eval "$TASK"

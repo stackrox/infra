@@ -223,50 +223,45 @@ endif
 		exit 1; \
 	fi
 
-# TODO: this needs to be re-done for GCP secrets manager
-## Configuration
-.PHONY: configuration-download
-configuration-download:
-	@echo "Downloading configuration from gs://infra-configuration"
-	gsutil -m cp -R "gs://infra-configuration/latest/configuration" "chart/infra-server/"
-
-# TODO: this needs to be re-done for GCP secrets manager
-.PHONY: configuration-upload
-configuration-upload: CONST_DATESTAMP := $(shell date '+%Y-%m-%d-%H-%M-%S')
-configuration-upload:
-	@echo "Uploading configuration to gs://infra-configuration/${CONST_DATESTAMP}"
-	gsutil -m cp -R chart/infra-server/configuration "gs://infra-configuration/${CONST_DATESTAMP}/"
-	@echo "Uploading configuration to gs://infra-configuration/latest/"
-	gsutil -m cp -R chart/infra-server/configuration "gs://infra-configuration/latest/"
-
-# TODO: this needs to be re-done for GCP secrets manager
-# Combines configuration/{development,production} files into single helm value.yaml files
-# (configuration/{development,production}-values-from-files.yaml) that can be used in template
-# rendering.
-.PHONY: create-consolidated-values
-create-consolidated-values:
-	@./scripts/create-consolidated-values.sh
-
 ## Render template
-.PHONY: template
-template: pre-check
-	@./scripts/deploy/helm template $(VERSION) $(SECRET_VERSION)
+.PHONY: helm-template
+helm-template: pre-check
+	@./scripts/deploy/helm template $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
 
 ## Deploy
-.PHONY: deploy
-deploy: pre-check
-	@./scripts/deploy/helm deploy $(VERSION) $(SECRET_VERSION)
+.PHONY: helm-deploy
+helm-deploy: pre-check
+	@./scripts/deploy/helm deploy $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
 
 ## Diff
-.PHONY: diff
-diff: pre-check
-	@./scripts/deploy/helm.sh diff $(VERSION) $(SECRET_VERSION)
+.PHONY: helm-diff
+helm-diff: pre-check
+	@./scripts/deploy/helm.sh diff $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
 
 ## Bounce pods
 .PHONY: bounce-infra-pods
 bounce-infra-pods:
-	$(kc) -n infra rollout restart deploy/infra-server-deployment
-	$(kc) -n infra rollout status deploy/infra-server-deployment --watch --timeout=3m
+	kubectl -n infra rollout restart deploy/infra-server-deployment
+	kubectl -n infra rollout status deploy/infra-server-deployment --watch --timeout=3m
+
+#############
+## Secrets ##
+#############
+.PHONY: secrets-download
+secrets-download: pre-check
+	@./scripts/deploy/secrets.sh download_secrets $(ENVIRONMENT)
+
+.PHONY: secrets-upload
+secrets-upload: pre-check
+	@./scripts/deploy/secrets.sh upload_secrets $(ENVIRONMENT) $(SECRET_VERSION)
+
+.PHONY: secrets-show
+secrets-show: pre-check
+	@./scripts/deploy/secrets.sh show $(ENVIRONMENT) $(SECRET_VERSION)
+
+.PHONY: secrets-edit
+secrets-edit: pre-check
+	./scripts/deploy/secrets.sh edit $(ENVIRONMENT) $(SECRET_VERSION)
 
 ##################
 ## Dependencies ##

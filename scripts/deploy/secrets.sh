@@ -4,7 +4,7 @@ set -euo pipefail
 
 TASK="$1"
 ENVIRONMENT="$2"
-SECRET_VERSION="$3"
+SECRET_VERSION="${3:-latest}"
 
 PROJECT="stackrox-infra"
 
@@ -96,5 +96,5 @@ revert() {
     upload_secrets
 }
 
-check_not_empty ENVIRONMENT SECRET_VERSION
+check_not_empty TASK ENVIRONMENT
 eval "$TASK"
