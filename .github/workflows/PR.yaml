@@ -10,6 +10,8 @@ defaults:
   run:
     working-directory: go/src/github.com/stackrox/infra
 
+concurrency: pr-${{ github.ref }}
+
 env:
   CLUSTER_NAME: infra-pr-${{ github.event.pull_request.number }}
   GH_TOKEN: ${{ secrets.ROBOT_ROX_GITHUB_TOKEN }}
