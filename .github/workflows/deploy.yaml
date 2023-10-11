@@ -53,14 +53,14 @@ jobs:
           gcloud container clusters get-credentials infra-${{ inputs.environment }} \
             --project stackrox-infra \
             --region us-west2
-          make install-${{ inputs.environment }}
+          ENVIRONMENT=${{ inputs.environment }} make install-argo helm-deploy
 
       - name: Notify infra channel about new version
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         uses: slackapi/slack-github-action@v1.23.0
         with:
-          channel-id: C01H4DC33K3 #acs-infra
+          channel-id: CVANK5K5W #acs-infra
           payload: >-
             {
                 "blocks": [

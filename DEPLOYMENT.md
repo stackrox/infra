@@ -138,6 +138,8 @@ Use the environment variable `TEST_MODE` to disable certain infra service behavi
 
 `TEST_MODE=true ENVIRONMENT=development SECRET_VERSION=latest make helm-deploy`
 
+This is used in the infra PR clusters to set the login referer and disable telemetry.
+
 ## Verification
 
 After deploying the service, browse to the appropriate endpoint to verify that you can login and view the UI.
