@@ -30,7 +30,7 @@ spec:
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /configuration/google-credentials.json
             - name: TEST_MODE
-              value: "{{ eq .Values.testMode true }}"
+              value: "{{ .Values.testMode }}"
           readinessProbe:
             httpGet:
               path: /

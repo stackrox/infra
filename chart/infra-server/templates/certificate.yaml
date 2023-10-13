@@ -1,4 +1,4 @@
-{{- if .Capabilities.APIVersions.Has "networking.gke.io/v1/ManagedCertificate" -}}
+{{- if eq .Values.testMode false -}}
 ---
 
 apiVersion: networking.gke.io/v1
