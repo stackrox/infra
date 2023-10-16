@@ -8,6 +8,8 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+- Deploying infra-server with Helm and GCP Secret Manager
+
 ## [0.8.2]
 
 - Hackathon '23:
