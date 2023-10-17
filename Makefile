@@ -280,3 +280,7 @@ install-argo: pre-check
 		--install \
 		--create-namespace \
 		--namespace argo
+
+.PHONY: clean-argo-config
+clean-argo-config: pre-check
+	kubectl delete configmap argo-workflows-workflow-controller-configmap -n argo || true
