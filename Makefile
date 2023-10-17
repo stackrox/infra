@@ -284,3 +284,4 @@ install-argo: pre-check
 .PHONY: clean-argo-config
 clean-argo-config: pre-check
 	kubectl delete configmap argo-workflows-workflow-controller-configmap -n argo || true
+	kubectl rollout restart deploy/argo-workflows-workflow-controller -n argo || true
