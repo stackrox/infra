@@ -118,6 +118,9 @@ To install Argo workflow server, run:
 
 NOTE: This is a separate step and not a dependant chart for example to avoid too frequent Argo deployments.
 
+Also note that if you plan to deploy `infra-server` to this cluster, you will need to remove the default Argo workflow controller ConfigMap with the `clean-argo-config` Make target.
+This is required until [ROX-20269](https://issues.redhat.com/browse/ROX-20269) is resolved.
+
 ### Manual deployment
 
 To render a copy of the charts (for inspection), run:
