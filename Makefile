@@ -232,6 +232,8 @@ helm-template: pre-check
 .PHONY: helm-deploy
 helm-deploy: pre-check
 	@./scripts/deploy/helm.sh deploy $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
+	# Pick up any eventual changes to the workflow controller configmap
+	@make bounce-argo-pods
 
 ## Diff
 .PHONY: helm-diff
@@ -243,6 +245,13 @@ helm-diff: pre-check
 bounce-infra-pods:
 	kubectl -n infra rollout restart deploy/infra-server-deployment
 	kubectl -n infra rollout status deploy/infra-server-deployment --watch --timeout=3m
+
+.PHONY: bounce-argo-pods
+bounce-argo-pods:
+	kubectl rollout restart deploy/argo-workflows-workflow-controller -n argo
+	kubectl rollout status deploy/argo-workflows-workflow-controller -n argo --watch --timeout=3m
+	kubectl rollout restart deploy/argo-workflows-server -n argo
+	kubectl rollout status deploy/argo-workflows-server -n argo --watch --timeout=3m
 
 #############
 ## Secrets ##
@@ -280,3 +289,7 @@ install-argo: pre-check
 		--install \
 		--create-namespace \
 		--namespace argo
+
+.PHONY: clean-argo-config
+clean-argo-config: pre-check
+	kubectl delete configmap argo-workflows-workflow-controller-configmap -n argo || true
