@@ -415,7 +415,7 @@ spec:
         - name: default
           image: golang:1.20.8
           script: |
-            cd $(workspaces.source.path)
+            cd $(workspaces.source.path)/source
             go test -v ./...
     workspaces:
     - name: workspace
