@@ -8,6 +8,14 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+## [0.8.5]
+
+- Fix: Openshift 3.11 provisioning is now based on quay.io/openshift installers (ROX-20327)
+
+## [0.8.4]
+
+- Fix: Scrolling on the cluster info page works again
+
 ## [0.8.3]
 
 - Deploying infra-server with Helm and GCP Secret Manager
