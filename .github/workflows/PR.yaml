@@ -10,6 +10,8 @@ defaults:
   run:
     working-directory: go/src/github.com/stackrox/infra
 
+concurrency: pr-${{ github.ref }}
+
 env:
   CLUSTER_NAME: infra-pr-${{ github.event.pull_request.number }}
   GH_TOKEN: ${{ secrets.ROBOT_ROX_GITHUB_TOKEN }}
@@ -97,7 +99,7 @@ jobs:
 
       - name: Deploy infra to dev cluster
         run: |
-          make install-local
+          ENVIRONMENT=development TEST_MODE=true make install-argo clean-argo-config helm-deploy
           sleep 10 # wait for old pods to disappear so the svc port-forward doesn't connect to them
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
           sleep 10
@@ -148,7 +150,7 @@ jobs:
         run: |
           make argo-workflow-lint
 
-      - name: Run e2e tests
+      - name: Run BATS e2e tests
         env:
           INFRA_TOKEN: ${{ secrets.INFRA_TOKEN_DEV }}
         run: |
@@ -158,7 +160,7 @@ jobs:
           $INFRACTL whoami || true
           $INFRACTL version || true
 
-          make e2e-tests || touch FAIL
+          make bats-e2e-tests || touch FAIL
           kubectl -n infra logs -l app=infra-server --tail=-1
           kill %1
 

@@ -835,7 +835,7 @@
     - name: cluster-console-password
       description: The password to login at the openshift console
 
-{{ if ne .Values.deployment "production" -}}
+{{ if ne .Values.environment "production" -}}
 #################
 #  URL artifact #
 #################

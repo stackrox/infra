@@ -49,27 +49,16 @@ infra-address-production   35.227.207.252  EXTERNAL                             
 
 ## Configuration
 
-Service configuration is [stored in a GCS bucket](https://console.cloud.google.com/storage/browser/infra-configuration?organizationId=847401270788&project=stackrox-infra).
+Service configuration and secrets are stored in [GCP Secret Manager](https://console.cloud.google.com/security/secret-manager?project=stackrox-infra).
 
-You will need to download this configuration if you plan to make a change to infra. Configuration changes are baked in to the `infra-server` image at build time.
+To view these, run:
 
-To download the configuration locally to `chart/infra-server/configuration`, run:
+`ENVIRONMENT=<development,production> SECRET_VERSION=<latest, 1,2,3,...> make secrets-download`.
 
-`make configuration-download`
+This will download the secrets to `chart/infra-server/configuration/`.
 
-After you change configuration run:
-
-`make create-consolidated-values`
-
-Which will e.g.:
-```
-INFO: Wed Jan 11 06:47:53 PM UTC 2023: Creating a combined values file for chart/infra-server/configuration/development files
-INFO: Wed Jan 11 06:47:53 PM UTC 2023: Creating a combined values file for chart/infra-server/configuration/production files
-```
-
-To upload the local configuration which includes the consolidated values back to the bucket, run:
-
-`make configuration-upload`
+- `<ENVIRONMENT>-values.yaml`: To show or edit a value, do it directly in this file, and use `ENVIRONMENT=<development,production> make secrets-upload` to upload the changes.
+- `<ENVIRONMENT>-values-from-files.yaml`: To show or edit a value, use `ENVIRONMENT=<development,production> SECRET_VERSION=<latest,1,2,3> make secrets-<show, edit>` and follow the instructions. NOTE: This will download a fresh copy of the requested secret version and upload a new version after your changes. That ensures that your local secrets do not go stale.
 
 ## Regenerating the localhost certificates for the gRPC gateway
 
@@ -121,35 +110,38 @@ correct tooling installed with:
 
 Use the `deploy` Github action to update development or production environments with a new release.
 
-### Staging/(dev.infra.rox.systems)
+### Argo Deployment
+
+To install Argo workflow server, run:
+
+`ENVIRONMENT=<development,production> make install-argo`
+
+NOTE: This is a separate step and not a dependant chart for example to avoid too frequent Argo deployments.
+
+Also note that if you plan to deploy `infra-server` to this cluster, you will need to remove the default Argo workflow controller ConfigMap with the `clean-argo-config` Make target.
+This is required until [ROX-20269](https://issues.redhat.com/browse/ROX-20269) is resolved.
+
+### Manual deployment
 
 To render a copy of the charts (for inspection), run:
 
-`make render-development`
+`ENVIRONMENT=<development,production> SECRET_VERSION=<latest,1,2,3, ...> make helm-template`
 
-To then apply that chart to the development cluster, run:
+To show the diff between the current Helm release and the charts, run:
 
-`make install-development-with-rendered`
+`ENVIRONMENT=<development,production> SECRET_VERSION=<latest,1,2,3, ...> make helm-diff`
 
-To do everything in one command, run:
+To then apply that chart to the cluster, run:
 
-`make install-development`
+`ENVIRONMENT=<development,production> SECRET_VERSION=<latest,1,2,3, ...> make helm-deploy`
 
-Note: This will always bounce the infra server pods.
+#### Test Mode
 
-### Production
+Use the environment variable `TEST_MODE` to disable certain infra service behavior, like:
 
-To render a copy of the charts (for inspection), run:
+`TEST_MODE=true ENVIRONMENT=development SECRET_VERSION=latest make helm-deploy`
 
-`make render-production`
-
-To then apply that chart to the development cluster, run:
-
-`make install-production-with-rendered`
-
-To do everything in one command, run:
-
-`make deploy-production`
+This is used in the infra PR clusters to set the login referer and disable telemetry.
 
 ## Verification
 

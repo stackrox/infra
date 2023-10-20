@@ -1,4 +1,4 @@
-{{ if eq .Values.deployment "production" -}}
+{{ if eq .Values.environment "production" -}}
 
 apiVersion: v1
 kind: Secret

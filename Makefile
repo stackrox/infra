@@ -14,6 +14,13 @@ else
 	VERSION := $(TAG)
 endif
 
+LOCAL_VALUES_FILE=chart/infra-server/configuration/infra-values-${ENVIRONMENT}.yaml
+LOCAL_COMBINED_VALUES_FILE=chart/infra-server/configuration/infra-values-from-files-${ENVIRONMENT}.yaml
+
+ifeq '$(SECRET_VERSION)' ''
+SECRET_VERSION := latest
+endif
+
 .PHONY: tag
 tag:
 	@echo $(VERSION)
@@ -22,92 +29,6 @@ IMAGE=us.gcr.io/stackrox-infra/infra-server:$(VERSION)
 .PHONY: image-name
 image-name:
 	@echo $(IMAGE)
-
-#############
-## Linting ##
-#############
-
-.PHONY: argo-workflow-lint
-argo-workflow-lint:
-	@argo lint ./chart/infra-server/static/workflow*.yaml
-
-.PHONY: shellcheck
-shellcheck:
-	@shellcheck -x -- **/*.{bats,sh}
-
-###########
-## Build ##
-###########
-
-# server - Builds the infra-server binary
-# When run locally, a Darwin binary is built and installed into the user's GOPATH bin.
-# When run in CI, a Darwin and Linux binary is built.
-.PHONY: server
-server:
-	@echo "+ $@"
-	GOARCH=amd64 GOOS=linux ./scripts/go-build -o bin/infra-server-linux-amd64 ./cmd/infra-server
-
-# cli - Builds the infractl client binary
-# When run in CI or when preparing an image, a Darwin and Linux binary is built.
-.PHONY: cli
-cli:
-	@echo "+ $@"
-	GOARCH=amd64 GOOS=darwin ./scripts/go-build -o bin/infractl-darwin-amd64 ./cmd/infractl
-	GOARCH=arm64 GOOS=darwin ./scripts/go-build -o bin/infractl-darwin-arm64 ./cmd/infractl
-	GOARCH=amd64 GOOS=linux  ./scripts/go-build -o bin/infractl-linux-amd64  ./cmd/infractl
-
-# cli-local - Builds the infractl client binary
-# When run locally, a Darwin binary is built and installed into the user's GOPATH bin.
-.PHONY: cli-local
-cli-local:
-	@echo "+ $@"
-	./scripts/go-build -o $(GOPATH)/bin/infractl  ./cmd/infractl
-
-.PHONY: ui
-ui:
-	@echo "+ $@"
-	@make -C ui all
-
-.PHONY: image
-image:
-	docker build . -t $(IMAGE) -f image/Dockerfile --secret id=npmrc,src=${HOME}/.npmrc
-
-.PHONY: push
-push:
-	docker push $(IMAGE) | cat
-
-#############
-## Testing ##
-#############
-
-.PHONY: unit-test
-unit-test: proto-generated-srcs
-	@echo "+ $@"
-	@go test -v ./...
-
-.PHONY: go-e2e-tests
-go-e2e-tests: proto-generated-srcs
-	@kubectl apply -f workflows/
-	@go test ./test/e2e/... -tags=e2e -v -parallel 5 -count 1 -cover -timeout 1h
-
-# Assuming a local dev infra server is running and accessible via a port-forward
-# i.e. nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
-.PHONY: pull-infractl-from-dev-server
-pull-infractl-from-dev-server:
-	@mkdir -p bin
-	@rm -f bin/infractl
-	set -o pipefail; \
-	curl --retry 3 --insecure --silent --show-error --fail --location https://localhost:8443/v1/cli/linux/amd64/upgrade \
-          | jq -r ".result.fileChunk" \
-          | base64 -d \
-          > bin/infractl
-	chmod +x bin/infractl
-	bin/infractl -k -e localhost:8443 version
-
-.PHONY: e2e-tests
-e2e-tests:
-	@kubectl apply -f "workflows/*.yaml"
-	@bats --jobs 5 --no-parallelize-within-files --recursive .
 
 ##############
 ## Protobuf ##
@@ -194,6 +115,92 @@ proto-generated-srcs: protoc-tools
 		--swagger_out=logtostderr=true:$(PROTO_OUTPUT_DIR) \
 		$(PROTO_FILES)
 
+###########
+## Build ##
+###########
+
+# server - Builds the infra-server binary
+# When run locally, a Darwin binary is built and installed into the user's GOPATH bin.
+# When run in CI, a Darwin and Linux binary is built.
+.PHONY: server
+server:
+	@echo "+ $@"
+	GOARCH=amd64 GOOS=linux ./scripts/go-build -o bin/infra-server-linux-amd64 ./cmd/infra-server
+
+# cli - Builds the infractl client binary
+# When run in CI or when preparing an image, a Darwin and Linux binary is built.
+.PHONY: cli
+cli:
+	@echo "+ $@"
+	GOARCH=amd64 GOOS=darwin ./scripts/go-build -o bin/infractl-darwin-amd64 ./cmd/infractl
+	GOARCH=arm64 GOOS=darwin ./scripts/go-build -o bin/infractl-darwin-arm64 ./cmd/infractl
+	GOARCH=amd64 GOOS=linux  ./scripts/go-build -o bin/infractl-linux-amd64  ./cmd/infractl
+
+# cli-local - Builds the infractl client binary
+# When run locally, a Darwin binary is built and installed into the user's GOPATH bin.
+.PHONY: cli-local
+cli-local:
+	@echo "+ $@"
+	./scripts/go-build -o $(GOPATH)/bin/infractl  ./cmd/infractl
+
+.PHONY: ui
+ui:
+	@echo "+ $@"
+	@make -C ui all
+
+.PHONY: image
+image:
+	docker build . -t $(IMAGE) -f image/Dockerfile --secret id=npmrc,src=${HOME}/.npmrc
+
+.PHONY: push
+push:
+	docker push $(IMAGE) | cat
+
+#############
+## Linting ##
+#############
+
+.PHONY: argo-workflow-lint
+argo-workflow-lint:
+	@argo lint ./chart/infra-server/static/workflow*.yaml
+
+.PHONY: shellcheck
+shellcheck:
+	@shellcheck -x -- **/*.{bats,sh}
+
+#############
+## Testing ##
+#############
+
+.PHONY: unit-test
+unit-test: proto-generated-srcs
+	@echo "+ $@"
+	@go test -v ./...
+
+.PHONY: bats-e2e-tests
+bats-e2e-tests:
+	@kubectl apply -f "workflows/*.yaml"
+	@bats --jobs 5 --no-parallelize-within-files --recursive .
+
+.PHONY: go-e2e-tests
+go-e2e-tests: proto-generated-srcs
+	@kubectl apply -f workflows/
+	@go test ./test/e2e/... -tags=e2e -v -parallel 5 -count 1 -cover -timeout 1h
+
+# Assuming a local dev infra server is running and accessible via a port-forward
+# i.e. nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
+.PHONY: pull-infractl-from-dev-server
+pull-infractl-from-dev-server:
+	@mkdir -p bin
+	@rm -f bin/infractl
+	set -o pipefail; \
+	curl --retry 3 --insecure --silent --show-error --fail --location https://localhost:8443/v1/cli/$(shell go env GOOS)/$(shell go env GOARCH)/upgrade \
+          | jq -r ".result.fileChunk" \
+          | base64 -d \
+          > bin/infractl
+	chmod +x bin/infractl
+	bin/infractl -k -e localhost:8443 version
+
 ##########
 ## Kube ##
 ##########
@@ -204,212 +211,85 @@ this_context = $(shell kubectl config current-context)
 ## Meta
 .PHONY: pre-check
 pre-check:
-ifndef DEPLOYMENT
-	$(error DEPLOYMENT is undefined)
-endif
 ifndef ENVIRONMENT
 	$(error ENVIRONMENT is undefined)
 endif
-	@if [[ "${DEPLOYMENT}" == "local" && ("${this_context}" == "${dev_context}" || "${this_context}" == "${prod_context}") ]]; then \
-		echo "Your kube context is not set to a local infra!"; \
+	@if [[ "${ENVIRONMENT}" == "development" && "${this_context}" == "${prod_context}" ]]; then \
+		echo -e "Your kube context is not set to a development infra. Use the following for dev cluster or set it to your PR cluster\n\tkubectl config use-context ${dev_context}\n"; \
 		exit 1; \
 	fi
-	@if [[ "${DEPLOYMENT}" == "development" && "${this_context}" != "${dev_context}" ]]; then \
-		echo -e "Your kube context is not set to development infra:\n\tkubectl config use-context ${dev_context}"; \
-		exit 1; \
-	fi
-	@if [[ "${DEPLOYMENT}" == "production" && "${this_context}" != "${prod_context}" ]]; then \
+	@if [[ "${ENVIRONMENT}" == "production" && "${this_context}" != "${prod_context}" ]]; then \
 		echo -e "Your kube context is not set to production infra:\n\tkubectl config use-context ${prod_context}"; \
 		exit 1; \
 	fi
 
-.PHONY: setup-kc
-setup-kc: pre-check
-	$(info DEPLOYMENT: ${DEPLOYMENT}, ENVIRONMENT: ${ENVIRONMENT})
-ifeq ($(DEPLOYMENT), local)
-kc=kubectl
-else ifeq ($(DEPLOYMENT), development)
-kc=kubectl --context gke_stackrox-infra_us-west2_infra-development
-else ifeq ($(DEPLOYMENT), production)
-kc=kubectl --context gke_stackrox-infra_us-west2_infra-production
-endif
-
-## Configuration
-.PHONY: configuration-download
-configuration-download:
-	@echo "Downloading configuration from gs://infra-configuration"
-	gsutil -m cp -R "gs://infra-configuration/latest/configuration" "chart/infra-server/"
-
-.PHONY: configuration-upload
-configuration-upload: CONST_DATESTAMP := $(shell date '+%Y-%m-%d-%H-%M-%S')
-configuration-upload:
-	@echo "Uploading configuration to gs://infra-configuration/${CONST_DATESTAMP}"
-	gsutil -m cp -R chart/infra-server/configuration "gs://infra-configuration/${CONST_DATESTAMP}/"
-	@echo "Uploading configuration to gs://infra-configuration/latest/"
-	gsutil -m cp -R chart/infra-server/configuration "gs://infra-configuration/latest/"
-
-# Combines configuration/{development,production} files into single helm value.yaml files
-# (configuration/{development,production}-values-from-files.yaml) that can be used in template
-# rendering.
-.PHONY: create-consolidated-values
-create-consolidated-values:
-	@./scripts/create-consolidated-values.sh
-
-## Render
-.PHONY: clean-render
-clean-render:
-	@rm -rf chart-rendered
-
-.PHONY: render
-render: pre-check clean-render create-consolidated-values
-	@if [[ ! -e chart/infra-server/configuration ]]; then \
-		echo chart/infra-server/configuration is absent. Try:; \
-		echo make configuration-download; \
-		exit 1; \
-	fi
-	@mkdir -p chart-rendered
-	helm template chart/infra-server \
-	    --output-dir chart-rendered \
-		--set deployment="${DEPLOYMENT}" \
-		--set tag="$(VERSION)" \
-		--values chart/infra-server/configuration/${ENVIRONMENT}-values.yaml \
-		--values chart/infra-server/configuration/${ENVIRONMENT}-values-from-files.yaml
-
-.PHONY: render-local
-render-local:
-	DEPLOYMENT=local ENVIRONMENT=development make render
-
-.PHONY: render-development
-render-development:
-	DEPLOYMENT=development ENVIRONMENT=development make render
-
-.PHONY: render-production
-render-production:
-	DEPLOYMENT=production ENVIRONMENT=production make render
-
-## Common install targets
-bounce-infra-pods: setup-kc
-	$(kc) -n infra rollout restart deploy/infra-server-deployment
-	$(kc) -n infra rollout status deploy/infra-server-deployment --watch --timeout=3m
-
-install-common: setup-kc
-	@if ! $(kc) get ns argo 2> /dev/null; then \
-		$(kc) create namespace argo; \
-	fi
-	$(kc) apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/v3.3.9/install.yaml;
-	@if ! $(kc) get ns infra 2> /dev/null; then \
-		$(kc) apply -f chart/infra-server/templates/namespace.yaml; \
-	fi
-
-## Install (without write)
-install: setup-kc install-common
-	gsutil cat gs://infra-configuration/latest/configuration/$(ENVIRONMENT)-values.yaml \
-               gs://infra-configuration/latest/configuration/$(ENVIRONMENT)-values-from-files.yaml | \
-	helm template chart/infra-server \
-		--set deployment="$(DEPLOYMENT)" \
-		--set tag="$(VERSION)" \
-		--values - | \
-	$(kc) apply -R \
-	    -f -
-	@sleep 10
-	make bounce-infra-pods
-
-.PHONY: install-local
-install-local:
-	DEPLOYMENT=local ENVIRONMENT=development make install-common install
-
-.PHONY: install-development
-install-development:
-	DEPLOYMENT=development ENVIRONMENT=development make install-common install
-
-.PHONY: install-production
-install-production:
-	DEPLOYMENT=production ENVIRONMENT=production make install-common install
-
-## Install (with rendered)
-.PHONY: install-with-rendered
-install-with-rendered: setup-kc install-common
-	$(kc) apply -R \
-	    -f chart-rendered/infra-server
-
-.PHONY: install-local
-install-local-with-rendered:
-	DEPLOYMENT=local ENVIRONMENT=development make render install-with-rendered
-
-.PHONY: install-development
-install-development-with-rendered:
-	DEPLOYMENT=development ENVIRONMENT=development make render install-with-rendered
-
-.PHONY: install-production
-install-production-with-rendered:
-	DEPLOYMENT=production ENVIRONMENT=production make render install-with-rendered
-
-## Diff
-.PHONY: diff
-diff: setup-kc
-	gsutil cat gs://infra-configuration/latest/configuration/$(ENVIRONMENT)-values.yaml \
-               gs://infra-configuration/latest/configuration/$(ENVIRONMENT)-values-from-files.yaml | \
-	helm template chart/infra-server \
-		--set deployment="$(DEPLOYMENT)" \
-		--set tag="$(VERSION)" \
-		--values - | \
-	$(kc) diff -R -f -
-
-.PHONY: diff-local
-diff-local:
-	DEPLOYMENT=local ENVIRONMENT=development make diff
-
-.PHONY: diff-development
-diff-development:
-	DEPLOYMENT=development ENVIRONMENT=development make diff
-
-.PHONY: diff-production
-diff-production:
-	DEPLOYMENT=production ENVIRONMENT=production make diff
-
-## Clean
-.PHONY: clean-infra
-clean-infra:
-	$(kc) delete namespace infra || true
-
-.PHONY: clean-argo
-clean-argo:
-	$(kc) delete namespace argo || true
-
-.PHONY: clean-local
-clean-local:
-	DEPLOYMENT=local ENVIRONMENT=development make setup-kc clean-infra clean-argo
-
-.PHONY: clean-development
-clean-development:
-	DEPLOYMENT=development ENVIRONMENT=development make setup-kc clean-infra
+## Render template
+.PHONY: helm-template
+helm-template: pre-check
+	@./scripts/deploy/helm.sh template $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
 
 ## Deploy
-.PHONY: deploy-local
-deploy-local: push install-local
-	@echo "All done!"
+.PHONY: helm-deploy
+helm-deploy: pre-check
+	@./scripts/deploy/helm.sh deploy $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
+	# Pick up any eventual changes to the workflow controller configmap
+	@make bounce-argo-pods
 
-.PHONY: deploy-development
-deploy-development: push install-development
-	@echo "All done!"
+## Diff
+.PHONY: helm-diff
+helm-diff: pre-check
+	@./scripts/deploy/helm.sh diff $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
 
-.PHONY: deploy-production
-deploy-production: push install-production
-	@echo "All done!"
+## Bounce pods
+.PHONY: bounce-infra-pods
+bounce-infra-pods:
+	kubectl -n infra rollout restart deploy/infra-server-deployment
+	kubectl -n infra rollout status deploy/infra-server-deployment --watch --timeout=3m
 
-##########
-## Misc ##
-##########
-.PHONY: gotags
-gotags:
-	@gotags -R . > tags
-	@echo "GoTags written to $(PWD)/tags"
+.PHONY: bounce-argo-pods
+bounce-argo-pods:
+	kubectl rollout restart deploy/argo-workflows-workflow-controller -n argo
+	kubectl rollout status deploy/argo-workflows-workflow-controller -n argo --watch --timeout=3m
+	kubectl rollout restart deploy/argo-workflows-server -n argo
+	kubectl rollout status deploy/argo-workflows-server -n argo --watch --timeout=3m
 
-.PHONY: update-version
-update-version: image_regex   := gcr.io/stackrox-infra/automation-flavors/.*
-update-version: image_version := 0.2.16
-update-version:
-	@echo 'Updating automation-flavor image versions to "${image_version}"'
-	@perl -p -i -e 's#image: (${image_regex}):(.*)#image: \1:${image_version}#g' \
-		./chart/infra-server/static/*.yaml
-	@git diff --name-status ./chart/infra-server/static/*.yaml
+#############
+## Secrets ##
+#############
+.PHONY: secrets-download
+secrets-download: pre-check
+	@./scripts/deploy/secrets.sh download_secrets $(ENVIRONMENT)
+
+.PHONY: secrets-upload
+secrets-upload: pre-check
+	@./scripts/deploy/secrets.sh upload_secrets $(ENVIRONMENT) $(SECRET_VERSION)
+
+.PHONY: secrets-show
+secrets-show: pre-check
+	@./scripts/deploy/secrets.sh show $(ENVIRONMENT) $(SECRET_VERSION)
+
+.PHONY: secrets-edit
+secrets-edit: pre-check
+	@./scripts/deploy/secrets.sh edit $(ENVIRONMENT) $(SECRET_VERSION)
+
+.PHONY: secrets-revert
+secrets-revert: pre-check
+	@./scripts/deploy/secrets.sh revert $(ENVIRONMENT) $(SECRET_VERSION)
+
+##################
+## Dependencies ##
+##################
+.PHONY: install-argo
+install-argo: pre-check
+	helm repo add argo https://argoproj.github.io/argo-helm
+	helm upgrade \
+		argo-workflows \
+		argo/argo-workflows \
+		--version 0.16.9 \
+		--install \
+		--create-namespace \
+		--namespace argo
+
+.PHONY: clean-argo-config
+clean-argo-config: pre-check
+	kubectl delete configmap argo-workflows-workflow-controller-configmap -n argo || true
