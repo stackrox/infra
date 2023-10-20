@@ -99,7 +99,7 @@ spec:
             path: /well-known/artifacts/terraform-destroy.tfplan
 
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.8.3-1-gc5b4e3ef79-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-multi-0.8.3-2-gf46168713e-snapshot
         command:
           - /usr/bin/entrypoint
         args:
@@ -131,7 +131,7 @@ spec:
           - name: terraform-destroy-plan
             path: /well-known/artifacts/terraform-destroy.tfplan
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.8.3-1-gc5b4e3ef79-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-multi-0.8.3-2-gf46168713e-snapshot
         command:
           - /usr/bin/entrypoint
         args:
