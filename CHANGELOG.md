@@ -8,6 +8,10 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+## [0.8.6]
+
+- Chore: Bump demo versions to 4.2.2
+
 ## [0.8.5]
 
 - Fix: Openshift 3.11 provisioning is now based on quay.io/openshift installers (ROX-20327)
