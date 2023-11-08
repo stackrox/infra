@@ -18,6 +18,7 @@ spec:
       - name: central-services-helm-chart-version
       - name: secured-cluster-services-helm-chart-version
       - name: trusted-certs-enabled
+      - name: credentials-mode
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -114,6 +115,8 @@ spec:
             value: "us-east1"
           - name: TRUSTED_CERTS_ENABLED
             value: "{{workflow.parameters.trusted-certs-enabled}}"
+          - name: CREDENTIALS_MODE
+            value: "{{workflow.parameters.credentials-mode}}"
 
     - name: pre-install
       script:

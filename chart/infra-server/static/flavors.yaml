@@ -307,6 +307,13 @@
       value: false
       kind: optional
 
+    - name: credentials-mode
+      description: credentials mode
+      value: quay.io/stackrox-io/main:{{ .Chart.Annotations.ocpCredentialsMode }}
+      help: |
+        Consult OCP documentation for details. {{ .Chart.Annotations.ocpCredentialsMode }} is the value used by
+        stackrox CI.
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
@@ -426,6 +433,13 @@
       value: false
       kind: optional
 
+    - name: credentials-mode
+      description: credentials mode
+      value: quay.io/stackrox-io/main:{{ .Chart.Annotations.ocpCredentialsMode }}
+      help: |
+        Consult OCP documentation for details. {{ .Chart.Annotations.ocpCredentialsMode }} is the value used by
+        stackrox CI.
+
   artifacts:
     - name: admin-password
       description: Admin password for StackRox console
@@ -527,6 +541,13 @@
       description: Should trusted certificates be created
       value: false
       kind: optional
+
+    - name: credentials-mode
+      description: credentials mode
+      value: quay.io/stackrox-io/main:{{ .Chart.Annotations.ocpCredentialsMode }}
+      help: |
+        Consult OCP documentation for details. {{ .Chart.Annotations.ocpCredentialsMode }} is the value used by
+        stackrox CI.
 
   artifacts:
     - name: kubeconfig

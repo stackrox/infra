@@ -23,6 +23,7 @@ spec:
         value: ""
       - name: fips-enabled
       - name: trusted-certs-enabled
+      - name: credentials-mode
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -118,6 +119,8 @@ spec:
             value: "{{workflow.parameters.fips-enabled}}"
           - name: TRUSTED_CERTS_ENABLED
             value: "{{workflow.parameters.trusted-certs-enabled}}"
+          - name: CREDENTIALS_MODE
+            value: "{{workflow.parameters.credentials-mode}}"
         volumeMounts:
           - name: data
             mountPath: /data
