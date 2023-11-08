@@ -309,7 +309,7 @@
 
     - name: credentials-mode
       description: credentials mode
-      value: quay.io/stackrox-io/main:{{ .Chart.Annotations.ocpCredentialsMode }}
+      value: {{ .Chart.Annotations.ocpCredentialsMode }}
       kind: optional
       help: |
         Consult OCP documentation for details. {{ .Chart.Annotations.ocpCredentialsMode }} is the value used by
