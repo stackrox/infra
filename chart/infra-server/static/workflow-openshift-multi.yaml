@@ -113,6 +113,8 @@ spec:
           - "--install-metrics={{inputs.parameters.install-metrics}}"
           - "--install-monitoring={{inputs.parameters.install-monitoring}}"
           - "--gcp-project=acs-team-temp-dev"
+          - "--dns-project=acs-team-temp-dev"
+          - "--dns-zone=ocp-infra-rox-systems"
         env:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
