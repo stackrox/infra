@@ -8,3 +8,4 @@ sources:
   - https://github.com/stackrox/infra
 annotations:
   acsDemoVersion: 4.2.2
+  ocpCredentialsMode: Passthrough

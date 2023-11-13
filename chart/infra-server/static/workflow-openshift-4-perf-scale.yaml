@@ -23,6 +23,7 @@ spec:
         value: ""
       - name: fips-enabled
       - name: trusted-certs-enabled
+      - name: credentials-mode
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -79,7 +80,7 @@ spec:
             archive:
               tar: {}
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.2
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.7
         imagePullPolicy: Always
         command:
           - entrypoint.sh
@@ -118,6 +119,8 @@ spec:
             value: "{{workflow.parameters.fips-enabled}}"
           - name: TRUSTED_CERTS_ENABLED
             value: "{{workflow.parameters.trusted-certs-enabled}}"
+          - name: CREDENTIALS_MODE
+            value: "{{workflow.parameters.credentials-mode}}"
         volumeMounts:
           - name: data
             mountPath: /data
@@ -155,7 +158,7 @@ spec:
 
     - name: destroy
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.2
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.7
         imagePullPolicy: Always
         command:
           - entrypoint.sh
