@@ -128,11 +128,11 @@ function ParameterFormField(props: {
 
   let helper;
   if (parameter.Help || helpByParameterName(parameter.Name)) {
-    helper=(
+    helper = (
       <Markdown remarkPlugins={[remarkGfm]}>
         {parameter.Help || helpByParameterName(parameter.Name)}
       </Markdown>
-    )
+    );
   }
 
   if (parameter.FromFile) {
