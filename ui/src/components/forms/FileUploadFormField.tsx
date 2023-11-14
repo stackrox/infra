@@ -30,11 +30,13 @@ export default function FileUploadFormField({
   };
 
   const handleTextOrDataChange = (value: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     helpers.setValue(value);
   };
 
   const handleClear = (_event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     setFilename('');
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     helpers.setValue('');
   };
 

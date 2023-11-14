@@ -65,7 +65,7 @@ export default function MutableLifespan({ cluster }: Props): ReactElement {
       .then(() => {
         if (clearClientSideUpdate) clearTimeout(clearClientSideUpdate);
         setClearClientSideUpdate(
-          (setTimeout(() => setClientSideLifespan(''), 20000) as unknown) as number
+          setTimeout(() => setClientSideLifespan(''), 20000) as unknown as number
         );
       })
       .catch((err) => {

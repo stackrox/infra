@@ -25,16 +25,19 @@ export default function NumberFormField({
 
   const onMinus = () => {
     const newValue = (field.value || 0) - 1;
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     helpers.setValue(newValue);
   };
 
   const onChange = (event: React.FormEvent<HTMLInputElement>) => {
     const { value } = event.target as HTMLInputElement;
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     helpers.setValue(value === '' ? value : +value);
   };
 
   const onPlus = () => {
     const newValue = (+(field.value as number) || 0) + 1;
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     helpers.setValue(newValue);
   };
 
