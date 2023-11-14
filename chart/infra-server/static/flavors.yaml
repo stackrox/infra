@@ -256,19 +256,26 @@
       kind: optional
       help: |
         ## Stable OCP
+
         The latest stable Red Hat enterprise OCP releases can be found at
-        https://mirror.openshift.com/pub/openshift-v4/clients/ocp/. For
+        [clients/ocp/](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/). For
         officially released OCP versions, use the path to one of the stable
         releases, e.g., ocp/stable-4.
 
+        ---
+
         ## Dev Preview OCP
+
         Dev preview Red Hat enterprise OCP builds can be found at
-        https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview/.
+        [clients/ocp-dev-preview/](https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview/).
         For dev preview OCP versions, use the path to one of the dev preview
         releases, e.g., ocp-dev-preview/latest.
 
+        ---
+
         ## Opensource OKD
-        Opensource OKD releases are at https://github.com/openshift/okd/releases.
+
+        Opensource OKD releases are at [okd/releases](https://github.com/openshift/okd/releases).
         For OKD, use the release tag, e.g., 4.7.0-0.okd-2021-02-25-144700.
 
     - name: pull-secret
