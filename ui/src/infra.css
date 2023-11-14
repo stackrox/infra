@@ -53,7 +53,9 @@ a > .pf-c-panel > .pf-c-panel__header {
 /* Form help popovers - rendered with react-markdown */
 
 /* #, ##, ### */
-.form-help h1,h2,h3 {
+.form-help h1,
+h2,
+h3 {
   font-weight: var(--pf-global--FontWeight--bold);
   margin-bottom: var(--pf-global--spacer--sm);
 }
