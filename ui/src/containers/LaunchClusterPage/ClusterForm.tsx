@@ -14,7 +14,6 @@ import { mapValues } from 'lodash';
 import { ClipLoader } from 'react-spinners';
 import { UploadCloud } from 'react-feather';
 import Markdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 
 import { ClusterServiceApi, V1Parameter } from 'generated/client';
 import configuration from 'client/configuration';
@@ -128,11 +127,7 @@ function ParameterFormField(props: {
 
   let helper;
   if (parameter.Help || helpByParameterName(parameter.Name)) {
-    helper = (
-      <Markdown remarkPlugins={[remarkGfm]}>
-        {parameter.Help || helpByParameterName(parameter.Name)}
-      </Markdown>
-    );
+    helper = <Markdown>{parameter.Help || helpByParameterName(parameter.Name)}</Markdown>;
   }
 
   if (parameter.FromFile) {
