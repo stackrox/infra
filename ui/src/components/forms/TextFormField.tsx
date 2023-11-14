@@ -35,7 +35,7 @@ export default function TextFormField({
       isRequired={required}
       labelIcon={
         helper ? (
-          <Popover bodyContent={helper}>
+          <Popover bodyContent={helper} className="form-help">
             <button
               type="button"
               aria-label={`Help for ${name}`}
