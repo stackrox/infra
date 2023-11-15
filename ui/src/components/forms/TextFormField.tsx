@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 import { useField } from 'formik';
 import { FormGroup, Popover, TextInput, ValidatedOptions } from '@patternfly/react-core';
 import { HelpIcon } from '@patternfly/react-icons';
@@ -9,7 +9,7 @@ type Props = {
   required?: boolean;
   label: string;
   placeholder?: string;
-  helperText?: string;
+  helper?: ReactNode;
   disabled?: boolean;
 };
 
@@ -19,7 +19,7 @@ export default function TextFormField({
   required = false,
   label,
   placeholder = '',
-  helperText = '',
+  helper,
   disabled = false,
 }: Props): ReactElement {
   const [field, meta] = useField(name);
@@ -34,8 +34,8 @@ export default function TextFormField({
       fieldId={id}
       isRequired={required}
       labelIcon={
-        helperText ? (
-          <Popover bodyContent={<div>{helperText}</div>}>
+        helper ? (
+          <Popover bodyContent={helper} className="form-help">
             <button
               type="button"
               aria-label={`Help for ${name}`}

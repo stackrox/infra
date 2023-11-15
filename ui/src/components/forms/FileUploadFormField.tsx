@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 import { useField } from 'formik';
 import { FormGroup, Popover, FileUpload, ValidatedOptions } from '@patternfly/react-core';
 import { HelpIcon } from '@patternfly/react-icons';
@@ -8,7 +8,7 @@ type Props = {
   id?: string;
   required?: boolean;
   label: string;
-  helperText?: string;
+  helper?: ReactNode;
 };
 
 export default function FileUploadFormField({
@@ -16,7 +16,7 @@ export default function FileUploadFormField({
   id = `file-input-${name}`,
   required = false,
   label,
-  helperText = '',
+  helper,
 }: Props): ReactElement {
   const [field, meta, helpers] = useField(name);
   const [filename, setFilename] = React.useState('');
@@ -52,8 +52,8 @@ export default function FileUploadFormField({
       fieldId={id}
       isRequired={required}
       labelIcon={
-        helperText ? (
-          <Popover bodyContent={<div>{helperText}</div>}>
+        helper ? (
+          <Popover bodyContent={helper}>
             <button
               type="button"
               aria-label={`Help for ${name}`}

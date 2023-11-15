@@ -49,3 +49,35 @@ a > .pf-c-panel > .pf-c-panel__header {
   font-weight: var(--pf-global--FontWeight--bold);
   font-size: var(--pf-global--FontSize--lg);
 }
+
+/* Form help popovers - rendered with react-markdown */
+
+/* #, ##, ### */
+.form-help h1,
+h2,
+h3 {
+  font-weight: var(--pf-global--FontWeight--bold);
+  margin-bottom: var(--pf-global--spacer--sm);
+}
+.form-help h1 {
+  font-size: var(--pf-global--FontSize--xl);
+}
+.form-help h2 {
+  font-size: var(--pf-global--FontSize--lg);
+}
+.form-help h3 {
+  font-size: var(--pf-global--FontSize--md);
+}
+
+/* A text block */
+.form-help p {
+  margin-bottom: var(--pf-global--spacer--lg);
+}
+
+/* [link](url) */
+.form-help a {
+  color: var(--pf-global--link--Color);
+}
+.form-help a:visited {
+  color: var(--pf-global--link--Color--visited);
+}

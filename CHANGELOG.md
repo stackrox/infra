@@ -8,6 +8,11 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+## [0.8.7]
+
+- Add support for credentialsMode to openshift-4* flavors and default to
+  Passthrough to mimic CI.
+
 ## [0.8.6]
 
 - Chore: Bump demo versions to 4.2.2
