@@ -139,7 +139,8 @@
       value: ""
       kind: optional
       help: |
-        e.g. 1.19.12-gke.2100. Use 'gcloud container get-server-config --zone=us-central1 --project acs-team-temp-dev' to see all versions.
+        e.g. 1.19.12-gke.2100. Use `gcloud container get-server-config
+        --zone=us-central1 --project acs-team-temp-dev` to see all versions.
 
     - name: pod-security-policy
       description: Enable pod security policy
@@ -151,7 +152,9 @@
       description: The GCP image type to use for the cluster
       value: ""
       kind: optional
-      help: "List of image types: https://cloud.google.com/kubernetes-engine/docs/concepts/node-images"
+      help: |
+        List of image types:
+        [node-images](https://cloud.google.com/kubernetes-engine/docs/concepts/node-images)
 
     - name: gcp-zone
       description: The zone in GCP to delete the cluster from
@@ -255,11 +258,23 @@
       value: ocp/stable
       kind: optional
       help: |
-        The latest stable Red Hat enterprise OCP releases can be found at https://mirror.openshift.com/pub/openshift-v4/clients/ocp/.
-        For officially released OCP versions, use the path to one of the stable releases, e.g., ocp/stable-4.
-        Dev preview Red Hat enterprise OCP builds can be found at https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp-dev-preview/.
-        For dev preview OCP versions, use the path to one of the dev preview releases, e.g., ocp-dev-preview/latest.
-        Opensource OKD releases are at https://github.com/openshift/okd/releases.
+        ## Stable OCP
+
+        The latest stable Red Hat enterprise OCP releases can be found at
+        [clients/ocp/](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/). For
+        officially released OCP versions, use the path to one of the stable
+        releases, e.g., ocp/stable-4.
+
+        ## Dev Preview OCP
+
+        Dev preview Red Hat enterprise OCP builds can be found at
+        [clients/ocp-dev-preview/](https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview/).
+        For dev preview OCP versions, use the path to one of the dev preview
+        releases, e.g., ocp-dev-preview/latest.
+
+        ## Opensource OKD
+
+        Opensource OKD releases are at [okd/releases](https://github.com/openshift/okd/releases).
         For OKD, use the release tag, e.g., 4.7.0-0.okd-2021-02-25-144700.
 
     - name: pull-secret
@@ -268,7 +283,7 @@
       fromFile: true
       help: |
         Use this if you want to associate this cluster with a particular cloud.redhat.com account.
-        Get the pull secret from: https://cloud.redhat.com/openshift/install/pull-secret
+        Get the pull secret from: [cloud.redhat.com](https://cloud.redhat.com/openshift/install/pull-secret)
         You might do this for access to OpenShift Cluster Manager for example.
         By default an infra automation account is used.
 
@@ -377,11 +392,23 @@
       value: ocp/stable
       kind: optional
       help: |
-        The latest stable Red Hat enterprise OCP releases can be found at https://mirror.openshift.com/pub/openshift-v4/clients/ocp/.
-        For officially released OCP versions, use the path to one of the stable releases, e.g., ocp/stable-4.
-        Dev preview Red Hat enterprise OCP builds can be found at https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp-dev-preview/.
-        For dev preview OCP versions, use the path to one of the dev preview releases, e.g., ocp-dev-preview/latest.
-        Opensource OKD releases are at https://github.com/openshift/okd/releases.
+        ## Stable OCP
+
+        The latest stable Red Hat enterprise OCP releases can be found at
+        [clients/ocp/](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/). For
+        officially released OCP versions, use the path to one of the stable
+        releases, e.g., ocp/stable-4.
+
+        ## Dev Preview OCP
+
+        Dev preview Red Hat enterprise OCP builds can be found at
+        [clients/ocp-dev-preview/](https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview/).
+        For dev preview OCP versions, use the path to one of the dev preview
+        releases, e.g., ocp-dev-preview/latest.
+
+        ## Opensource OKD
+
+        Opensource OKD releases are at [okd/releases](https://github.com/openshift/okd/releases).
         For OKD, use the release tag, e.g., 4.7.0-0.okd-2021-02-25-144700.
 
     - name: image-registry
@@ -492,11 +519,23 @@
       value: ocp/stable
       kind: optional
       help: |
-        The latest stable Red Hat enterprise OCP releases can be found at https://mirror.openshift.com/pub/openshift-v4/clients/ocp/.
-        For officially released OCP versions, use the path to one of the stable releases, e.g., ocp/stable-4.
-        Dev preview Red Hat enterprise OCP builds can be found at https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp-dev-preview/.
-        For dev preview OCP versions, use the path to one of the dev preview releases, e.g., ocp-dev-preview/latest.
-        Opensource OKD releases are at https://github.com/openshift/okd/releases.
+        ## Stable OCP
+
+        The latest stable Red Hat enterprise OCP releases can be found at
+        [clients/ocp/](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/). For
+        officially released OCP versions, use the path to one of the stable
+        releases, e.g., ocp/stable-4.
+
+        ## Dev Preview OCP
+
+        Dev preview Red Hat enterprise OCP builds can be found at
+        [clients/ocp-dev-preview/](https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview/).
+        For dev preview OCP versions, use the path to one of the dev preview
+        releases, e.g., ocp-dev-preview/latest.
+
+        ## Opensource OKD
+
+        Opensource OKD releases are at [okd/releases](https://github.com/openshift/okd/releases).
         For OKD, use the release tag, e.g., 4.7.0-0.okd-2021-02-25-144700.
 
     - name: pull-secret
@@ -505,7 +544,7 @@
       fromFile: true
       help: |
         Use this if you want to associate this cluster with a particular cloud.redhat.com account.
-        Get the pull secret from: https://cloud.redhat.com/openshift/install/pull-secret
+        Get the pull secret from: [cloud.redhat.com](https://cloud.redhat.com/openshift/install/pull-secret)
         You might do this for access to OpenShift Cluster Manager for example.
         By default an infra automation account is used.
 
@@ -776,9 +815,13 @@
       kind: optional
 
     - name: machine-type
-      description: node machine type (https://aws.amazon.com/ec2/instance-types/, https://instances.vantage.sh/)
+      description: node machine type
       value: m5.2xlarge
       kind: optional
+      help: |
+        For options see
+        [https://aws.amazon.com/ec2/instance-types/](https://aws.amazon.com/ec2/instance-types/) and
+        [https://instances.vantage.sh/](https://instances.vantage.sh/)
 
   artifacts:
     - name: kubeconfig
@@ -819,9 +862,15 @@
       kind: optional
 
     - name: machine-type
-      description: node machine type (custom-96-393216 custom-96-196608 custom-72-147456 custom-64-262144 custom-48-98304 custom-48-196608 custom-36-73728 custom-32-131072 custom-4-32768-ext custom-4-16384 custom-8-32768 custom-8-16384 custom-8-65536-ext custom-16-131072-ext custom-16-32768 custom-16-65536)
+      description: node machine type
       value: custom-8-32768
       kind: optional
+      help: |
+        Options are: custom-96-393216 custom-96-196608 custom-72-147456
+        custom-64-262144 custom-48-98304 custom-48-196608 custom-36-73728
+        custom-32-131072 custom-4-32768-ext custom-4-16384 custom-8-32768
+        custom-8-16384 custom-8-65536-ext custom-16-131072-ext custom-16-32768
+        custom-16-65536
 
   artifacts:
     - name: kubeconfig

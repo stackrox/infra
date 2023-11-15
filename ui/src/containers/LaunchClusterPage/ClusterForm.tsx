@@ -13,6 +13,7 @@ import * as yup from 'yup';
 import { mapValues } from 'lodash';
 import { ClipLoader } from 'react-spinners';
 import { UploadCloud } from 'react-feather';
+import Markdown from 'react-markdown';
 
 import { ClusterServiceApi, V1Parameter } from 'generated/client';
 import configuration from 'client/configuration';
@@ -124,12 +125,17 @@ function ParameterFormField(props: {
 
   const required = !parameter.Optional;
 
+  let helper;
+  if (parameter.Help || helpByParameterName(parameter.Name)) {
+    helper = <Markdown>{parameter.Help || helpByParameterName(parameter.Name)}</Markdown>;
+  }
+
   if (parameter.FromFile) {
     return (
       <FileUploadFormField
         name={`Parameters.${parameter.Name}`}
         label={getFormLabelFromParameter(parameter)}
-        helperText={parameter.Help}
+        helper={helper}
         required={required}
       />
     );
@@ -141,7 +147,7 @@ function ParameterFormField(props: {
         <TextFormField
           name={`Parameters.${parameter.Name}`}
           label={getFormLabelFromParameter(parameter)}
-          helperText={parameter.Help || helpByParameterName(parameter.Name)}
+          helper={helper}
           required={required}
         />
       );
