@@ -11,6 +11,23 @@
     "application/json"
   ],
   "paths": {
+    "/v1/checksums": {
+      "get": {
+        "summary": "CreateToken generates an arbitrary service account token",
+        "operationId": "Checksums",
+        "responses": {
+          "200": {
+            "description": "A successful response.(streaming responses)",
+            "schema": {
+              "$ref": "#/x-stream-definitions/v1CliChecksumResponse"
+            }
+          }
+        },
+        "tags": [
+          "CliService"
+        ]
+      }
+    },
     "/v1/cli/{os}/{arch}/upgrade": {
       "get": {
         "operationId": "Upgrade",
@@ -500,6 +517,15 @@
         }
       }
     },
+    "v1CliChecksumResponse": {
+      "type": "object",
+      "properties": {
+        "fileChunk": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
     "v1CliUpgradeResponse": {
       "type": "object",
       "properties": {
@@ -928,6 +954,18 @@
     }
   },
   "x-stream-definitions": {
+    "v1CliChecksumResponse": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "$ref": "#/definitions/v1CliChecksumResponse"
+        },
+        "error": {
+          "$ref": "#/definitions/runtimeStreamError"
+        }
+      },
+      "title": "Stream result of v1CliChecksumResponse"
+    },
     "v1CliUpgradeResponse": {
       "type": "object",
       "properties": {

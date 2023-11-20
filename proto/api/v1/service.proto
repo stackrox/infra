@@ -452,12 +452,23 @@ message CliUpgradeResponse {
     bytes fileChunk = 1;
 }
 
+message CliChecksumResponse {
+    bytes fileChunk = 1;
+}
+
 // CliService provides an upgrade path for the command line interface.
 service CliService {
     // Upgrade - gets an updated binary if it exists.
     rpc Upgrade (CliUpgradeRequest) returns (stream CliUpgradeResponse) {
         option (google.api.http) = {
             get: "/v1/cli/{os}/{arch}/upgrade"
+        };
+    }
+
+    // Checksums - gets a file with checksums for the binaries
+    rpc Checksums (google.protobuf.Empty) returns (stream CliChecksumResponse) {
+        option (google.api.http) = {
+            get: "/v1/checksums"
         };
     }
 }
