@@ -46,11 +46,12 @@ export default function UserServiceAccountToken(): ReactElement {
           example, you may put it in your Go executable directory.
         </p>
         <p className="my-2">
-          Additionally, you may verify the integrity of the binary by downloading the <code>CHECKSUMS (SHA-512)</code> file.
+          Additionally, you may verify the integrity of the binary by downloading the{' '}
+          <code>CHECKSUMS (SHA-512)</code> file.
         </p>
         <p className="my-2">
-          Here are the commands to check the integrity, move the file, allow it to execute on an Intel-based Mac, confirm
-          its location, and help you learn about its features.
+          Here are the commands to check the integrity, move the file, allow it to execute on an
+          Intel-based Mac, confirm its location, and help you learn about its features.
         </p>
         <pre className="border border-base-400 p-4 text-lg whitespace-pre-wrap">
           $ shasum --check --ignore-missing infractl-CHECKSUMS

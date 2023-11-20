@@ -63,7 +63,7 @@ func (s *cliImpl) Upgrade(request *v1.CliUpgradeRequest, stream v1.CliService_Up
 	return nil
 }
 
-func (s *cliImpl) Checksums(request *emptypb.Empty, stream v1.CliService_ChecksumsServer) error {
+func (s *cliImpl) Checksums(_ *emptypb.Empty, stream v1.CliService_ChecksumsServer) error {
 	filename := webRoot + "/downloads/infractl-CHECKSUMS"
 	file, err := os.Open(filename)
 	if err != nil {
