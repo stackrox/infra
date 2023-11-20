@@ -5,7 +5,7 @@ main() {
     pushd bin/ >/dev/null || exit 1
     rm -f "${filename}"
     shasum -a 512 -- infractl-* > "${filename}"
-    popd bin/ >/dev/null || exit 1
+    popd >/dev/null || exit 1
 
 }
 
