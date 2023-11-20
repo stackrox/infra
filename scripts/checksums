@@ -4,7 +4,7 @@ main() {
     local filename="infractl-CHECKSUMS"
     pushd bin/ >/dev/null || exit 1
     rm -f "${filename}"
-    shasum -a 512 -- infractl-* > "${filename}"
+    shasum --algorithm 512 -- infractl-* > "${filename}"
     popd >/dev/null || exit 1
 
 }
