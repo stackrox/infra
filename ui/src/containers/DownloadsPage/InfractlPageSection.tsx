@@ -8,6 +8,7 @@ export default function InfractlPageSection(): ReactElement {
     'Download for Intel Mac': '/downloads/infractl-darwin-amd64',
     'Download for M1 Mac': '/downloads/infractl-darwin-arm64',
     'Download for Linux': '/downloads/infractl-linux-amd64',
+    'Checksums (SHA-512)': '/downloads/infractl-CHECKSUMS',
   };
   const infractlLinks = Object.entries(infractlDownloads).map(([label, value]) => (
     <a key={value} href={value} download className="btn btn-base mr-2">
