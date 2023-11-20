@@ -135,6 +135,7 @@ cli:
 	GOARCH=amd64 GOOS=darwin ./scripts/go-build -o bin/infractl-darwin-amd64 ./cmd/infractl
 	GOARCH=arm64 GOOS=darwin ./scripts/go-build -o bin/infractl-darwin-arm64 ./cmd/infractl
 	GOARCH=amd64 GOOS=linux  ./scripts/go-build -o bin/infractl-linux-amd64  ./cmd/infractl
+	@./scripts/checksums
 
 # cli-local - Builds the infractl client binary
 # When run locally, a Darwin binary is built and installed into the user's GOPATH bin.

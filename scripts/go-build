@@ -4,11 +4,6 @@ main() {
     # Current time in epoch seconds.
     local BUILD_TIMESTAMP="$(date +'%s')"
 
-    # The URL for the CircleCI workflow that was run for the current commit.
-    local STABLE_CIRCLECI_WORKFLOW_URL
-    if [ -n "$CIRCLE_WORKFLOW_ID" ]; then
-        STABLE_CIRCLECI_WORKFLOW_URL="https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}"
-    fi
 
     # The Git short SHA for the current commit.
     local STABLE_GIT_SHORT_SHA="$(git rev-parse --short HEAD)"
