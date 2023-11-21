@@ -23,7 +23,7 @@ jobs:
 
       - name: Get NPM package access
         env:
-          GITHUB_TOKEN: ${{ secrets.ROBOT_ROX_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RHACS_BOT_GITHUB_TOKEN }}
         run: echo "//npm.pkg.github.com/:_authToken=\"$GITHUB_TOKEN\"" > ~/.npmrc
 
       - name: Setup env
