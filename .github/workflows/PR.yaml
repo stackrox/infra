@@ -14,7 +14,7 @@ concurrency: pr-${{ github.ref }}
 
 env:
   CLUSTER_NAME: infra-pr-${{ github.event.pull_request.number }}
-  GH_TOKEN: ${{ secrets.ROBOT_ROX_GITHUB_TOKEN }}
+  GH_TOKEN: ${{ secrets.RHACS_BOT_GITHUB_TOKEN }}
 
 jobs:
   lint:
@@ -54,7 +54,7 @@ jobs:
 
       - name: Add PR comment for deploy to dev
         env:
-          GITHUB_TOKEN: ${{ secrets.ROBOT_ROX_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RHACS_BOT_GITHUB_TOKEN }}
         run: |
           ./scripts/add-PR-comment-for-deploy-to-dev.sh "${{ github.event.pull_request.html_url }}" "$CLUSTER_NAME"
 
