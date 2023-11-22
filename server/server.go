@@ -167,7 +167,8 @@ func serveApplicationResources(dir string, oidc auth.OidcAuth) http.Handler {
 			prefix: true,
 		},
 		{
-			path: "/manifest.json",
+			path:      "/manifest.json",
+			anonymous: true,
 		},
 		{
 			path:      "/favicon.ico",

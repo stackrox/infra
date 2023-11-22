@@ -5,12 +5,11 @@
 
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "ui/"
+  - package-ecosystem: 'npm'
+    directory: 'ui/'
     schedule:
-      interval: "weekly"
-      day: "thursday"
-    open-pull-requests-limit: 10
+      interval: 'weekly'
+      day: 'wednesday'
     reviewers:
       - 'stackrox/ui-dep-updaters'
       - 'stackrox/infra'
@@ -20,6 +19,13 @@ updates:
     schedule:
       interval: 'weekly'
       day: 'wednesday'
-    open-pull-requests-limit: 3
+    reviewers:
+      - 'stackrox/infra'
+
+  - package-ecosystem: 'docker'
+    directory: 'image/'
+    schedule:
+      interval: 'weekly'
+      day: 'wednesday'
     reviewers:
       - 'stackrox/infra'
