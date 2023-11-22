@@ -3,7 +3,7 @@ module github.com/stackrox/infra
 go 1.20
 
 require (
-	cloud.google.com/go/bigquery v1.56.0
+	cloud.google.com/go/bigquery v1.57.1
 	cloud.google.com/go/storage v1.35.1
 	github.com/argoproj/argo-workflows/v3 v3.5.0
 	github.com/buger/jsonparser v1.1.1
