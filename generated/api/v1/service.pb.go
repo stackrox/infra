@@ -918,6 +918,7 @@ type Cluster struct {
 	URL string `protobuf:"bytes,9,opt,name=URL,proto3" json:"URL,omitempty"`
 	// Connect is a command to add kube connection information to kubeconfig.
 	Connect string `protobuf:"bytes,10,opt,name=Connect,proto3" json:"Connect,omitempty"`
+	// Parameters is a list of options to configure the cluster creation.
 	Parameters           []*Parameter `protobuf:"bytes,11,rep,name=Parameters,proto3" json:"Parameters,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
 	XXX_unrecognized     []byte       `json:"-"`
