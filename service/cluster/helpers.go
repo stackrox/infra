@@ -154,9 +154,13 @@ func (s *clusterImpl) getClusterDetailsFromArtifacts(cluster *v1.Cluster, workfl
 func metaClusterParametersFromWorkflow(workflow v1alpha1.Workflow) []*v1.Parameter {
 	parameters := []*v1.Parameter{}
 	for _, p := range workflow.Spec.Arguments.Parameters {
+		description := ""
+		if p.Description != nil {
+			description = p.Description.String()
+		}
 		parameters = append(parameters, &v1.Parameter{
 			Name:        p.Name,
-			Description: p.Description.String(),
+			Description: description,
 			Value:       p.GetValue(),
 		})
 	}
