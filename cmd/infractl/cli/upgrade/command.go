@@ -64,6 +64,7 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []str
 	if err != nil {
 		return nil, err
 	}
+	// also download checksums, and check them
 
 	infractlFilename, err := moveIntoPlace(tempFilename)
 	if err != nil {
