@@ -153,6 +153,13 @@ func TestGetClusterJSONOutput(t *testing.T) {
 				DestroyedOn: nil,
 				Lifespan:    ptypes.DurationProto(10800 * time.Second),
 				Description: "My test cluster",
+				Parameters: []*v1.Parameter{
+					&v1.Parameter{
+						Name:        "Test parameter",
+						Value:       "Test value",
+						Description: "This is a test parameter",
+					},
+				},
 			}, nil
 		},
 	}
@@ -205,7 +212,19 @@ func TestGetClusterJSONOutput(t *testing.T) {
   "Lifespan": {
     "seconds": "10800"
   },
-  "Description": "My test cluster"
+  "Description": "My test cluster",
+  "Parameters": [
+    {
+      "Name": "Test parameter",
+      "Description": "This is a test parameter",
+      "Value": "Test value",
+      "Optional": false,
+      "Internal": false,
+      "Order": 0,
+      "Help": "",
+      "FromFile": false
+    }
+  ]
 }
 `
 	assert.Equal(t, expected, buf.String())
