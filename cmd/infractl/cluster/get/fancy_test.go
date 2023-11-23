@@ -154,7 +154,7 @@ func TestGetClusterJSONOutput(t *testing.T) {
 				Lifespan:    ptypes.DurationProto(10800 * time.Second),
 				Description: "My test cluster",
 				Parameters: []*v1.Parameter{
-					&v1.Parameter{
+					{
 						Name:        "Test parameter",
 						Value:       "Test value",
 						Description: "This is a test parameter",
