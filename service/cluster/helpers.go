@@ -146,7 +146,26 @@ func (s *clusterImpl) getClusterDetailsFromArtifacts(cluster *v1.Cluster, workfl
 		}
 	}
 
+	cluster.Parameters = metaClusterParametersFromWorkflow(workflow)
+
 	return cluster, nil
+}
+
+func metaClusterParametersFromWorkflow(workflow v1alpha1.Workflow) []*v1.Parameter {
+	parameters := []*v1.Parameter{}
+	for _, p := range workflow.Spec.Arguments.Parameters {
+		description := ""
+		if p.Description != nil {
+			description = p.Description.String()
+		}
+		parameters = append(parameters, &v1.Parameter{
+			Name:        p.Name,
+			Description: description,
+			Value:       p.GetValue(),
+		})
+	}
+
+	return parameters
 }
 
 func handleArtifactMigration(workflow v1alpha1.Workflow, artifact v1alpha1.Artifact) (string, string) {
