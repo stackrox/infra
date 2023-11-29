@@ -553,6 +553,13 @@
         "Connect": {
           "type": "string",
           "description": "Connect is a command to add kube connection information to kubeconfig."
+        },
+        "Parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Parameter"
+          },
+          "description": "Parameters is a list of options to configure the cluster creation."
         }
       },
       "description": "Cluster represents a single cluster."

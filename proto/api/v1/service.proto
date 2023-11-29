@@ -283,6 +283,9 @@ message Cluster {
 
     // Connect is a command to add kube connection information to kubeconfig.
     string Connect = 10;
+
+    // Parameters is a list of options to configure the cluster creation.
+    repeated Parameter Parameters = 11;
 }
 
 // ClusterListRequest represents a request to ClusterService.List.
