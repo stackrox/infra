@@ -26,7 +26,7 @@ build: deps $(SOURCES)
 .PHONY: lint-check
 lint-check: deps $(SOURCES)
 	@echo "+ $@"
-	yarn lint-check
+	NODE_OPTIONS=--openssl-legacy-provider yarn lint-check
 
 # runs unit tests in a non-interactive mode (w/o watching)
 .PHONY: test
