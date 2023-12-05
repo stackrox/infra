@@ -16,7 +16,7 @@ spec:
       - name: nodes
         value: "4"
       - name: machine-type
-        value: "m5.xlarge"
+        value: "m5.2xlarge"
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -72,8 +72,6 @@ spec:
               secretKeyRef:
                 name: osd-access-secrets
                 key: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
-          - name: AWS_DEFAULT_REGION
-            value: "{{workflow.parameters.aws-region}}"
           - name: AWS_REGION
             value: "{{workflow.parameters.aws-region}}"
           - name: MANAGED_CP
@@ -144,8 +142,6 @@ spec:
         env:
           - name: ROSA_ARGS
             value: "{{workflow.parameters.rosa-args}}"
-          - name: AWS_DEFAULT_REGION
-            value: "{{workflow.parameters.aws-region}}"
           - name: AWS_REGION
             value: "{{workflow.parameters.aws-region}}"
           - name: AWS_ACCESS_KEY_ID
