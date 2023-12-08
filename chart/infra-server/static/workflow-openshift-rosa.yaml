@@ -44,7 +44,7 @@ spec:
     - name: create
       activeDeadlineSeconds: 7200
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-rosa-0.9.1-71-g874011da17-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-rosa-0.9.1-82-g26686681c4-snapshot
         imagePullPolicy: Always
         command:
           - ./entrypoint.sh
@@ -132,7 +132,7 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-rosa-0.9.1-71-g874011da17-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-rosa-0.9.1-82-g26686681c4-snapshot
         imagePullPolicy: Always
         command:
           - ./entrypoint.sh
