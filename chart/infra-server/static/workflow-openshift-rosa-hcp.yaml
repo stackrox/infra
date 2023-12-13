@@ -10,13 +10,13 @@ spec:
       - name: rosa-args
         value: ""
       - name: aws-region
-        value: "us-east-1"
+        value: "us-east-2"
       - name: managed-cp
         value: true
       - name: nodes
         value: "2"
       - name: machine-type
-        value: "m5.2xlarge"
+        value: "m5.xlarge"
   volumeClaimTemplates:
     - metadata:
         name: data
