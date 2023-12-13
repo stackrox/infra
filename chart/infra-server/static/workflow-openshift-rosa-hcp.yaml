@@ -72,6 +72,8 @@ spec:
               secretKeyRef:
                 name: osd-access-secrets
                 key: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
+          - name: ROSA_ARGS
+            value: "{{workflow.parameters.rosa-args}}"
           - name: AWS_REGION
             value: "{{workflow.parameters.aws-region}}"
           - name: MANAGED_CP
@@ -140,8 +142,6 @@ spec:
           - destroy
           - "{{workflow.parameters.name}}"
         env:
-          - name: ROSA_ARGS
-            value: "{{workflow.parameters.rosa-args}}"
           - name: AWS_REGION
             value: "{{workflow.parameters.aws-region}}"
           - name: AWS_ACCESS_KEY_ID
