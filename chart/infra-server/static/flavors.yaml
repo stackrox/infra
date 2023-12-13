@@ -811,6 +811,64 @@
     - name: cluster-console-password
       description: The password to login at the openshift console
 
+########################
+#  Openshift ROSA HCP  #
+########################
+- id: rosahcp
+  name: ROSA HCP
+  description: Openshift ROSA Hypershift (ManagedCP) cluster
+  availability: stable
+  workflow: configuration/workflow-openshift-rosa-hcp.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      value: example1
+
+    - name: nodes
+      description: number of nodes
+      value: "2"
+      kind: optional
+
+    - name: aws-region
+      description: aws region for cluster
+      value: "us-east-1"
+      kind: optional
+
+    - name: managed-cp
+      description: Use managed control-plane?
+      value: "true"
+      kind: optional
+
+    - name: rosa-args
+      description: additional rosa cli args
+      value: ""
+      kind: optional
+
+    - name: machine-type
+      description: node machine type
+      value: m5.2xlarge
+      kind: optional
+
+  artifacts:
+    - name: kubeconfig
+      description: Kube config for connecting to this cluster
+
+    - name: dotenv
+      description: Environment variables used to access the cluster and consoles
+
+    - name: data
+      description: An archive that includes ssh keys to connect to cluster nodes
+
+    - name: cluster-console-url
+      description: The URL for the openshift console
+      tags: [url]
+
+    - name: cluster-console-username
+      description: The username to login at the openshift console
+
+    - name: cluster-console-password
+      description: The password to login at the openshift console
+
 #########################
 #  Openshift OSD on AWS #
 #########################

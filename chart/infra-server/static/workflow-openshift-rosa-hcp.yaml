@@ -10,11 +10,11 @@ spec:
       - name: rosa-args
         value: ""
       - name: aws-region
-        value: "us-east-2"
+        value: "us-east-1"
       - name: managed-cp
-        value: false
+        value: true
       - name: nodes
-        value: "4"
+        value: "2"
       - name: machine-type
         value: "m5.2xlarge"
   volumeClaimTemplates:
@@ -44,7 +44,7 @@ spec:
     - name: create
       activeDeadlineSeconds: 7200
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-rosa-0.9.2-15-g8116bf4d61-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-rosa-0.9.2-107-g42dacc9708-snapshot
         imagePullPolicy: Always
         command:
           - ./entrypoint.sh
@@ -132,7 +132,7 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-rosa-0.9.2-15-g8116bf4d61-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-rosa-0.9.2-107-g42dacc9708-snapshot
         imagePullPolicy: Always
         command:
           - ./entrypoint.sh
