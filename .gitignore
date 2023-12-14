@@ -16,7 +16,6 @@ chart/argo/configs
 chart/argo/secrets
 configuration/
 .idea/
-.vscode/
 **/*.swp
 tags
 nohup.out
