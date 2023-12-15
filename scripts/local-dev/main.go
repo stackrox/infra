@@ -12,12 +12,14 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var LOCAL_CONFIGURATION_DIR = "configuration/"
+var localConfigurationDir = "configuration/"
 
-var VALUES = map[string]interface{}{
-	"Annotations": map[string]interface{}{
-		"ocpCredentialsMode": "Passthrough",
-		"acsDemoVersion":     "4.3.1",
+var values = map[string]interface{}{
+	"Charts": map[string]interface{}{
+		"Annotations": map[string]interface{}{
+			"ocpCredentialsMode": "Passthrough",
+			"acsDemoVersion":     "4.3.1",
+		},
 	},
 	"Values": map[string]interface{}{
 		"testMode": true,
@@ -26,13 +28,13 @@ var VALUES = map[string]interface{}{
 
 func createLocalConfigurationDir() error {
 	// remove previous configurations
-	err := os.RemoveAll(LOCAL_CONFIGURATION_DIR)
+	err := os.RemoveAll(localConfigurationDir)
 	if err != nil {
 		return fmt.Errorf("error while deleting the local configuration directory: %v", err)
 	}
 
 	// create clean configuration directory
-	err = os.MkdirAll(LOCAL_CONFIGURATION_DIR, os.ModePerm)
+	err = os.MkdirAll(localConfigurationDir, os.ModePerm)
 	if err != nil {
 		return fmt.Errorf("error occurred creating the local configuration directory: %v", err)
 	}
@@ -84,7 +86,7 @@ func renderFile(path, content string, decodeString bool) error {
 	}
 
 	// Use a simple template engine to render the template
-	tmpl, err := template.New("template").Parse(string(content))
+	tmpl, err := template.New("template").Parse(content)
 	if err != nil {
 		return fmt.Errorf("error while parsing the template: %v", err)
 	}
@@ -95,7 +97,7 @@ func renderFile(path, content string, decodeString bool) error {
 	}
 	defer outputFile.Close()
 
-	err = tmpl.Execute(outputFile, VALUES)
+	err = tmpl.Execute(outputFile, values)
 	if err != nil {
 		return fmt.Errorf("An error occurred while rendering the template: %v", err)
 	}
