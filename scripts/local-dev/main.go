@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,18 +12,6 @@ import (
 )
 
 var localConfigurationDir = "configuration/"
-
-var values = map[string]interface{}{
-	"Charts": map[string]interface{}{
-		"Annotations": map[string]interface{}{
-			"ocpCredentialsMode": "Passthrough",
-			"acsDemoVersion":     "4.3.1",
-		},
-	},
-	"Values": map[string]interface{}{
-		"testMode": true,
-	},
-}
 
 func createLocalConfigurationDir() error {
 	// remove previous configurations
@@ -44,7 +31,7 @@ func createLocalConfigurationDir() error {
 
 func readFileToMap(path string) (map[string]string, error) {
 	data := make(map[string]string)
-	fileContent, err := ioutil.ReadFile(path)
+	fileContent, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -67,6 +54,31 @@ func getPathFromKey(key string) string {
 	}
 
 	return filepath
+}
+
+func determineValues() (map[string]interface{}, error) {
+	values := map[string]interface{}{
+		"Values": map[string]interface{}{
+			"testMode": true,
+		},
+	}
+
+	data := make(map[string]interface{})
+	fileContent, err := os.ReadFile("chart/infra-server/Chart.yaml")
+	if err != nil {
+		return nil, err
+	}
+
+	err = yaml.Unmarshal(fileContent, &data)
+	if err != nil {
+		return nil, err
+	}
+
+	values["Chart"] = map[string]interface{}{
+		"Annotations": data["annotations"],
+	}
+
+	return values, nil
 }
 
 func renderFile(path, content string, decodeString bool) error {
@@ -97,6 +109,10 @@ func renderFile(path, content string, decodeString bool) error {
 	}
 	defer outputFile.Close()
 
+	values, err := determineValues()
+	if err != nil {
+		return fmt.Errorf("An error occurred while determining values: %v", err)
+	}
 	err = tmpl.Execute(outputFile, values)
 	if err != nil {
 		return fmt.Errorf("An error occurred while rendering the template: %v", err)
@@ -107,7 +123,7 @@ func renderFile(path, content string, decodeString bool) error {
 
 func renderFlavors() error {
 	path := "flavors.yaml"
-	fileContent, err := ioutil.ReadFile(fmt.Sprintf("chart/infra-server/static/%s", path))
+	fileContent, err := os.ReadFile(fmt.Sprintf("chart/infra-server/static/%s", path))
 	if err != nil {
 		return err
 	}
