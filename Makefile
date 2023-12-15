@@ -293,3 +293,10 @@ install-argo: pre-check
 .PHONY: clean-argo-config
 clean-argo-config: pre-check
 	kubectl delete configmap argo-workflows-workflow-controller-configmap -n argo || true
+
+###############
+## Debugging ##
+###############
+.PHONY: prepare-local-server-debugging
+prepare-local-server-debugging:
+	@./scripts/local-dev/prepare.sh
