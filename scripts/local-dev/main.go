@@ -82,7 +82,7 @@ func determineValues() (map[string]interface{}, error) {
 }
 
 func renderFile(path, content string, decodeString bool) error {
-	configPath := fmt.Sprintf("configuration/%s", path)
+	configPath := fmt.Sprintf("%s%s", localConfigurationDir, path)
 	dir := filepath.Dir(configPath)
 	err := os.MkdirAll(dir, os.ModePerm)
 	if err != nil {
