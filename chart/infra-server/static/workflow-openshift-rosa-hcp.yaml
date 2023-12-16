@@ -10,13 +10,15 @@ spec:
       - name: rosa-args
         value: ""
       - name: aws-region
-        value: "us-east-2"
+        value: "us-east-1"
       - name: managed-cp
         value: true
+      - name: SUBNET_IDS
+        value: ""
       - name: nodes
         value: "2"
       - name: machine-type
-        value: "m5.xlarge"
+        value: "m5.2xlarge"
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -78,6 +80,8 @@ spec:
             value: "{{workflow.parameters.aws-region}}"
           - name: MANAGED_CP
             value: "{{workflow.parameters.managed-cp}}"
+          - name: SUBNET_IDS
+            value: "{{workflow.parameters.subnet-ids}}"
           - name: NODE_COUNT
             value: "{{workflow.parameters.nodes}}"
           - name: INSTANCE_TYPE

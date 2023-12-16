@@ -848,6 +848,15 @@
       help: |
         Run as ROSA HCP?
 
+    - name: subnet-ids
+      description: Subnets for the cluster.
+      value: "true"
+      kind: optional
+      help: |
+        Set like "public_subnet,private_subnet"
+        It will be placed in the command like `rosa create cluster --subnet-ids $SUBNET_IDS` 
+        Set empty for the installer to create a new empty vpc and subnets.
+
     - name: rosa-args
       description: additional rosa cli args
       value: "--sts"
