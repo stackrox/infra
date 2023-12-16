@@ -780,11 +780,18 @@
       description: Use managed control-plane?
       value: "false"
       kind: optional
+      help: |
+        Run as ROSA HCP?
 
     - name: rosa-args
       description: additional rosa cli args
       value: ""
       kind: optional
+      help: |
+        Arguments such as,
+        --sts
+        --private-link
+        See `rosa create cluster --help`
 
     - name: machine-type
       description: node machine type
@@ -838,11 +845,18 @@
       description: Use managed control-plane?
       value: "true"
       kind: optional
+      help: |
+        Run as ROSA HCP?
 
     - name: rosa-args
       description: additional rosa cli args
-      value: ""
+      value: "--sts"
       kind: optional
+      help: |
+        Arguments such as,
+        --sts
+        --private-link
+        See `rosa create cluster --help`
 
     - name: machine-type
       description: node machine type
