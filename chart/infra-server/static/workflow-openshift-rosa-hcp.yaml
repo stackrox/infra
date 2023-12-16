@@ -13,7 +13,7 @@ spec:
         value: "us-east-1"
       - name: managed-cp
         value: true
-      - name: SUBNET_IDS
+      - name: subnet-ids
         value: ""
       - name: nodes
         value: "2"
