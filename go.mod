@@ -5,7 +5,7 @@ go 1.20
 require (
 	cloud.google.com/go/bigquery v1.57.1
 	cloud.google.com/go/storage v1.35.1
-	github.com/argoproj/argo-workflows/v3 v3.5.0
+	github.com/argoproj/argo-workflows/v3 v3.5.2
 	github.com/buger/jsonparser v1.1.1
 	github.com/coreos/go-oidc/v3 v3.9.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -103,7 +103,7 @@ require (
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.12.0 // indirect
-	github.com/gorilla/websocket v1.5.0 // indirect
+	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
 	github.com/huandu/xstrings v1.3.3 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
