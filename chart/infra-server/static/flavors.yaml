@@ -850,7 +850,7 @@
 
     - name: subnet-ids
       description: Subnets for the cluster.
-      value: "true"
+      value: ""
       kind: optional
       help: |
         Set like "public_subnet,private_subnet"
