@@ -8,6 +8,13 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+## [0.8.8]
+
+- Add cluster parameters to the `infractl get <cluster-id> --json` output to help debugging.
+- Bump default demo versions to 4.3.0.
+- Add markdown for parameter help formatting.
+- Fix an issue with PWA.
+
 ## [0.8.7]
 
 - Add support for credentialsMode to openshift-4* flavors and default to
