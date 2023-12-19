@@ -99,7 +99,11 @@ spec:
         source: |
           cd /data
           . ./dotenv
-          echo "https://console-openshift-console.apps.rosa${API_ENDPOINT//https:\/\/api}" > cluster-console-url
+          if [[ -z "${CONSOLE_ENDPOINT// /}" ]]; then
+            echo "https://console-openshift-console.apps.rosa${API_ENDPOINT//https:\/\/api}" > cluster-console-url
+          else
+            echo "${CONSOLE_ENDPOINT}" > cluster-console-url
+          fi
           echo "${CONSOLE_USER}" > cluster-console-username
           echo "${CONSOLE_PASSWORD}" > cluster-console-password
         volumeMounts:
