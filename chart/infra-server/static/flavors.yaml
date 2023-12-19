@@ -822,8 +822,8 @@
 #  Openshift ROSA HCP  #
 ########################
 - id: rosahcp
-  name: ROSA HCP
-  description: Openshift ROSA Hypershift (ManagedCP) cluster
+  name: Hypershift on ROSA (HCP)
+  description: Openshift ROSA HCP (Hypershift ManagedCP) cluster
   availability: stable
   workflow: configuration/workflow-openshift-rosa-hcp.yaml
   parameters:
