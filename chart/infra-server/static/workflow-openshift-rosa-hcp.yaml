@@ -100,7 +100,9 @@ spec:
           cd /data
           . ./dotenv
           if [[ -z "${CONSOLE_ENDPOINT// /}" ]]; then
-            echo "https://console-openshift-console.apps.rosa${API_ENDPOINT//https:\/\/api}" > cluster-console-url
+            CONSOLE_ENDPOINT="https://console-openshift-console.apps.rosa${API_ENDPOINT#https://api}"
+            echo "$CONSOLE_ENDPOINT" \
+              | sed -e 's/:[0-9]*$//' > cluster-console-url
           else
             echo "${CONSOLE_ENDPOINT}" > cluster-console-url
           fi
