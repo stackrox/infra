@@ -16,10 +16,9 @@ about the available scripts and the tooling behavior.
 One easy route to current stackrox build tooling is to use
 https://github.com/stackrox/stackrox-env.
 
-- [Node.js](https://nodejs.org/en/) `10.15.3 LTS` or higher (it's highly
-  recommended to use an LTS version, if you're managing multiple versions of
-  Node.js on your machine, consider using
-  [nvm](https://github.com/creationix/nvm))
+- [Node.js](https://nodejs.org/en/) `20 LTS` or higher (it's highly recommended
+  to use an LTS version, if you're managing multiple versions of Node.js on your
+  machine, consider using [nvm](https://github.com/creationix/nvm))
 - [Yarn](https://yarnpkg.com/en/)
 
 ### GitHub Packages NPM Registry

@@ -29,3 +29,11 @@ updates:
       day: 'wednesday'
     reviewers:
       - 'stackrox/infra'
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: 'weekly'
+      day: 'wednesday'
+    reviewers:
+    - "stackrox/infra"
