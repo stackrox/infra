@@ -32,7 +32,7 @@ jobs:
           echo "Version: ${{ inputs.version }}"
 
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ inputs.version }}
