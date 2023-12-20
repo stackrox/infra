@@ -38,7 +38,7 @@ function helpByParameterName(name?: string): string {
   return '';
 }
 
-const schemasByParameterName: { [key: string]: yup.BaseSchema } = {
+const schemasByParameterName: { [key: string]: yup.Schema } = {
   // name length is restricted by certificate generation
   name: yup
     .string()
@@ -57,18 +57,18 @@ const schemasByParameterName: { [key: string]: yup.BaseSchema } = {
 };
 
 type FlavorParameters = { [key: string]: V1Parameter };
-type ParameterSchemas = { [key: string]: yup.BaseSchema };
+type ParameterSchemas = { [key: string]: yup.Schema };
 
 function createParameterSchemas(parameters: FlavorParameters): ParameterSchemas {
   return Object.keys(parameters).reduce<Record<string, unknown>>((fields, param) => {
-    let thisParamSchema: yup.BaseSchema;
+    let thisParamSchema: yup.Schema;
     if (schemasByParameterName[param]) {
       thisParamSchema = schemasByParameterName[param];
     } else {
       thisParamSchema = yup.string();
     }
     if (!parameters[param].Optional) {
-      thisParamSchema = thisParamSchema.required('Required') as yup.BaseSchema;
+      thisParamSchema = thisParamSchema.required('Required') as yup.Schema;
     }
     return {
       ...fields,
@@ -98,12 +98,12 @@ function adjustParametersBeforeSubmit(parameterValues: FormikValues): { [key: st
  *
  * @template T type the schema describes
  * @template V test param value type
- * @param {yup.BaseSchema<T>} schema Yup schema
+ * @param {yup.Schema<T>} schema Yup schema
  * @param {string} testName name of the test in the schema
  * @param {string} [testParamName=testName] name of the test parameter to return value of
  */
 function getSchemaTestParamValue<T = unknown, V = unknown>(
-  schema: yup.BaseSchema<T>,
+  schema: yup.Schema<T>,
   testName: string,
   testParamName: string = testName
 ): V | undefined {
@@ -116,10 +116,7 @@ function getFormLabelFromParameter(parameter: V1Parameter): string {
   return parameter.Description || parameter.Name || '';
 }
 
-function ParameterFormField(props: {
-  parameter: V1Parameter;
-  schema: yup.BaseSchema;
-}): ReactElement {
+function ParameterFormField(props: { parameter: V1Parameter; schema: yup.Schema }): ReactElement {
   const { parameter, schema } = props;
   assertDefined(parameter.Name); // swagger def is too permissive, it must be defined
 
@@ -173,7 +170,7 @@ function getOrderFromParameter(parameter: V1Parameter): number {
 function getSchemaForParameter(
   parameterSchemas: ParameterSchemas,
   parameter: V1Parameter
-): yup.BaseSchema {
+): yup.Schema {
   if (parameter.Name && parameter.Name in parameterSchemas) {
     return parameterSchemas[parameter.Name];
   }
