@@ -20,4 +20,5 @@ configuration/
 tags
 nohup.out
 test/mocks
-__debug_bin
+__debug_bin*
+.DS_Store

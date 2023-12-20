@@ -16,7 +16,26 @@ toolchain, it is also possible to rely on CI. CI will lint, build and push the
 infra server. And then deploy it to a development cluster created using the
 production infra deployment. A
 (comment)[https://github.com/stackrox/infra/pull/711#issuecomment-1270457578]
-will appear on PRs with more detail. 
+will appear on PRs with more detail.
+
+### Debugging
+
+If opened in VS Code, you will find configurations for debugging CLI and Server.
+
+#### CLI
+
+To debug a CLI command, update the VS Code launch configuration "Debug CLI" with the desired command and update the `INFRA_TOKEN` value if necessary.
+You may also point to a different infra server with the `--endpoint` flag.
+
+#### Server
+
+To debug the server, you need to fulfil the prerequisites first.
+
+1. Have an authenticated `gcloud` CLI.
+1. Have your `KUBECONFIG` point to a cluster where Argo Workflows and the ConfigMaps and Secrets for infra are deployed. This is most easily achieved by connecting to a PR cluster or deploying infra with `ENVIRONMENT=<DEVELOPMENT,PRODUCTION> make install-argo clean-argo-config helm-deploy` to a new or local cluster. This cluster will only be used to run workflows.
+1. Run `make prepare-local-server-debugging` to set the contents of the `configuration` directory and compile the UI + CLI (for downloads).
+
+Then, you can use the "Debug Server" launch configuration.
 
 ### Regenerate Go bindings from protos
 

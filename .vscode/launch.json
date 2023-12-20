@@ -19,6 +19,20 @@
             "env": {
                 // "INFRA_TOKEN": "ALTERNATIVE_INFRA_TOKEN"
             }
-        }
+        },
+        {
+            "name": "Debug Server",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "cmd/infra-server/main.go",
+            "args": [
+                "-config-dir", "../../configuration/"
+            ],
+            "env": {
+                "GOOGLE_APPLICATION_CREDENTIALS": "../../configuration/google_credentials.json",
+                "TEST_MODE": "true",
+            },
+        },
     ]
 }
