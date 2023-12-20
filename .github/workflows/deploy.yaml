@@ -32,18 +32,18 @@ jobs:
           echo "Version: ${{ inputs.version }}"
 
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ inputs.version }}
 
       - name: Authenticate to GCloud
-        uses: google-github-actions/auth@v0
+        uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_INFRA_DEPLOY_AUTOMATION_SA }}
 
       - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v0'
+        uses: 'google-github-actions/setup-gcloud@v2'
         with:
           install_components: "gke-gcloud-auth-plugin"
 
@@ -59,7 +59,7 @@ jobs:
       - name: Notify infra channel about new version
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v1.24.0
         with:
           channel-id: CVANK5K5W #acs-infra
           payload: >-
