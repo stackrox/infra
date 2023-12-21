@@ -1,5 +1,12 @@
 #!/bin/bash
 
+set -euo pipefail
+
+if ! sed --version | grep -q GNU; then
+    echo "Only GNU sed is supported"
+    exit 1
+fi
+
 echo "INFO: Download secrets"
 ENVIRONMENT=development make secrets-download
 
