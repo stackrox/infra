@@ -824,7 +824,8 @@
       value: "true"
       kind: optional
       help: |
-        Run as ROSA HCP?
+        Run as ROSA HCP? Setting this to `false` will create a 
+        ROSA Classic cluster instead of HCP/Hypershift.
 
     - name: subnet-ids
       description: Subnets for the cluster.
