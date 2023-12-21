@@ -771,28 +771,6 @@
       value: "4"
       kind: optional
 
-    - name: aws-region
-      description: aws region for cluster
-      value: "us-east-2"
-      kind: optional
-
-    - name: managed-cp
-      description: Use managed control-plane?
-      value: "false"
-      kind: optional
-      help: |
-        Run as ROSA HCP?
-
-    - name: rosa-args
-      description: additional rosa cli args
-      value: ""
-      kind: optional
-      help: |
-        Arguments such as,
-        - `--sts`
-        - `--private-link`
-        See `rosa create cluster --help`
-
     - name: machine-type
       description: node machine type
       value: m5.xlarge
