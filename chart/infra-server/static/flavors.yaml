@@ -841,8 +841,8 @@
       kind: optional
       help: |
         Arguments such as,
-        --sts
-        --private-link
+        - `--sts`
+        - `--private-link`
         See `rosa create cluster --help`
 
     - name: machine-type
