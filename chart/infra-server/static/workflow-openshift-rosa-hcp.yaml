@@ -7,10 +7,18 @@ spec:
   arguments:
     parameters:
       - name: name
+      - name: rosa-args
+        value: ""
+      - name: aws-region
+        value: "us-east-1"
+      - name: managed-cp
+        value: true
+      - name: subnet-ids
+        value: ""
       - name: nodes
-        value: "4"
+        value: "2"
       - name: machine-type
-        value: "m5.xlarge"
+        value: "m5.2xlarge"
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -66,6 +74,14 @@ spec:
               secretKeyRef:
                 name: osd-access-secrets
                 key: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
+          - name: ROSA_ARGS
+            value: "{{workflow.parameters.rosa-args}}"
+          - name: AWS_REGION
+            value: "{{workflow.parameters.aws-region}}"
+          - name: MANAGED_CP
+            value: "{{workflow.parameters.managed-cp}}"
+          - name: SUBNET_IDS
+            value: "{{workflow.parameters.subnet-ids}}"
           - name: NODE_COUNT
             value: "{{workflow.parameters.nodes}}"
           - name: INSTANCE_TYPE
@@ -83,7 +99,13 @@ spec:
         source: |
           cd /data
           . ./dotenv
-          echo "${CONSOLE_ENDPOINT}" > cluster-console-url
+          if [[ -z "${CONSOLE_ENDPOINT// /}" ]]; then
+            CONSOLE_ENDPOINT="https://console-openshift-console.apps.rosa${API_ENDPOINT#https://api}"
+            echo "$CONSOLE_ENDPOINT" \
+              | sed -e 's/:[0-9]*$//' > cluster-console-url
+          else
+            echo "${CONSOLE_ENDPOINT}" > cluster-console-url
+          fi
           echo "${CONSOLE_USER}" > cluster-console-username
           echo "${CONSOLE_PASSWORD}" > cluster-console-password
         volumeMounts:
@@ -130,6 +152,8 @@ spec:
           - destroy
           - "{{workflow.parameters.name}}"
         env:
+          - name: AWS_REGION
+            value: "{{workflow.parameters.aws-region}}"
           - name: AWS_ACCESS_KEY_ID
             valueFrom:
               secretKeyRef:
