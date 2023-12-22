@@ -90,7 +90,9 @@ func mainCmd() error {
 		func() (middleware.APIService, error) {
 			return service.NewUserService(oidc.GenerateServiceAccountToken)
 		},
-		service.NewCliService,
+		func() (middleware.APIService, error) {
+			return service.NewCliService(cfg.Server.StaticDir)
+		},
 		service.NewStatusService,
 		service.NewVersionService,
 		func() (middleware.APIService, error) {

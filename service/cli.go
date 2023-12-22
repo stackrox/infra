@@ -15,7 +15,9 @@ import (
 
 const bufferSize = 1000 * 1024
 
-type cliImpl struct{}
+type cliImpl struct {
+	staticDir string
+}
 
 var (
 	log = logging.CreateProductionLogger()
@@ -25,8 +27,8 @@ var (
 )
 
 // NewCliService creates a new CliUpgradeService.
-func NewCliService() (middleware.APIService, error) {
-	return &cliImpl{}, nil
+func NewCliService(staticDir string) (middleware.APIService, error) {
+	return &cliImpl{staticDir: staticDir}, nil
 }
 
 // Upgrade provides the binary for the requested OS and architecture.
@@ -36,7 +38,7 @@ func (s *cliImpl) Upgrade(request *v1.CliUpgradeRequest, stream v1.CliService_Up
 		return err
 	}
 
-	filename := webRoot + "/downloads/infractl-" + request.GetOs() + "-" + request.GetArch()
+	filename := s.staticDir + "/downloads/infractl-" + request.GetOs() + "-" + request.GetArch()
 	file, err := os.Open(filename)
 	if err != nil {
 		log.Log(logging.ERROR, "failed to open infractl binary", "error", err)
