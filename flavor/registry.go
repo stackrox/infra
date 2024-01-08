@@ -206,6 +206,7 @@ func NewFromConfig(filename string) (*Registry, error) {
 			Availability: v1.FlavorAvailability(availability),
 			Parameters:   parameters,
 			Artifacts:    artifacts,
+			Aliases:      flavorCfg.Aliases,
 		}
 
 		// Parse the references Argo workflow file.
