@@ -98,11 +98,28 @@ func (r *Registry) Get(id string) (v1.Flavor, v1alpha1.Workflow, bool) {
 	if pair, found := r.flavors[id]; found {
 		return pair.flavor, pair.workflow, true
 	}
+
 	if flavor, workflow := r.getPairFromWorkflowTemplate(id); flavor != nil {
 		return *flavor, *workflow, true
 	}
 
+	if pair, found := r.getFlavorFromAlias(id); found {
+		return pair.flavor, pair.workflow, true
+	}
+
 	return v1.Flavor{}, v1alpha1.Workflow{}, false
+}
+
+func (r *Registry) getFlavorFromAlias(alias string) (pair, bool) {
+	for _, pair := range r.flavors {
+		for _, a := range pair.flavor.Aliases {
+			if alias == a {
+				return pair, true
+			}
+		}
+	}
+
+	return pair{}, false
 }
 
 // check validates that a default flavor was added.
