@@ -114,7 +114,7 @@ setup_file() {
   flavor="$(infractl flavor get test-alias-1 --json)"
   assert_success
   name="$(echo "$flavor" | jq -r '.Name')"
-  assert_equal "$name" "test-connect-artifact"
+  assert_equal "$name" "Test Connect Artifact"
 }
 
 @test "errors if no flavor can be found via alias" {
