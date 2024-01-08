@@ -118,7 +118,7 @@ setup_file() {
 }
 
 @test "errors if no flavor can be found via alias" {
-  flavor="$(infractl flavor get test-alias-not-set --json)"
+  infractl flavor get test-alias-not-set --json
   assert_failure
 }
 
