@@ -111,3 +111,13 @@ func TestClusterCanBeCreatedWithAliasFlavor(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "test-connect-artifact", cluster.Flavor)
 }
+
+func TestClusterWontBeCreatedIfAliasNotFound(t *testing.T) {
+	utils.CheckContext()
+	invalidAlias := "test-alias-not-set"
+	_, err := infractlCreateCluster(
+		invalidAlias, utils.GetUniqueClusterName("alias-negative"),
+		"--lifespan=5m",
+	)
+	assert.ErrorContainsf(t, err, "flavor \"%s\" not found", invalidAlias)
+}

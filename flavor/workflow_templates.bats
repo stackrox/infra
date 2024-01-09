@@ -117,11 +117,6 @@ setup_file() {
   assert_equal "$name" "Test Connect Artifact"
 }
 
-# @test "errors if no flavor can be found via alias" {
-#   infractl flavor get test-alias-not-set --json
-#   assert_failure
-# }
-
 infractl() {
   bin/infractl -e localhost:8443 -k "$@"
 }
