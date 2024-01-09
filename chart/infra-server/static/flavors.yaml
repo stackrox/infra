@@ -33,7 +33,7 @@
       value: us-central1
 
     - name: gcp-zone
-      description: GCP region
+      description: GCP zone
       help: GCP zone to deploy infrastructure into.
       value: us-central1-b
 
@@ -489,11 +489,6 @@
         Consult OCP documentation for details. {{ .Chart.Annotations.ocpCredentialsMode }} is the value used by
         stackrox CI.
 
-    - name: region
-      description: Google Cloud zone to deploy infrastructure into.
-      value: us-east1
-      kind: optional
-
   artifacts:
     - name: admin-password
       description: Admin password for StackRox console
@@ -724,8 +719,6 @@
         Specify "azure" for Azure network policy manager and "calico" for calico network policy controller.
         Defaults to "" (network policy disabled).
 
-  # TODO: add parameter for region
-
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
@@ -759,8 +752,6 @@
       description: node machine type
       value: Standard_D4s_v3
       kind: optional
-
-    # add parameter for region
 
   artifacts:
     - name: kubeconfig
@@ -804,8 +795,6 @@
       description: node machine type
       value: m5.xlarge
       kind: optional
-
-    # add parameter for region
 
   artifacts:
     - name: kubeconfig
@@ -929,8 +918,6 @@
         [https://aws.amazon.com/ec2/instance-types/](https://aws.amazon.com/ec2/instance-types/) and
         [https://instances.vantage.sh/](https://instances.vantage.sh/)
 
-    # add parameter for region
-
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
@@ -979,8 +966,6 @@
         custom-32-131072 custom-4-32768-ext custom-4-16384 custom-8-32768
         custom-8-16384 custom-8-65536-ext custom-16-131072-ext custom-16-32768
         custom-16-65536
-
-    # add parameter for region
 
   artifacts:
     - name: kubeconfig
