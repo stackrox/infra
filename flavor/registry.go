@@ -117,11 +117,11 @@ func (r *Registry) Get(id string) (v1.Flavor, v1alpha1.Workflow, bool) {
 }
 
 func (r *Registry) getFlavorFromAlias(alias string) (pair, bool) {
-	flavorID, ok := r.aliasRegistry[alias]
-	if !ok {
-		return pair{}, false
+	if flavorID, found := r.aliasRegistry[alias]; found {
+		return r.flavors[flavorID], true
 	}
-	return r.flavors[flavorID], true
+
+	return pair{}, false
 }
 
 // check validates that a default flavor was added.
