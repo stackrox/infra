@@ -100,7 +100,7 @@ func TestClusterCanExpireByChangingLifespan(t *testing.T) {
 func TestClusterCanBeCreatedWithAliasFlavor(t *testing.T) {
 	utils.CheckContext()
 	clusterID, err := infractlCreateCluster(
-		"test-2", utils.GetUniqueClusterName("alias-positive"),
+		"test-alias-1", utils.GetUniqueClusterName("alias-positive"),
 		"--lifespan=5m",
 	)
 	assert.NoError(t, err)
