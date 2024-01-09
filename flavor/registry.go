@@ -35,6 +35,7 @@ type Registry struct {
 	workflowTemplateNamespace      string
 	workflowTemplateCache          map[string]*v1alpha1.WorkflowTemplate
 	workflowTemplateCacheTimestamp int64
+	aliasRegistry                  map[string]string
 }
 
 // Flavors returns a sorted list of all registered flavors.
@@ -58,8 +59,8 @@ func (r *Registry) Flavors() []v1.Flavor {
 // add registers the given flavor and workflow.
 func (r *Registry) add(flavor v1.Flavor, workflow v1alpha1.Workflow) error {
 	// Validate that another flavor with the same ID was not already added.
-	if _, found := r.flavors[flavor.ID]; found {
-		return fmt.Errorf("duplicate flavor id %q", flavor.ID)
+	if _, found := r.flavors[flavor.GetID()]; found {
+		return fmt.Errorf("duplicate flavor id %q", flavor.GetID())
 	}
 
 	// Validate that the flavor parameters and workflow parameters are
@@ -69,19 +70,24 @@ func (r *Registry) add(flavor v1.Flavor, workflow v1alpha1.Workflow) error {
 	}
 
 	// Register this flavor.
-	r.flavors[flavor.ID] = pair{
+	r.flavors[flavor.GetID()] = pair{
 		workflow: workflow,
 		flavor:   flavor,
 	}
+
+	for _, alias := range flavor.GetAliases() {
+		r.aliasRegistry[alias] = flavor.GetID()
+	}
+
 	log.Log(logging.INFO, "registered flavor", "flavor-id", flavor.GetID(), "flavor-name", flavor.GetName())
 
 	// Register a default flavor if one has not already been registered.
 	if flavor.Availability == v1.Flavor_default {
 		// There is more than 1 default flavor!
 		if r.defaultFlavor != "" {
-			return fmt.Errorf("both %q and %q configured as default flavors", r.defaultFlavor, flavor.ID)
+			return fmt.Errorf("both %q and %q configured as default flavors", r.defaultFlavor, flavor.GetID())
 		}
-		r.defaultFlavor = flavor.ID
+		r.defaultFlavor = flavor.GetID()
 		log.Log(logging.INFO, "registered default flavor", "flavor-id", flavor.GetID(), "flavor-name", flavor.GetName())
 	}
 
@@ -98,11 +104,24 @@ func (r *Registry) Get(id string) (v1.Flavor, v1alpha1.Workflow, bool) {
 	if pair, found := r.flavors[id]; found {
 		return pair.flavor, pair.workflow, true
 	}
+
 	if flavor, workflow := r.getPairFromWorkflowTemplate(id); flavor != nil {
 		return *flavor, *workflow, true
 	}
 
+	if pair, found := r.getFlavorFromAlias(id); found {
+		return pair.flavor, pair.workflow, true
+	}
+
 	return v1.Flavor{}, v1alpha1.Workflow{}, false
+}
+
+func (r *Registry) getFlavorFromAlias(alias string) (pair, bool) {
+	if flavorID, found := r.aliasRegistry[alias]; found {
+		return r.flavors[flavorID], true
+	}
+
+	return pair{}, false
 }
 
 // check validates that a default flavor was added.
@@ -127,7 +146,8 @@ func NewFromConfig(filename string) (*Registry, error) {
 	}
 
 	registry := &Registry{
-		flavors: make(map[string]pair),
+		flavors:       make(map[string]pair),
+		aliasRegistry: make(map[string]string),
 	}
 
 	if err := registry.initWorkflowTemplatesClient(); err != nil {
@@ -189,6 +209,7 @@ func NewFromConfig(filename string) (*Registry, error) {
 			Availability: v1.FlavorAvailability(availability),
 			Parameters:   parameters,
 			Artifacts:    artifacts,
+			Aliases:      flavorCfg.Aliases,
 		}
 
 		// Parse the references Argo workflow file.
@@ -206,6 +227,7 @@ func NewFromConfig(filename string) (*Registry, error) {
 		if err := registry.add(flavor, workflow); err != nil {
 			return nil, err
 		}
+
 	}
 
 	return registry.check()

@@ -17,6 +17,7 @@ type WhoamiResponse struct {
 type ClusterResponse struct {
 	ID     string
 	Status string
+	Flavor string
 }
 
 // ListClusterReponse maps to the JSON response for infractl list operations.

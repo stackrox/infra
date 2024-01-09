@@ -197,6 +197,9 @@ message Flavor {
 
     // Artifacts is a map of artifacts produced by this flavor.
     map<string, FlavorArtifact> Artifacts = 6;
+
+    // Aliases are alternative IDs of the flavor.
+    repeated string Aliases = 7;
 }
 
 // FlavorListRequest represents a request to FlavorService.List.

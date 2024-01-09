@@ -96,3 +96,27 @@ func TestClusterCanExpireByChangingLifespan(t *testing.T) {
 	assertStatusBecomes(t, clusterID, "DESTROYING")
 	assertStatusBecomes(t, clusterID, "FINISHED")
 }
+
+func TestClusterCanBeCreatedWithAliasFlavor(t *testing.T) {
+	utils.CheckContext()
+	clusterID, err := infractlCreateCluster(
+		"test-alias-1", utils.GetUniqueClusterName("alias-positive"),
+		"--lifespan=5m",
+	)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, clusterID)
+	assertStatusBecomes(t, clusterID, "READY")
+
+	cluster, err := infractlGetCluster(clusterID)
+	assert.NoError(t, err)
+	assert.Equal(t, "test-connect-artifact", cluster.Flavor)
+}
+
+func TestClusterWontBeCreatedIfAliasNotFound(t *testing.T) {
+	utils.CheckContext()
+	_, err := infractlCreateCluster(
+		"test-alias-not-set", utils.GetUniqueClusterName("alias-negative"),
+		"--lifespan=5m",
+	)
+	assert.ErrorContains(t, err, "flavor \"test-alias-not-set\" not found")
+}

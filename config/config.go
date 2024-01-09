@@ -109,6 +109,9 @@ type FlavorConfig struct {
 
 	// WorkflowFile is the filename of an Argo workflow definition.
 	WorkflowFile string `json:"workflow"`
+
+	// Aliases are alternative IDs of the flavor.
+	Aliases []string `json:"aliases"`
 }
 
 // parameter represents a single parameter that is needed to launch a flavor.

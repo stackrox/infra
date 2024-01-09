@@ -119,6 +119,8 @@
   description: GKE cluster running the default version
   availability: stable
   workflow: configuration/workflow-gke-default.yaml
+  aliases:
+    - gke
   parameters:
     - name: name
       description: cluster name
@@ -180,6 +182,9 @@
   description: OpenShift 3.11 cluster
   availability: stable
   workflow: configuration/workflow-openshift-multi.yaml
+  aliases:
+    - openshift-3
+    - ocp-3
   parameters:
     - name: name
       description: cluster name
@@ -248,6 +253,8 @@
   description: OpenShift 4.x OCP or OKD cluster
   availability: stable
   workflow: configuration/workflow-openshift-4.yaml
+  aliases:
+    - ocp-4
   parameters:
     - name: name
       description: cluster name
@@ -368,6 +375,8 @@
   description: OpenShift 4.x Demo
   availability: stable
   workflow: configuration/workflow-openshift-4-demo.yaml
+  aliases:
+    - ocp-4-demo
   parameters:
     - name: name
       description: cluster name
@@ -509,6 +518,8 @@
   description: OpenShift 4.x Perf&Scale
   availability: stable
   workflow: configuration/workflow-openshift-4-perf-scale.yaml
+  aliases:
+    - ocp-4-perf-scale
   parameters:
     - name: name
       description: cluster name
@@ -824,7 +835,7 @@
       value: "true"
       kind: optional
       help: |
-        Run as ROSA HCP? Setting this to `false` will create a 
+        Run as ROSA HCP? Setting this to `false` will create a
         ROSA Classic cluster instead of HCP/Hypershift.
 
     - name: subnet-ids
@@ -833,7 +844,7 @@
       kind: optional
       help: |
         Set like "public_subnet,private_subnet"
-        It will be placed in the command like `rosa create cluster --subnet-ids $SUBNET_IDS` 
+        It will be placed in the command like `rosa create cluster --subnet-ids $SUBNET_IDS`
         Set empty for the installer to create a new empty vpc and subnets.
 
     - name: rosa-args
@@ -992,6 +1003,9 @@
   name: Test Connect Artifact
   description: Test Connect Artifact
   availability: stable
+  aliases:
+    - test-alias-1
+    - test-alias-2
   workflow: configuration/test-connect-artifact.yaml
   parameters:
     - name: name
