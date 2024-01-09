@@ -27,6 +27,14 @@
       value: "false"
       kind: hardcoded
 
+    - name: gcp-region
+      help: GCP region to deploy infrastructure into.
+      value: us-central1
+
+    - name: gcp-zone
+      help: GCP zone to deploy infrastructure into.
+      value: us-central1-b
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to cluster
@@ -94,6 +102,14 @@
       kind: optional
       help: PSPs were removed from K8s >=1.25. Enabling PSP generation on newer K8s versions will fail the deployment.
 
+    - name: gcp-region
+      help: GCP region to deploy infrastructure into.
+      value: us-central1
+
+    - name: gcp-zone
+      help: GCP zone to deploy infrastructure into.
+      value: us-central1-b
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to cluster
@@ -157,7 +173,7 @@
         [node-images](https://cloud.google.com/kubernetes-engine/docs/concepts/node-images)
 
     - name: gcp-zone
-      description: The zone in GCP to delete the cluster from
+      description: Google Cloud zone to deploy infrastructure into.
       value: us-central1-a
       kind: optional
 
@@ -469,6 +485,11 @@
         Consult OCP documentation for details. {{ .Chart.Annotations.ocpCredentialsMode }} is the value used by
         stackrox CI.
 
+    - name: region
+      description: Google Cloud zone to deploy infrastructure into.
+      value: us-east1
+      kind: optional
+
   artifacts:
     - name: admin-password
       description: Admin password for StackRox console
@@ -699,6 +720,8 @@
         Specify "azure" for Azure network policy manager and "calico" for calico network policy controller.
         Defaults to "" (network policy disabled).
 
+  # TODO: add parameter for region
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
@@ -732,6 +755,8 @@
       description: node machine type
       value: Standard_D4s_v3
       kind: optional
+
+    # add parameter for region
 
   artifacts:
     - name: kubeconfig
@@ -775,6 +800,8 @@
       description: node machine type
       value: m5.xlarge
       kind: optional
+
+    # add parameter for region
 
   artifacts:
     - name: kubeconfig
@@ -824,7 +851,7 @@
       value: "true"
       kind: optional
       help: |
-        Run as ROSA HCP? Setting this to `false` will create a 
+        Run as ROSA HCP? Setting this to `false` will create a
         ROSA Classic cluster instead of HCP/Hypershift.
 
     - name: subnet-ids
@@ -833,7 +860,7 @@
       kind: optional
       help: |
         Set like "public_subnet,private_subnet"
-        It will be placed in the command like `rosa create cluster --subnet-ids $SUBNET_IDS` 
+        It will be placed in the command like `rosa create cluster --subnet-ids $SUBNET_IDS`
         Set empty for the installer to create a new empty vpc and subnets.
 
     - name: rosa-args
@@ -898,6 +925,8 @@
         [https://aws.amazon.com/ec2/instance-types/](https://aws.amazon.com/ec2/instance-types/) and
         [https://instances.vantage.sh/](https://instances.vantage.sh/)
 
+    # add parameter for region
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
@@ -946,6 +975,8 @@
         custom-32-131072 custom-4-32768-ext custom-4-16384 custom-8-32768
         custom-8-16384 custom-8-65536-ext custom-16-131072-ext custom-16-32768
         custom-16-65536
+
+    # add parameter for region
 
   artifacts:
     - name: kubeconfig

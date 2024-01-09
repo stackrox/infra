@@ -18,6 +18,8 @@ spec:
       - name: central-db-image
       - name: k8s-version
       - name: enable-psps
+      - name: gcp-region
+      - name: gcp-zone
 
   volumes:
     - name: credentials
@@ -118,7 +120,7 @@ spec:
               none: {}
 
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.8.0
+        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.9.0-1-g9a91981c31-snapshot
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint
@@ -132,6 +134,8 @@ spec:
           - --creation-source=infra
           - --k8s-version={{workflow.parameters.k8s-version}}
           - --enable-psps={{workflow.parameters.enable-psps}}
+          - --gcp-region={{workflow.parameters.gcp-region}}
+          - --gcp-zone={{workflow.parameters.gcp-zone}}
         volumeMounts:
           - name: credentials
             mountPath: /tmp/google-credentials.json
@@ -184,7 +188,7 @@ spec:
             path: /data/tfvars
             optional: true
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.8.0
+        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.9.0-1-g9a91981c31-snapshot
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint
