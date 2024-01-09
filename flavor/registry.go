@@ -35,7 +35,7 @@ type Registry struct {
 	workflowTemplateNamespace      string
 	workflowTemplateCache          map[string]*v1alpha1.WorkflowTemplate
 	workflowTemplateCacheTimestamp int64
-	aliasRegistry				   map[string]string
+	aliasRegistry                  map[string]string
 }
 
 // Flavors returns a sorted list of all registered flavors.
@@ -119,8 +119,9 @@ func (r *Registry) Get(id string) (v1.Flavor, v1alpha1.Workflow, bool) {
 func (r *Registry) getFlavorFromAlias(alias string) (pair, bool) {
 	if flavorID, ok := r.aliasRegistry[alias]; !ok {
 		return pair{}, false
+	} else {
+		return r.flavors[flavorID], true
 	}
-	return r.flavors[flavorID], true
 }
 
 // check validates that a default flavor was added.
@@ -145,10 +146,9 @@ func NewFromConfig(filename string) (*Registry, error) {
 	}
 
 	registry := &Registry{
-		flavors: make(map[string]pair),
+		flavors:       make(map[string]pair),
+		aliasRegistry: make(map[string]string),
 	}
-
-	aliasRegistry :=
 
 	if err := registry.initWorkflowTemplatesClient(); err != nil {
 		return nil, err
@@ -227,7 +227,6 @@ func NewFromConfig(filename string) (*Registry, error) {
 		if err := registry.add(flavor, workflow); err != nil {
 			return nil, err
 		}
-
 
 	}
 
