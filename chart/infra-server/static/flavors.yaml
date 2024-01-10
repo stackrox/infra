@@ -328,7 +328,7 @@
       kind: optional
 
     - name: region
-      description: Google Cloud zone to deploy infrastructure into.
+      description: Google Cloud region to deploy infrastructure into.
       value: us-east1
       kind: optional
 
@@ -489,6 +489,11 @@
         Consult OCP documentation for details. {{ .Chart.Annotations.ocpCredentialsMode }} is the value used by
         stackrox CI.
 
+    - name: region
+      description: Google Cloud region to deploy infrastructure into.
+      value: us-east1
+      kind: optional
+
   artifacts:
     - name: admin-password
       description: Admin password for StackRox console
@@ -589,7 +594,7 @@
       kind: optional
 
     - name: region
-      description: Google Cloud zone to deploy infrastructure into.
+      description: Google Cloud region to deploy infrastructure into.
       value: us-east1
       kind: optional
 
@@ -794,6 +799,11 @@
     - name: machine-type
       description: node machine type
       value: m5.xlarge
+      kind: optional
+
+    - name: aws-region
+      description: AWS region to deploy into.
+      value: us-east-1
       kind: optional
 
   artifacts:

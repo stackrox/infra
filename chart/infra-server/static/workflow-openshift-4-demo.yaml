@@ -19,6 +19,7 @@ spec:
       - name: secured-cluster-services-helm-chart-version
       - name: trusted-certs-enabled
       - name: credentials-mode
+      - name: region
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -112,7 +113,7 @@ spec:
           - name: WORKER_NODE_TYPE
             value: "e2-standard-16"
           - name: REGION
-            value: "us-east1"
+            value: "{{workflow.parameters.region}}"
           - name: TRUSTED_CERTS_ENABLED
             value: "{{workflow.parameters.trusted-certs-enabled}}"
           - name: CREDENTIALS_MODE

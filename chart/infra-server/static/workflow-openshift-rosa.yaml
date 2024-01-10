@@ -11,6 +11,8 @@ spec:
         value: "4"
       - name: machine-type
         value: "m5.xlarge"
+      - name: aws-region
+        value: "us-east-1"
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -72,6 +74,8 @@ spec:
             value: "{{workflow.parameters.machine-type}}"
           - name: CREATION_SOURCE
             value: "infra"
+          - name: AWS_REGION
+            value: "{{workflow.parameters.aws-region}}"
         volumeMounts:
           - name: data
             mountPath: /data
@@ -150,6 +154,8 @@ spec:
               secretKeyRef:
                 name: osd-access-secrets
                 key: REDHAT_PULL_SECRET_BASE64
+          - name: AWS_REGION
+            value: "{{workflow.parameters.aws-region}}"
         volumeMounts:
           - name: data
             mountPath: /data
