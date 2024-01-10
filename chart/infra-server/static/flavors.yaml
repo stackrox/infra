@@ -801,7 +801,7 @@
       value: m5.xlarge
       kind: optional
 
-    - name: region
+    - name: aws-region
       description: AWS region to deploy into.
       value: us-east-1
       kind: optional
