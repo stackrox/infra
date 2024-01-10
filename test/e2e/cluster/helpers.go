@@ -84,6 +84,23 @@ func infractlDeleteCluster(clusterID string) error {
 	return infraClusterDeleteCmd.Execute()
 }
 
+func infractlGetCluster(clusterID string) (utils.ClusterResponse, error) {
+	infraClusterGetCmd := infraClusterGet.Command()
+	buf := utils.PrepareCommand(infraClusterGetCmd, true, clusterID)
+	jsonData := utils.ClusterResponse{}
+
+	err := infraClusterGetCmd.Execute()
+	if err != nil {
+		return jsonData, err
+	}
+	err = utils.RetrieveCommandOutputJSON(buf, &jsonData)
+	if err != nil {
+		return jsonData, err
+	}
+
+	return jsonData, nil
+}
+
 func infractlLifespan(clusterID string, lifespanUpdate string) error {
 	infraClusterLifespanCmd := infraClusterLifespan.Command()
 	utils.PrepareCommand(infraClusterLifespanCmd, false, clusterID, lifespanUpdate)

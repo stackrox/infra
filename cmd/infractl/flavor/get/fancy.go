@@ -18,6 +18,7 @@ func (p prettyFlavor) PrettyPrint(cmd *cobra.Command) {
 	cmd.Printf("Name:         %s\n", p.Name)
 	cmd.Printf("Description:  %s\n", p.Description)
 	cmd.Printf("Availability: %s\n", p.Availability)
+	cmd.Printf("Aliases:      %s\n", p.Aliases)
 
 	// Skip printing header/newlines if there are no parameters.
 	if len(p.Parameters) == 0 {
