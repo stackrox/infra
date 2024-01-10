@@ -928,6 +928,13 @@
         [https://aws.amazon.com/ec2/instance-types/](https://aws.amazon.com/ec2/instance-types/) and
         [https://instances.vantage.sh/](https://instances.vantage.sh/)
 
+    - name: aws-region
+      description: AWS region to launch cluster into.
+      value: us-west-2
+      kind: optional
+      help: |
+        For whether the service is available in a region, see [List of AWS Services Available by Region](https://aws.amazon.com/about-aws/global-infrastructure/regional-product-services/)
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
@@ -976,6 +983,11 @@
         custom-32-131072 custom-4-32768-ext custom-4-16384 custom-8-32768
         custom-8-16384 custom-8-65536-ext custom-16-131072-ext custom-16-32768
         custom-16-65536
+
+    - name: gcp-region
+      description: GCP Region to launch cluster into.
+      value: us-east1
+      kind: optional
 
   artifacts:
     - name: kubeconfig
