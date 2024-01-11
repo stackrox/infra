@@ -11,6 +11,8 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 ## [0.8.9]
 
 - Add region configuration to more flavors. This is now supported by all except ARO and AKS.
+- Add flavor aliases, e.g. `ocp-4` for `openshift-4`. This may be used for `infractl flavor get` and `infractl create` commands.
+- Bump default demo versions to 4.3.2.
 
 ## [0.8.8]
 
