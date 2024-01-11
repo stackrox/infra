@@ -929,7 +929,7 @@
         [https://instances.vantage.sh/](https://instances.vantage.sh/)
 
     - name: aws-region
-      description: AWS region to launch cluster into.
+      description: AWS region to launch cluster into
       value: us-west-2
       kind: optional
       help: |
@@ -985,7 +985,7 @@
         custom-16-65536
 
     - name: gcp-region
-      description: GCP Region to launch cluster into.
+      description: GCP Region to launch cluster into
       value: us-east1
       kind: optional
 
