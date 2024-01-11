@@ -27,6 +27,16 @@
       value: "false"
       kind: hardcoded
 
+    - name: gcp-region
+      description: GCP region
+      help: GCP region to deploy infrastructure into.
+      value: us-central1
+
+    - name: gcp-zone
+      description: GCP zone
+      help: GCP zone to deploy infrastructure into.
+      value: us-central1-b
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to cluster
@@ -94,6 +104,16 @@
       kind: optional
       help: PSPs were removed from K8s >=1.25. Enabling PSP generation on newer K8s versions will fail the deployment.
 
+    - name: gcp-region
+      description: GCP region
+      help: GCP region to deploy infrastructure into.
+      value: us-central1
+
+    - name: gcp-zone
+      description: GCP zone
+      help: GCP zone to deploy infrastructure into.
+      value: us-central1-b
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to cluster
@@ -159,7 +179,7 @@
         [node-images](https://cloud.google.com/kubernetes-engine/docs/concepts/node-images)
 
     - name: gcp-zone
-      description: The zone in GCP to delete the cluster from
+      description: Google Cloud zone to deploy infrastructure into.
       value: us-central1-a
       kind: optional
 
@@ -315,7 +335,7 @@
       kind: optional
 
     - name: region
-      description: Google Cloud zone to deploy infrastructure into.
+      description: Google Cloud region to deploy infrastructure into.
       value: us-east1
       kind: optional
 
@@ -478,6 +498,11 @@
         Consult OCP documentation for details. {{ .Chart.Annotations.ocpCredentialsMode }} is the value used by
         stackrox CI.
 
+    - name: region
+      description: Google Cloud region to deploy infrastructure into.
+      value: us-east1
+      kind: optional
+
   artifacts:
     - name: admin-password
       description: Admin password for StackRox console
@@ -580,7 +605,7 @@
       kind: optional
 
     - name: region
-      description: Google Cloud zone to deploy infrastructure into.
+      description: Google Cloud region to deploy infrastructure into.
       value: us-east1
       kind: optional
 
@@ -787,6 +812,11 @@
       value: m5.xlarge
       kind: optional
 
+    - name: aws-region
+      description: AWS region to deploy into.
+      value: us-east-1
+      kind: optional
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
@@ -909,6 +939,13 @@
         [https://aws.amazon.com/ec2/instance-types/](https://aws.amazon.com/ec2/instance-types/) and
         [https://instances.vantage.sh/](https://instances.vantage.sh/)
 
+    - name: aws-region
+      description: AWS region to launch cluster into
+      value: us-west-2
+      kind: optional
+      help: |
+        For whether the service is available in a region, see [List of AWS Services Available by Region](https://aws.amazon.com/about-aws/global-infrastructure/regional-product-services/)
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
@@ -957,6 +994,11 @@
         custom-32-131072 custom-4-32768-ext custom-4-16384 custom-8-32768
         custom-8-16384 custom-8-65536-ext custom-16-131072-ext custom-16-32768
         custom-16-65536
+
+    - name: gcp-region
+      description: GCP Region to launch cluster into
+      value: us-east1
+      kind: optional
 
   artifacts:
     - name: kubeconfig
