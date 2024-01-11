@@ -11,6 +11,8 @@ spec:
         value: "4"
       - name: machine-type
         value: "m5.xlarge"
+      - name: gcp-region
+        value: us-east1
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -38,7 +40,7 @@ spec:
     - name: create
       activeDeadlineSeconds: 7200
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-osd-0.2.24
+        image: quay.io/stackrox-io/ci:automation-flavors-osd-0.9.7-1-ge4b4757607-snapshot
         imagePullPolicy: Always
         command:
           - ./entrypoint.sh
@@ -70,6 +72,8 @@ spec:
             value: "{{workflow.parameters.machine-type}}"
           - name: CREATION_SOURCE
             value: "infra"
+          - name: GCP_REGION
+            value: "{{workflow.parameters.gcp-region}}"
         volumeMounts:
           - name: data
             mountPath: /data
@@ -120,7 +124,7 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-osd-0.2.24
+        image: quay.io/stackrox-io/ci:automation-flavors-osd-0.9.7-1-ge4b4757607-snapshot
         imagePullPolicy: Always
         command:
           - ./entrypoint.sh
