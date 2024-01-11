@@ -8,6 +8,10 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+## [0.8.9]
+
+- Add region configuration to more flavors. This is now supported by all except ARO and AKS.
+
 ## [0.8.8]
 
 - Add cluster parameters to the `infractl get <cluster-id> --json` output to help debugging.
