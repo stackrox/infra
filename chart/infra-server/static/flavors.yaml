@@ -282,9 +282,11 @@
 
     - name: openshift-version
       description: openshift release from OCP, OCP dev preview, or OKD
-      value: ocp/stable
+      value: ocp/candidate-4.14
       kind: optional
       help: |
+        Pinned to candidate-4.14 to get latest ocp client to work-around recent gcp assuredoss change.
+
         ## Stable OCP
 
         The latest stable Red Hat enterprise OCP releases can be found at
