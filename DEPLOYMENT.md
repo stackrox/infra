@@ -67,9 +67,7 @@ To regenerate the certificate, run: `./scripts/cert/renew.sh <local|development|
 
 ## Creating a Tag for Release
 
-To create a full GitHub release, draft a new release from the console.
-Edit the release to include a summary of key features, changes, deprecations,
-etc since the last full release.
+To find the next tag, use:
 
 ```bash
 # find the next tag
@@ -80,7 +78,8 @@ git tag -l
 git log --decorate --graph --abbrev-commit --date=relative 0.2.13..master
 ```
 
-We often deploy Infra from a tag without creating a full GitHub release.
+We often deploy Infra from a tag without creating a full GitHub release, after updating the CHANGELOG on master.
+
 To create a tag for deployment under this scenario:
 
 ```bash
@@ -88,12 +87,6 @@ cd $GOPATH/src/github.com/stackrox/infra
 git tag 0.2.14  # for example
 git push origin --tags
 ```
-
-Prior to deployment make note of the current version of infra in case a rollback is needed.
-A rollback consists of checking out the previously deployed tag and redeploying.
-
-    https://infra.rox.systems/      => version 0.2.13
-    https://dev.infra.rox.systems/  => version 0.2.13
 
 Once the tag is ready for deployment &mdash; via full release or manually pushing a
 new tag &mdash; the next step is to deploy to target environments.
@@ -142,6 +135,11 @@ Use the environment variable `TEST_MODE` to disable certain infra service behavi
 `TEST_MODE=true ENVIRONMENT=development SECRET_VERSION=latest make helm-deploy`
 
 This is used in the infra PR clusters to set the login referer and disable telemetry.
+
+### Rollback
+
+Use `helm rollback infra-server <REVISION>`.
+To rollback to the previous release, omit the revision or set it to 0.
 
 ## Verification
 
