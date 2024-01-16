@@ -348,6 +348,13 @@
       value: false
       kind: optional
 
+    - name: keep-failed-cluster
+      description: Keep failed cluster
+      value: false
+      kind: optional
+      help: |
+          *Only for debugging infra issues.* If in doubt, please keep to false.
+
     - name: trusted-certs-enabled
       description: Should trusted certificates be created
       value: false

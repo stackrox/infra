@@ -24,6 +24,7 @@ spec:
       - name: fips-enabled
       - name: trusted-certs-enabled
       - name: credentials-mode
+      - name: keep-failed-cluster
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -80,7 +81,7 @@ spec:
             archive:
               tar: {}
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.7
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.9.8-1-g9d1b145f1c-snapshot
         imagePullPolicy: Always
         command:
           - entrypoint.sh
@@ -121,6 +122,8 @@ spec:
             value: "{{workflow.parameters.trusted-certs-enabled}}"
           - name: CREDENTIALS_MODE
             value: "{{workflow.parameters.credentials-mode}}"
+          - name: KEEP_FAILED_CLUSTER
+            value: "{{workflow.parameters.keep-failed-cluster}}"
         volumeMounts:
           - name: data
             mountPath: /data
