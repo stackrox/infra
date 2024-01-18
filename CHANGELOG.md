@@ -8,6 +8,10 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+## [0.8.10]
+
+- Adds a fix for `demo` and `qa-demo` flavors: Region parameters should be optional on cluster creation, defaults are set in UI and the flavor itself.
+
 ## [0.8.9]
 
 - Add region configuration to more flavors. This is now supported by all except ARO and AKS.

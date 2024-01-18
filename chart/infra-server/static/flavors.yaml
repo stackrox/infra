@@ -31,11 +31,13 @@
       description: GCP region
       help: GCP region to deploy infrastructure into.
       value: us-central1
+      kind: optional
 
     - name: gcp-zone
       description: GCP zone
       help: GCP zone to deploy infrastructure into.
       value: us-central1-b
+      kind: optional
 
   artifacts:
     - name: kubeconfig
@@ -108,11 +110,13 @@
       description: GCP region
       help: GCP region to deploy infrastructure into.
       value: us-central1
+      kind: optional
 
     - name: gcp-zone
       description: GCP zone
       help: GCP zone to deploy infrastructure into.
       value: us-central1-b
+      kind: optional
 
   artifacts:
     - name: kubeconfig
