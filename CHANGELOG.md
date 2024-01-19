@@ -8,6 +8,8 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+- Add an optional parameter to the in openshift-4 flavor to keep failed clusters around (infra will still delete the cluster)
+
 ## [0.8.10]
 
 - Adds a fix for `demo` and `qa-demo` flavors: Region parameters should be optional on cluster creation, defaults are set in UI and the flavor itself.
