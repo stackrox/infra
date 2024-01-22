@@ -8,6 +8,8 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+- Bump default demo versions to 4.3.4.
+
 ## [0.8.10]
 
 - Adds a fix for `demo` and `qa-demo` flavors: Region parameters should be optional on cluster creation, defaults are set in UI and the flavor itself.
