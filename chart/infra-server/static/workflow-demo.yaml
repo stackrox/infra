@@ -120,12 +120,12 @@ spec:
               none: {}
 
           - name: central-bundle
-            path: /data/central/central-bundle.tar.gz
+            path: /data/central-bundle.tar.gz
             archive:
               none: {}
 
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.9.11-4-g8a070dea4a-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.9.11-5-ga8546dfa69-snapshot
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint
