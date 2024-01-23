@@ -56,6 +56,9 @@
     - name: roxctl
       tags: [internal]
 
+    - name: central-bundle
+      description: Central bundle
+
 #############
 #  qa-demo  #
 #############
