@@ -119,8 +119,13 @@ spec:
             archive:
               none: {}
 
+          - name: central-bundle
+            path: /data/central/central-bundle.tar.gz
+            archive:
+              none: {}
+
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.9.8-2-ga702bfd9b1-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.9.11-4-g8a070dea4a-snapshot
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint
@@ -188,7 +193,7 @@ spec:
             path: /data/tfvars
             optional: true
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.9.8-2-ga702bfd9b1-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-demo-0.9.11-4-g8a070dea4a-snapshot
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint
