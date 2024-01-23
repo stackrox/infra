@@ -1,0 +1,150 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: roks-
+spec:
+  entrypoint: start
+  arguments:
+    parameters:
+      - name: name
+      - name: nodes
+        value: ""
+      - name: instance-type
+        value: ""
+      - name: zone
+        value: ""
+      - name: vpc
+        value: ""
+      - name: public-gateway
+        value: ""
+      - name: subnet
+        value: ""
+      - name: openshift-version
+        value: ""
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 10Mi
+
+  templates:
+    - name: start
+      steps:
+        - - name: create
+            template: create
+
+        - - name: gather
+            template: gather
+
+        - - name: wait
+            template: wait
+
+        - - name: destroy
+            template: destroy
+
+    - name: create
+      activeDeadlineSeconds: 7200
+      container:
+        image: quay.io/stackrox-io/ci:automation-flavors-ibmroks-0.9.11-107-g95bf7859d1-snapshot
+        imagePullPolicy: Always
+        command:
+          - ./entrypoint.sh
+        args:
+          - create
+          - "{{workflow.parameters.name}}"
+        env:
+          - name: IBM_ROKS_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: osd-access-secrets
+                key: IBM_ROKS_API_KEY
+          - name: NODE_COUNT
+            value: "{{workflow.parameters.nodes}}"
+          - name: INSTANCE_TYPE
+            value: "{{workflow.parameters.instance-type}}"
+          - name: IBM_ZONE
+            value: "{{workflow.parameters.zone}}"
+          - name: OPENSHIFT_VERSION
+            value: "{{workflow.parameters.openshift-version}}"
+          - name: VPC_ID
+            value: "{{workflow.parameters.vpc}}"
+          - name: GATEWAY_ID
+            value: "{{workflow.parameters.public-gateway}}"
+          - name: SUBNET_ID
+            value: "{{workflow.parameters.subnet}}"
+          - name: CREATION_SOURCE
+            value: "infra"
+        volumeMounts:
+          - name: data
+            mountPath: /data
+
+    - name: gather
+      script:
+        image: busybox
+        command: [sh]
+        source: |
+          cd /data
+          . ./dotenv
+          echo "${CONSOLE_ENDPOINT}" > cluster-console-url
+          echo "${CONSOLE_USER}" > cluster-console-username
+          echo "${CONSOLE_PASSWORD}" > cluster-console-password
+          ls -la
+        volumeMounts:
+          - name: data
+            mountPath: /data
+      outputs:
+        artifacts:
+          - name: kubeconfig
+            path: /data/kubeconfig
+            archive:
+              none: {}
+          - name: admin-key.pem
+            path: /data/admin-key.pem
+            archive:
+              none: {}
+          - name: admin.pem
+            path: /data/admin.pem
+            archive:
+              none: {}
+          - name: data
+            path: /data/data.zip
+            archive:
+              none: {}
+          - name: cluster-console-url
+            path: /data/cluster-console-url
+            archive:
+              none: {}
+
+    - name: wait
+      suspend: {}
+
+    - name: destroy
+      activeDeadlineSeconds: 3600
+      container:
+        image: quay.io/stackrox-io/ci:automation-flavors-ibmroks-0.9.11-107-g95bf7859d1-snapshot
+        imagePullPolicy: Always
+        command:
+          - ./entrypoint.sh
+        args:
+          - destroy
+          - "{{workflow.parameters.name}}"
+        env:
+          - name: IBM_ROKS_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: osd-access-secrets
+                key: IBM_ROKS_API_KEY
+          - name: IBM_ZONE
+            value: "{{workflow.parameters.zone}}"
+          - name: VPC_ID
+            value: "{{workflow.parameters.vpc}}"
+          - name: GATEWAY_ID
+            value: "{{workflow.parameters.public-gateway}}"
+          - name: SUBNET_ID
+            value: "{{workflow.parameters.subnet}}"
+        volumeMounts:
+          - name: data
+            mountPath: /data
