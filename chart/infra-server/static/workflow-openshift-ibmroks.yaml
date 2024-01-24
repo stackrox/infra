@@ -101,11 +101,11 @@ spec:
             path: /data/kubeconfig
             archive:
               none: {}
-          - name: admin-key.pem
+          - name: admin-key
             path: /data/admin-key.pem
             archive:
               none: {}
-          - name: admin.pem
+          - name: admin
             path: /data/admin.pem
             archive:
               none: {}

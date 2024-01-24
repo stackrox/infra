@@ -1036,7 +1036,8 @@
     - name: name
       description: cluster name
       value: example1
-      help: The name must start with a letter, can contain letters, 
+      help: |
+        The name must start with a letter, can contain letters, 
         numbers, periods (.), and hyphen (-), and must be 35 
         characters or fewer. Use a name that is unique across 
         regions. The cluster name and the region in which the 
@@ -1051,36 +1052,32 @@
       description: number of nodes (ACS may not start if memory < 48gb total)
       value: "3"
       kind: optional
-      help: <https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-flavors>
-        Current ACS(<=4.3) fails to start on instances with fewer
-        than 8 cores individually or memory less than 48GB combined.
-        # ACS 4.2.2 started on instance types (node count in parens):
-        - cx2.8x16 (3,4)
-        - bx2.8x32 (2)
-        - mx2.8x64 (2)
-        - cx2.16x32 (2)
-        - bx2.16x64 (2,4)
 
     - name: instance-type
       description: node machine type (ACS may not start if cores < 8 each or memory < 48gb total)
       value: cx2.8x16
       kind: optional
-      help: <https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-flavors>
-        Current ACS(<=4.3) fails to start on instances with fewer
+      help: |
+        <https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-flavors>
+        Current ACS(<=4.3) fails to start on ROKS instances with fewer
         than 8 cores individually or memory less than 48GB combined.
-        # ACS 4.2.2 started on instance types (node count in parens):
-        - cx2.8x16 (3,4)
-        - bx2.8x32 (2)
-        - mx2.8x64 (2)
-        - cx2.16x32 (2)
-        - bx2.16x64 (2,4)
+        ACS 4.2.2 started on instance types (minimum node count in parens)
+        + cx2.8x16 (3)
+        + bx2.8x32 (2)
+        + mx2.8x64 (2)
+        + cx2.16x32 (2)
+        + bx2.16x64 (2)
 
     - name: zone
-      description: IBM Cloud zone to deploy into (Ex: eu-de-1, us-south-1, jp-tok-1).
+      description: IBM Cloud zone to deploy into (Example eu-de-1, us-south-1, jp-tok-1).
       value: us-south-1
       kind: optional
-      help: Example VPC-gen2 regions: eu-de-1, us-south-1, jp-tok-1
+      help: |
         <https://cloud.ibm.com/docs/openshift?topic=openshift-regions-and-zones#zones-vpc>
+        Example VPC-gen2 regions
+        + Berlin eu-de-1
+        + Dallas us-south-1
+        + Tokyo jp-tok-1
 
     - name: vpc
       description: VPC to deploy into.
@@ -1099,14 +1096,20 @@
       kind: optional
       help: Empty for a new temporary subnet to be created.
 
+    - name: openshift-version
+      description: ROKS Openshift version (Empty for default stable)
+      value: ""
+      kind: optional
+      help: <https://cloud.ibm.com/docs/openshift?topic=openshift-openshift_versions>
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
 
-    - name: admin-key.pem
+    - name: admin-key
       description: client key for kubeconfig connections
 
-    - name: admin.pem
+    - name: admin
       description: client certificate for kubeconfig connections
 
     - name: dotenv
