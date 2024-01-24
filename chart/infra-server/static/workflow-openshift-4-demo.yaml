@@ -152,7 +152,7 @@ spec:
           - name: roxctl-secured-cluster-services
             path: /usr/bin/roxctl-secured-cluster-services
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-0.9.8-2-ga702bfd9b1-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-0.9.12-3-g5c55c5984d-snapshot
         imagePullPolicy: Always
         command:
           - ansible-playbook
