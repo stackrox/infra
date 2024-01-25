@@ -135,7 +135,7 @@ spec:
           - name: IBM_ROKS_API_KEY
             valueFrom:
               secretKeyRef:
-                name: osd-access-secrets
+                name: ibm-cloud-secrets
                 key: IBM_ROKS_API_KEY
           - name: IBM_ZONE
             value: "{{workflow.parameters.zone}}"
