@@ -48,7 +48,7 @@ spec:
     - name: create
       activeDeadlineSeconds: 7200
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-ibmroks-0.9.11-19-0316def45e1-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-ibmroks-0.9.11-19-g0316def45e-snapshot
         imagePullPolicy: Always
         command:
           - ./entrypoint.sh
@@ -124,7 +124,7 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-ibmroks-0.9.11-19-0316def45e1-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-ibmroks-0.9.11-19-g0316def45e-snapshot
         imagePullPolicy: Always
         command:
           - ./entrypoint.sh
