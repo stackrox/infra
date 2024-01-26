@@ -77,6 +77,8 @@ spec:
             value: "{{workflow.parameters.subnet}}"
           - name: CREATION_SOURCE
             value: "infra"
+          - name: SCRATCH
+            value: "/data"
         volumeMounts:
           - name: data
             mountPath: /data
@@ -146,6 +148,8 @@ spec:
             value: "{{workflow.parameters.public-gateway}}"
           - name: SUBNET_ID
             value: "{{workflow.parameters.subnet}}"
+          - name: SCRATCH
+            value: "/data"
         volumeMounts:
           - name: data
             mountPath: /data
