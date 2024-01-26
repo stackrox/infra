@@ -48,7 +48,7 @@ spec:
     - name: create
       activeDeadlineSeconds: 7200
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-ibmroks-0.9.11-116-gb2a6d7450e-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-ibmroks-0.9.11-20-g20b667de08-snapshot
         imagePullPolicy: Always
         command:
           - ./entrypoint.sh
@@ -59,7 +59,7 @@ spec:
           - name: IBM_ROKS_API_KEY
             valueFrom:
               secretKeyRef:
-                name: osd-access-secrets
+                name: ibm-cloud-secrets
                 key: IBM_ROKS_API_KEY
           - name: NODE_COUNT
             value: "{{workflow.parameters.nodes}}"
@@ -101,11 +101,15 @@ spec:
             path: /data/kubeconfig
             archive:
               none: {}
-          - name: admin-key.pem
+          - name: dotenv
+            path: /data/dotenv
+            archive:
+              none: {}
+          - name: admin-key
             path: /data/admin-key.pem
             archive:
               none: {}
-          - name: admin.pem
+          - name: admin
             path: /data/admin.pem
             archive:
               none: {}
@@ -124,7 +128,7 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-ibmroks-0.9.11-116-gb2a6d7450e-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-ibmroks-0.9.11-20-g20b667de08-snapshot
         imagePullPolicy: Always
         command:
           - ./entrypoint.sh
@@ -135,7 +139,7 @@ spec:
           - name: IBM_ROKS_API_KEY
             valueFrom:
               secretKeyRef:
-                name: osd-access-secrets
+                name: ibm-cloud-secrets
                 key: IBM_ROKS_API_KEY
           - name: IBM_ZONE
             value: "{{workflow.parameters.zone}}"
