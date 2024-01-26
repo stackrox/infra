@@ -89,9 +89,6 @@ spec:
           cd /data
           . ./dotenv
           echo "${CONSOLE_ENDPOINT}" > cluster-console-url
-          echo "${CONSOLE_USER}" > cluster-console-username
-          echo "${CONSOLE_PASSWORD}" > cluster-console-password
-          ls -la
         volumeMounts:
           - name: data
             mountPath: /data
