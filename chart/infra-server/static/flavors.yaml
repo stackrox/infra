@@ -1049,17 +1049,19 @@
         <https://cloud.ibm.com/docs/openshift?topic=openshift-cluster-create-vpc-gen2&interface=cli>
 
     - name: nodes
-      description: number of nodes (ACS may not start if memory < 48gb total)
+      description: number of nodes 
+      help: ACS may not start if memory < 48gb total
       value: "3"
       kind: optional
 
     - name: instance-type
-      description: node machine type (ACS may not start if cores < 8 each or memory < 48gb total)
+      description: node machine type
+      help: ACS may not start if cores < 8 each or memory < 48gb total
       value: cx2.8x16
       kind: optional
       help: |
         <https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-flavors>
-        Current ACS(<=4.3) fails to start on ROKS instances with fewer
+        ACS fails to start on ROKS instances with fewer
         than 8 cores individually or memory less than 48GB combined.
         ACS 4.2.2 successfully started on instance types below (minimum node count)
         + cx2.8x16 (3)
@@ -1069,7 +1071,7 @@
         + bx2.16x64 (2)
 
     - name: zone
-      description: IBM Cloud zone to deploy into (Example eu-de-1, us-south-1, jp-tok-1).
+      description: IBM Cloud zone to deploy into
       value: us-south-1
       kind: optional
       help: |
@@ -1098,10 +1100,10 @@
       help: Empty for a new temporary subnet to be created.
 
     - name: openshift-version
-      description: ROKS Openshift version (Like "4.14" or empty for default stable)
+      description: ROKS Openshift major.minor version
       value: ""
       kind: optional
-      help: <https://cloud.ibm.com/docs/openshift?topic=openshift-openshift_versions>
+      help: <https://cloud.ibm.com/docs/openshift?topic=openshift-openshift_versions> Keep empty for default stable version.
 
   artifacts:
     - name: kubeconfig
