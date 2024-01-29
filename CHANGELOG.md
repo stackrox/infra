@@ -9,6 +9,7 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 ## [NEXT RELEASE]
 
 - Bump default demo versions to 4.3.4.
+- Bump demo automation flavors images to 0.9.13.
 
 ## [0.8.10]
 
