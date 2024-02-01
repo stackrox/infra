@@ -8,6 +8,10 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+## [0.8.12]
+
+- Add IBM ROKS flavor. Note that there are two known issues (ROX-22142, ROX-22143).
+
 ## [0.8.11]
 
 - Bump default demo versions to 4.3.4.
