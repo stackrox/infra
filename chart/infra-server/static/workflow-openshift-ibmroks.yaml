@@ -36,9 +36,6 @@ spec:
         - - name: create
             template: create
 
-        - - name: gather
-            template: gather
-
         - - name: wait
             template: wait
 
