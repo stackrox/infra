@@ -1037,26 +1037,25 @@
       description: cluster name
       value: example1
       help: |
-        The name must start with a letter, can contain letters, 
-        numbers, periods (.), and hyphen (-), and must be 35 
-        characters or fewer. Use a name that is unique across 
-        regions. The cluster name and the region in which the 
-        cluster is deployed form the fully qualified domain name 
-        for the Ingress subdomain. To ensure that the Ingress 
-        subdomain is unique within a region, the cluster name 
-        might be truncated and appended with a random value within 
+        The name must start with a letter, can contain letters,
+        numbers, periods (.), and hyphen (-), and must be 35
+        characters or fewer. Use a name that is unique across
+        regions. The cluster name and the region in which the
+        cluster is deployed form the fully qualified domain name
+        for the Ingress subdomain. To ensure that the Ingress
+        subdomain is unique within a region, the cluster name
+        might be truncated and appended with a random value within
         the Ingress domain name.
         <https://cloud.ibm.com/docs/openshift?topic=openshift-cluster-create-vpc-gen2&interface=cli>
 
     - name: nodes
-      description: number of nodes 
+      description: number of nodes
       help: ACS may not start if memory < 48gb total
       value: "3"
       kind: optional
 
     - name: instance-type
       description: node machine type
-      help: ACS may not start if cores < 8 each or memory < 48gb total
       value: cx2.8x16
       kind: optional
       help: |
