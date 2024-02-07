@@ -80,7 +80,7 @@ spec:
             archive:
               tar: {}
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.7
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.9.19
         imagePullPolicy: Always
         command:
           - entrypoint.sh
@@ -158,12 +158,13 @@ spec:
 
     - name: destroy
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.7
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.9.19
         imagePullPolicy: Always
         command:
           - entrypoint.sh
         args:
           - destroy
+          - "{{workflow.parameters.name}}"
         env:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
