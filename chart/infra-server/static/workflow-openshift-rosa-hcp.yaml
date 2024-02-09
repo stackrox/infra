@@ -31,8 +31,22 @@ spec:
   templates:
     - name: start
       steps:
+        - - name: get_cloud_identifier
+            template: get_cloud_identifier
+
         - - name: create
             template: create
+            continueOn:
+              failed: true
+
+        - - name: tagger
+            template: tagger
+            arguments:
+              parameters:
+                - name: cloud_identifier
+                  value: "{{ steps.get_cloud_identifier.outputs.parameter.cloud_identifier }}"
+                - name: create_exit_code
+                  value: "{{ steps.create.exitCode }}"
 
         - - name: gather
             template: gather
@@ -42,6 +56,22 @@ spec:
 
         - - name: destroy
             template: destroy
+
+    - name: get_cloud_identifier
+      container:
+        image: quay.io/stackrox-io/ci:automation-flavors-rosa-0.9.5
+        command:
+          - ./entrypoint.sh
+        args:
+          - get_cloud_identifier
+          - "{{workflow.parameters.name}}"
+          - ">"
+          - "/tmp/cloud_identifier.txt"
+      outputs:
+        parameters:
+        - name: cloud_identifier
+          valueFrom:
+            path: /tmp/cloud_identifier.txt
 
     - name: create
       activeDeadlineSeconds: 7200
@@ -91,6 +121,26 @@ spec:
         volumeMounts:
           - name: data
             mountPath: /data
+
+    - name: tagger
+      inputs:
+        parameters:
+        - name: cloud_identifier
+        - name: create_exit_code
+      script:
+        image: busybox
+        command: [sh]
+        source: |
+          echo ">>>"
+          echo "{{inputs.parameters.cloud_identifier}}"
+          echo "<<<"
+          echo ">>>"
+          echo "{{inputs.parameters.create_exit_code}}"
+          echo "<<<"
+          if [[ "{{inputs.parameters.create_exit_code}}" != "0" ]]; then
+            echo "fail due to create fail"
+            exit 1
+          fi
 
     - name: gather
       script:
