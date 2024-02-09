@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: rosa-
+  generateName: rosa-hcp-
 spec:
   entrypoint: start
   arguments:
@@ -44,7 +44,7 @@ spec:
             arguments:
               parameters:
                 - name: cloud_identifier
-                  value: "{{ steps.get-cloud-identifier.outputs.parameter.cloud_identifier }}"
+                  value: "{{ steps.get-cloud-identifier.outputs.parameters.cloud_identifier }}"
                 - name: create_exit_code
                   value: "{{ steps.create.exitCode }}"
 
