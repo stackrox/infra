@@ -31,8 +31,8 @@ spec:
   templates:
     - name: start
       steps:
-        - - name: get_cloud_identifier
-            template: get_cloud_identifier
+        - - name: get-cloud-identifier
+            template: get-cloud-identifier
 
         - - name: create
             template: create
@@ -44,7 +44,7 @@ spec:
             arguments:
               parameters:
                 - name: cloud_identifier
-                  value: "{{ steps.get_cloud_identifier.outputs.parameter.cloud_identifier }}"
+                  value: "{{ steps.get-cloud-identifier.outputs.parameter.cloud_identifier }}"
                 - name: create_exit_code
                   value: "{{ steps.create.exitCode }}"
 
@@ -57,7 +57,7 @@ spec:
         - - name: destroy
             template: destroy
 
-    - name: get_cloud_identifier
+    - name: get-cloud-identifier
       container:
         image: quay.io/stackrox-io/ci:automation-flavors-rosa-0.9.14-1-gae1ba617dd-snapshot
         command:
