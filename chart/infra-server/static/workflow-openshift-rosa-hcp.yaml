@@ -59,7 +59,7 @@ spec:
 
     - name: get_cloud_identifier
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-rosa-0.9.5
+        image: quay.io/stackrox-io/ci:automation-flavors-rosa-0.9.14-1-gae1ba617dd-snapshot
         command:
           - ./entrypoint.sh
         args:
