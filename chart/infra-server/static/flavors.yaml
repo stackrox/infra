@@ -1024,6 +1024,107 @@
     - name: cluster-console-password
       description: The password to login at the openshift console
 
+#########################
+#  Openshift IBM ROKS   #
+#########################
+- id: ibmroks
+  name: IBM ROKS
+  description: IBM ROKS cluster on VPC infrastructure.
+  availability: stable
+  workflow: configuration/workflow-openshift-ibmroks.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      value: example1
+      help: |
+        The name must start with a letter, can contain letters,
+        numbers, periods (.), and hyphen (-), and must be 35
+        characters or fewer. Use a name that is unique across
+        regions. The cluster name and the region in which the
+        cluster is deployed form the fully qualified domain name
+        for the Ingress subdomain. To ensure that the Ingress
+        subdomain is unique within a region, the cluster name
+        might be truncated and appended with a random value within
+        the Ingress domain name.
+        <https://cloud.ibm.com/docs/openshift?topic=openshift-cluster-create-vpc-gen2&interface=cli>
+
+    - name: nodes
+      description: number of nodes
+      help: ACS may not start if memory < 48gb total
+      value: "3"
+      kind: optional
+
+    - name: instance-type
+      description: node machine type
+      value: cx2.8x16
+      kind: optional
+      help: |
+        <https://cloud.ibm.com/docs/openshift?topic=openshift-vpc-flavors>
+        ACS fails to start on ROKS instances with fewer
+        than 8 cores individually or memory less than 48GB combined.
+        ACS 4.2.2 successfully started on instance types below (minimum node count)
+        + cx2.8x16 (3)
+        + bx2.8x32 (2)
+        + mx2.8x64 (2)
+        + cx2.16x32 (2)
+        + bx2.16x64 (2)
+
+    - name: zone
+      description: IBM Cloud zone to deploy into
+      value: us-south-1
+      kind: optional
+      help: |
+        <https://cloud.ibm.com/docs/openshift?topic=openshift-regions-and-zones#zones-vpc>
+        Example VPC-gen2 regions
+        + Berlin eu-de-1
+        + Dallas us-south-1
+        + Tokyo jp-tok-1
+
+    - name: vpc
+      description: VPC to deploy into.
+      value: infra
+      kind: optional
+      help: Empty for a new temporary vpc to be created.
+
+    - name: public-gateway
+      description: Public gateway for vpc external access.
+      value: infra-gateway
+      kind: optional
+      help: Empty for a new temporary gateway to be created.
+
+    - name: subnet
+      description: Subnet within the vpc.
+      value: ""
+      kind: optional
+      help: Empty for a new temporary subnet to be created.
+
+    - name: openshift-version
+      description: ROKS Openshift major.minor version
+      value: ""
+      kind: optional
+      help: <https://cloud.ibm.com/docs/openshift?topic=openshift-openshift_versions> Keep empty for default stable version.
+
+  artifacts:
+    - name: kubeconfig
+      description: Kube config for connecting to this cluster
+
+    - name: admin-key
+      description: client key for kubeconfig connections
+
+    - name: admin
+      description: client certificate for kubeconfig connections
+
+    - name: dotenv
+      description: Environment variables used to access the cluster and consoles
+
+    - name: data
+      description: An archive that includes kubeconfig and keys to connect to the cluster
+
+    - name: cluster-console-url
+      description: The URL for the openshift console
+      tags: [url]
+
+
 {{ if ne .Values.environment "production" -}}
 #################
 #  URL artifact #
