@@ -8,6 +8,8 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+- Create GCP workload identity pools for `openshift-4` clusters. They can be used to setup short-lived token integrations.
+
 ## [0.8.12]
 
 - Add IBM ROKS flavor. Note that there are two known issues (ROX-22142, ROX-22143).
