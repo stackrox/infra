@@ -8,6 +8,9 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+- ROX-22142: wait for IBM ROKS nodes to be ready during provisioning.
+- Fix GKE cluster destruction with retries and disabled auto-upgrades and repairs.
+
 ## [0.8.12]
 
 - Add IBM ROKS flavor. Note that there are two known issues (ROX-22142, ROX-22143).
