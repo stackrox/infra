@@ -35,7 +35,7 @@ NAME                       ADDRESS/RANGE   TYPE      PURPOSE  NETWORK  REGION  S
 infra-address-production   35.227.207.252  EXTERNAL                                    IN_USE
 $ gcloud compute addresses list --project acs-team-automation
 NAME                       ADDRESS/RANGE   TYPE      PURPOSE  NETWORK  REGION  SUBNET  STATUS
-infra-development            34.102.6.82   EXTERNAL                  us-west2        RESERVED
+infra-development          34.49.127.147   EXTERNAL                                    IN_USE
 ```
 
 ## Configuration
