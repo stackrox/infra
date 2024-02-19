@@ -8,6 +8,10 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+## [0.8.13]
+
+- ROX-22142: wait for IBM ROKS nodes to be ready during provisioning.
+- Fix GKE cluster destruction with retries and disabled auto-upgrades and repairs.
 - Create GCP workload identity pools for `openshift-4` clusters. They can be used to setup short-lived token integrations.
 
 ## [0.8.12]
