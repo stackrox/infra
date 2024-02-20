@@ -9,20 +9,20 @@ To work with either of the clusters in `project=stackrox-infra` you will need to
 When not in use, this cluster is resized to 0.
 
 ```
-gcloud container clusters --project=stackrox-infra --zone=us-west2 resize infra-development --num-nodes=0
+gcloud container clusters --project=acs-team-automation --zone=us-west2 resize infra-development --num-nodes=0
 ```
 
 To bring it back for development:
 
 ```
-gcloud container clusters --project=stackrox-infra --zone=us-west2 resize infra-development --num-nodes=4
+gcloud container clusters --project=acs-team-automation --zone=us-west2 resize infra-development --num-nodes=2
 ```
 
 To connect to this cluster using kubectl, run:
 
 ```
 gcloud container clusters get-credentials infra-development \
-    --project stackrox-infra \
+    --project acs-team-automation \
     --region us-west2
 ```
 
