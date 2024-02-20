@@ -2,27 +2,16 @@
 
 ## Production and Staging Clusters
 
-To work with either of the clusters in `project=stackrox-infra` you will need to either be a member of the `team-automation` group or have someone add you as a project owner.
+To work with either of the clusters you will need to either be a member of the
+`team-automation` group or have someone add you as a project owner.
 
-### [Staging (dev.infra.rox.systems)](https://console.cloud.google.com/kubernetes/clusters/details/us-west2/infra-development?project=stackrox-infra&organizationId=847401270788)
-
-When not in use, this cluster is resized to 0.
-
-```
-gcloud container clusters --project=stackrox-infra --zone=us-west2 resize infra-development --num-nodes=0
-```
-
-To bring it back for development:
-
-```
-gcloud container clusters --project=stackrox-infra --zone=us-west2 resize infra-development --num-nodes=4
-```
+### [Staging (dev.infra.rox.systems)](https://console.cloud.google.com/kubernetes/clusters/details/us-west2/infra-development?project=acs-team-automation)
 
 To connect to this cluster using kubectl, run:
 
 ```
 gcloud container clusters get-credentials infra-development \
-    --project stackrox-infra \
+    --project acs-team-automation \
     --region us-west2
 ```
 
@@ -43,8 +32,10 @@ Infra uses GKE `Ingress` and `ManagedCertificate` CRDs to handle ingress. Plus t
 ```
 $ gcloud compute addresses list --project stackrox-infra
 NAME                       ADDRESS/RANGE   TYPE      PURPOSE  NETWORK  REGION  SUBNET  STATUS
-infra-address-development  35.227.221.195  EXTERNAL                                    IN_USE
 infra-address-production   35.227.207.252  EXTERNAL                                    IN_USE
+$ gcloud compute addresses list --project acs-team-automation
+NAME                       ADDRESS/RANGE   TYPE      PURPOSE  NETWORK  REGION  SUBNET  STATUS
+infra-development          34.49.127.147   EXTERNAL                                    IN_USE
 ```
 
 ## Configuration
