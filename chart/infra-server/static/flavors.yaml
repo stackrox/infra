@@ -361,6 +361,11 @@
         Consult OCP documentation for details. {{ .Chart.Annotations.ocpCredentialsMode }} is the value used by
         stackrox CI.
 
+    - name: ssd-storage-class
+      description: Ensure an SSD StorageClass is the default StorageClass for the cluster
+      value: false
+      kind: optional
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
