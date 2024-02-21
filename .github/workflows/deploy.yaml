@@ -54,7 +54,7 @@ jobs:
           gcloud container clusters get-credentials infra-${{ inputs.environment }} \
             --project stackrox-infra \
             --region us-west2
-          ENVIRONMENT=${{ inputs.environment }} make install-argo clean-argo-config helm-deploy
+          ENVIRONMENT=${{ inputs.environment }} make install-argo clean-argo-config install-monitoring helm-deploy
 
       - name: Notify infra channel about new version
         env:

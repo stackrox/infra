@@ -99,7 +99,7 @@ jobs:
 
       - name: Deploy infra to dev cluster
         run: |
-          ENVIRONMENT=development TEST_MODE=true make install-argo clean-argo-config helm-deploy
+          ENVIRONMENT=development TEST_MODE=true make install-argo clean-argo-config install-monitoring helm-deploy
           sleep 10 # wait for old pods to disappear so the svc port-forward doesn't connect to them
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
           sleep 10

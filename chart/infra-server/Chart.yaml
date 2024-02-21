@@ -9,7 +9,3 @@ sources:
 annotations:
   acsDemoVersion: 4.3.4
   ocpCredentialsMode: Passthrough
-dependencies:
-  - name: kube-prometheus
-    version: 8.27.0
-    repository: https://charts.bitnami.com/bitnami
