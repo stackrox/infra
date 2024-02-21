@@ -18,6 +18,7 @@ spec:
       labels:
         severity: 'info'
         namespace: monitoring
+        environment: {{ .Values.environment }}
     - alert: Workflow Failure
       expr: increase(argo_workflows_count{status="Failed"}[5m]) > 0
       for: 1m
@@ -27,3 +28,4 @@ spec:
       labels:
         severity: 'info'
         namespace: monitoring
+        environment: {{ .Values.environment }}

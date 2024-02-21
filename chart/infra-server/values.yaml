@@ -56,14 +56,4 @@ kube-prometheus:
         alertmanagerConfig: slack
 
   blackboxExporter:
-    resources:
-      limits:
-        cpu: 250m
-        ephemeral-storage: 1Gi
-        memory: 512Mi
-      requests:
-        cpu: 250m
-        ephemeral-storage: 1Gi
-        memory: 512Mi
-
-alertmanagerSlackWebhook: "<TODO: figure out how to get the secret here>"
+    enabled: false

@@ -25,7 +25,12 @@ check_not_empty() {
     done
 }
 
+update_dependency_charts() {
+    helm dependency update chart/infra-server
+}
+
 template() {
+    update_dependency_charts
     # Need to use helm upgrade --dry-run to have .Capabilities context available
     helm upgrade \
         "${RELEASE_NAME}" \
@@ -49,6 +54,7 @@ template() {
 
 # deploy upgrades the Helm release with
 deploy() {
+    update_dependency_charts
     helm upgrade \
         "${RELEASE_NAME}" \
         chart/infra-server \
@@ -72,6 +78,7 @@ deploy() {
 
 # diff renders the Helm chart and compares the deployed resources to show what would change on next deployment.
 diff() {
+    update_dependency_charts
     # Need to use helm upgrade --dry-run to have .Capabilities context available
     helm upgrade \
         "${RELEASE_NAME}" \
