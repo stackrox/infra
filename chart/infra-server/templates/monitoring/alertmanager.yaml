@@ -1,4 +1,5 @@
 ---
+{{- if eq .Values.testMode false -}}
 apiVersion: monitoring.coreos.com/v1alpha1
 kind: AlertmanagerConfig
 metadata:
@@ -54,3 +55,4 @@ spec:
         {{ "{{" }}- end {{ "}}" }}
       color: |
         '{{ "{{" }} if eq .Status "firing" -{{ "}}" }}{{ "{{" }} if eq .CommonLabels.severity "warning" -{{ "}}" }}warning{{ "{{" }}- else if eq .CommonLabels.severity "critical" -{{ "}}" }}danger{{ "{{" }}- else -{{ "}}" }}#439FE0{{ "{{" }}- end -{{ "}}" }}{{ "{{" }} else -{{ "}}" }}good{{ "{{" }}- end {{ "}}" }}'
+{{- end -}}
