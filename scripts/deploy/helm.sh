@@ -11,7 +11,7 @@ SECRET_VERSION="${4:-latest}"
 # Cannot use CI, because then CD with GHA would not be possible.
 TEST_MODE="${TEST_MODE:-false}"
 
-PROJECT="stackrox-infra"
+SECRETS_PROJECT="stackrox-infra"
 RELEASE_NAMESPACE="infra"
 RELEASE_NAME="infra-server"
 
@@ -45,10 +45,10 @@ template() {
         --values - \
     < <(gcloud secrets versions access "${SECRET_VERSION}" \
         --secret "infra-values-${ENVIRONMENT}" \
-        --project "${PROJECT}" \
+        --project "${SECRETS_PROJECT}" \
     && gcloud secrets versions access "${SECRET_VERSION}" \
         --secret "infra-values-from-files-${ENVIRONMENT}" \
-        --project "${PROJECT}" \
+        --project "${SECRETS_PROJECT}" \
     )
 }
 
@@ -69,10 +69,10 @@ deploy() {
         --values - \
     < <(gcloud secrets versions access "${SECRET_VERSION}" \
         --secret "infra-values-${ENVIRONMENT}" \
-        --project "${PROJECT}" \
+        --project "${SECRETS_PROJECT}" \
     && gcloud secrets versions access "${SECRET_VERSION}" \
         --secret "infra-values-from-files-${ENVIRONMENT}" \
-        --project "${PROJECT}" \
+        --project "${SECRETS_PROJECT}" \
     )
 }
 
@@ -93,10 +93,10 @@ diff() {
         --values - \
     < <(gcloud secrets versions access "${SECRET_VERSION}" \
         --secret "infra-values-${ENVIRONMENT}" \
-        --project "${PROJECT}" \
+        --project "${SECRETS_PROJECT}" \
     && gcloud secrets versions access "${SECRET_VERSION}" \
         --secret "infra-values-from-files-${ENVIRONMENT}" \
-        --project "${PROJECT}" \
+        --project "${SECRETS_PROJECT}" \
     ) \
     | sed -n '/---/,$p' \
     | kubectl diff -R -f -
