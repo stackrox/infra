@@ -50,6 +50,7 @@ jobs:
         uses: 'google-github-actions/setup-gcloud@v2'
         with:
           install_components: "gke-gcloud-auth-plugin"
+          project_id: ${{ env.PROJECT }}
 
       - name: Deploy to ${{ inputs.environment }}
         env:
