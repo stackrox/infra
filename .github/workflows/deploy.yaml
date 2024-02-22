@@ -7,6 +7,9 @@ run-name: >-
     )
   }}
 
+env:
+  PROJECT: acs-team-automation
+
 on:
   workflow_dispatch:
     inputs:
@@ -41,6 +44,7 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_INFRA_DEPLOY_AUTOMATION_SA }}
+          project_id: "${PROJECT}"
 
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v2'
@@ -50,7 +54,6 @@ jobs:
       - name: Deploy to ${{ inputs.environment }}
         env:
           USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
-          PROJECT: acs-team-automation
         run: |
           gcloud container clusters get-credentials infra-${{ inputs.environment }} \
             --project "${PROJECT}" \
