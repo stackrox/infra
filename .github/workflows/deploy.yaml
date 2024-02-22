@@ -50,14 +50,10 @@ jobs:
       - name: Deploy to ${{ inputs.environment }}
         env:
           USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
+          PROJECT: acs-team-automation
         run: |
-          if [[ "${{ inputs.environment }}" == "production" ]]; then
-            project="stackrox-infra"
-          else
-            project="acs-team-automation"
-          fi
           gcloud container clusters get-credentials infra-${{ inputs.environment }} \
-            --project "${project}" \
+            --project "${PROJECT}" \
             --region us-west2
           ENVIRONMENT=${{ inputs.environment }} make install-argo clean-argo-config helm-deploy
 

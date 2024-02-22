@@ -7,6 +7,18 @@ To work with either of the clusters you will need to either be a member of the
 
 ### [Staging (dev.infra.rox.systems)](https://console.cloud.google.com/kubernetes/clusters/details/us-west2/infra-development?project=acs-team-automation)
 
+The staging infra instance is scaled to 0 when not in use, to bring it back:
+
+```
+gcloud container clusters --project=acs-team-automation --zone=us-west2 resize infra-development --num-nodes=1
+```
+
+Scale it back to 0 when done:
+
+```
+gcloud container clusters --project=acs-team-automation --zone=us-west2 resize infra-development --num-nodes=0
+```
+
 To connect to this cluster using kubectl, run:
 
 ```
@@ -15,13 +27,13 @@ gcloud container clusters get-credentials infra-development \
     --region us-west2
 ```
 
-### [Production](https://console.cloud.google.com/kubernetes/clusters/details/us-west2/infra-production?project=stackrox-infra&organizationId=847401270788)
+### [Production](https://console.cloud.google.com/kubernetes/clusters/details/us-west2/infra-production?project=acs-team-automation)
 
 To connect to this cluster using kubectl, run:
 
 ```
 gcloud container clusters get-credentials infra-production \
-    --project stackrox-infra \
+    --project acs-team-automation \
     --region us-west2
 ```
 
