@@ -123,7 +123,7 @@ func workflowTemplate2Flavor(template *v1alpha1.WorkflowTemplate) *v1.Flavor {
 		Name:         template.ObjectMeta.Name,
 		Description:  template.ObjectMeta.Annotations["infra.stackrox.io/description"],
 		Availability: availability,
-		Provider:     template.ObjectMeta.Provider,
+		Provider:     template.ObjectMeta.Annotations["infra.stackrox.io/provider"],
 		Parameters:   getParametersFromWorkflowTemplate(template),
 		Artifacts:    make(map[string]*v1.FlavorArtifact),
 	}
