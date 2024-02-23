@@ -56,7 +56,7 @@ setup_file() {
 @test "provider is set" {
   flavor="$(infractl flavor get test-gke-lite --json)"
   assert_success
-  availability="$(echo "$flavor" | jq -r '.Provider')"
+  provider="$(echo "$flavor" | jq -r '.Provider')"
   assert_equal "$provider" "gcp"
 }
 
