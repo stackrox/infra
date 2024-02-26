@@ -8,6 +8,10 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
+## [0.8.14]
+
+- ROX-17343: Setup metric collection and alerting for infra service.
+
 ## [0.8.13]
 
 - ROX-22142: wait for IBM ROKS nodes to be ready during provisioning.
