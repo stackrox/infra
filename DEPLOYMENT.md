@@ -15,13 +15,13 @@ gcloud container clusters get-credentials infra-development \
     --region us-west2
 ```
 
-### [Production](https://console.cloud.google.com/kubernetes/clusters/details/us-west2/infra-production?project=stackrox-infra&organizationId=847401270788)
+### [Production](https://console.cloud.google.com/kubernetes/clusters/details/us-west2/infra-production?project=acs-team-automation)
 
 To connect to this cluster using kubectl, run:
 
 ```
 gcloud container clusters get-credentials infra-production \
-    --project stackrox-infra \
+    --project acs-team-automation \
     --region us-west2
 ```
 
