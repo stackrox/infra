@@ -204,8 +204,8 @@ pull-infractl-from-dev-server:
 ##########
 ## Kube ##
 ##########
-dev_context = gke_stackrox-infra_us-west2_infra-development
-prod_context = gke_stackrox-infra_us-west2_infra-production
+dev_context = gke_acs-team-automation_us-west2_infra-development
+prod_context = gke_acs-team-automation_us-west2_infra-production
 this_context = $(shell kubectl config current-context)
 
 ## Meta
