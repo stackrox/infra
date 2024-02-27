@@ -1099,7 +1099,7 @@
       help: Empty for a new temporary subnet to be created.
 
     - name: openshift-version
-      description: ROKS Openshift major.minor version
+      description: ROKS Openshift version
       value: ""
       kind: optional
       help: <https://cloud.ibm.com/docs/openshift?topic=openshift-openshift_versions> Keep empty for default stable version.
