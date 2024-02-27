@@ -14,7 +14,7 @@ spec:
       for: 1m
       annotations:
         summary: A workflow has errored
-        description: '<!subteam^S04R2SVS371> Look at the workflows: `kubectl get workflows -l workflows.argoproj.io/phase=Error`'
+        description: '<!subteam^{{ .Values.alertmanagerSlackTeam }}> Look at the workflows: `kubectl get workflows -l workflows.argoproj.io/phase=Error`'
       labels:
         severity: 'info'
         namespace: monitoring
@@ -24,7 +24,7 @@ spec:
       for: 1m
       annotations:
         summary: A workflow has failed.
-        description: '<!subteam^S04R2SVS371> Look at the workflows: `kubectl get workflows -l workflows.argoproj.io/phase=Failed`'
+        description: '<!subteam^{{ .Values.alertmanagerSlackTeam }}> Look at the workflows: `kubectl get workflows -l workflows.argoproj.io/phase=Failed`'
       labels:
         severity: 'info'
         namespace: monitoring
