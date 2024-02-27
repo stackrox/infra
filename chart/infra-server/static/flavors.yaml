@@ -1102,7 +1102,11 @@
       description: ROKS Openshift version
       value: ""
       kind: optional
-      help: <https://cloud.ibm.com/docs/openshift?topic=openshift-openshift_versions> Keep empty for default stable version.
+      help: |
+        <https://cloud.ibm.com/docs/openshift?topic=openshift-openshift_versions>
+        Keep empty for the default stable version.
+        * If set, it must be formatted like "4.13.28_openshift" to get OpenShift.
+        * Major.Minor values will result in a cluster running vanilla Kubernetes.
 
   artifacts:
     - name: kubeconfig
