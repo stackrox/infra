@@ -1103,9 +1103,10 @@
       value: ""
       kind: optional
       help: |
-        <https://cloud.ibm.com/docs/openshift?topic=openshift-openshift_versions>
+        <https://cloud.ibm.com/docs/openshift?topic=openshift-openshift_versions><br/>
         Keep empty for the default stable version.
         * If set, it must be formatted like "4.13.28_openshift" to get OpenShift.
+        * Can be like "4.13_openshift" and the latest will be used (this example resulted as "4.13.28_1555_openshift").
         * Major.Minor values will result in a cluster running vanilla Kubernetes.
 
   artifacts:
