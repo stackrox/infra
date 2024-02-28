@@ -294,6 +294,16 @@ install-argo: pre-check
 clean-argo-config: pre-check
 	kubectl delete configmap argo-workflows-workflow-controller-configmap -n argo || true
 
+.PHONY: install-monitoring
+install-monitoring: pre-check
+	helm dependency update chart/infra-monitoring
+	helm upgrade prometheus-stack chart/infra-monitoring \
+		--install \
+		--namespace monitoring \
+		--create-namespace \
+		--values chart/infra-monitoring/values.yaml \
+		--wait
+
 ###############
 ## Debugging ##
 ###############
