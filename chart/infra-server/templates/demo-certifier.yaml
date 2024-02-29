@@ -27,7 +27,7 @@ spec:
         spec:
           containers:
           - name: certifier
-            image: us.gcr.io/stackrox-infra/certifier:0.8.8
+            image: us.gcr.io/stackrox-infra/certifier:{{ required "A valid .Values.tag entry is required!" .Values.tag }}
             imagePullPolicy: IfNotPresent
             args:
               - --common-name=*.demo.stackrox.com
@@ -62,7 +62,7 @@ spec:
         spec:
           containers:
           - name: certifier
-            image: us.gcr.io/stackrox-infra/certifier:0.8.8
+            image: us.gcr.io/stackrox-infra/certifier:{{ required "A valid .Values.tag entry is required!" .Values.tag }}
             imagePullPolicy: IfNotPresent
             args:
               - --common-name=*.demos.rox.systems
