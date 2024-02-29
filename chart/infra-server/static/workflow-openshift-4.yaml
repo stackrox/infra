@@ -86,7 +86,7 @@ spec:
           - entrypoint.sh
         args:
           - create
-          - "{{workflow.parameters.name}}"
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
           - ocp.infra.rox.systems
         env:
           - name: GOOGLE_CREDENTIALS
@@ -102,25 +102,25 @@ spec:
                 name: redhat-pull-secret
                 key: REDHAT_PULL_SECRET
           - name: USER_PULL_SECRET
-            value: "{{workflow.parameters.pull-secret}}"
+            value: '{{ "{{" }}workflow.parameters.pull-secret{{ "}}" }}'
           - name: OPENSHIFT_VERSION
-            value: "{{workflow.parameters.openshift-version}}"
+            value: '{{ "{{" }}workflow.parameters.openshift-version{{ "}}" }}'
           - name: MASTER_NODE_COUNT
-            value: "{{workflow.parameters.master-node-count}}"
+            value: '{{ "{{" }}workflow.parameters.master-node-count{{ "}}" }}'
           - name: WORKER_NODE_COUNT
-            value: "{{workflow.parameters.worker-node-count}}"
+            value: '{{ "{{" }}workflow.parameters.worker-node-count{{ "}}" }}'
           - name: MASTER_NODE_TYPE
-            value: "{{workflow.parameters.master-node-type}}"
+            value: '{{ "{{" }}workflow.parameters.master-node-type{{ "}}" }}'
           - name: WORKER_NODE_TYPE
-            value: "{{workflow.parameters.worker-node-type}}"
+            value: '{{ "{{" }}workflow.parameters.worker-node-type{{ "}}" }}'
           - name: REGION
-            value: "{{workflow.parameters.region}}"
+            value: '{{ "{{" }}workflow.parameters.region{{ "}}" }}'
           - name: FIPS_ENABLED
-            value: "{{workflow.parameters.fips-enabled}}"
+            value: '{{ "{{" }}workflow.parameters.fips-enabled{{ "}}" }}'
           - name: TRUSTED_CERTS_ENABLED
-            value: "{{workflow.parameters.trusted-certs-enabled}}"
+            value: '{{ "{{" }}workflow.parameters.trusted-certs-enabled{{ "}}" }}'
           - name: CREDENTIALS_MODE
-            value: "{{workflow.parameters.credentials-mode}}"
+            value: '{{ "{{" }}workflow.parameters.credentials-mode{{ "}}" }}'
         volumeMounts:
           - name: data
             mountPath: /data
@@ -164,7 +164,7 @@ spec:
           - entrypoint.sh
         args:
           - destroy
-          - "{{workflow.parameters.name}}"
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
         env:
           - name: GOOGLE_CREDENTIALS
             valueFrom:

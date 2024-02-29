@@ -44,7 +44,7 @@ spec:
           - ./entrypoint.sh
         args:
           - create
-          - "{{workflow.parameters.name}}"
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
         env:
           - name: AZURE_SUBSCRIPTION_ID
             valueFrom:
@@ -72,9 +72,9 @@ spec:
                 name: aro-cluster-manager
                 key: REDHAT_PULL_SECRET_BASE64
           - name: NODE_COUNT
-            value: "{{workflow.parameters.nodes}}"
+            value: '{{ "{{" }}workflow.parameters.nodes{{ "}}" }}'
           - name: INSTANCE_TYPE
-            value: "{{workflow.parameters.machine-type}}"
+            value: '{{ "{{" }}workflow.parameters.machine-type{{ "}}" }}'
           - name: CREATION_SOURCE
             value: "infra"
         volumeMounts:
@@ -133,7 +133,7 @@ spec:
           - ./entrypoint.sh
         args:
           - destroy
-          - "{{workflow.parameters.name}}"
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
         env:
           - name: AZURE_SUBSCRIPTION_ID
             valueFrom:

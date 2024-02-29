@@ -46,7 +46,7 @@ spec:
           - ./entrypoint.sh
         args:
           - create
-          - "{{workflow.parameters.name}}"
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
         env:
           - name: AWS_ACCESS_KEY_ID
             valueFrom:
@@ -69,13 +69,13 @@ spec:
                 name: osd-access-secrets
                 key: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
           - name: NODE_COUNT
-            value: "{{workflow.parameters.nodes}}"
+            value: '{{ "{{" }}workflow.parameters.nodes{{ "}}" }}'
           - name: INSTANCE_TYPE
-            value: "{{workflow.parameters.machine-type}}"
+            value: '{{ "{{" }}workflow.parameters.machine-type{{ "}}" }}'
           - name: CREATION_SOURCE
             value: "infra"
           - name: AWS_REGION
-            value: "{{workflow.parameters.aws-region}}"
+            value: '{{ "{{" }}workflow.parameters.aws-region{{ "}}" }}'
         volumeMounts:
           - name: data
             mountPath: /data
@@ -132,7 +132,7 @@ spec:
           - ./entrypoint.sh
         args:
           - destroy
-          - "{{workflow.parameters.name}}"
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
         env:
           - name: AWS_ACCESS_KEY_ID
             valueFrom:
@@ -155,7 +155,7 @@ spec:
                 name: osd-access-secrets
                 key: REDHAT_PULL_SECRET_BASE64
           - name: AWS_REGION
-            value: "{{workflow.parameters.aws-region}}"
+            value: '{{ "{{" }}workflow.parameters.aws-region{{ "}}" }}'
         volumeMounts:
           - name: data
             mountPath: /data

@@ -35,7 +35,7 @@ spec:
             arguments:
               parameters:
                 - name: name
-                  value: "{{steps.create.outputs.parameters.cluster_name}}"
+                  value: '{{ "{{" }}steps.create.outputs.parameters.cluster_name{{ "}}" }}'
 
     - name: create
       activeDeadlineSeconds: 3600
@@ -66,15 +66,15 @@ spec:
           - /usr/bin/entrypoint
         args:
           - create
-          - "--name={{workflow.parameters.name}}"
-          - "--nodes={{workflow.parameters.nodes}}"
-          - "--machine-type={{workflow.parameters.machine-type}}"
+          - --name={{ "{{" }}workflow.parameters.name{{ "}}" }}
+          - --nodes={{ "{{" }}workflow.parameters.nodes{{ "}}" }}
+          - --machine-type={{ "{{" }}workflow.parameters.machine-type{{ "}}" }}
           - --gcp-project=acs-team-temp-dev
           - --creation-source=infra
-          - --k8s-version={{workflow.parameters.k8s-version}}
-          - --pod-security-policy={{workflow.parameters.pod-security-policy}}
-          - --gcp-image-type={{workflow.parameters.gcp-image-type}}
-          - --gcp-zone={{workflow.parameters.gcp-zone}}
+          - --k8s-version={{ "{{" }}workflow.parameters.k8s-version{{ "}}" }}
+          - --pod-security-policy={{ "{{" }}workflow.parameters.pod-security-policy{{ "}}" }}
+          - --gcp-image-type={{ "{{" }}workflow.parameters.gcp-image-type{{ "}}" }}
+          - --gcp-zone={{ "{{" }}workflow.parameters.gcp-zone{{ "}}" }}
         volumeMounts:
           - name: credentials
             mountPath: /tmp
@@ -91,9 +91,9 @@ spec:
           - /usr/bin/entrypoint
         args:
           - destroy
-          - "--name={{workflow.parameters.name}}"
+          - --name={{ "{{" }}workflow.parameters.name{{ "}}" }}
           - --gcp-project=acs-team-temp-dev
-          - --gcp-zone={{workflow.parameters.gcp-zone}}
+          - --gcp-zone={{ "{{" }}workflow.parameters.gcp-zone{{ "}}" }}
         volumeMounts:
           - name: credentials
             mountPath: /tmp

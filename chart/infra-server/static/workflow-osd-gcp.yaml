@@ -47,7 +47,7 @@ spec:
         args:
           - gcp
           - create
-          - "{{workflow.parameters.name}}"
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
         env:
           - name: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
             valueFrom:
@@ -67,13 +67,13 @@ spec:
           - name: GCP_PROJECT
             value: "acs-team-temp-dev"
           - name: NODE_COUNT
-            value: "{{workflow.parameters.nodes}}"
+            value: '{{ "{{" }}workflow.parameters.nodes{{ "}}" }}'
           - name: INSTANCE_TYPE
-            value: "{{workflow.parameters.machine-type}}"
+            value: '{{ "{{" }}workflow.parameters.machine-type{{ "}}" }}'
           - name: CREATION_SOURCE
             value: "infra"
           - name: GCP_REGION
-            value: "{{workflow.parameters.gcp-region}}"
+            value: '{{ "{{" }}workflow.parameters.gcp-region{{ "}}" }}'
         volumeMounts:
           - name: data
             mountPath: /data
@@ -131,7 +131,7 @@ spec:
         args:
           - gcp
           - destroy
-          - "{{workflow.parameters.name}}"
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
         env:
           - name: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
             valueFrom:

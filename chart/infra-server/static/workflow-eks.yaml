@@ -49,7 +49,7 @@ spec:
           - entrypoint
         args:
           - create
-          - "{{workflow.parameters.name}}"
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
         env:
           - name: AWS_ACCESS_KEY_ID
             valueFrom:
@@ -62,17 +62,17 @@ spec:
                 name: aws-access-secrets
                 key: AWS_SECRET_ACCESS_KEY
           - name: NODE_COUNT
-            value: "{{workflow.parameters.nodes}}"
+            value: '{{ "{{" }}workflow.parameters.nodes{{ "}}" }}'
           - name: INSTANCE_TYPE
-            value: "{{workflow.parameters.machine-type}}"
+            value: '{{ "{{" }}workflow.parameters.machine-type{{ "}}" }}'
           - name: K8S_VERSION
-            value: "{{workflow.parameters.k8s-version}}"
+            value: '{{ "{{" }}workflow.parameters.k8s-version{{ "}}" }}'
           - name: USER_ARNS
-            value: "{{workflow.parameters.user-arns}}"
+            value: '{{ "{{" }}workflow.parameters.user-arns{{ "}}" }}'
           - name: CREATION_SOURCE
             value: "infra"
           - name: REGION
-            value: "{{workflow.parameters.region}}"
+            value: '{{ "{{" }}workflow.parameters.region{{ "}}" }}'
 
         volumeMounts:
           - name: data
@@ -93,7 +93,7 @@ spec:
         imagePullPolicy: Always
         args:
           - destroy
-          - "{{workflow.parameters.name}}"
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
         env:
           - name: AWS_ACCESS_KEY_ID
             valueFrom:

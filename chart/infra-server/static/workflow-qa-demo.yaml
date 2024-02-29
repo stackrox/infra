@@ -46,7 +46,7 @@ spec:
             arguments:
               artifacts:
                 - name: roxctl
-                  from: "{{steps.roxctl.outputs.artifacts.roxctl}}"
+                  from: '{{ "{{" }}steps.roxctl.outputs.artifacts.roxctl{{ "}}" }}'
 
         - - name: wait
             template: wait
@@ -58,9 +58,9 @@ spec:
             arguments:
               artifacts:
                 - name: tfstate
-                  from: "{{workflow.outputs.artifacts.global-tfstate}}"
+                  from: '{{ "{{" }}workflow.outputs.artifacts.global-tfstate{{ "}}" }}'
                 - name: tfvars
-                  from: "{{workflow.outputs.artifacts.global-tfvars}}"
+                  from: '{{ "{{" }}workflow.outputs.artifacts.global-tfvars{{ "}}" }}'
 
     - name: roxctl
       activeDeadlineSeconds: 120
@@ -69,7 +69,7 @@ spec:
           - name: roxctl
             path: /tmp/roxctl
       container:
-        image: "{{workflow.parameters.main-image}}"
+        image: '{{ "{{" }}workflow.parameters.main-image{{ "}}" }}'
         imagePullPolicy: Always
         command:
           - cp
@@ -132,18 +132,18 @@ spec:
           - /usr/bin/entrypoint
         args:
           - create
-          - "--name={{workflow.parameters.name}}"
-          - "--main-image={{workflow.parameters.main-image}}"
-          - "--scanner-image={{workflow.parameters.scanner-image}}"
-          - "--scanner-db-image={{workflow.parameters.scanner-db-image}}"
-          - "--central-db-image={{workflow.parameters.central-db-image}}"
+          - --name={{ "{{" }}workflow.parameters.name{{ "}}" }}
+          - --main-image={{ "{{" }}workflow.parameters.main-image{{ "}}" }}
+          - --scanner-image={{ "{{" }}workflow.parameters.scanner-image{{ "}}" }}
+          - --scanner-db-image={{ "{{" }}workflow.parameters.scanner-db-image{{ "}}" }}
+          - --central-db-image={{ "{{" }}workflow.parameters.central-db-image{{ "}}" }}
           - --gcp-project=acs-team-temp-dev
           - --dns-gcp-project=acs-team-temp-dev
           - --creation-source=infra
-          - --k8s-version={{workflow.parameters.k8s-version}}
-          - --enable-psps={{workflow.parameters.enable-psps}}
-          - --gcp-region={{workflow.parameters.gcp-region}}
-          - --gcp-zone={{workflow.parameters.gcp-zone}}
+          - --k8s-version={{ "{{" }}workflow.parameters.k8s-version{{ "}}" }}
+          - --enable-psps={{ "{{" }}workflow.parameters.enable-psps{{ "}}" }}
+          - --gcp-region={{ "{{" }}workflow.parameters.gcp-region{{ "}}" }}
+          - --gcp-zone={{ "{{" }}workflow.parameters.gcp-zone{{ "}}" }}
         volumeMounts:
           - name: credentials
             mountPath: /tmp/google-credentials.json
