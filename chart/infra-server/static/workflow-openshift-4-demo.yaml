@@ -78,7 +78,7 @@ spec:
 
     - name: create
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.7
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
         volumeMounts:
           - name: data
@@ -152,7 +152,7 @@ spec:
           - name: roxctl-secured-cluster-services
             path: /usr/bin/roxctl-secured-cluster-services
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-0.9.13
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
         command:
           - ansible-playbook
@@ -178,21 +178,21 @@ spec:
           - name: ORCHESTRATOR
             value: openshift
           - name: ADMIN_PASSWORD
-            value: "{{ inputs.parameters.admin-password {{ "}}" }}'
+            value: '{{ "{{" }}inputs.parameters.admin-password{{ "}}" }}'
           - name: KUBECONFIG_BASE64
-            value: "{{ inputs.parameters.kubeconfig-base64 {{ "}}" }}'
+            value: '{{ "{{" }}inputs.parameters.kubeconfig-base64{{ "}}" }}'
           - name: IMAGE_REGISTRY
-            value: "{{ workflow.parameters.image-registry {{ "}}" }}'
+            value: '{{ "{{" }}workflow.parameters.image-registry{{ "}}" }}'
           - name: MAIN_IMAGE_TAG
-            value: "{{ workflow.parameters.main-image-tag {{ "}}" }}'
+            value: '{{ "{{" }}workflow.parameters.main-image-tag{{ "}}" }}'
           - name: SCANNER_IMAGE_TAG
-            value: "{{ workflow.parameters.scanner-image-tag {{ "}}" }}'
+            value: '{{ "{{" }}workflow.parameters.scanner-image-tag{{ "}}" }}'
           - name: SCANNER_DB_IMAGE_TAG
-            value: "{{ workflow.parameters.scanner-db-image-tag {{ "}}" }}'
+            value: '{{ "{{" }}workflow.parameters.scanner-db-image-tag{{ "}}" }}'
           - name: COLLECTOR_SLIM_IMAGE_TAG
-            value: "{{ workflow.parameters.collector-slim-image-tag {{ "}}" }}'
+            value: '{{ "{{" }}workflow.parameters.collector-slim-image-tag{{ "}}" }}'
           - name: CENTRAL_DB_IMAGE_TAG
-            value: "{{ workflow.parameters.central-db-image-tag {{ "}}" }}'
+            value: '{{ "{{" }}workflow.parameters.central-db-image-tag{{ "}}" }}'
           - name: ANSIBLE_STDOUT_CALLBACK
             value: debug
         volumeMounts:
@@ -260,7 +260,7 @@ spec:
 
     - name: destroy
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.7
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
         command:
           - entrypoint.sh
@@ -285,7 +285,7 @@ spec:
           - name: roxctl-central
             path: /tmp/roxctl-central
       container:
-        image: "quay.io/stackrox-io/main:{{ workflow.parameters.central-services-helm-chart-version {{ "}}" }}'
+        image: 'quay.io/stackrox-io/main:{{ "{{" }}workflow.parameters.central-services-helm-chart-version{{ "}}" }}'
         imagePullPolicy: Always
         command:
           - cp
@@ -302,7 +302,7 @@ spec:
           - name: roxctl-secured-cluster-services
             path: /tmp/roxctl-secured-cluster-services
       container:
-        image: "quay.io/stackrox-io/main:{{ workflow.parameters.secured-cluster-services-helm-chart-version {{ "}}" }}'
+        image: 'quay.io/stackrox-io/main:{{ "{{" }}workflow.parameters.secured-cluster-services-helm-chart-version{{ "}}" }}'
         imagePullPolicy: Always
         command:
           - cp
