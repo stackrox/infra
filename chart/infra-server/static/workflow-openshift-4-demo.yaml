@@ -129,7 +129,7 @@ spec:
         source: |
           openssl rand -base64 32 | tr "+/" "_#"  | cut -c 1-20 > /data/admin_password
           base64 /data/auth/kubeconfig | tr -d "\n" > /data/auth/kubeconfig_base64
-          subdomain="apps.{{workflow.parameters.name}}.ocp.infra.rox.systems"
+          subdomain=apps.{{ "{{" }}workflow.parameters.name{{ "}}" }}.ocp.infra.rox.systems
           echo "https://console-openshift-console.${subdomain}" > /data/url-openshift
           echo "https://central-stackrox.${subdomain}" > /data/url-stackrox
       outputs:
