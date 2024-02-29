@@ -104,17 +104,17 @@ spec:
           - /usr/bin/entrypoint
         args:
           - create
-          - "--name={{inputs.parameters.name{{ "}}" }}'
-          - "--crio={{inputs.parameters.crio{{ "}}" }}'
+          - '--name={{ "{{" }}inputs.parameters.name{{ "}}" }}'
+          - '--crio={{ "{{" }}inputs.parameters.crio{{ "}}" }}'
           - --creation-source=infra
-          - "--zone={{inputs.parameters.zone{{ "}}" }}'
-          - "--nodes={{inputs.parameters.nodes{{ "}}" }}'
-          - "--machine-type={{inputs.parameters.machine-type{{ "}}" }}'
-          - "--install-metrics={{inputs.parameters.install-metrics{{ "}}" }}'
-          - "--install-monitoring={{inputs.parameters.install-monitoring{{ "}}" }}'
-          - "--gcp-project=acs-team-temp-dev"
-          - "--dns-project=acs-team-temp-dev"
-          - "--dns-zone=ocp-infra-rox-systems"
+          - '--zone={{ "{{" }}inputs.parameters.zone{{ "}}" }}'
+          - '--nodes={{ "{{" }}inputs.parameters.nodes{{ "}}" }}'
+          - '--machine-type={{ "{{" }}inputs.parameters.machine-type{{ "}}" }}'
+          - '--install-metrics={{ "{{" }}inputs.parameters.install-metrics{{ "}}" }}'
+          - '--install-monitoring={{ "{{" }}inputs.parameters.install-monitoring{{ "}}" }}'
+          - --gcp-project=acs-team-temp-dev
+          - --dns-project=acs-team-temp-dev
+          - --dns-zone=ocp-infra-rox-systems
         env:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
