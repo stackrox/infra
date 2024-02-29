@@ -25,7 +25,7 @@ endif
 tag:
 	@echo $(VERSION)
 
-IMAGE=us.gcr.io/stackrox-infra/infra-server:$(VERSION)
+IMAGE=quay.io/rhacs-eng/infra-server:$(VERSION)
 .PHONY: image-name
 image-name:
 	@echo $(IMAGE)

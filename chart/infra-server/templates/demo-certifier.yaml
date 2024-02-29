@@ -13,7 +13,6 @@ data:
     {{ required ".Values.demo__demo_cert_bot_json is undefined" .Values.demo__demo_cert_bot_json }}
 
 ---
-
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -27,7 +26,7 @@ spec:
         spec:
           containers:
           - name: certifier
-            image: us.gcr.io/stackrox-infra/certifier:{{ required "A valid .Values.tag entry is required!" .Values.tag }}
+            image: quay.io/rhacs-eng/infra-certifier:{{ required "A valid .Values.tag entry is required!" .Values.tag }}
             imagePullPolicy: IfNotPresent
             args:
               - --common-name=*.demo.stackrox.com
@@ -46,9 +45,10 @@ spec:
             - name: configuration
               secret:
                 secretName: demo-certifier-credentials
+          imagePullSecrets:
+            - name: infra-image-registry-pull-secret
 
 ---
-
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -62,7 +62,7 @@ spec:
         spec:
           containers:
           - name: certifier
-            image: us.gcr.io/stackrox-infra/certifier:{{ required "A valid .Values.tag entry is required!" .Values.tag }}
+            image: quay.io/rhacs-eng/infra-certifier:{{ required "A valid .Values.tag entry is required!" .Values.tag }}
             imagePullPolicy: IfNotPresent
             args:
               - --common-name=*.demos.rox.systems
@@ -82,5 +82,6 @@ spec:
             - name: configuration
               secret:
                 secretName: demo-certifier-credentials
-
+          imagePullSecrets:
+            - name: infra-image-registry-pull-secret
 {{ end }}
