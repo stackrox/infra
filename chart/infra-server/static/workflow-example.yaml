@@ -48,7 +48,7 @@ spec:
           - name: success
 
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/example:0.2.16
+        image: quay.io/stackrox-io/ci:automation-flavors-example-0.10.1-1-gc0125f66f7-snapshot
         args:
           - create
           - "--sleep={{inputs.parameters.sleep}}"
@@ -65,7 +65,7 @@ spec:
           - name: success
 
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/example:0.2.16
+        image: quay.io/stackrox-io/ci:automation-flavors-example-0.10.1-1-gc0125f66f7-snapshot
         args:
           - destroy
           - "--sleep={{inputs.parameters.sleep}}"
