@@ -40,10 +40,6 @@ jobs:
           make proto-generated-srcs
           git diff --exit-code HEAD
 
-      - name: Go Unit Test
-        run: |
-          make unit-test
-
       - name: Build Infra Server
         run: |
           make image

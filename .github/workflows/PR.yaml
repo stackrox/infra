@@ -20,6 +20,9 @@ jobs:
   lint:
     uses: ./.github/workflows/lint.yaml
 
+  unit-tests:
+    uses: ./.github/workflows/unit-tests.yaml
+
   build-and-push:
     uses: ./.github/workflows/build-and-push.yaml
     secrets: inherit
