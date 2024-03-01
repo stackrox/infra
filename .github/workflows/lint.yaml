@@ -52,14 +52,6 @@ jobs:
     container:
       image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
     steps:
-      - name: Install Argo CLI
-        run: |
-          ARGO_VERSION=$(grep "github.com/argoproj/argo-workflows/v3" go.mod | awk '{ print $2 }')
-          curl -sLO "https://github.com/argoproj/argo-workflows/releases/download/${ARGO_VERSION}/argo-linux-amd64.gz"
-          gunzip argo-linux-amd64.gz
-          chmod +x argo-linux-amd64
-          mv ./argo-linux-amd64 /usr/local/bin/argo
-          argo version
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -70,6 +62,14 @@ jobs:
           # Prevent fatal error "detected dubious ownership in repository" from
           # the recent git in this container.
           git config --global --add safe.directory "$(pwd)"
+      - name: Install Argo CLI
+        run: |
+          ARGO_VERSION=$(grep "github.com/argoproj/argo-workflows/v3" go.mod | awk '{ print $2 }')
+          curl -sLO "https://github.com/argoproj/argo-workflows/releases/download/${ARGO_VERSION}/argo-linux-amd64.gz"
+          gunzip argo-linux-amd64.gz
+          chmod +x argo-linux-amd64
+          mv ./argo-linux-amd64 /usr/local/bin/argo
+          argo version
       - name: Argo Workflow lint
         run: |
           make argo-workflow-lint
