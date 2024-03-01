@@ -48,7 +48,7 @@ spec:
             archive:
               tar: {}
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/aks:0.2.16
+        image: quay.io/stackrox-io/ci:automation-flavors-aks-0.10.1
         imagePullPolicy: Always
         command:
           - entrypoint
@@ -96,7 +96,7 @@ spec:
 
     - name: destroy
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/aks:0.2.16
+        image: quay.io/stackrox-io/ci:automation-flavors-aks-0.10.1
         imagePullPolicy: Always
         command:
           - entrypoint

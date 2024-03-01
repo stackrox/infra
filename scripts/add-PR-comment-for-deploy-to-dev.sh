@@ -24,7 +24,7 @@ add_PR_comment_for_deploy_to_dev() {
     cat > "$tmpfile" <<- EOT
 A single node development cluster ({{.Env.DEV_CLUSTER_NAME}}) was allocated in production infra for this PR.
 
-CI will attempt to deploy {{.Env.IMAGE_NAME}} to it.
+CI will attempt to deploy \`{{.Env.IMAGE_NAME}}\` to it.
 
 :electric_plug: You can **connect** to this cluster with:
 \`\`\`
@@ -46,7 +46,7 @@ bin/infractl -k -e localhost:8443 whoami
 
 ### Further Development
 
-:coffee: If you make changes, you can commit and push and CI will take care of updating the development cluster. 
+:coffee: If you make changes, you can commit and push and CI will take care of updating the development cluster.
 
 :rocket: If you only modify configuration (chart/infra-server/configuration) or templates (chart/infra-server/{static,templates}), you can get a faster update with:
 
@@ -61,7 +61,7 @@ Logs for the development infra depending on your @redhat.com authuser:
 - [authuser=1](https://console.cloud.google.com/logs/query;query=resource.labels.cluster_name%3D%22{{.Env.DEV_CLUSTER_NAME}}%22%0Aresource.labels.container_name%3D%22infra-server%22?project=acs-team-temp-dev&authuser=1)
 - [authuser=2](https://console.cloud.google.com/logs/query;query=resource.labels.cluster_name%3D%22{{.Env.DEV_CLUSTER_NAME}}%22%0Aresource.labels.container_name%3D%22infra-server%22?project=acs-team-temp-dev&authuser=2)
 
-Or: 
+Or:
 \`\`\`
 kubectl -n infra logs -l app=infra-server --tail=1 -f
 \`\`\`
