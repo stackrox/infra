@@ -3,7 +3,7 @@ run-name: >-
   ${{
     format('Smoke testing flavors on infra cluster {0} (prefix ID {1})',
       inputs.cluster,
-      inputs.prefix,
+      inputs.prefix
     )
   }}
 
