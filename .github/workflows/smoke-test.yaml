@@ -1,0 +1,75 @@
+name: Smoke test automation-flavors
+run-name: >-
+  ${{
+    format('Smoking testing automation-flavor version {0} on infra cluster {1}',
+      inputs.automation-flavors-version,
+      inputs.cluster
+    )
+  }}
+
+env:
+  PROJECT: acs-team-temp-dev
+
+on:
+  workflow_dispatch:
+    inputs:
+      automation-flavors-version:
+        description: automation-flavors version, e.g. 0.10.2
+        required: true
+      cluster:
+        description: Infra cluster to run smoke test on (in acs-team-temp-dev project)
+        required: true
+
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Show inputs
+      run: |
+        echo "automation-flavors version: ${{ inputs.automation-flavors-version }}"
+        echo "Cluster: ${{ inputs.cluster }}"
+
+  deploy: # TODO: change name
+    runs-on: ubuntu-latest
+    env:
+      KUBECONFIG: /github/home/artifacts/kubeconfig
+      INFRA_TOKEN_PROD: ${{ secrets.INFRA_TOKEN }}
+      INFRA_TOKEN_DEV: ${{ secrets.INFRA_TOKEN_DEV }}
+      USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
+    strategy:
+      matrix:
+        name: [demo, aks, aro, eks, gke-default, ibmroks, openshift-4, openshift-4-demo, openshift-4-perf-scale, openshift-multi, osd-on-aws, osd-on-gcp, qa-demo, rosa, rosahcp]
+    steps:
+      - name: Authenticate to GCloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.INFRA_CI_AUTOMATION_GCP_SA }}
+
+      - name: Set up Cloud SDK
+        uses: "google-github-actions/setup-gcloud@v2"
+        with:
+          install_components: "gke-gcloud-auth-plugin"
+
+      - name: Download production infractl
+        uses: stackrox/actions/infra/install-infractl@v1
+
+      - name: Download artifacts from production
+        env:
+          INFRA_TOKEN: ${{ env.INFRA_TOKEN_PROD }}
+        run: |
+          /github/home/.local/bin/infractl artifacts "${{ inputs.cluster }}" -d /github/home/artifacts >> "$GITHUB_STEP_SUMMARY"
+          kubectl get nodes -o wide || true
+          kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
+          sleep 10
+
+      - name: Create infra cluster for ${{ matrix.name }}
+        uses: stackrox/actions/infra/create-cluster@tm/create-cluster-endpoint
+        with:
+          token: ${{ env.INFRA_TOKEN_DEV }}
+          flavor: ${{ matrix.name }}
+          name: smoke-test-${{ matrix.name }}-${{ inputs.automation-flavors-version }}
+          lifespan: 1h
+          wait: true
+          endpoint: localhost:8443
+          insecure: true
