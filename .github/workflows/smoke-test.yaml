@@ -1,7 +1,7 @@
 name: Smoke test automation-flavors
 run-name: >-
   ${{
-    format('Smoking testing automation-flavor version {0} on infra cluster {1}',
+    format('Smoke testing automation-flavor version {0} on infra cluster {1}',
       inputs.automation-flavors-version,
       inputs.cluster
     )
@@ -55,8 +55,8 @@ jobs:
         env:
           INFRA_TOKEN: ${{ env.INFRA_TOKEN_PROD }}
         run: |
+          set -uo pipefail
           infractl artifacts "${{ inputs.cluster }}" -d "/home/runner/artifacts" >> "$GITHUB_STEP_SUMMARY"
-          kubectl get nodes -o wide || true
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
           sleep 10
 
@@ -65,7 +65,7 @@ jobs:
         with:
           token: ${{ env.INFRA_TOKEN_DEV }}
           flavor: ${{ matrix.name }}
-          name: smoke-test-${{ matrix.name }}-${{ inputs.automation-flavors-version }}
+          name: sm-${{ matrix.name }}-${{ inputs.automation-flavors-version }}
           lifespan: 1h
           wait: true
           endpoint: localhost:8443
