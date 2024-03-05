@@ -1,20 +1,21 @@
-name: Smoke test automation-flavors
+name: Smoke test infra flavors
 run-name: >-
   ${{
-    format('Smoke testing automation-flavor version {0} on infra cluster {1}',
-      inputs.automation-flavors-version,
-      inputs.cluster
+    format('Smoke testing flavors on infra cluster {0} (prefix ID {1})',
+      inputs.cluster,
+      inputs.prefix,
     )
   }}
 
 on:
   workflow_dispatch:
     inputs:
-      automation-flavors-version:
-        description: automation-flavors version, e.g. 0.10.2
-        required: true
       cluster:
         description: Infra cluster to run smoke test on (in acs-team-temp-dev project)
+        required: true
+      prefix:
+        description: Identifying prefix added to the clusters created for the smoke test
+        default: ist
         required: true
 
 jobs:
@@ -23,8 +24,8 @@ jobs:
     steps:
     - name: Show inputs
       run: |
-        echo "automation-flavors version: ${{ inputs.automation-flavors-version }}"
         echo "Cluster: ${{ inputs.cluster }}"
+        echo "Identifying prefix: ${{ inputs.prefix }}"
 
   smoke-test:
     runs-on: ubuntu-latest
@@ -35,7 +36,23 @@ jobs:
       USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
     strategy:
       matrix:
-        name: [demo, aks, aro, eks, gke-default, ibmroks, openshift-4, openshift-4-demo, openshift-4-perf-scale, openshift-multi, osd-on-aws, osd-on-gcp, qa-demo, rosa, rosahcp]
+        flavors: [
+          # {name: "demo", "args": ""},
+          # {name: "aks", "args": ""},
+          # {name: "aro", "args": ""},
+          {name: "eks", "args": "user-arns=arn:aws:iam::393282794030:user/joey@stackrox.com"},
+          # {name: "gke", "args": ""},
+          # {name: "ibmroks", "args": ""},
+          # {name: "ocp-4", "args": ""},
+          # {name: "ocp-4-demo", "args": ""},
+          # {name: "ocp-4-perf-scale", "args": ""},
+          # {name: "ocp-3", "args": ""},
+          # {name: "osd-on-aws", "args": ""},
+          # {name: "osd-on-gcp", "args": ""},
+          {name: "qa-demo", "args": "main-image=quay.io/rhacs-eng/main:4.3.4"},
+          # {name: "rosa", "args": ""},
+          # {name: "rosahcp", "args": ""},
+        ]
       fail-fast: false
     steps:
       - name: Authenticate to GCloud
@@ -64,9 +81,10 @@ jobs:
         uses: stackrox/actions/infra/create-cluster@tm/create-cluster-endpoint
         with:
           token: ${{ env.INFRA_TOKEN_DEV }}
-          flavor: ${{ matrix.name }}
-          name: sm-${{ matrix.name }}-${{ inputs.automation-flavors-version }}
-          lifespan: 1h
+          flavor: ${{ matrix.flavors.name }}
+          name: ${{ inputs.prefix }}-${{ matrix.flavors.name }}
+          lifespan: 2h
           wait: true
           endpoint: localhost:8443
           insecure: true
+          args: ${{ matrix.flavors.args }}
