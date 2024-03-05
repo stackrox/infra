@@ -11,14 +11,19 @@ env:
   PROJECT: acs-team-temp-dev
 
 on:
+  push:
+    branches:
+      - tm/move-flavor-version-to-var
   workflow_dispatch:
     inputs:
       automation-flavors-version:
         description: automation-flavors version, e.g. 0.10.2
         required: true
+        default: "0.10.1"
       cluster:
         description: Infra cluster to run smoke test on (in acs-team-temp-dev project)
         required: true
+        default: "actions-pr-48"
 
 jobs:
   debug:
