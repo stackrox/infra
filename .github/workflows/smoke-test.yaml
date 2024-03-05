@@ -11,6 +11,9 @@ env:
   PROJECT: acs-team-temp-dev
 
 on:
+  push:
+    branches:
+      - tm/move-flavor-version-to-var
   workflow_dispatch:
     inputs:
       automation-flavors-version:
