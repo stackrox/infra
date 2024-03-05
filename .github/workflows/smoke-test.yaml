@@ -36,6 +36,7 @@ jobs:
     strategy:
       matrix:
         name: [demo, aks, aro, eks, gke-default, ibmroks, openshift-4, openshift-4-demo, openshift-4-perf-scale, openshift-multi, osd-on-aws, osd-on-gcp, qa-demo, rosa, rosahcp]
+      fail-fast: false
     steps:
       - name: Authenticate to GCloud
         uses: google-github-actions/auth@v2
