@@ -14,7 +14,7 @@ on:
         description: Infra cluster to run smoke test on (in acs-team-temp-dev project)
         required: true
       prefix:
-        description: Identifying prefix added to the clusters created for the smoke test
+        description: Identifying prefix added to the clusters created for the smoke test (maximum 8 chars)
         default: ist
         required: true
 
@@ -37,21 +37,21 @@ jobs:
     strategy:
       matrix:
         flavors: [
-          # {name: "demo", "args": ""},
-          # {name: "aks", "args": ""},
-          # {name: "aro", "args": ""},
+          {name: "demo", "args": ""},
+          {name: "aks", "args": ""},
+          {name: "aro", "args": ""},
           {name: "eks", "args": "user-arns=arn:aws:iam::393282794030:user/joey@stackrox.com"},
-          # {name: "gke", "args": ""},
-          # {name: "ibmroks", "args": ""},
-          # {name: "ocp-4", "args": ""},
-          # {name: "ocp-4-demo", "args": ""},
-          # {name: "ocp-4-perf-scale", "args": ""},
-          # {name: "ocp-3", "args": ""},
-          # {name: "osd-on-aws", "args": ""},
-          # {name: "osd-on-gcp", "args": ""},
+          {name: "gke", "args": ""},
+          {name: "ibmroks", "args": ""},
+          {name: "ocp-4", "args": ""},
+          {name: "ocp-4-demo", "args": ""},
+          {name: "ocp-4-perf-scale", "args": ""},
+          {name: "ocp-3", "args": ""},
+          {name: "osd-on-aws", "args": ""},
+          {name: "osd-on-gcp", "args": ""},
           {name: "qa-demo", "args": "main-image=quay.io/rhacs-eng/main:4.3.4"},
-          # {name: "rosa", "args": ""},
-          # {name: "rosahcp", "args": ""},
+          {name: "rosa", "args": ""},
+          {name: "rosahcp", "args": ""},
         ]
       fail-fast: false
     steps:
