@@ -7,13 +7,7 @@ run-name: >-
     )
   }}
 
-env:
-  PROJECT: acs-team-temp-dev
-
 on:
-  push:
-    branches:
-      - tm/move-flavor-version-to-var
   workflow_dispatch:
     inputs:
       automation-flavors-version:
@@ -33,6 +27,7 @@ jobs:
       run: |
         echo "automation-flavors version: ${{ inputs.automation-flavors-version }}"
         echo "Cluster: ${{ inputs.cluster }}"
+<<<<<<< HEAD
 
   smoke-test:
     runs-on: ubuntu-latest
@@ -79,3 +74,5 @@ jobs:
           wait: true
           endpoint: localhost:8443
           insecure: true
+=======
+>>>>>>> master
