@@ -11,9 +11,6 @@ env:
   PROJECT: acs-team-temp-dev
 
 on:
-  push:
-    branches:
-      - tm/move-flavor-version-to-var
   workflow_dispatch:
     inputs:
       automation-flavors-version:
@@ -22,7 +19,6 @@ on:
       cluster:
         description: Infra cluster to run smoke test on (in acs-team-temp-dev project)
         required: true
-
 
 jobs:
   debug:
@@ -33,8 +29,10 @@ jobs:
         echo "automation-flavors version: ${{ inputs.automation-flavors-version }}"
         echo "Cluster: ${{ inputs.cluster }}"
 
-  deploy: # TODO: change name
+  smoke-test:
     runs-on: ubuntu-latest
+    container:
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
     env:
       KUBECONFIG: /github/home/artifacts/kubeconfig
       INFRA_TOKEN_PROD: ${{ secrets.INFRA_TOKEN }}
@@ -57,7 +55,7 @@ jobs:
       - name: Download production infractl
         uses: stackrox/actions/infra/install-infractl@v1
 
-      - name: Download artifacts from production
+      - name: Download artifacts for cluster ${{ inputs.cluster }}
         env:
           INFRA_TOKEN: ${{ env.INFRA_TOKEN_PROD }}
         run: |
