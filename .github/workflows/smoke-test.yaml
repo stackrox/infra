@@ -1,7 +1,7 @@
 name: Smoke test infra flavors
 run-name: >-
   ${{
-    format('Smoke testing flavors on infra cluster {0} (prefix ID {1})',
+    format('Smoke testing flavors on infra cluster {0} (prefix {1})',
       inputs.cluster,
       inputs.prefix
     )
@@ -14,7 +14,7 @@ on:
         description: Infra cluster to run smoke test on (in acs-team-temp-dev project)
         required: true
       prefix:
-        description: Identifying prefix added to the clusters created for the smoke test (maximum 8 chars)
+        description: Prefix added to the clusters created for the smoke test (maximum 8 chars)
         default: ist
         required: true
 
@@ -25,7 +25,7 @@ jobs:
     - name: Show inputs
       run: |
         echo "Cluster: ${{ inputs.cluster }}"
-        echo "Identifying prefix: ${{ inputs.prefix }}"
+        echo "Prefix: ${{ inputs.prefix }}"
 
   smoke-test:
     runs-on: ubuntu-latest
