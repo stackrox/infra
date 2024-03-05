@@ -29,7 +29,7 @@ jobs:
   smoke-test:
     runs-on: ubuntu-latest
     env:
-      KUBECONFIG: /home/artifacts/kubeconfig
+      KUBECONFIG: /home/runner/artifacts/kubeconfig
       INFRA_TOKEN_PROD: ${{ secrets.INFRA_TOKEN }}
       INFRA_TOKEN_DEV: ${{ secrets.INFRA_TOKEN_DEV }}
       USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
@@ -55,10 +55,7 @@ jobs:
         env:
           INFRA_TOKEN: ${{ env.INFRA_TOKEN_PROD }}
         run: |
-          echo "$HOME"
-          echo "$PATH"
-          ls -lisa ~/.local/bin/
-          infractl artifacts "${{ inputs.cluster }}" -d /home/artifacts >> "$GITHUB_STEP_SUMMARY"
+          infractl artifacts "${{ inputs.cluster }}" -d "/home/runner/artifacts" >> "$GITHUB_STEP_SUMMARY"
           kubectl get nodes -o wide || true
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
           sleep 10
