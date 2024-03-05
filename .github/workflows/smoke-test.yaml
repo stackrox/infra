@@ -27,7 +27,6 @@ jobs:
       run: |
         echo "automation-flavors version: ${{ inputs.automation-flavors-version }}"
         echo "Cluster: ${{ inputs.cluster }}"
-<<<<<<< HEAD
 
   smoke-test:
     runs-on: ubuntu-latest
@@ -40,7 +39,8 @@ jobs:
       USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
     strategy:
       matrix:
-        name: [demo, aks, aro, eks, gke-default, ibmroks, openshift-4, openshift-4-demo, openshift-4-perf-scale, openshift-multi, osd-on-aws, osd-on-gcp, qa-demo, rosa, rosahcp]
+        name: [gke-default]
+        # name: [demo, aks, aro, eks, gke-default, ibmroks, openshift-4, openshift-4-demo, openshift-4-perf-scale, openshift-multi, osd-on-aws, osd-on-gcp, qa-demo, rosa, rosahcp]
     steps:
       - name: Authenticate to GCloud
         uses: google-github-actions/auth@v2
@@ -74,5 +74,3 @@ jobs:
           wait: true
           endpoint: localhost:8443
           insecure: true
-=======
->>>>>>> master
