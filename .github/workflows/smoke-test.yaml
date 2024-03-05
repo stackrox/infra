@@ -13,11 +13,9 @@ on:
       automation-flavors-version:
         description: automation-flavors version, e.g. 0.10.2
         required: true
-        default: "0.10.1"
       cluster:
         description: Infra cluster to run smoke test on (in acs-team-temp-dev project)
         required: true
-        default: "actions-pr-48"
 
 jobs:
   debug:
@@ -30,10 +28,8 @@ jobs:
 
   smoke-test:
     runs-on: ubuntu-latest
-    container:
-      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
     env:
-      KUBECONFIG: /github/home/artifacts/kubeconfig
+      KUBECONFIG: /home/artifacts/kubeconfig
       INFRA_TOKEN_PROD: ${{ secrets.INFRA_TOKEN }}
       INFRA_TOKEN_DEV: ${{ secrets.INFRA_TOKEN_DEV }}
       USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
@@ -59,7 +55,10 @@ jobs:
         env:
           INFRA_TOKEN: ${{ env.INFRA_TOKEN_PROD }}
         run: |
-          /github/home/.local/bin/infractl artifacts "${{ inputs.cluster }}" -d /github/home/artifacts >> "$GITHUB_STEP_SUMMARY"
+          echo "$HOME"
+          echo "$PATH"
+          ls -lisa ~/.local/bin/
+          infractl artifacts "${{ inputs.cluster }}" -d /home/artifacts >> "$GITHUB_STEP_SUMMARY"
           kubectl get nodes -o wide || true
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
           sleep 10
