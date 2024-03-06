@@ -78,7 +78,7 @@ jobs:
           sleep 10
 
       - name: Create infra cluster for ${{ matrix.flavors.name }}
-        uses: stackrox/actions/infra/create-cluster@tm/create-cluster-endpoint
+        uses: stackrox/actions/infra/create-cluster@v1
         with:
           token: ${{ env.INFRA_TOKEN_DEV }}
           flavor: ${{ matrix.flavors.name }}
