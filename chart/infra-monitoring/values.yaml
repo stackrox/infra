@@ -1,0 +1,59 @@
+kube-prometheus:
+  operator:
+    resources:
+      limits:
+        cpu: 100m
+        ephemeral-storage: 1Gi
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        ephemeral-storage: 1Gi
+        memory: 256Mi
+    kubeletService:
+      enabled: false
+
+  prometheus:
+    resources:
+      limits:
+        cpu: 100m
+        ephemeral-storage: 1Gi
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        ephemeral-storage: 1Gi
+        memory: 256Mi
+
+  exporters:
+    node-exporter:
+      enabled: false
+    kube-state-metrics:
+      enabled: false
+  kubelet:
+    enabled: false
+  kubeApiServer:
+    enabled: false
+  kubeControllerManager:
+    enabled: false
+  kubeScheduler:
+    enabled: false
+  coreDns:
+    enabled: false
+  kubeProxy:
+    enabled: false
+
+  alertmanager:
+    resources:
+      limits:
+        cpu: 100m
+        ephemeral-storage: 1Gi
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        ephemeral-storage: 1Gi
+        memory: 256Mi
+    configSelector:
+      matchLabels:
+        alertmanagerConfig: slack
+
+  blackboxExporter:
+    enabled: false

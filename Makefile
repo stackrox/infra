@@ -25,7 +25,7 @@ endif
 tag:
 	@echo $(VERSION)
 
-IMAGE=us.gcr.io/stackrox-infra/infra-server:$(VERSION)
+IMAGE=quay.io/rhacs-eng/infra-server:$(VERSION)
 .PHONY: image-name
 image-name:
 	@echo $(IMAGE)
@@ -204,8 +204,8 @@ pull-infractl-from-dev-server:
 ##########
 ## Kube ##
 ##########
-dev_context = gke_stackrox-infra_us-west2_infra-development
-prod_context = gke_stackrox-infra_us-west2_infra-production
+dev_context = gke_acs-team-automation_us-west2_infra-development
+prod_context = gke_acs-team-automation_us-west2_infra-production
 this_context = $(shell kubectl config current-context)
 
 ## Meta
@@ -293,6 +293,16 @@ install-argo: pre-check
 .PHONY: clean-argo-config
 clean-argo-config: pre-check
 	kubectl delete configmap argo-workflows-workflow-controller-configmap -n argo || true
+
+.PHONY: install-monitoring
+install-monitoring: pre-check
+	helm dependency update chart/infra-monitoring
+	helm upgrade prometheus-stack chart/infra-monitoring \
+		--install \
+		--namespace monitoring \
+		--create-namespace \
+		--values chart/infra-monitoring/values.yaml \
+		--wait
 
 ###############
 ## Debugging ##

@@ -74,6 +74,8 @@ func Command() *cobra.Command {
 	for _, osArg := range os.Args {
 		if strings.Contains(osArg, "qa-demo") {
 			cmd.Flags().Bool("rhacs", false, "use Red Hat branded images for qa-demo (the default is to use open source images)")
+			// Abort loop if found, otherwise 'infractl create qa-demo prefix-qa-demo' will attempt to add another --rhacs flag.
+			break
 		}
 	}
 	return cmd

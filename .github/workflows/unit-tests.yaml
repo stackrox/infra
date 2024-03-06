@@ -1,0 +1,33 @@
+name: Unit Tests
+
+on:
+  workflow_call:
+
+defaults:
+  run:
+    working-directory: go/src/github.com/stackrox/infra
+
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: go/src/github.com/stackrox/infra
+
+      - name: Setup env
+        run: |
+          GOPATH="$GITHUB_WORKSPACE/go"
+          echo GOPATH="${GOPATH}" >> "$GITHUB_ENV"
+          PATH="${PATH}:${GOPATH}/bin"
+          echo PATH="${PATH}" >> "$GITHUB_ENV"
+
+      - name: Go Unit Test
+        run: |
+          make unit-test

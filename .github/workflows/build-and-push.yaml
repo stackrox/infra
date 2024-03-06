@@ -8,10 +8,10 @@ defaults:
     working-directory: go/src/github.com/stackrox/infra
 
 jobs:
-  build-and-push:
+  build-and-push-server:
     runs-on: ubuntu-latest
     container:
-      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.51.1
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
 
     steps:
       - name: Checkout
@@ -40,26 +40,45 @@ jobs:
           make proto-generated-srcs
           git diff --exit-code HEAD
 
-      - name: Go Unit Test
-        run: |
-          make unit-test
-
       - name: Build Infra Server
         run: |
           make image
 
-      - name: Build Certifier
-        run: |
-          cd certifier && make image
-  
       - name: Login for image push
         uses: docker/login-action@v3
         with:
-          registry: us.gcr.io
-          username: _json_key
-          password: ${{ secrets.INFRA_IMAGE_PUSH }}
+          registry: quay.io
+          username: ${{ secrets.QUAY_RHACS_ENG_INFRA_RW_USERNAME }}
+          password: ${{ secrets.QUAY_RHACS_ENG_INFRA_RW_PASSWORD }}
 
       - name: Push
         run: |
           make push
+
+  build-and-push-certifier:
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: go/src/github.com/stackrox/infra
+
+      - name: Build Certifier
+        run: |
+          cd certifier && make image
+
+      - name: Login for image push
+        uses: docker/login-action@v3
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_RHACS_ENG_INFRA_RW_USERNAME }}
+          password: ${{ secrets.QUAY_RHACS_ENG_INFRA_RW_PASSWORD }}
+
+      - name: Push
+        run: |
           cd certifier && make push

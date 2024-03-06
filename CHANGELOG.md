@@ -1,12 +1,11 @@
 # Changelog
 
-Entries in this file should be limited to:
+This CHANGELOG is abandoned in favor of auto-generated release notes.
+Please see the release description for change information.
 
-- Any changes that introduce a deprecation in functionality, OR
-- Obscure side-effects that are not obviously apparent based on the JIRA associated with the changes.
-Please avoid adding duplicate information across this changelog and JIRA/doc input pages.
+## [0.8.14]
 
-## [NEXT RELEASE]
+- ROX-17343: Setup metric collection and alerting for infra service.
 
 ## [0.8.13]
 

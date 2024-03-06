@@ -1,0 +1,29 @@
+name: Smoke test automation-flavors
+run-name: >-
+  ${{
+    format('Smoking testing automation-flavor version {0} on infra cluster {1}',
+      inputs.automation-flavors-version,
+      inputs.cluster
+    )
+  }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      automation-flavors-version:
+        description: automation-flavors version, e.g. 0.10.2
+        required: true
+        default: "0.10.1"
+      cluster:
+        description: Infra cluster to run smoke test on (in acs-team-temp-dev project)
+        required: true
+        default: "actions-pr-48"
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Show inputs
+      run: |
+        echo "automation-flavors version: ${{ inputs.automation-flavors-version }}"
+        echo "Cluster: ${{ inputs.cluster }}"
