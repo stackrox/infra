@@ -512,6 +512,11 @@
       value: us-east1
       kind: optional
 
+    - name: ssd-storage-class
+      description: Ensure an SSD StorageClass is the default StorageClass for the cluster
+      value: false
+      kind: optional
+
   artifacts:
     - name: admin-password
       description: Admin password for StackRox console
@@ -635,6 +640,11 @@
       help: |
         Consult OCP documentation for details. {{ .Chart.Annotations.ocpCredentialsMode }} is the value used by
         stackrox CI.
+
+    - name: ssd-storage-class
+      description: Ensure an SSD StorageClass is the default StorageClass for the cluster
+      value: false
+      kind: optional
 
   artifacts:
     - name: kubeconfig

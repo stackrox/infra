@@ -8,8 +8,6 @@ Please avoid adding duplicate information across this changelog and JIRA/doc inp
 
 ## [NEXT RELEASE]
 
-- Add an SSD StorageClass parameter to the openshift-4 flavor
-
 ## [0.8.13]
 
 - ROX-22142: wait for IBM ROKS nodes to be ready during provisioning.
