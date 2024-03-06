@@ -14,7 +14,7 @@ on:
         description: Infra cluster to run smoke test on (in acs-team-temp-dev project)
         required: true
       prefix:
-        description: Prefix added to the clusters created for the smoke test (maximum 8 chars)
+        description: Prefix added to the clusters created for the smoke test (maximum 7 chars)
         default: ist
         required: true
 
@@ -37,21 +37,21 @@ jobs:
     strategy:
       matrix:
         flavors: [
-          {name: "demo", "args": ""},
-          {name: "aks", "args": ""},
-          {name: "aro", "args": ""},
-          {name: "eks", "args": "user-arns=arn:aws:iam::393282794030:user/joey@stackrox.com"},
-          {name: "gke", "args": ""},
-          {name: "ibmroks", "args": ""},
-          {name: "ocp-4", "args": ""},
-          {name: "ocp-4-demo", "args": ""},
-          {name: "ocp-4-perf-scale", "args": ""},
-          {name: "ocp-3", "args": ""},
-          {name: "osd-on-aws", "args": ""},
-          {name: "osd-on-gcp", "args": ""},
-          {name: "qa-demo", "args": "main-image=quay.io/rhacs-eng/main:4.3.4"},
-          {name: "rosa", "args": ""},
-          {name: "rosahcp", "args": ""},
+          # {name: "demo", "args": "", "uniqueness": "a"},
+          # {name: "aks", "args": "", "uniqueness": "b"},
+          {name: "aro", "args": "", "uniqueness": "c"},
+          # {name: "eks", "args": "user-arns=arn:aws:iam::393282794030:user/joey@stackrox.com", "uniqueness": "d"},
+          {name: "gke", "args": "", "uniqueness": "e"},
+          {name: "ibmroks", "args": "", "uniqueness": "f"},
+          {name: "ocp-4", "args": "", "uniqueness": "g"},
+          {name: "ocp-4-demo", "args": "", "uniqueness": "h"},
+          {name: "ocp-4-perf-scale", "args": "", "uniqueness": "i"},
+          # {name: "ocp-3", "args": "", "uniqueness": "j"},
+          {name: "osd-on-aws", "args": "", "uniqueness": "k"},
+          {name: "osd-on-gcp", "args": "", "uniqueness": "l"},
+          # {name: "qa-demo", "args": "main-image=quay.io/rhacs-eng/main:4.3.4", "uniqueness": "m"},
+          {name: "rosa", "args": "", "uniqueness": "n"},
+          # {name: "rosahcp", "args": "", "uniqueness": "o"},
         ]
       fail-fast: false
     steps:
@@ -82,7 +82,7 @@ jobs:
         with:
           token: ${{ env.INFRA_TOKEN_DEV }}
           flavor: ${{ matrix.flavors.name }}
-          name: ${{ inputs.prefix }}-${{ matrix.flavors.name }}
+          name: ${{ inputs.prefix }}${{ matrix.flavors.uniqueness }}-${{ matrix.flavors.name }}
           lifespan: 2h
           wait: true
           endpoint: localhost:8443
