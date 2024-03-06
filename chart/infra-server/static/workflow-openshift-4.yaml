@@ -24,6 +24,7 @@ spec:
       - name: fips-enabled
       - name: trusted-certs-enabled
       - name: credentials-mode
+      - name: ssd-storage-class
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -121,6 +122,8 @@ spec:
             value: '{{ "{{" }}workflow.parameters.trusted-certs-enabled{{ "}}" }}'
           - name: CREDENTIALS_MODE
             value: '{{ "{{" }}workflow.parameters.credentials-mode{{ "}}" }}'
+          - name: SSD_STORAGE_CLASS
+            value: '{{ "{{" }}workflow.parameters.ssd-storage-class{{ "}}" }}'
         volumeMounts:
           - name: data
             mountPath: /data
