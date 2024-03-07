@@ -7,6 +7,10 @@ if ! sed --version | grep -q GNU; then
     exit 1
 fi
 
+echo "INFO: Removing previous configuration files"
+rm -r configuration/
+mkdir -p configuration/
+
 echo "INFO: Download secrets"
 ENVIRONMENT=development make secrets-download
 
@@ -20,9 +24,6 @@ sed -i 's/configuration\//..\/..\/configuration\//g' configuration/flavors.yaml
 
 echo "INFO: Replace /etc/infra/static -> ../../ui/build in infra.yaml"
 sed -i 's/\/etc\/infra\/static/..\/..\/ui\/build/g' configuration/infra.yaml
-
-echo "INFO: Copy workflow templates in place"
-cp chart/infra-server/static/{test,workflow}-*.yaml configuration/
 
 echo "Prepare UI + CLI (for downloads)"
 make -C ui
