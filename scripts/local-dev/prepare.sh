@@ -7,10 +7,6 @@ if ! sed --version | grep -q GNU; then
     exit 1
 fi
 
-echo "INFO: Removing previous configuration files"
-rm -r configuration/
-mkdir -p configuration/
-
 echo "INFO: Download secrets"
 ENVIRONMENT=development make secrets-download
 

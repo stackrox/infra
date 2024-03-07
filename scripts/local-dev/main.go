@@ -18,12 +18,17 @@ var (
 	valuesPath            = "chart/infra-server/configuration/development-values-from-files.yaml"
 )
 
-func ensureLocalConfigurationDirExists() error {
-	if _, err := os.Stat(localConfigurationDir); err != nil {
-		if os.IsNotExist(err) {
-			return fmt.Errorf("local configuration directory does not exist: %v", err)
-		}
-		return fmt.Errorf("unknown error while looking for local configuration directory: %v", err)
+func createLocalConfigurationDir() error {
+	// remove previous configurations
+	err := os.RemoveAll(localConfigurationDir)
+	if err != nil {
+		return fmt.Errorf("error while deleting the local configuration directory: %v", err)
+	}
+
+	// create clean configuration directory
+	err = os.MkdirAll(localConfigurationDir, os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("error occurred creating the local configuration directory: %v", err)
 	}
 
 	return nil
@@ -151,7 +156,7 @@ func renderWorkflows() error {
 }
 
 func main() {
-	if err := ensureLocalConfigurationDirExists(); err != nil {
+	if err := createLocalConfigurationDir(); err != nil {
 		fmt.Printf("Error: %v\n", err)
 		return
 	}
