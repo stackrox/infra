@@ -1,0 +1,31 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: argo-workflow-failures
+  namespace: monitoring
+spec:
+  groups:
+  - name: Workflow failures
+    interval: 30s
+    rules:
+    - alert: Workflow Error
+      expr: increase(argo_workflows_count{status="Error"}[5m]) > 0
+      for: 1m
+      annotations:
+        summary: A workflow has errored
+        description: '<!subteam^{{ .Values.alertmanagerSlackTeam }}> Look at the workflows: `kubectl get workflows -l workflows.argoproj.io/phase=Error`'
+      labels:
+        severity: 'info'
+        namespace: monitoring
+        environment: {{ .Values.environment }}
+    - alert: Workflow Failure
+      expr: increase(argo_workflows_count{status="Failed"}[5m]) > 0
+      for: 1m
+      annotations:
+        summary: A workflow has failed.
+        description: '<!subteam^{{ .Values.alertmanagerSlackTeam }}> Look at the workflows: `kubectl get workflows -l workflows.argoproj.io/phase=Failed`'
+      labels:
+        severity: 'info'
+        namespace: monitoring
+        environment: {{ .Values.environment }}

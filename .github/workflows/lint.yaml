@@ -24,14 +24,14 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v4
         with:
           version: v1.53
 
   shellcheck:
     runs-on: ubuntu-latest
     container:
-      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.51.1
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
     steps:
       - name: Checkout
         uses: actions/checkout@v4

@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
         - name: infra-server
-          image: us.gcr.io/stackrox-infra/infra-server:{{ required "A valid .Values.tag entry is required!" .Values.tag }}
+          image: quay.io/rhacs-eng/infra-server:{{ required "A valid .Values.tag entry is required!" .Values.tag }}
           env:
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /configuration/google-credentials.json
@@ -55,9 +55,5 @@ spec:
         - name: configuration
           secret:
             secretName: infra-server-secrets
-
-{{ if eq .Values.environment "development" }}
-
       imagePullSecrets:
         - name: infra-image-registry-pull-secret
-{{ end }}

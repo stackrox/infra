@@ -38,13 +38,13 @@ spec:
     - name: create
       activeDeadlineSeconds: 7200
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-aro-0.2.16
+        image: quay.io/stackrox-io/ci:automation-flavors-aro-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
         command:
           - ./entrypoint.sh
         args:
           - create
-          - "{{workflow.parameters.name}}"
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
         env:
           - name: AZURE_SUBSCRIPTION_ID
             valueFrom:
@@ -72,9 +72,9 @@ spec:
                 name: aro-cluster-manager
                 key: REDHAT_PULL_SECRET_BASE64
           - name: NODE_COUNT
-            value: "{{workflow.parameters.nodes}}"
+            value: '{{ "{{" }}workflow.parameters.nodes{{ "}}" }}'
           - name: INSTANCE_TYPE
-            value: "{{workflow.parameters.machine-type}}"
+            value: '{{ "{{" }}workflow.parameters.machine-type{{ "}}" }}'
           - name: CREATION_SOURCE
             value: "infra"
         volumeMounts:
@@ -127,13 +127,13 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-aro-0.2.16
+        image: quay.io/stackrox-io/ci:automation-flavors-aro-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
         command:
           - ./entrypoint.sh
         args:
           - destroy
-          - "{{workflow.parameters.name}}"
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
         env:
           - name: AZURE_SUBSCRIPTION_ID
             valueFrom:

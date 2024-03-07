@@ -20,6 +20,7 @@ spec:
       - name: trusted-certs-enabled
       - name: credentials-mode
       - name: region
+      - name: ssd-storage-class
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -58,14 +59,14 @@ spec:
             arguments:
               parameters:
               - name: admin-password
-                value: "{{steps.pre-install.outputs.parameters.admin-password}}"
+                value: '{{ "{{" }}steps.pre-install.outputs.parameters.admin-password{{ "}}" }}'
               - name: kubeconfig-base64
-                value: "{{steps.pre-install.outputs.parameters.kubeconfig-base64}}"
+                value: '{{ "{{" }}steps.pre-install.outputs.parameters.kubeconfig-base64{{ "}}" }}'
               artifacts:
                 - name: roxctl-central
-                  from: "{{steps.roxctl-central.outputs.artifacts.roxctl-central}}"
+                  from: '{{ "{{" }}steps.roxctl-central.outputs.artifacts.roxctl-central{{ "}}" }}'
                 - name: roxctl-secured-cluster-services
-                  from: "{{steps.roxctl-secured-cluster-services.outputs.artifacts.roxctl-secured-cluster-services}}"
+                  from: '{{ "{{" }}steps.roxctl-secured-cluster-services.outputs.artifacts.roxctl-secured-cluster-services{{ "}}" }}'
 
         - - name: gather
             template: gather
@@ -78,7 +79,7 @@ spec:
 
     - name: create
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.7
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
         volumeMounts:
           - name: data
@@ -87,7 +88,7 @@ spec:
           - entrypoint.sh
         args:
           - create
-          - "{{workflow.parameters.name}}"
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
           - ocp.infra.rox.systems
         env:
           - name: GOOGLE_CREDENTIALS
@@ -103,7 +104,7 @@ spec:
                 name: redhat-pull-secret
                 key: REDHAT_PULL_SECRET
           - name: OPENSHIFT_VERSION
-            value: "{{workflow.parameters.openshift-version}}"
+            value: '{{ "{{" }}workflow.parameters.openshift-version{{ "}}" }}'
           - name: MASTER_NODE_COUNT
             value: "3"
           - name: WORKER_NODE_COUNT
@@ -113,11 +114,13 @@ spec:
           - name: WORKER_NODE_TYPE
             value: "e2-standard-16"
           - name: REGION
-            value: "{{workflow.parameters.region}}"
+            value: '{{ "{{" }}workflow.parameters.region{{ "}}" }}'
           - name: TRUSTED_CERTS_ENABLED
-            value: "{{workflow.parameters.trusted-certs-enabled}}"
+            value: '{{ "{{" }}workflow.parameters.trusted-certs-enabled{{ "}}" }}'
           - name: CREDENTIALS_MODE
-            value: "{{workflow.parameters.credentials-mode}}"
+            value: '{{ "{{" }}workflow.parameters.credentials-mode{{ "}}" }}'
+          - name: SSD_STORAGE_CLASS
+            value: '{{ "{{" }}workflow.parameters.ssd-storage-class{{ "}}" }}'
 
     - name: pre-install
       script:
@@ -129,7 +132,7 @@ spec:
         source: |
           openssl rand -base64 32 | tr "+/" "_#"  | cut -c 1-20 > /data/admin_password
           base64 /data/auth/kubeconfig | tr -d "\n" > /data/auth/kubeconfig_base64
-          subdomain="apps.{{workflow.parameters.name}}.ocp.infra.rox.systems"
+          subdomain=apps.{{ "{{" }}workflow.parameters.name{{ "}}" }}.ocp.infra.rox.systems
           echo "https://console-openshift-console.${subdomain}" > /data/url-openshift
           echo "https://central-stackrox.${subdomain}" > /data/url-stackrox
       outputs:
@@ -152,7 +155,7 @@ spec:
           - name: roxctl-secured-cluster-services
             path: /usr/bin/roxctl-secured-cluster-services
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-0.7.10
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
         command:
           - ansible-playbook
@@ -178,21 +181,21 @@ spec:
           - name: ORCHESTRATOR
             value: openshift
           - name: ADMIN_PASSWORD
-            value: "{{ inputs.parameters.admin-password }}"
+            value: '{{ "{{" }}inputs.parameters.admin-password{{ "}}" }}'
           - name: KUBECONFIG_BASE64
-            value: "{{ inputs.parameters.kubeconfig-base64 }}"
+            value: '{{ "{{" }}inputs.parameters.kubeconfig-base64{{ "}}" }}'
           - name: IMAGE_REGISTRY
-            value: "{{ workflow.parameters.image-registry }}"
+            value: '{{ "{{" }}workflow.parameters.image-registry{{ "}}" }}'
           - name: MAIN_IMAGE_TAG
-            value: "{{ workflow.parameters.main-image-tag }}"
+            value: '{{ "{{" }}workflow.parameters.main-image-tag{{ "}}" }}'
           - name: SCANNER_IMAGE_TAG
-            value: "{{ workflow.parameters.scanner-image-tag }}"
+            value: '{{ "{{" }}workflow.parameters.scanner-image-tag{{ "}}" }}'
           - name: SCANNER_DB_IMAGE_TAG
-            value: "{{ workflow.parameters.scanner-db-image-tag }}"
+            value: '{{ "{{" }}workflow.parameters.scanner-db-image-tag{{ "}}" }}'
           - name: COLLECTOR_SLIM_IMAGE_TAG
-            value: "{{ workflow.parameters.collector-slim-image-tag }}"
+            value: '{{ "{{" }}workflow.parameters.collector-slim-image-tag{{ "}}" }}'
           - name: CENTRAL_DB_IMAGE_TAG
-            value: "{{ workflow.parameters.central-db-image-tag }}"
+            value: '{{ "{{" }}workflow.parameters.central-db-image-tag{{ "}}" }}'
           - name: ANSIBLE_STDOUT_CALLBACK
             value: debug
         volumeMounts:
@@ -260,7 +263,7 @@ spec:
 
     - name: destroy
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.8.7
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
         command:
           - entrypoint.sh
@@ -285,7 +288,7 @@ spec:
           - name: roxctl-central
             path: /tmp/roxctl-central
       container:
-        image: "quay.io/stackrox-io/main:{{ workflow.parameters.central-services-helm-chart-version }}"
+        image: 'quay.io/stackrox-io/main:{{ "{{" }}workflow.parameters.central-services-helm-chart-version{{ "}}" }}'
         imagePullPolicy: Always
         command:
           - cp
@@ -302,7 +305,7 @@ spec:
           - name: roxctl-secured-cluster-services
             path: /tmp/roxctl-secured-cluster-services
       container:
-        image: "quay.io/stackrox-io/main:{{ workflow.parameters.secured-cluster-services-helm-chart-version }}"
+        image: 'quay.io/stackrox-io/main:{{ "{{" }}workflow.parameters.secured-cluster-services-helm-chart-version{{ "}}" }}'
         imagePullPolicy: Always
         command:
           - cp

@@ -48,13 +48,13 @@ spec:
             archive:
               tar: {}
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/aks:0.2.16
+        image: quay.io/stackrox-io/ci:automation-flavors-aks-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
         command:
           - entrypoint
         args:
           - create
-          - "{{workflow.parameters.name}}"
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
           - srox-temp-dev-test
         env:
           - name: AZURE_SP_USERNAME
@@ -73,15 +73,15 @@ spec:
                 name: azure-secrets
                 key: AZURE_SP_TENANT
           - name: NODE_COUNT
-            value: "{{workflow.parameters.nodes}}"
+            value: '{{ "{{" }}workflow.parameters.nodes{{ "}}" }}'
           - name: INSTANCE_TYPE
-            value: "{{workflow.parameters.machine-type}}"
+            value: '{{ "{{" }}workflow.parameters.machine-type{{ "}}" }}'
           - name: K8S_VERSION
-            value: "{{workflow.parameters.k8s-version}}"
+            value: '{{ "{{" }}workflow.parameters.k8s-version{{ "}}" }}'
           - name: NETWORK_PLUGIN
-            value: "{{workflow.parameters.network-plugin}}"
+            value: '{{ "{{" }}workflow.parameters.network-plugin{{ "}}" }}'
           - name: NETWORK_POLICY
-            value: "{{workflow.parameters.network-policy}}"
+            value: '{{ "{{" }}workflow.parameters.network-policy{{ "}}" }}'
           - name: CREATION_SOURCE
             value: "infra"
         volumeMounts:
@@ -96,13 +96,13 @@ spec:
 
     - name: destroy
       container:
-        image: gcr.io/stackrox-infra/automation-flavors/aks:0.2.16
+        image: quay.io/stackrox-io/ci:automation-flavors-aks-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
         command:
           - entrypoint
         args:
           - destroy
-          - "{{workflow.parameters.name}}"
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
           - srox-temp-dev-test
         env:
           - name: AZURE_SP_USERNAME

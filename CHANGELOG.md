@@ -1,12 +1,26 @@
 # Changelog
 
-Entries in this file should be limited to:
+This CHANGELOG is abandoned in favor of auto-generated release notes.
+Please see the release description for change information.
 
-- Any changes that introduce a deprecation in functionality, OR
-- Obscure side-effects that are not obviously apparent based on the JIRA associated with the changes.
-Please avoid adding duplicate information across this changelog and JIRA/doc input pages.
+## [0.8.14]
 
-## [NEXT RELEASE]
+- ROX-17343: Setup metric collection and alerting for infra service.
+
+## [0.8.13]
+
+- ROX-22142: wait for IBM ROKS nodes to be ready during provisioning.
+- Fix GKE cluster destruction with retries and disabled auto-upgrades and repairs.
+- Create GCP workload identity pools for `openshift-4` clusters. They can be used to setup short-lived token integrations.
+
+## [0.8.12]
+
+- Add IBM ROKS flavor. Note that there are two known issues (ROX-22142, ROX-22143).
+
+## [0.8.11]
+
+- Bump default demo versions to 4.3.4.
+- Bump demo automation flavors images to 0.9.13.
 
 - Add an optional parameter to the in openshift-4 flavor to keep failed clusters around (infra will still delete the cluster)
 

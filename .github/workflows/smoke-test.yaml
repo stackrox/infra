@@ -1,0 +1,90 @@
+name: Smoke test infra flavors
+run-name: >-
+  ${{
+    format('Smoke testing flavors on infra cluster {0} (prefix {1})',
+      inputs.cluster,
+      inputs.prefix
+    )
+  }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      cluster:
+        description: Infra cluster to run smoke test on (in acs-team-temp-dev project)
+        required: true
+      prefix:
+        description: Prefix added to the clusters created for the smoke test (maximum 7 chars)
+        default: ist
+        required: true
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Show inputs
+      run: |
+        echo "Cluster: ${{ inputs.cluster }}"
+        echo "Prefix: ${{ inputs.prefix }}"
+
+  smoke-test:
+    runs-on: ubuntu-latest
+    env:
+      KUBECONFIG: /home/runner/artifacts/kubeconfig
+      INFRA_TOKEN_PROD: ${{ secrets.INFRA_TOKEN }}
+      INFRA_TOKEN_DEV: ${{ secrets.INFRA_TOKEN_DEV }}
+      USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
+    strategy:
+      matrix:
+        flavors: [
+          {name: "demo", "args": "", "uniqueness": "a"},
+          {name: "aks", "args": "", "uniqueness": "b"},
+          {name: "aro", "args": "", "uniqueness": "c"},
+          {name: "eks", "args": "user-arns=arn:aws:iam::393282794030:user/joey@stackrox.com", "uniqueness": "d"},
+          {name: "gke", "args": "", "uniqueness": "e"},
+          {name: "ibmroks", "args": "", "uniqueness": "f"},
+          {name: "ocp-4", "args": "", "uniqueness": "g"},
+          {name: "ocp-4-demo", "args": "", "uniqueness": "h"},
+          {name: "ocp-4-perf-scale", "args": "", "uniqueness": "i"},
+          {name: "ocp-3", "args": "", "uniqueness": "j"},
+          {name: "osd-on-aws", "args": "", "uniqueness": "k"},
+          {name: "osd-on-gcp", "args": "", "uniqueness": "l"},
+          {name: "qa-demo", "args": "main-image=quay.io/rhacs-eng/main:4.3.4", "uniqueness": "m"},
+          {name: "rosa", "args": "", "uniqueness": "n"},
+          {name: "rosahcp", "args": "", "uniqueness": "o"},
+        ]
+      fail-fast: false
+    steps:
+      - name: Authenticate to GCloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.INFRA_CI_AUTOMATION_GCP_SA }}
+
+      - name: Set up Cloud SDK
+        uses: "google-github-actions/setup-gcloud@v2"
+        with:
+          install_components: "gke-gcloud-auth-plugin"
+
+      - name: Download production infractl
+        uses: stackrox/actions/infra/install-infractl@v1
+
+      - name: Download artifacts for cluster ${{ inputs.cluster }}
+        env:
+          INFRA_TOKEN: ${{ env.INFRA_TOKEN_PROD }}
+        run: |
+          set -uo pipefail
+          infractl artifacts "${{ inputs.cluster }}" -d "/home/runner/artifacts" >> "$GITHUB_STEP_SUMMARY"
+          kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
+          sleep 10
+
+      - name: Create infra cluster for ${{ matrix.flavors.name }}
+        uses: stackrox/actions/infra/create-cluster@v1
+        with:
+          token: ${{ env.INFRA_TOKEN_DEV }}
+          flavor: ${{ matrix.flavors.name }}
+          name: ${{ inputs.prefix }}${{ matrix.flavors.uniqueness }}-${{ matrix.flavors.name }}
+          lifespan: 2h
+          wait: true
+          endpoint: localhost:8443
+          insecure: true
+          args: ${{ matrix.flavors.args }}

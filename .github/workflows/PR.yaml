@@ -20,6 +20,9 @@ jobs:
   lint:
     uses: ./.github/workflows/lint.yaml
 
+  unit-tests:
+    uses: ./.github/workflows/unit-tests.yaml
+
   build-and-push:
     uses: ./.github/workflows/build-and-push.yaml
     secrets: inherit
@@ -31,7 +34,7 @@ jobs:
         with:
           flavor: gke-default
           name: infra-pr-${{ github.event.pull_request.number }}
-          args: machine-type=e2-medium,nodes=1,gcp-image-type=ubuntu_containerd
+          args: machine-type=e2-medium,nodes=3,gcp-image-type=ubuntu_containerd
           lifespan: ${{ github.actor == 'dependabot[bot]' && '1h' || '24h' }}
           wait: true
           token: ${{ secrets.INFRA_TOKEN }}
@@ -42,7 +45,7 @@ jobs:
       - create-dev-cluster
     runs-on: ubuntu-latest
     container:
-      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.51.1
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
 
     steps:
       - name: Checkout
@@ -64,7 +67,7 @@ jobs:
       - create-dev-cluster
     runs-on: ubuntu-latest
     container:
-      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.51.1
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
     env:
       KUBECONFIG: /github/home/artifacts/kubeconfig
       INFRA_TOKEN: ${{ secrets.INFRA_TOKEN }}
@@ -82,7 +85,7 @@ jobs:
       - name: Authenticate to GCloud
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_INFRA_CI_AUTOMATION_SA }}
+          credentials_json: ${{ secrets.INFRA_CI_AUTOMATION_GCP_SA }}
 
       - name: Set up Cloud SDK
         uses: "google-github-actions/setup-gcloud@v2"
@@ -99,7 +102,7 @@ jobs:
 
       - name: Deploy infra to dev cluster
         run: |
-          ENVIRONMENT=development TEST_MODE=true make install-argo clean-argo-config helm-deploy
+          ENVIRONMENT=development TEST_MODE=true make install-argo clean-argo-config install-monitoring helm-deploy
           sleep 10 # wait for old pods to disappear so the svc port-forward doesn't connect to them
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
           sleep 10

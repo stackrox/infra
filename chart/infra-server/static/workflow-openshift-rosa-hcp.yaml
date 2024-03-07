@@ -46,13 +46,13 @@ spec:
     - name: create
       activeDeadlineSeconds: 7200
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-rosa-0.9.5
+        image: quay.io/stackrox-io/ci:automation-flavors-rosa-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
         command:
           - ./entrypoint.sh
         args:
           - create
-          - "{{workflow.parameters.name}}"
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
         env:
           - name: AWS_ACCESS_KEY_ID
             valueFrom:
@@ -75,17 +75,17 @@ spec:
                 name: osd-access-secrets
                 key: OPENSHIFT_CLUSTER_MANAGER_API_TOKEN
           - name: ROSA_ARGS
-            value: "{{workflow.parameters.rosa-args}}"
+            value: '{{ "{{" }}workflow.parameters.rosa-args{{ "}}" }}'
           - name: AWS_REGION
-            value: "{{workflow.parameters.aws-region}}"
+            value: '{{ "{{" }}workflow.parameters.aws-region{{ "}}" }}'
           - name: MANAGED_CP
-            value: "{{workflow.parameters.managed-cp}}"
+            value: '{{ "{{" }}workflow.parameters.managed-cp{{ "}}" }}'
           - name: SUBNET_IDS
-            value: "{{workflow.parameters.subnet-ids}}"
+            value: '{{ "{{" }}workflow.parameters.subnet-ids{{ "}}" }}'
           - name: NODE_COUNT
-            value: "{{workflow.parameters.nodes}}"
+            value: '{{ "{{" }}workflow.parameters.nodes{{ "}}" }}'
           - name: INSTANCE_TYPE
-            value: "{{workflow.parameters.machine-type}}"
+            value: '{{ "{{" }}workflow.parameters.machine-type{{ "}}" }}'
           - name: CREATION_SOURCE
             value: "infra"
         volumeMounts:
@@ -144,16 +144,16 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-rosa-0.9.5
+        image: quay.io/stackrox-io/ci:automation-flavors-rosa-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
         command:
           - ./entrypoint.sh
         args:
           - destroy
-          - "{{workflow.parameters.name}}"
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
         env:
           - name: AWS_REGION
-            value: "{{workflow.parameters.aws-region}}"
+            value: '{{ "{{" }}workflow.parameters.aws-region{{ "}}" }}'
           - name: AWS_ACCESS_KEY_ID
             valueFrom:
               secretKeyRef:
