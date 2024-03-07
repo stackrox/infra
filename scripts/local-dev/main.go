@@ -11,7 +11,12 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var localConfigurationDir = "configuration/"
+var (
+	localConfigurationDir = "configuration/"
+	chartPath             = "chart/infra-server/Chart.yaml"
+	staticPath            = "chart/infra-server/static"
+	valuesPath            = "chart/infra-server/configuration/development-values-from-files.yaml"
+)
 
 func createLocalConfigurationDir() error {
 	// remove previous configurations
@@ -64,7 +69,7 @@ func determineValues() (map[string]interface{}, error) {
 	}
 
 	data := make(map[string]interface{})
-	fileContent, err := os.ReadFile("chart/infra-server/Chart.yaml")
+	fileContent, err := os.ReadFile(chartPath)
 	if err != nil {
 		return nil, err
 	}
@@ -121,13 +126,33 @@ func renderFile(path, content string, decodeString bool) error {
 	return nil
 }
 
-func renderFlavors() error {
-	path := "flavors.yaml"
-	fileContent, err := os.ReadFile(fmt.Sprintf("chart/infra-server/static/%s", path))
+func renderFlavorList() error {
+	file := "flavors.yaml"
+	fileContent, err := os.ReadFile(fmt.Sprintf("%s/%s", staticPath, file))
 	if err != nil {
 		return err
 	}
-	return renderFile(path, string(fileContent), false)
+	return renderFile(file, string(fileContent), false)
+}
+
+func renderWorkflows() error {
+	files, err := os.ReadDir(staticPath)
+	if err != nil {
+		return fmt.Errorf("error while looking for workflow files: %v", err)
+	}
+	for _, file := range files {
+		fileName := file.Name()
+		if (strings.HasPrefix(fileName, "test-") || strings.HasPrefix(fileName, "workflow-")) && strings.HasSuffix(fileName, ".yaml") {
+			fileContent, err := os.ReadFile(fmt.Sprintf("%s/%s", staticPath, fileName))
+			if err != nil {
+				return err
+			}
+			if err := renderFile(fileName, string(fileContent), false); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func main() {
@@ -136,7 +161,7 @@ func main() {
 		return
 	}
 
-	data, err := readFileToMap("chart/infra-server/configuration/development-values-from-files.yaml")
+	data, err := readFileToMap(valuesPath)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		return
@@ -153,10 +178,17 @@ func main() {
 		}
 	}
 
-	if err := renderFlavors(); err != nil {
+	if err := renderFlavorList(); err != nil {
 		fmt.Printf("Error: %v\n", err)
 		return
 	} else {
 		fmt.Println("Created flavors.yaml")
+	}
+
+	if err := renderWorkflows(); err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return
+	} else {
+		fmt.Println("Rendered workflows")
 	}
 }
