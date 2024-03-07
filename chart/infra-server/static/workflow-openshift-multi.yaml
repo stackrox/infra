@@ -27,19 +27,19 @@ spec:
             arguments:
               parameters:
                 - name: name
-                  value: "{{workflow.parameters.name}}"
+                  value: '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
                 - name: crio
-                  value: "{{workflow.parameters.crio}}"
+                  value: '{{ "{{" }}workflow.parameters.crio{{ "}}" }}'
                 - name: nodes
-                  value: "{{workflow.parameters.nodes}}"
+                  value: '{{ "{{" }}workflow.parameters.nodes{{ "}}" }}'
                 - name: machine-type
-                  value: "{{workflow.parameters.machine-type}}"
+                  value: '{{ "{{" }}workflow.parameters.machine-type{{ "}}" }}'
                 - name: zone
-                  value: "{{workflow.parameters.zone}}"
+                  value: '{{ "{{" }}workflow.parameters.zone{{ "}}" }}'
                 - name: install-monitoring
-                  value: "{{workflow.parameters.install-monitoring}}"
+                  value: '{{ "{{" }}workflow.parameters.install-monitoring{{ "}}" }}'
                 - name: install-metrics
-                  value: "{{workflow.parameters.install-metrics}}"
+                  value: '{{ "{{" }}workflow.parameters.install-metrics{{ "}}" }}'
 
         - - name: wait
             template: wait
@@ -48,10 +48,10 @@ spec:
             arguments:
               parameters:
                 - name: name
-                  value: "{{workflow.parameters.name}}"
+                  value: '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
               artifacts:
                 - name: terraform-destroy-plan
-                  from: "{{steps.create.outputs.artifacts.terraform-destroy-plan}}"
+                  from: '{{ "{{" }}steps.create.outputs.artifacts.terraform-destroy-plan{{ "}}" }}'
 
     - name: create
       activeDeadlineSeconds: 3600
@@ -99,22 +99,22 @@ spec:
             path: /well-known/artifacts/terraform-destroy.tfplan
 
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-multi-0.8.5
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-multi-{{ .Chart.Annotations.automationFlavorsVersion }}
         command:
           - /usr/bin/entrypoint
         args:
           - create
-          - "--name={{inputs.parameters.name}}"
-          - "--crio={{inputs.parameters.crio}}"
+          - '--name={{ "{{" }}inputs.parameters.name{{ "}}" }}'
+          - '--crio={{ "{{" }}inputs.parameters.crio{{ "}}" }}'
           - --creation-source=infra
-          - "--zone={{inputs.parameters.zone}}"
-          - "--nodes={{inputs.parameters.nodes}}"
-          - "--machine-type={{inputs.parameters.machine-type}}"
-          - "--install-metrics={{inputs.parameters.install-metrics}}"
-          - "--install-monitoring={{inputs.parameters.install-monitoring}}"
-          - "--gcp-project=acs-team-temp-dev"
-          - "--dns-project=acs-team-temp-dev"
-          - "--dns-zone=ocp-infra-rox-systems"
+          - '--zone={{ "{{" }}inputs.parameters.zone{{ "}}" }}'
+          - '--nodes={{ "{{" }}inputs.parameters.nodes{{ "}}" }}'
+          - '--machine-type={{ "{{" }}inputs.parameters.machine-type{{ "}}" }}'
+          - '--install-metrics={{ "{{" }}inputs.parameters.install-metrics{{ "}}" }}'
+          - '--install-monitoring={{ "{{" }}inputs.parameters.install-monitoring{{ "}}" }}'
+          - --gcp-project=acs-team-temp-dev
+          - --dns-project=acs-team-temp-dev
+          - --dns-zone=ocp-infra-rox-systems
         env:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
@@ -134,7 +134,7 @@ spec:
           - name: terraform-destroy-plan
             path: /well-known/artifacts/terraform-destroy.tfplan
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-multi-0.8.5
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-multi-{{ .Chart.Annotations.automationFlavorsVersion }}
         command:
           - /usr/bin/entrypoint
         args:

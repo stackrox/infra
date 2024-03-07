@@ -43,13 +43,13 @@ spec:
             archive:
               tar: {}
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-eks-0.6.9
+        image: quay.io/stackrox-io/ci:automation-flavors-eks-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
         command:
           - entrypoint
         args:
           - create
-          - "{{workflow.parameters.name}}"
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
         env:
           - name: AWS_ACCESS_KEY_ID
             valueFrom:
@@ -62,17 +62,17 @@ spec:
                 name: aws-access-secrets
                 key: AWS_SECRET_ACCESS_KEY
           - name: NODE_COUNT
-            value: "{{workflow.parameters.nodes}}"
+            value: '{{ "{{" }}workflow.parameters.nodes{{ "}}" }}'
           - name: INSTANCE_TYPE
-            value: "{{workflow.parameters.machine-type}}"
+            value: '{{ "{{" }}workflow.parameters.machine-type{{ "}}" }}'
           - name: K8S_VERSION
-            value: "{{workflow.parameters.k8s-version}}"
+            value: '{{ "{{" }}workflow.parameters.k8s-version{{ "}}" }}'
           - name: USER_ARNS
-            value: "{{workflow.parameters.user-arns}}"
+            value: '{{ "{{" }}workflow.parameters.user-arns{{ "}}" }}'
           - name: CREATION_SOURCE
             value: "infra"
           - name: REGION
-            value: "{{workflow.parameters.region}}"
+            value: '{{ "{{" }}workflow.parameters.region{{ "}}" }}'
 
         volumeMounts:
           - name: data
@@ -87,13 +87,13 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-eks-0.6.9
+        image: quay.io/stackrox-io/ci:automation-flavors-eks-{{ .Chart.Annotations.automationFlavorsVersion }}
         command:
           - entrypoint
         imagePullPolicy: Always
         args:
           - destroy
-          - "{{workflow.parameters.name}}"
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
         env:
           - name: AWS_ACCESS_KEY_ID
             valueFrom:

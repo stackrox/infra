@@ -45,13 +45,13 @@ spec:
     - name: create
       activeDeadlineSeconds: 7200
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-ibmroks-0.10.1
+        image: quay.io/stackrox-io/ci:automation-flavors-ibmroks-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
         command:
           - ./entrypoint.sh
         args:
           - create
-          - "{{workflow.parameters.name}}"
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
         env:
           - name: IBM_ROKS_API_KEY
             valueFrom:
@@ -59,19 +59,19 @@ spec:
                 name: ibm-cloud-secrets
                 key: IBM_ROKS_API_KEY
           - name: NODE_COUNT
-            value: "{{workflow.parameters.nodes}}"
+            value: '{{ "{{" }}workflow.parameters.nodes{{ "}}" }}'
           - name: INSTANCE_TYPE
-            value: "{{workflow.parameters.instance-type}}"
+            value: '{{ "{{" }}workflow.parameters.instance-type{{ "}}" }}'
           - name: IBM_ZONE
-            value: "{{workflow.parameters.zone}}"
+            value: '{{ "{{" }}workflow.parameters.zone{{ "}}" }}'
           - name: OPENSHIFT_VERSION
-            value: "{{workflow.parameters.openshift-version}}"
+            value: '{{ "{{" }}workflow.parameters.openshift-version{{ "}}" }}'
           - name: VPC_ID
-            value: "{{workflow.parameters.vpc}}"
+            value: '{{ "{{" }}workflow.parameters.vpc{{ "}}" }}'
           - name: GATEWAY_ID
-            value: "{{workflow.parameters.public-gateway}}"
+            value: '{{ "{{" }}workflow.parameters.public-gateway{{ "}}" }}'
           - name: SUBNET_ID
-            value: "{{workflow.parameters.subnet}}"
+            value: '{{ "{{" }}workflow.parameters.subnet{{ "}}" }}'
           - name: CREATION_SOURCE
             value: "infra"
           - name: SCRATCH
@@ -112,13 +112,13 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-ibmroks-0.10.1
+        image: quay.io/stackrox-io/ci:automation-flavors-ibmroks-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
         command:
           - ./entrypoint.sh
         args:
           - destroy
-          - "{{workflow.parameters.name}}"
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
         env:
           - name: IBM_ROKS_API_KEY
             valueFrom:
@@ -126,13 +126,13 @@ spec:
                 name: ibm-cloud-secrets
                 key: IBM_ROKS_API_KEY
           - name: IBM_ZONE
-            value: "{{workflow.parameters.zone}}"
+            value: '{{ "{{" }}workflow.parameters.zone{{ "}}" }}'
           - name: VPC_ID
-            value: "{{workflow.parameters.vpc}}"
+            value: '{{ "{{" }}workflow.parameters.vpc{{ "}}" }}'
           - name: GATEWAY_ID
-            value: "{{workflow.parameters.public-gateway}}"
+            value: '{{ "{{" }}workflow.parameters.public-gateway{{ "}}" }}'
           - name: SUBNET_ID
-            value: "{{workflow.parameters.subnet}}"
+            value: '{{ "{{" }}workflow.parameters.subnet{{ "}}" }}'
           - name: SCRATCH
             value: "/data"
         volumeMounts:
