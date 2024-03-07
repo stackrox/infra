@@ -24,6 +24,7 @@ spec:
       - name: fips-enabled
       - name: trusted-certs-enabled
       - name: credentials-mode
+      - name: keep-failed-cluster
       - name: ssd-storage-class
   volumeClaimTemplates:
     - metadata:
@@ -122,6 +123,8 @@ spec:
             value: '{{ "{{" }}workflow.parameters.trusted-certs-enabled{{ "}}" }}'
           - name: CREDENTIALS_MODE
             value: '{{ "{{" }}workflow.parameters.credentials-mode{{ "}}" }}'
+          - name: KEEP_FAILED_CLUSTER
+            value: '{{ "{{" }}workflow.parameters.keep-failed-cluster{{ "}}" }}'
           - name: SSD_STORAGE_CLASS
             value: '{{ "{{" }}workflow.parameters.ssd-storage-class{{ "}}" }}'
         volumeMounts:

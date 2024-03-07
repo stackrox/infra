@@ -22,6 +22,8 @@ Please see the release description for change information.
 - Bump default demo versions to 4.3.4.
 - Bump demo automation flavors images to 0.9.13.
 
+- Add an optional parameter to the in openshift-4 flavor to keep failed clusters around (infra will still delete the cluster)
+
 ## [0.8.10]
 
 - Adds a fix for `demo` and `qa-demo` flavors: Region parameters should be optional on cluster creation, defaults are set in UI and the flavor itself.
