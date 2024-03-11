@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackrox/infra/service/metrics"
 	"io"
 	"os"
 	"sort"
@@ -401,6 +402,8 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		"cluster-id", clusterID,
 		"cluster-owner", owner,
 	)
+
+	metrics.FlavorsUsedCounter.WithLabelValues(flav.ID).Inc()
 
 	created, err := s.argoWorkflowsClient.CreateWorkflow(s.argoClientCtx, &workflowpkg.WorkflowCreateRequest{
 		Workflow:  &workflow,
