@@ -5,13 +5,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/stackrox/infra/service/metrics"
 	"io"
 	"os"
 	"sort"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/stackrox/infra/service/metrics"
 
 	argov3client "github.com/argoproj/argo-workflows/v3/cmd/argo/commands/client"
 	"github.com/argoproj/argo-workflows/v3/pkg/apiclient"
