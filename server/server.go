@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
-
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -84,7 +83,27 @@ func (s *server) RunServer() (<-chan error, error) {
 		apiSvc.RegisterServiceServer(server)
 	}
 
-	grpc_prometheus.Register(server)
+	// Metrics server
+	go func() {
+		// TODO: make port configurable
+		listenAddress := fmt.Sprintf("0.0.0.0:%d", 9101)
+		log.Infow("starting metrics server", "listenAddress", listenAddress)
+
+		// TODO: make time histogram data collection configurable
+		grpc_prometheus.EnableHandlingTimeHistogram()
+		grpc_prometheus.Register(server)
+
+		mux := http.NewServeMux()
+		mux.Handle("/metrics", promhttp.Handler())
+
+		if err := http.ListenAndServeTLS(
+			listenAddress,
+			s.cfg.Server.CertFile, s.cfg.Server.KeyFile,
+			mux,
+		); err != nil {
+			errCh <- err
+		}
+	}()
 
 	// muxHandler is a HTTP handler that can route both HTTP/2 gRPC and HTTP1.1
 	// requests.
@@ -134,7 +153,6 @@ func (s *server) RunServer() (<-chan error, error) {
 	// login/logout/static, and also gRPC-Gateway routes.
 	routeMux.Handle("/", serveApplicationResources(s.cfg.Server.StaticDir, s.oidc))
 	routeMux.Handle("/v1/", gwMux)
-	routeMux.Handle("/metrics", promhttp.Handler())
 	s.oidc.Handle(routeMux)
 
 	mux.Handle("/",
