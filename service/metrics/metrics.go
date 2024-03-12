@@ -3,12 +3,12 @@ package metrics
 import "github.com/prometheus/client_golang/prometheus"
 
 var (
-	// FlavorsUsedCounter is a Prometheus metrics counter for tracking the cluster flavors being created
+	// FlavorsUsedCounter is a Prometheus metric, counting the number of clusters created per flavor
 	FlavorsUsedCounter = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Namespace: "infra",
 			Name:      "flavors_used",
-			Help:      "Kubernetes cluster flavors being created",
+			Help:      "Number of cluster created by flavor",
 		},
 		[]string{"flavor"},
 	)

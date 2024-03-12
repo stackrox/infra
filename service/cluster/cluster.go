@@ -404,8 +404,6 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		"cluster-owner", owner,
 	)
 
-	metrics.FlavorsUsedCounter.WithLabelValues(flav.ID).Inc()
-
 	created, err := s.argoWorkflowsClient.CreateWorkflow(s.argoClientCtx, &workflowpkg.WorkflowCreateRequest{
 		Workflow:  &workflow,
 		Namespace: s.workflowNamespace,
@@ -419,6 +417,8 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		"workflow-name", created.GetName(),
 		"cluster-id", clusterID,
 	)
+
+	metrics.FlavorsUsedCounter.WithLabelValues(flav.ID).Inc()
 
 	err = s.bqClient.InsertClusterCreationRecord(context.Background(), clusterID, created.GetName(), flav.GetID(), owner)
 	if err != nil {
