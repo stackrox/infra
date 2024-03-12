@@ -69,10 +69,12 @@ type AuthOidcConfig struct {
 // ServerConfig represents the configuration used for running the HTTP & GRPC
 // servers, and providing TLS.
 type ServerConfig struct {
-	Port      int    `json:"port"`
-	CertFile  string `json:"cert"`
-	KeyFile   string `json:"key"`
-	StaticDir string `json:"static"`
+	Port                    int    `json:"port"`
+	CertFile                string `json:"cert"`
+	KeyFile                 string `json:"key"`
+	StaticDir               string `json:"static"`
+	MetricsPort             int    `json:"metricsPort"`
+	MetricsIncludeHistogram bool   `json:"metricsIncludeHistogram"`
 }
 
 // SlackConfig represents the configuration used for sending cluster lifecycle

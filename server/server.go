@@ -85,12 +85,12 @@ func (s *server) RunServer() (<-chan error, error) {
 
 	// Metrics server
 	go func() {
-		// TODO: make port configurable
-		listenAddress := fmt.Sprintf("0.0.0.0:%d", 9101)
+		listenAddress := fmt.Sprintf("0.0.0.0:%d", s.cfg.Server.MetricsPort)
 		log.Infow("starting metrics server", "listenAddress", listenAddress)
 
-		// TODO: make time histogram data collection configurable
-		grpc_prometheus.EnableHandlingTimeHistogram()
+		if s.cfg.Server.MetricsIncludeHistogram {
+			grpc_prometheus.EnableHandlingTimeHistogram()
+		}
 		grpc_prometheus.Register(server)
 
 		mux := http.NewServeMux()
