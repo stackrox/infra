@@ -37,55 +37,57 @@ jobs:
         with:
           token: ${{ secrets.QUAY_RHACS_ENG_BEARER_TOKEN }}
           image: rhacs-eng/${{ matrix.image }}:${{ inputs.version }}
+          limit: 1800
 
-  # deploy:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Show inputs
-  #       run: |
-  #         echo "Environment: ${{ inputs.environment }}"
-  #         echo "Version: ${{ inputs.version }}"
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [wait-for-images]
+    steps:
+      - name: Show inputs
+        run: |
+          echo "Environment: ${{ inputs.environment }}"
+          echo "Version: ${{ inputs.version }}"
 
-  #     - name: Check out code
-  #       uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 0
-  #         ref: ${{ inputs.version }}
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.version }}
 
-  #     - name: Authenticate to GCloud
-  #       uses: google-github-actions/auth@v2
-  #       with:
-  #         credentials_json: ${{ secrets.INFRA_DEPLOY_AUTOMATION_GCP_SA }}
+      - name: Authenticate to GCloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.INFRA_DEPLOY_AUTOMATION_GCP_SA }}
 
-  #     - name: 'Set up Cloud SDK'
-  #       uses: 'google-github-actions/setup-gcloud@v2'
-  #       with:
-  #         install_components: "gke-gcloud-auth-plugin"
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          install_components: "gke-gcloud-auth-plugin"
 
-  #     - name: Deploy to ${{ inputs.environment }}
-  #       env:
-  #         USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
-  #       run: |
-  #         gcloud container clusters get-credentials infra-${{ inputs.environment }} \
-  #           --project "${PROJECT}" \
-  #           --region us-west2
-  #         ENVIRONMENT=${{ inputs.environment }} make install-argo clean-argo-config install-monitoring helm-deploy
+      - name: Deploy to ${{ inputs.environment }}
+        env:
+          USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
+        run: |
+          gcloud container clusters get-credentials infra-${{ inputs.environment }} \
+            --project "${PROJECT}" \
+            --region us-west2
+          ENVIRONMENT=${{ inputs.environment }} make install-argo clean-argo-config install-monitoring helm-deploy
 
-  #     - name: Notify infra channel about new version
-  #       env:
-  #         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-  #       uses: slackapi/slack-github-action@v1.25.0
-  #       with:
-  #         channel-id: CVANK5K5W #acs-infra
-  #         payload: >-
-  #           {
-  #               "blocks": [
-  #                 {
-  #                   "type": "section",
-  #                   "text": {
-  #                     "type": "mrkdwn",
-  #                     "text": ":ship::tada:*Infra (${{ inputs.environment }}) was updated to ${{ inputs.version }}.*\nTo see the latest changes, click <${{ github.server_url }}/${{ github.repository }}/blob/${{ inputs.version }}/CHANGELOG.md|here>."
-  #                   }
-  #                 }
-  #               ]
-  #             }
+      - name: Notify infra channel about new version
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          channel-id: CVANK5K5W #acs-infra
+          payload: >-
+            {
+                "blocks": [
+                  {
+                    "type": "section",
+                    "text": {
+                      "type": "mrkdwn",
+                      "text": ":ship::tada:*Infra (${{ inputs.environment }}) was updated to ${{ inputs.version }}.*\nTo see the latest changes, click <${{ github.server_url }}/${{ github.repository }}/blob/${{ inputs.version }}/CHANGELOG.md|here>."
+                    }
+                  }
+                ]
+              }
