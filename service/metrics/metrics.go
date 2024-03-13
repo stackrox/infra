@@ -8,7 +8,7 @@ var (
 		prometheus.CounterOpts{
 			Namespace: "infra",
 			Name:      "flavors_used",
-			Help:      "Number of cluster created by flavor",
+			Help:      "Number of clusters created by flavor",
 		},
 		[]string{"flavor"},
 	)
