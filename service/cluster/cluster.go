@@ -12,6 +12,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/stackrox/infra/service/metrics"
+
 	argov3client "github.com/argoproj/argo-workflows/v3/cmd/argo/commands/client"
 	"github.com/argoproj/argo-workflows/v3/pkg/apiclient"
 	workflowpkg "github.com/argoproj/argo-workflows/v3/pkg/apiclient/workflow"
@@ -415,6 +417,8 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		"workflow-name", created.GetName(),
 		"cluster-id", clusterID,
 	)
+
+	metrics.FlavorsUsedCounter.WithLabelValues(flav.ID).Inc()
 
 	err = s.bqClient.InsertClusterCreationRecord(context.Background(), clusterID, created.GetName(), flav.GetID(), owner)
 	if err != nil {
