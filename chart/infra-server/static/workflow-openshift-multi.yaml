@@ -54,7 +54,7 @@ spec:
                   from: '{{ "{{" }}steps.create.outputs.artifacts.terraform-destroy-plan{{ "}}" }}'
 
     - name: create
-      activeDeadlineSeconds: 3600
+      activeDeadlineSeconds: 7200
       inputs:
         parameters:
           - name: name
