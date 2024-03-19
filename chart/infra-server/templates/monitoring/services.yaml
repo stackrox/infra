@@ -15,14 +15,18 @@ spec:
   selector:
     app.kubernetes.io/component: workflow-controller
 ---
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
+apiVersion: v1
+kind: Service
 metadata:
-  name: argo-workflows
-  namespace: argo
+  labels:
+    app: infra-server
+  name: infra-server-metrics
+  namespace: infra
 spec:
-  endpoints:
-  - port: metrics
+  ports:
+  - name: metrics
+    port: 9101
+    protocol: TCP
+    targetPort: 9101
   selector:
-    matchLabels:
-      app: workflow-controller
+    app.kubernetes.io/name: infra-server
