@@ -206,6 +206,7 @@ func NewFromConfig(filename string) (*Registry, error) {
 			ID:           flavorCfg.ID,
 			Name:         flavorCfg.Name,
 			Description:  flavorCfg.Description,
+			Provider:     flavorCfg.Provider,
 			Availability: v1.FlavorAvailability(availability),
 			Parameters:   parameters,
 			Artifacts:    artifacts,

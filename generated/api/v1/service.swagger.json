@@ -662,6 +662,10 @@
             "type": "string"
           },
           "description": "Aliases are alternative IDs of the flavor."
+        },
+        "Provider": {
+          "type": "string",
+          "description": "(cloud) Provider is a human readable name of the provider."
         }
       },
       "description": "Flavor represents a configured cluster flavor."
