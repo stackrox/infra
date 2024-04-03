@@ -167,6 +167,7 @@ spec:
           - entrypoint.sh
         args:
           - destroy
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
         env:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
