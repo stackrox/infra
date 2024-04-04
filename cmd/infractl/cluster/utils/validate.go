@@ -32,7 +32,7 @@ func ValidateClusterName(name string) error {
 	return nil
 }
 
-// ValidateLifespan accepts a duration and returns an error if it does not comply with ther requirements.
+// ValidateLifespan accepts a duration and returns an error if it does not comply with the requirements.
 func ValidateLifespan(lifespan time.Duration) error {
 	if err := durationpb.New(lifespan).CheckValid(); err != nil {
 		return fmt.Errorf("bad lifespan argument %q", err)
@@ -43,5 +43,37 @@ func ValidateLifespan(lifespan time.Duration) error {
 
 // This stub can contain custom logic to further validate lifespans.
 func checkValidLifespan(_ time.Duration) error {
+	return nil
+}
+
+// ValidateParameterArgument checks that key-value parameter arguments comply with the requirements.
+func ValidateParameterArgument(parts []string) error {
+	if len(parts) != 2 {
+		return errors.New("must be of form key=value")
+	}
+	key, value := parts[0], parts[1]
+
+	if key == "" {
+		return errors.New("key is empty")
+	}
+	match, err := regexp.MatchString(`^[a-z0-9-]+$`, key)
+	if err != nil {
+		return err
+	}
+	if !match {
+		return errors.New("key is invalid format")
+	}
+
+	if value == "" {
+		return errors.New("value is empty")
+	}
+	match, err = regexp.MatchString(`^[a-zA-Z0-9:?/.-]+$`, value)
+	if err != nil {
+		return err
+	}
+	if !match {
+		return errors.New("value is invalid format")
+	}
+
 	return nil
 }

@@ -112,8 +112,8 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 
 	for _, arg := range params {
 		parts := strings.SplitN(arg, "=", 2)
-		if len(parts) != 2 || parts[1] == "" {
-			return nil, fmt.Errorf("bad parameter argument %q", arg)
+		if err := utils.ValidateParameterArgument(parts); err != nil {
+			return nil, fmt.Errorf("bad parameter argument %q: %v", arg, err)
 		}
 		req.Parameters[parts[0]] = parts[1]
 	}
