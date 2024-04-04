@@ -4,6 +4,7 @@ package get
 import (
 	"context"
 	"errors"
+	"regexp"
 
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/common"
@@ -28,9 +29,13 @@ func Command() *cobra.Command {
 }
 
 func args(_ *cobra.Command, args []string) error {
-	// TODO: validate args[0] is a nice string
-	if args[0] == "" {
-		return errors.New("no flavor ID given")
+	flavorID := args[0]
+	match, err := regexp.MatchString(`^[a-z0-9-]+$`, flavorID)
+	if err != nil {
+		return err
+	}
+	if !match {
+		return errors.New("flavor ID must be non-empty alphanumeric string (parts combined with dashes")
 	}
 	return nil
 }
