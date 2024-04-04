@@ -8,6 +8,7 @@ import (
 
 	"github.com/golang/protobuf/ptypes"
 	"github.com/spf13/cobra"
+	"github.com/stackrox/infra/cmd/infractl/cluster/utils"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"google.golang.org/grpc"
@@ -45,10 +46,18 @@ func args(_ *cobra.Command, args []string) error {
 	if args[0] == "" {
 		return errors.New("no cluster ID given")
 	}
+	if err := utils.ValidateClusterName(args[0]); err != nil {
+		return err
+	}
+
 	if args[1] == "" {
 		return errors.New("no duration given")
 	}
-	return nil
+	lifespan, err := time.ParseDuration(args[1])
+	if err != nil {
+		return err
+	}
+	return utils.ValidateLifespan(lifespan)
 }
 
 func run(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, args []string) (common.PrettyPrinter, error) {

@@ -30,6 +30,7 @@ func Command() *cobra.Command {
 }
 
 func args(_ *cobra.Command, args []string) error {
+	// TODO: add more validation that these are actual name, description and emails.
 	name, description, email := args[0], args[1], args[2]
 	switch {
 	case name == "":

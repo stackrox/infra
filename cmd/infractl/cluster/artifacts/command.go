@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/stackrox/infra/cmd/infractl/cluster/utils"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"google.golang.org/grpc"
@@ -45,7 +46,7 @@ func args(_ *cobra.Command, args []string) error {
 	if args[0] == "" {
 		return errors.New("no cluster ID given")
 	}
-	return nil
+	return utils.ValidateClusterName(args[0])
 }
 
 func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []string) (common.PrettyPrinter, error) {

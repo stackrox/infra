@@ -28,6 +28,7 @@ func Command() *cobra.Command {
 }
 
 func args(_ *cobra.Command, args []string) error {
+	// TODO: validate args[0] is a nice string
 	if args[0] == "" {
 		return errors.New("no flavor ID given")
 	}
