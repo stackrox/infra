@@ -35,7 +35,7 @@ func args(_ *cobra.Command, args []string) error {
 		return err
 	}
 	if !match {
-		return errors.New("flavor ID must be non-empty alphanumeric string (parts combined with dashes")
+		return errors.New("flavor ID must be non-empty alphanumeric string (parts combined with dashes)")
 	}
 	return nil
 }
