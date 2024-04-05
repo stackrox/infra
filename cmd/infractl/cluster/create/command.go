@@ -99,6 +99,10 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 		wait = true
 	}
 
+	if err := utils.ValidateLifespan(lifespan); err != nil {
+		return nil, err
+	}
+
 	client := v1.NewClusterServiceClient(conn)
 
 	req := v1.CreateClusterRequest{

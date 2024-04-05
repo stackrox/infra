@@ -53,7 +53,7 @@ func args(_ *cobra.Command, args []string) error {
 	if args[1] == "" {
 		return errors.New("no duration given")
 	}
-	lifespan, err := time.ParseDuration(args[1])
+	_, lifespan, err := parseDuration(args[1])
 	if err != nil {
 		return err
 	}
