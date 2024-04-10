@@ -5,7 +5,7 @@ go 1.20
 require (
 	cloud.google.com/go/bigquery v1.60.0
 	cloud.google.com/go/storage v1.39.1
-	github.com/argoproj/argo-workflows/v3 v3.5.4
+	github.com/argoproj/argo-workflows/v3 v3.5.5
 	github.com/buger/jsonparser v1.1.1
 	github.com/coreos/go-oidc/v3 v3.9.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -38,6 +38,7 @@ require (
 	github.com/apache/arrow/go/v14 v14.0.2 // indirect
 	github.com/colinmarc/hdfs/v2 v2.4.0 // indirect
 	github.com/evilmonkeyinc/jsonpath v0.8.1 // indirect
+	github.com/expr-lang/expr v1.16.0 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/google/flatbuffers v23.5.26+incompatible // indirect
@@ -83,7 +84,6 @@ require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.2.0 // indirect
 	github.com/Masterminds/sprig/v3 v3.2.3 // indirect
-	github.com/antonmedv/expr v1.15.5 // indirect
 	github.com/argoproj/argo-events v1.7.3 // indirect
 	github.com/argoproj/pkg v0.13.7-0.20230901113346-235a5432ec98 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
