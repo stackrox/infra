@@ -3,6 +3,7 @@ package token
 
 import (
 	"context"
+	"regexp"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -29,20 +30,54 @@ func Command() *cobra.Command {
 	}
 }
 
+func validateName(name string) error {
+	if name == "" {
+		return errors.New("no name given")
+	}
+	match, err := regexp.MatchString(`^[a-zA-Z][a-zA-Z ]*$`, name)
+	if err != nil {
+		return err
+	}
+	if !match {
+		return errors.New("name must be a non-empty alphabetical string")
+	}
+
+	return nil
+}
+
+func validateDescription(description string) error {
+	if description == "" {
+		return errors.New("no description given")
+	}
+	match, err := regexp.MatchString(`^[a-zA-Z][a-zA-Z0-9 .-]*$`, description)
+	if err != nil {
+		return err
+	}
+	if !match {
+		return errors.New("name must be a non-empty alphanumeric string (allowed special chars: space, dot, hyphen)")
+	}
+	return nil
+}
+
+func validateEmail(email string) error {
+	if email == "" {
+		return errors.New("no email given")
+	}
+	if !strings.HasSuffix(email, "@redhat.com") {
+		return errors.Errorf("given email %q is not a redhat.com address", email)
+	}
+	return nil
+}
+
 func args(_ *cobra.Command, args []string) error {
 	name, description, email := args[0], args[1], args[2]
-	switch {
-	case name == "":
-		return errors.New("no name given")
-	case description == "":
-		return errors.New("no description given")
-	case email == "":
-		return errors.New("no email given")
-	case !strings.HasSuffix(email, "@redhat.com"):
-		return errors.Errorf("given email %q is not a redhat.com address", email)
-	default:
-		return nil
+	if err := validateName(name); err != nil {
+		return err
 	}
+	if err := validateDescription(description); err != nil {
+		return err
+	}
+	return validateEmail(email)
 }
 
 func token(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, args []string) (common.PrettyPrinter, error) {

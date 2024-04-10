@@ -141,6 +141,12 @@ setup() {
   assert_output --partial "Error: The name does not match the requirements."
 }
 
+@test "cannot create a cluster with an invalid lifespan" {
+  run infractl create test-qa-demo --lifespan 3w
+  assert_failure
+  assert_output --partial "Error: invalid argument \"3w\" for \"--lifespan\" flag:"
+}
+
 infractl() {
   "$ROOT"/bin/infractl -e localhost:8443 -k "$@"
 }
