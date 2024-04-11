@@ -67,7 +67,7 @@ func ValidateParameterArgument(parts []string) error {
 	if value == "" {
 		return errors.New("value is empty")
 	}
-	match, err = regexp.MatchString(`^[a-zA-Z0-9:?/.-_]+$`, value)
+	match, err = regexp.MatchString(`^[a-zA-Z0-9:\/\?._-]+$`, value)
 	if err != nil {
 		return err
 	}
