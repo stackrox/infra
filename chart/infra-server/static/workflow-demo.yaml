@@ -54,7 +54,7 @@ spec:
                   from: '{{ "{{" }}workflow.outputs.artifacts.global-tfvars{{ "}}" }}'
 
     - name: roxctl
-      activeDeadlineSeconds: 120
+      activeDeadlineSeconds: 600
       outputs:
         artifacts:
           - name: roxctl
