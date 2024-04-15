@@ -13,7 +13,7 @@ CLUSTER_NAME="$(kubectl get workflow "${WORKFLOW_NAME}" -o yaml | yq '.metadata.
 
 TIMESTAMP=$(date +%s)
 RUNNER_NAME="${PREFIX}-${CLUSTER_NAME}-destroyer-${TIMESTAMP}"
-AUTOMATION_FLAVORS_OS4_TAG="0.10.8"
+AUTOMATION_FLAVORS_OS4_TAG=$(yq '.annotations.automationFlavorsVersion' chart/infra-server/Chart.yaml)
 OPENSHIFT_VERSION="ocp/stable"
 
 PVC_NAME="${WORKFLOW_NAME}-data"
