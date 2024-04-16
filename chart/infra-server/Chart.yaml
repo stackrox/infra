@@ -8,5 +8,5 @@ sources:
   - https://github.com/stackrox/infra
 annotations:
   acsDemoVersion: 4.4.0
-  automationFlavorsVersion: 0.10.9
+  automationFlavorsVersion: 0.10.11
   ocpCredentialsMode: Passthrough
