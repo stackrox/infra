@@ -30,7 +30,7 @@ require (
 	google.golang.org/protobuf v1.33.0
 	gopkg.in/square/go-jose.v2 v2.6.0
 	k8s.io/api v0.29.2
-	k8s.io/apimachinery v0.29.2
+	k8s.io/apimachinery v0.29.4
 	k8s.io/client-go v0.29.2
 )
 
