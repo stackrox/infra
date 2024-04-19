@@ -5,7 +5,7 @@ export GO111MODULE=on
 all: image
 
 TAG=$(shell git describe --tags --abbrev=10 --long)
-TAGGED=$(shell git tag --contains | head)
+TAGGED=$(shell git tag --sort=-creatordate --contains | head --lines=1)
 ifneq (,$(TAGGED))
 	# We're tagged. Use the tag explicitly.
 	VERSION := $(TAGGED)
