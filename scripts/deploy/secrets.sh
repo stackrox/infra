@@ -77,12 +77,14 @@ edit() {
     echo "> Enter new value. Type 'EOF' on a line by itself to finish:"
     new_value=""
 
+    stty_saved=$(stty -g); stty -icanon  # workaround tty input length limit
     while IFS= read -r line; do
         if [ "$line" = "EOF" ]; then
             break
         fi
         new_value+="$line\n"
     done
+    stty "${stty_saved}"
 
     yq eval \
         --inplace ".${secret_name} = \"$(echo -e -n "${new_value}" | base64)\"" \
