@@ -34,12 +34,12 @@ func validateName(name string) error {
 	if name == "" {
 		return errors.New("no name given")
 	}
-	match, err := regexp.MatchString(`^[a-zA-Z][a-zA-Z ]*$`, name)
+	match, err := regexp.MatchString(`^[a-zA-Z][a-zA-Z -]*$`, name)
 	if err != nil {
 		return err
 	}
 	if !match {
-		return errors.New("name must be a non-empty alphabetical string")
+		return errors.New("name must be a non-empty alphabetical string (allowed special chars: space, hyphen)")
 	}
 
 	return nil
