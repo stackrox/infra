@@ -7,7 +7,7 @@ touch "${HOME}/.bigqueryrc"
 
 bq query \
     --nouse_legacy_sql \
-    --project_id stackrox-infra \
+    --project_id acs-team-automation \
     --format prettyjson \
 < "${WORKING_DIR}/total-time-consumed.sql" \
 | python3 "${WORKING_DIR}/render_costs.py"
