@@ -143,7 +143,7 @@ func TestGetClusterJSONOutput(t *testing.T) {
 	testTime, err := ptypes.TimestampProto(time.Date(2022, time.April, 1, 1, 0, 0, 0, time.UTC))
 	assert.NoError(t, err)
 	csc := &FakeClusterServiceClient{
-		infoFn: func(ctx context.Context, clusterID *v1.ResourceByID) (*v1.Cluster, error) {
+		infoFn: func(_ context.Context, _ *v1.ResourceByID) (*v1.Cluster, error) {
 			return &v1.Cluster{
 				ID:          "test-123",
 				Status:      v1.Status_FAILED,

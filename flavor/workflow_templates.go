@@ -146,6 +146,7 @@ func getParametersFromWorkflowTemplate(template *v1alpha1.WorkflowTemplate) map[
 			Order: int32(idx + 1),
 		}
 		parameter.Description = wfParameter.Description.String()
+		//nolint:gocritic
 		if wfParameter.Default == nil && wfParameter.Value == nil {
 			// Required
 			parameter.Optional = false
