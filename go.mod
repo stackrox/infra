@@ -10,8 +10,8 @@ require (
 	github.com/argoproj/argo-workflows/v3 v3.5.5
 	github.com/buger/jsonparser v1.1.1
 	github.com/coreos/go-oidc/v3 v3.9.0
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
+	github.com/go-jose/go-jose/v4 v4.0.2
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.5.4
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
@@ -31,7 +31,6 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20240314234333-6e1732d8331c
 	google.golang.org/grpc v1.62.1
 	google.golang.org/protobuf v1.33.0
-	gopkg.in/square/go-jose.v2 v2.6.0
 	k8s.io/api v0.29.2
 	k8s.io/apimachinery v0.29.2
 	k8s.io/client-go v0.29.2

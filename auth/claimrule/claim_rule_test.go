@@ -4,8 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"gopkg.in/square/go-jose.v2"
-
+	"github.com/go-jose/go-jose/v4"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,7 +15,8 @@ type dataSet struct {
 }
 
 func getRawToken(t *testing.T, jwt map[string]interface{}) string {
-	signer, err := jose.NewSigner(jose.SigningKey{Algorithm: "HS256", Key: []byte("secret")}, (&jose.SignerOptions{}).WithType("JWT"))
+	key := []byte(`ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz`)
+	signer, err := jose.NewSigner(jose.SigningKey{Algorithm: jose.HS256, Key: key}, (&jose.SignerOptions{}).WithType("JWT"))
 	if err != nil {
 		t.Fatal(err)
 	}
