@@ -9,7 +9,7 @@
 
 Infra (the server) and infractl (the cli) are written in Go, and use gRPC for
 client-server communication. The UI uses a React/Typescript/Yarn toolchain (see
-(ui/README.md)[ui/README.md]).
+[ui/README.md](ui/README.md)).
 
 While a development workflow can be achieved using a locally installed
 toolchain, it is also possible to rely on CI. CI will lint, build and push the
