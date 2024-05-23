@@ -257,23 +257,23 @@ bounce-argo-pods:
 ## Secrets ##
 #############
 .PHONY: secrets-download
-secrets-download: pre-check
+secrets-download:
 	@./scripts/deploy/secrets.sh download_secrets $(ENVIRONMENT)
 
 .PHONY: secrets-upload
-secrets-upload: pre-check
+secrets-upload:
 	@./scripts/deploy/secrets.sh upload_secrets $(ENVIRONMENT) $(SECRET_VERSION)
 
 .PHONY: secrets-show
-secrets-show: pre-check
+secrets-show:
 	@./scripts/deploy/secrets.sh show $(ENVIRONMENT) $(SECRET_VERSION)
 
 .PHONY: secrets-edit
-secrets-edit: pre-check
+secrets-edit:
 	@./scripts/deploy/secrets.sh edit $(ENVIRONMENT) $(SECRET_VERSION)
 
 .PHONY: secrets-revert
-secrets-revert: pre-check
+secrets-revert:
 	@./scripts/deploy/secrets.sh revert $(ENVIRONMENT) $(SECRET_VERSION)
 
 ##################
