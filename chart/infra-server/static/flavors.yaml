@@ -157,7 +157,7 @@
 
     - name: machine-type
       description: node machine type
-      value: e2-standard-4
+      value: e2-standard-8
       kind: optional
 
     - name: k8s-version
