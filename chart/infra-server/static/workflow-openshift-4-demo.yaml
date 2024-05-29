@@ -269,6 +269,7 @@ spec:
           - entrypoint.sh
         args:
           - destroy
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
         env:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
@@ -282,7 +283,7 @@ spec:
             mountPath: /data
 
     - name: roxctl-central
-      activeDeadlineSeconds: 120
+      activeDeadlineSeconds: 600
       outputs:
         artifacts:
           - name: roxctl-central
@@ -299,7 +300,7 @@ spec:
           - /tmp/roxctl-central
 
     - name: roxctl-secured-cluster-services
-      activeDeadlineSeconds: 120
+      activeDeadlineSeconds: 600
       outputs:
         artifacts:
           - name: roxctl-secured-cluster-services

@@ -11,7 +11,7 @@ jobs:
   build-and-push-server:
     runs-on: ubuntu-latest
     container:
-      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.69
 
     steps:
       - name: Checkout
@@ -58,7 +58,7 @@ jobs:
   build-and-push-certifier:
     runs-on: ubuntu-latest
     container:
-      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.69
 
     steps:
       - name: Checkout

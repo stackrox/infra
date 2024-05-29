@@ -11,14 +11,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/cluster/artifacts"
+	"github.com/stackrox/infra/cmd/infractl/cluster/utils"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
 const (
@@ -97,12 +98,17 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 	if downloadDir != "" {
 		wait = true
 	}
+
+	if err := utils.ValidateLifespan(lifespan); err != nil {
+		return nil, err
+	}
+
 	client := v1.NewClusterServiceClient(conn)
 
 	req := v1.CreateClusterRequest{
 		ID:          args[0],
 		Parameters:  make(map[string]string),
-		Lifespan:    ptypes.DurationProto(lifespan),
+		Lifespan:    durationpb.New(lifespan),
 		Description: description,
 		NoSlack:     noSlack,
 		SlackDM:     slackDM,
@@ -110,8 +116,8 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 
 	for _, arg := range params {
 		parts := strings.SplitN(arg, "=", 2)
-		if len(parts) != 2 || parts[1] == "" {
-			return nil, fmt.Errorf("bad parameter argument %q", arg)
+		if err := utils.ValidateParameterArgument(parts); err != nil {
+			return nil, fmt.Errorf("bad parameter argument %q: %v", arg, err)
 		}
 		req.Parameters[parts[0]] = parts[1]
 	}
@@ -121,7 +127,7 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 
 	if len(args) > 1 {
 		name := args[1]
-		err := validateName(name)
+		err := utils.ValidateClusterName(name)
 		if err != nil {
 			return nil, err
 		}
@@ -151,28 +157,6 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 	}
 
 	return prettyResourceByID(*clusterID), nil
-}
-
-func validateName(name string) error {
-	if len(name) < 3 {
-		return errors.New("cluster name too short")
-	}
-	if len(name) > 28 {
-		return errors.New("cluster name too long")
-	}
-
-	match, err := regexp.MatchString(`^(?:[a-z](?:[-a-z0-9]{1,26}[a-z0-9]))$`, name)
-	if err != nil {
-		return err
-	}
-	if !match {
-		return errors.New(
-			"The name does not match the requirements. " +
-				"Only lowercase letters, numbers, and '-' allowed, must start with a letter and end with a letter or number. " +
-				"A minimum length of 3 characters and a maximum length of 28 is allowed.")
-	}
-
-	return nil
 }
 
 func determineWorkingEnvironment() {
