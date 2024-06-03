@@ -6,17 +6,7 @@ TASK="$1"
 ENVIRONMENT="$2"
 SECRET_VERSION="${3:-latest}"
 
-PROJECT="stackrox-infra"
-
-check_not_empty() {
-    for V in "$@"; do
-        typeset -n VAR="$V"
-        if [ -z "${VAR:-}" ]; then
-            echo "ERROR: Variable $V is not set or empty"
-            exit 1
-        fi
-    done
-}
+PROJECT="${INFRA_GCP_PROJECT:-acs-team-automation}"
 
 # Downloads secrets files for an ENVIRONMENT.
 download_secrets() {
@@ -96,5 +86,4 @@ revert() {
     upload_secrets
 }
 
-check_not_empty TASK ENVIRONMENT
 eval "$TASK"
