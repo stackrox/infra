@@ -11,7 +11,7 @@ SECRET_VERSION="${4:-latest}"
 # Cannot use CI, because then CD with GHA would not be possible.
 TEST_MODE="${TEST_MODE:-false}"
 
-SECRETS_PROJECT="stackrox-infra"
+SECRETS_PROJECT="acs-team-automation"
 RELEASE_NAMESPACE="infra"
 RELEASE_NAME="infra-server"
 
