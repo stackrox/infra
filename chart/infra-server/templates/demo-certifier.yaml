@@ -69,7 +69,7 @@ spec:
               - --cert-name=demos.rox.systems
               - --gcs-bucket=sr-demo-files
               - --gcs-prefix=certs
-              - --dns-gcp-project=acs-team-temp-dev
+              - --gcp-project-name=acs-team-temp-dev
             env:
               - name: GOOGLE_APPLICATION_CREDENTIALS
                 value: /configuration/google-credentials.json
