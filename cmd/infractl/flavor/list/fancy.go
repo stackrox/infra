@@ -20,6 +20,7 @@ func (p prettyFlavorListResponse) PrettyPrint(cmd *cobra.Command) {
 		cmd.Printf("  Name:         %s\n", flavor.GetName())
 		cmd.Printf("  Description:  %s\n", flavor.GetDescription())
 		cmd.Printf("  Availability: %s\n", flavor.GetAvailability())
+		cmd.Printf("  Provider:     %s\n", flavor.GetProvider())
 	}
 }
 

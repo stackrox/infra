@@ -200,6 +200,9 @@ message Flavor {
 
     // Aliases are alternative IDs of the flavor.
     repeated string Aliases = 7;
+
+    // (cloud) Provider is a human readable name of the provider.
+    string Provider = 8;
 }
 
 // FlavorListRequest represents a request to FlavorService.List.
