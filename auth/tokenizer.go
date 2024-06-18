@@ -6,7 +6,8 @@ import (
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/go-jose/go-jose/v4"
+	"github.com/go-jose/go-jose/v4/jwt"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/auth/claimrule"
@@ -15,13 +16,9 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// clockDriftLeeway is used to account for minor clock drift between our host,
-// and OIDC.
-//
-// See this issue for context:
-// https://github.com/dgrijalva/jwt-go/issues/314#issuecomment-494585527
 const (
-	clockDriftLeeway = int64(10 * time.Second)
+	// clockDriftLeeway is used to account for minor clock drift between our host and OIDC.
+	clockDriftLeeway = 10 * time.Second
 
 	emailSuffixRedHat = "@redhat.com"
 )
@@ -34,7 +31,7 @@ func createHumanUser(profile oidcClaims) *v1.User {
 		Name:    profile.Name,
 		Email:   profile.Email,
 		Picture: profile.PictureURL,
-		Expiry:  &timestamp.Timestamp{Seconds: profile.ExpiresAt},
+		Expiry:  &timestamp.Timestamp{Seconds: int64(*profile.Expiry)},
 	}
 }
 
@@ -63,24 +60,18 @@ func NewStateTokenizer(lifetime time.Duration, secret string) *stateTokenizer {
 // Generate generates a state JWT.
 func (t stateTokenizer) Generate() (string, error) {
 	now := time.Now()
-	claims := jwt.StandardClaims{
-		ExpiresAt: now.Add(t.lifetime).Unix(),
-		NotBefore: now.Unix(),
-		IssuedAt:  now.Unix(),
+	nowDate := jwt.NewNumericDate(now)
+	claims := jwt.Claims{
+		Expiry:    jwt.NewNumericDate(now.Add(t.lifetime)),
+		NotBefore: nowDate,
+		IssuedAt:  nowDate,
 	}
-
-	// Generate new token object, containing the wrapped data.
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	// Sign and get the complete encoded token as a string using the secret
-	return token.SignedString(t.secret)
+	return signedToken(t.secret, claims)
 }
 
 // Validate validates a state JWT.
 func (t stateTokenizer) Validate(token string) error {
-	_, err := jwt.Parse(token, func(_ *jwt.Token) (interface{}, error) {
-		return t.secret, nil
-	})
+	_, err := jwt.ParseSigned(token, []jose.SignatureAlgorithm{jose.HS256})
 	return err
 }
 
@@ -109,7 +100,7 @@ func NewOidcTokenizer(verifier *oidc.IDTokenVerifier) *oidcTokenizer {
 // oidcClaims facilitates the unmarshalling of JWTs containing OIDC user
 // profile data.
 type oidcClaims struct {
-	jwt.StandardClaims
+	jwt.Claims
 	FamilyName    string `json:"family_name"`
 	GivenName     string `json:"given_name"`
 	Name          string `json:"name"`
@@ -139,10 +130,9 @@ func (c oidcClaims) Valid() error {
 		log.AuditLog(logging.INFO, "oidc-claim-validation", errMsg, "email", c.Email)
 		return errors.Errorf(errMsg)
 	default:
-		c.StandardClaims.IssuedAt -= clockDriftLeeway
-		valid := c.StandardClaims.Valid()
-		c.StandardClaims.IssuedAt += clockDriftLeeway
-		return valid
+		// Use an empty jwt.Expected to skip non-time-related validation and use time.Now()
+		// for the validation.
+		return c.ValidateWithLeeway(jwt.Expected{}, clockDriftLeeway)
 	}
 }
 
@@ -193,37 +183,38 @@ func NewUserTokenizer(lifetime time.Duration, secret string) *userTokenizer {
 // userClaims facilitates the arshalling/unmarshalling of JWTs containing v1
 // .User data.
 type userClaims struct {
+	jwt.Claims
 	User v1.User `json:"user"`
-	jwt.StandardClaims
 }
 
 // Generate generates a user JWT containing a v1.User struct.
 func (t userTokenizer) Generate(user *v1.User) (string, error) {
 	now := time.Now()
+	nowDate := jwt.NewNumericDate(now)
 	claims := userClaims{
 		User: *user,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: now.Add(t.lifetime).Unix(),
-			NotBefore: now.Unix(),
-			IssuedAt:  now.Unix(),
+		Claims: jwt.Claims{
+			Expiry:    jwt.NewNumericDate(now.Add(t.lifetime)),
+			NotBefore: nowDate,
+			IssuedAt:  nowDate,
 		},
 	}
-
-	// Generate new token object, containing the wrapped data.
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	// Sign and get the complete encoded token as a string using the secret
-	return token.SignedString(t.secret)
+	return signedToken(t.secret, claims)
 }
 
 // Validate validates a user JWT and returns the contained v1.User struct.
 func (t userTokenizer) Validate(token string) (*v1.User, error) {
-	var claims userClaims
-	if _, err := jwt.ParseWithClaims(token, &claims, func(_ *jwt.Token) (interface{}, error) {
-		return t.secret, nil
-	}); err != nil {
+	parsedToken, err := jwt.ParseSigned(token, []jose.SignatureAlgorithm{jose.HS256})
+	if err != nil {
 		return nil, err
 	}
+
+	var claims userClaims
+	err = parsedToken.Claims(t.secret, &claims)
+	if err != nil {
+		return nil, err
+	}
+
 	return &claims.User, nil
 }
 
@@ -276,20 +267,20 @@ func (t serviceAccountTokenizer) Generate(svcacct v1.ServiceAccount) (string, er
 		return "", errors.Wrap(err, "invalid service account")
 	}
 
-	// Generate new token object, containing the wrapped data.
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, svc)
-
-	// Sign and get the complete encoded token as a string using the secret
-	return token.SignedString(t.secret)
+	return signedToken(t.secret, svc)
 }
 
 // Validate validates a service account JWT and returns the contained
 // v1.ServiceAccount.
 func (t serviceAccountTokenizer) Validate(token string) (v1.ServiceAccount, error) {
+	parsedToken, err := jwt.ParseSigned(token, []jose.SignatureAlgorithm{jose.HS256})
+	if err != nil {
+		return v1.ServiceAccount{}, err
+	}
+
 	var claims serviceAccountValidator
-	if _, err := jwt.ParseWithClaims(token, &claims, func(_ *jwt.Token) (interface{}, error) {
-		return t.secret, nil
-	}); err != nil {
+	err = parsedToken.Claims(t.secret, &claims)
+	if err != nil {
 		return v1.ServiceAccount{}, err
 	}
 
@@ -322,4 +313,18 @@ func (t accessTokenizer) Validate(_ context.Context, rawToken *oauth2.Token) err
 	}
 
 	return t.claimRules.Validate(rawAccessToken.(string))
+}
+
+func signedToken(key []byte, claims any) (string, error) {
+	sigKey := jose.SigningKey{
+		Algorithm: jose.HS256,
+		Key:       key,
+	}
+	// See https://pkg.go.dev/github.com/go-jose/go-jose/v4/jwt#example-Signed for an example.
+	sig, err := jose.NewSigner(sigKey, (&jose.SignerOptions{}).WithType("JWT"))
+	if err != nil {
+		return "", err
+	}
+
+	return jwt.Signed(sig).Claims(claims).Serialize()
 }
