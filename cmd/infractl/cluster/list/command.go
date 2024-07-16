@@ -36,6 +36,7 @@ func Command() *cobra.Command {
 
 	cmd.Flags().Bool("all", false, "include clusters not owned by you")
 	cmd.Flags().Bool("expired", false, "include expired clusters")
+	cmd.Flags().BoolP("quiet", "q", false, "only output cluster names")
 	cmd.Flags().String("prefix", "", "only include clusters whose names matches this prefix")
 	return cmd
 }
@@ -43,6 +44,7 @@ func Command() *cobra.Command {
 func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []string) (common.PrettyPrinter, error) {
 	includeAll := common.MustBool(cmd.Flags(), "all")
 	includeExpired := common.MustBool(cmd.Flags(), "expired")
+	quietMode := common.MustBool(cmd.Flags(), "quiet")
 	prefix, _ := cmd.Flags().GetString("prefix")
 
 	req := v1.ClusterListRequest{
@@ -56,5 +58,8 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []str
 		return nil, err
 	}
 
-	return prettyClusterListResponse(*resp), nil
+	return prettyClusterListResponse{
+		ClusterListResponse: *resp,
+		QuietMode:           quietMode,
+	}, nil
 }
