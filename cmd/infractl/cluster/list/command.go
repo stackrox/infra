@@ -20,7 +20,10 @@ $ infractl list --expired
 $ infractl list --all
 
 # List clusters whose name matches a prefix.
-$ infractl list --prefix=<match>`
+$ infractl list --prefix=<match>
+
+# List only the names of clusters
+$ infractl list --quiet`
 
 // Command defines the handler for infractl list.
 func Command() *cobra.Command {
