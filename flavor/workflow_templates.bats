@@ -53,6 +53,13 @@ setup_file() {
   assert_output --partial '"msg":"ignoring a workflow template with an unknown infra.stackrox.io/availability annotation","template-name":"invalid-availability","template-availability":"woot!"'
 }
 
+@test "provider is set" {
+  flavor="$(infractl flavor get test-gke-lite --json)"
+  assert_success
+  provider="$(echo "$flavor" | jq -r '.Provider')"
+  assert_equal "$provider" "gcp"
+}
+
 # Parameters
 
 @test "parameters must have descriptions" {

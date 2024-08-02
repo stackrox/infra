@@ -5,6 +5,7 @@
   name: StackRox Demo
   description: Demo running StackRox {{ .Chart.Annotations.acsDemoVersion }}
   availability: default
+  provider: gcp
   workflow: configuration/workflow-demo.yaml
   parameters:
     - name: name
@@ -63,6 +64,7 @@
   name: StackRox Demo for QA testing
   description: Demo running a provided StackRox version
   availability: stable
+  provider: gcp
   workflow: configuration/workflow-qa-demo.yaml
   parameters:
     - name: name
@@ -142,6 +144,7 @@
   name: GKE Default
   description: GKE cluster running the default version
   availability: stable
+  provider: gcp
   workflow: configuration/workflow-gke-default.yaml
   aliases:
     - gke
@@ -205,6 +208,7 @@
   name: OpenShift 3.11
   description: OpenShift 3.11 cluster
   availability: stable
+  provider: gcp
   workflow: configuration/workflow-openshift-multi.yaml
   aliases:
     - openshift-3
@@ -276,6 +280,7 @@
   name: OpenShift 4.x
   description: OpenShift 4.x OCP or OKD cluster
   availability: stable
+  provider: gcp
   workflow: configuration/workflow-openshift-4.yaml
   aliases:
     - ocp-4
@@ -410,6 +415,7 @@
   name: OpenShift 4.x Demo
   description: OpenShift 4.x Demo
   availability: stable
+  provider: gcp
   workflow: configuration/workflow-openshift-4-demo.yaml
   aliases:
     - ocp-4-demo
@@ -563,6 +569,7 @@
   name: OpenShift 4.x Perf&Scale
   description: OpenShift 4.x Perf&Scale
   availability: stable
+  provider: gcp
   workflow: configuration/workflow-openshift-4-perf-scale.yaml
   aliases:
     - ocp-4-perf-scale
@@ -690,6 +697,7 @@
   name: EKS
   description: AWS EKS cluster
   availability: stable
+  provider: aws
   workflow: configuration/workflow-eks.yaml
   parameters:
     - name: name
@@ -727,6 +735,7 @@
   name: AKS
   description: Azure AKS cluster
   availability: stable
+  provider: azure
   workflow: configuration/workflow-aks.yaml
   parameters:
     - name: name
@@ -779,6 +788,7 @@
   name: ARO
   description: Openshift ARO cluster
   availability: stable
+  provider: azure
   workflow: configuration/workflow-openshift-aro.yaml
   parameters:
     - name: name
@@ -822,6 +832,7 @@
   name: ROSA
   description: Openshift ROSA cluster
   availability: stable
+  provider: aws
   workflow: configuration/workflow-openshift-rosa.yaml
   parameters:
     - name: name
@@ -870,6 +881,7 @@
   name: Hypershift on ROSA (HCP)
   description: Openshift ROSA HCP (Hypershift ManagedCP) cluster
   availability: stable
+  provider: aws
   workflow: configuration/workflow-openshift-rosa-hcp.yaml
   parameters:
     - name: name
@@ -945,6 +957,7 @@
   name: OSD on AWS
   description: Openshift dedicated on AWS
   availability: stable
+  provider: aws
   workflow: configuration/workflow-osd-aws.yaml
   parameters:
     - name: name
@@ -999,6 +1012,7 @@
   name: OSD on GCP
   description: Openshift dedicated on GCP
   availability: stable
+  provider: gcp
   workflow: configuration/workflow-osd-gcp.yaml
   parameters:
     - name: name
@@ -1053,6 +1067,7 @@
   name: IBM ROKS
   description: IBM ROKS cluster on VPC infrastructure.
   availability: stable
+  provider: ibm
   workflow: configuration/workflow-openshift-ibmroks.yaml
   parameters:
     - name: name
@@ -1159,6 +1174,7 @@
   name: Test URL Artifact
   description: Test URL Artifact
   availability: stable
+  provider: ""
   workflow: configuration/test-url-artifact.yaml
   parameters:
     - name: name
@@ -1176,6 +1192,7 @@
   name: Test Connect Artifact
   description: Test Connect Artifact
   availability: stable
+  provider: ""
   aliases:
     - test-alias-1
     - test-alias-2

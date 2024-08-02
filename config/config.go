@@ -98,6 +98,9 @@ type FlavorConfig struct {
 	// Description is a human readable description for the flavor.
 	Description string `json:"description"`
 
+	// (Cloud) Provider
+	Provider string `json:"provider"`
+
 	// Availability is an availability classification level. One of "alpha",
 	// "beta", "stable", or "default". Exactly 1 default flavor must be
 	// configured.
