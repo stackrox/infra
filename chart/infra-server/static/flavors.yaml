@@ -159,6 +159,8 @@
       description: node machine type
       value: e2-standard-8
       kind: optional
+      help: |
+        [allowed machine types](https://source.redhat.com/departments/it/devit/it-infrastructure/itcloudservices/itpubliccloudpage/cloud/docs/consumer/gcp_list_of_allowed_machines_types)
 
     - name: k8s-version
       description: GKE kubernetes version
