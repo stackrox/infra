@@ -5,7 +5,9 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"net/http"
@@ -70,6 +72,8 @@ func DownloadArtifacts(ctx context.Context, client v1.ClusterServiceClient, id s
 	}
 
 	for _, artifact := range resp.Artifacts {
+		json_blob, _ := json.MarshalIndent(artifact, "", "  ")
+		fmt.Printf("\nArtifact: %s\n", string(json_blob))
 		filename, err := download(downloadDir, *artifact)
 		if err != nil {
 			return nil, err
@@ -92,11 +96,14 @@ func download(downloadDir string, artifact v1.Artifact) (filename string, err er
 	}
 
 	// Download the (GCS signed) URL.
+	fmt.Printf("URL: %s\n", artifact.URL)
 	resp, err := http.Get(artifact.URL)
+	json_blob, _ := json.MarshalIndent(resp.Header, "", "  ")
+	fmt.Printf("Response header: %s\n", string(json_blob))
+	defer resp.Body.Close() //nolint:errcheck
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close() //nolint:errcheck
 
 	var artifactName string
 	if strings.Contains(resp.Header.Get("Content-Type"), "gzip") {
