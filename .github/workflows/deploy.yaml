@@ -86,7 +86,7 @@ jobs:
                     "type": "section",
                     "text": {
                       "type": "mrkdwn",
-                      "text": ":ship::tada:*Infra (${{ inputs.environment }}) was updated to ${{ inputs.version }}, ${{ github.server_url }}/${{ github.repository }}/releases."
+                      "text": ":ship::tada:*Infra (${{ inputs.environment }}) was updated to <${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ inputs.version }}|${{ inputs.version }}>."
                     }
                   }
                 ]
