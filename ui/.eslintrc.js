@@ -8,8 +8,6 @@ module.exports = {
     'plugin:eslint-comments/recommended',
     'airbnb-typescript',
     'prettier',
-    'prettier/@typescript-eslint',
-    'prettier/react',
   ],
   parserOptions: {
     project: './tsconfig.eslint.json',
