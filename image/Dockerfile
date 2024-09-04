@@ -6,13 +6,13 @@ COPY . .
 
 RUN make server cli
 
-FROM node:20.11.0 as ui-builder
+FROM node:22.8.0 as ui-builder
 
 COPY ui ui
 
 RUN --mount=type=secret,id=npmrc,target=/root/.npmrc make -C ui all
 
-FROM alpine:3.19.1 as app
+FROM alpine:3.20.2 as app
 
 COPY --from=golang-builder /go/src/github.com/stackrox/infra/bin/infra-server-linux-amd64 /infra-server
 
