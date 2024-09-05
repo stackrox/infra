@@ -18,6 +18,7 @@ DAILY_COST_MAP = {
     "eks": 13,
     "aks": 17,
     "aro": 53,
+    "unknown": 25,
 }
 
 def read_usage_from_stdin():
@@ -39,7 +40,10 @@ def calculate_costs(usage):
             "total usage (days)": x["total_days_consumed"],
         }
 
-        current["cost (usd)"] = float(x["total_days_consumed"]) * DAILY_COST_MAP[x["flavor"]]
+        try:
+            current["cost (usd)"] = float(x["total_days_consumed"]) * DAILY_COST_MAP[x["flavor"]]
+        except KeyError:
+            current["cost (usd)"] = float(x["total_days_consumed"]) * DAILY_COST_MAP["unknown"]
         costs.append(current)
 
     return costs
