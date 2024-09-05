@@ -5,14 +5,14 @@
 
 version: 2
 updates:
-  - package-ecosystem: 'npm'
-    directory: 'ui/'
-    schedule:
-      interval: 'weekly'
-      day: 'wednesday'
-    reviewers:
-      - 'stackrox/ui-dep-updaters'
-      - 'stackrox/infra'
+  #- package-ecosystem: 'npm'
+  #  directory: 'ui/'
+  #  schedule:
+  #    interval: 'weekly'
+  #    day: 'wednesday'
+  #  reviewers:
+  #    - 'stackrox/ui-dep-updaters'
+  #    - 'stackrox/infra'
 
   - package-ecosystem: 'gomod'
     directory: '/'
