@@ -1,6 +1,5 @@
 import namor from 'namor';
 
-// eslint-disable-next-line import/prefer-default-export
 export function generateClusterName(username = ''): string {
   // start with lowercase initials
   const userPart = username

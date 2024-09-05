@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { ReactElement } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { AxiosPromise } from 'axios';
@@ -57,7 +56,7 @@ function ClusterCards({ showAllClusters = false }: ClusterCardsProps): ReactElem
     : data.Clusters.filter((cluster) => cluster.Owner === user?.Email);
   // sorted in descending order by creation date
   const sortedClusters = clustersToShow.sort((c1, c2) =>
-    moment(c1.CreatedOn).isBefore(c2.CreatedOn) ? 1 : -1
+    moment(c1.CreatedOn).isBefore(c2.CreatedOn) ? 1 : -1,
   );
 
   if (sortedClusters.length === 0) {
@@ -138,4 +137,3 @@ export default function MyClustersPageSection(): ReactElement {
   );
 }
 
-/* eslint-enable jsx-a11y/label-has-associated-control */
