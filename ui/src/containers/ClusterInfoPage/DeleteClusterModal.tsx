@@ -20,7 +20,7 @@ type Props = {
 export default function DeleteClusterModal({ cluster, onCancel, onDeleted }: Props): ReactElement {
   const [deleteCluster, { called, loading, error }] = useApiOperation(() => {
     assertDefined(cluster.ID); // swagger definitions are too permitting
-    return clusterService._delete(cluster.ID); // eslint-disable-line no-underscore-dangle
+    return clusterService._delete(cluster.ID);  
   });
 
   assertDefined(cluster.ID); // swagger definitions are too permitting

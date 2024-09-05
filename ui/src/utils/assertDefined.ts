@@ -6,7 +6,7 @@
  */
 export default function assertDefined<T>(
   testValue: T,
-  msg?: string
+  msg?: string,
 ): asserts testValue is NonNullable<T> {
   if (testValue === undefined || testValue === null) {
     throw new Error(msg || 'Must not be a nullable value');

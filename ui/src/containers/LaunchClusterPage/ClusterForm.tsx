@@ -28,8 +28,7 @@ const clusterService = new ClusterServiceApi(configuration);
 
 function helpByParameterName(name?: string): string {
   const help: { [key: string]: string } = {
-    name:
-      "You can use the generated name, or type in your own. Only lowercase letters, numbers, and '-' allowed, must start with a letter and end with a letter or number. The name must be between 3 and 28 characters long.",
+    name: "You can use the generated name, or type in your own. Only lowercase letters, numbers, and '-' allowed, must start with a letter and end with a letter or number. The name must be between 3 and 28 characters long.",
   };
 
   if (name && name in help) {
@@ -46,7 +45,7 @@ const schemasByParameterName: { [key: string]: yup.Schema } = {
     .max(28, 'Too long')
     .matches(
       /^(?:[a-z](?:[a-z0-9-]{1,26}[a-z0-9]))$/,
-      'The input value does not match its requirements. See the (?) section for details.'
+      'The input value does not match its requirements. See the (?) section for details.',
     ),
   nodes: yup
     .number()
@@ -83,7 +82,7 @@ function createInitialParameterValues(parameters: FlavorParameters): Record<stri
       ...fields,
       [param]: parameters[param].Value ? parameters[param].Value : '',
     }),
-    {}
+    {},
   );
 }
 
@@ -105,7 +104,7 @@ function adjustParametersBeforeSubmit(parameterValues: FormikValues): { [key: st
 function getSchemaTestParamValue<T = unknown, V = unknown>(
   schema: yup.Schema<T>,
   testName: string,
-  testParamName: string = testName
+  testParamName: string = testName,
 ): V | undefined {
   const { tests } = schema.describe();
   const test = tests.find((t) => t.name === testName);
@@ -169,7 +168,7 @@ function getOrderFromParameter(parameter: V1Parameter): number {
 
 function getSchemaForParameter(
   parameterSchemas: ParameterSchemas,
-  parameter: V1Parameter
+  parameter: V1Parameter,
 ): yup.Schema {
   if (parameter.Name && parameter.Name in parameterSchemas) {
     return parameterSchemas[parameter.Name];
@@ -253,7 +252,7 @@ export default function ClusterForm({
 
   const onSubmit = async (
     values: FormikValues,
-    actions: FormikHelpers<FormikValues>
+    actions: FormikHelpers<FormikValues>,
   ): Promise<void> => {
     try {
       const response = await clusterService.create({
@@ -264,7 +263,6 @@ export default function ClusterForm({
       const { id } = response.data;
       if (!id) throw new Error('Server returned empty cluster ID');
       onClusterCreated(id);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       setError(e);
     } finally {

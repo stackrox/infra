@@ -24,7 +24,7 @@ export default function FileUploadFormField({
 
   const handleFileInputChange = (
     event: React.ChangeEvent<HTMLInputElement> | React.DragEvent<HTMLElement>,
-    file: File
+    file: File,
   ) => {
     setFilename(file.name);
   };
@@ -71,7 +71,7 @@ export default function FileUploadFormField({
     >
       <FileUpload
         id={id}
-        value={field.value} // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+        value={field.value}
         filename={filename}
         filenamePlaceholder="Drag and drop a file or upload one"
         type="text"

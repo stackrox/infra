@@ -56,7 +56,7 @@ export default function TextFormField({
         name={name}
         onChange={onChange}
         type="text"
-        value={field.value} // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+        value={field.value}
         placeholder={placeholder}
         isRequired={required}
         isDisabled={disabled}

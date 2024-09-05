@@ -44,7 +44,7 @@ export default function MutableLifespan({ cluster }: Props): ReactElement {
     // it expires. Therefore, calculating the "now" moment expressed as a lifetime is a bit tricky.
     const now = moment.duration(
       Date.now() - moment(modifiedCluster.CreatedOn).toDate().getTime(),
-      'ms'
+      'ms',
     );
     const minimumLifespan = now.clone().add(minimumClusterLifetime);
 
@@ -65,7 +65,7 @@ export default function MutableLifespan({ cluster }: Props): ReactElement {
       .then(() => {
         if (clearClientSideUpdate) clearTimeout(clearClientSideUpdate);
         setClearClientSideUpdate(
-          (setTimeout(() => setClientSideLifespan(''), 20000) as unknown) as number
+          setTimeout(() => setClientSideLifespan(''), 20000) as unknown as number,
         );
       })
       .catch((err) => {

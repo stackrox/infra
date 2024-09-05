@@ -25,7 +25,7 @@ export default function useApiOperation<T>(requester: ApiCaller<T>): [() => void
     () => (): void => {
       isMounted.current = false;
     },
-    [isMounted]
+    [isMounted],
   );
 
   const operation = useCallback(() => {

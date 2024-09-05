@@ -8,7 +8,7 @@ test('renders app with the proper header', () => {
   const { getByText } = render(
     <Router>
       <AppHeader />
-    </Router>
+    </Router>,
   );
   const headerElement = getByText('Infra');
   expect(headerElement).toBeInTheDocument();
