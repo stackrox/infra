@@ -7,6 +7,7 @@ from tabulate import tabulate
 DAILY_COST_MAP = {
     "demo": 33,
     "gke-default": 10,
+    "ibmroks": 56,
     "openshift-4": 29,
     "openshift-4-demo": 53,
     "openshift-4-perf-scale": 70,
@@ -14,7 +15,8 @@ DAILY_COST_MAP = {
     "osd-on-gcp": 35,
     "qa-demo": 33,
     "osd-on-aws": 50,
-    "rosa": 97,
+    "rosa": 40,
+    "rosahcp": 23,
     "eks": 13,
     "aks": 17,
     "aro": 53,
