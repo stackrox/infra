@@ -5,8 +5,9 @@
 
 version: 2
 updates:
-  #- package-ecosystem: 'npm'
-  #  directory: 'ui/'
+  - package-ecosystem: 'npm'
+    directory: 'ui/'
+    open-pull-requests-limit: 0
   #  schedule:
   #    interval: 'weekly'
   #    day: 'wednesday'
