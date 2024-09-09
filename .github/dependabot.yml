@@ -8,12 +8,12 @@ updates:
   - package-ecosystem: 'npm'
     directory: 'ui/'
     open-pull-requests-limit: 0
-  #  schedule:
-  #    interval: 'weekly'
-  #    day: 'wednesday'
-  #  reviewers:
-  #    - 'stackrox/ui-dep-updaters'
-  #    - 'stackrox/infra'
+    schedule:
+      interval: 'weekly'
+      day: 'wednesday'
+    reviewers:
+      - 'stackrox/ui-dep-updaters'
+      - 'stackrox/infra'
 
   - package-ecosystem: 'gomod'
     directory: '/'
