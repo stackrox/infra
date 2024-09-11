@@ -180,7 +180,7 @@ unit-test: proto-generated-srcs
 .PHONY: bats-e2e-tests
 bats-e2e-tests:
 	@kubectl apply -f "workflows/*.yaml"
-	@bats --jobs 5 --no-parallelize-within-files --recursive .
+	@bats --recursive .
 
 .PHONY: go-e2e-tests
 go-e2e-tests: proto-generated-srcs
