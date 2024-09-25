@@ -1035,7 +1035,7 @@
 
     - name: vpc
       description: VPC to deploy into.
-      value: infra
+      value: infra-vpc
       kind: optional
       help: Empty for a new temporary vpc to be created.
 
