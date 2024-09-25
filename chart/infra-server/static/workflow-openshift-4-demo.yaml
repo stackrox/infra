@@ -84,8 +84,6 @@ spec:
         volumeMounts:
           - name: data
             mountPath: /data
-        command:
-          - entrypoint.sh
         args:
           - create
           - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
@@ -157,8 +155,6 @@ spec:
       container:
         image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
-        command:
-          - ansible-playbook
         args: ["-i", "inventory.yml", "main.yml"]
         env:
           - name: IMAGE_PULL_USER
@@ -265,8 +261,6 @@ spec:
       container:
         image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
-        command:
-          - entrypoint.sh
         args:
           - destroy
           - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'

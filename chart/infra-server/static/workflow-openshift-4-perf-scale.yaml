@@ -83,8 +83,6 @@ spec:
       container:
         image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
-        command:
-          - entrypoint.sh
         args:
           - create
           - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
@@ -163,8 +161,6 @@ spec:
       container:
         image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
-        command:
-          - entrypoint.sh
         args:
           - destroy
           - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
