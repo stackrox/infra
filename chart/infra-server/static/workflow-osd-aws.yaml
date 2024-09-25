@@ -42,6 +42,8 @@ spec:
       container:
         image: quay.io/stackrox-io/ci:automation-flavors-osd-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
+        command:
+          - ./entrypoint.sh
         args:
           - aws
           - create
@@ -127,6 +129,8 @@ spec:
       container:
         image: quay.io/stackrox-io/ci:automation-flavors-osd-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
+        command:
+          - ./entrypoint.sh
         args:
           - aws
           - destroy

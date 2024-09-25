@@ -45,6 +45,8 @@ spec:
       container:
         image: quay.io/stackrox-io/ci:automation-flavors-eks-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
+        command:
+          - entrypoint
         args:
           - create
           - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
@@ -86,6 +88,8 @@ spec:
       activeDeadlineSeconds: 3600
       container:
         image: quay.io/stackrox-io/ci:automation-flavors-eks-{{ .Chart.Annotations.automationFlavorsVersion }}
+        command:
+          - entrypoint
         imagePullPolicy: Always
         args:
           - destroy

@@ -62,6 +62,8 @@ spec:
       container:
         image: quay.io/stackrox-io/ci:automation-flavors-gke-default-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
+        command:
+          - /usr/bin/entrypoint
         args:
           - create
           - --name={{ "{{" }}workflow.parameters.name{{ "}}" }}
@@ -85,6 +87,8 @@ spec:
       container:
         image: quay.io/stackrox-io/ci:automation-flavors-gke-default-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
+        command:
+          - /usr/bin/entrypoint
         args:
           - destroy
           - --name={{ "{{" }}workflow.parameters.name{{ "}}" }}
