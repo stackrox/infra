@@ -66,6 +66,8 @@ jobs:
         uses: stackrox/actions/infra/install-infractl@v1
 
       - name: Download artifacts
+        env:
+          INFRA_TOKEN: ${{ secrets.INFRA_TOKEN }}
         run: |
           /home/runner/.local/bin/infractl artifacts "${{ steps.determine-cluster-name.outputs.cluster-name }}" -d /home/runner/artifacts >> "$GITHUB_STEP_SUMMARY"
           kubectl get nodes -o wide || true
