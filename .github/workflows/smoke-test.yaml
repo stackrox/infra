@@ -43,6 +43,7 @@ jobs:
           flavor: gke-default
           name: ${{ steps.determine-cluster-name.outputs.cluster-name }}
           lifespan: 8h
+          wait: true
 
   smoke-test:
     runs-on: ubuntu-latest
