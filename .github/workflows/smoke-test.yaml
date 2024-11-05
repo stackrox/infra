@@ -45,6 +45,35 @@ jobs:
           lifespan: 8h
           wait: true
 
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: go/src/github.com/stackrox/infra
+
+      - name: Authenticate to GCloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.INFRA_CI_AUTOMATION_GCP_SA }}
+
+      - name: Set up Cloud SDK
+        uses: "google-github-actions/setup-gcloud@v2"
+        with:
+          install_components: "gke-gcloud-auth-plugin"
+
+      - name: Download production infractl
+        uses: stackrox/actions/infra/install-infractl@v1
+
+      - name: Download artifacts
+        run: |
+          /github/home/.local/bin/infractl artifacts "${{ steps.determine-cluster-name.outputs.cluster-name }}" -d /github/home/artifacts >> "$GITHUB_STEP_SUMMARY"
+          kubectl get nodes -o wide || true
+
+      - name: Deploy infra to smoke test cluster
+        run: |
+          ENVIRONMENT=development TEST_MODE=true make install-argo clean-argo-config install-monitoring helm-deploy
+
   smoke-test:
     runs-on: ubuntu-latest
     needs: [create-cluster]
