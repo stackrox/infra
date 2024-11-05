@@ -67,7 +67,7 @@ jobs:
 
       - name: Download artifacts
         run: |
-          /github/home/.local/bin/infractl artifacts "${{ steps.determine-cluster-name.outputs.cluster-name }}" -d /github/home/artifacts >> "$GITHUB_STEP_SUMMARY"
+          /home/runner/.local/bin/infractl artifacts "${{ steps.determine-cluster-name.outputs.cluster-name }}" -d /home/runner/artifacts >> "$GITHUB_STEP_SUMMARY"
           kubectl get nodes -o wide || true
 
       - name: Deploy infra to smoke test cluster
