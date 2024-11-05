@@ -37,7 +37,7 @@ jobs:
         run: |
           echo "cluster-name=daily-smoke-test-$(date +%s)" >> ${GITHUB_OUTPUT}
 
-      - uses: ./.actions/infra/create-cluster
+      - uses: stackrox/actions/infra/create-cluster@v1
         with:
           token: ${{ secrets.INFRA_TOKEN }}
           flavor: gke-default
