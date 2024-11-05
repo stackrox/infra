@@ -50,7 +50,6 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
-          path: go/src/github.com/stackrox/infra
 
       - name: Authenticate to GCloud
         uses: google-github-actions/auth@v2
@@ -70,7 +69,6 @@ jobs:
           INFRA_TOKEN: ${{ secrets.INFRA_TOKEN }}
         run: |
           /home/runner/.local/bin/infractl artifacts "${{ steps.determine-cluster-name.outputs.cluster-name }}" -d /home/runner/artifacts >> "$GITHUB_STEP_SUMMARY"
-          kubectl get nodes -o wide || true
 
       - name: Deploy infra to smoke test cluster
         run: |
