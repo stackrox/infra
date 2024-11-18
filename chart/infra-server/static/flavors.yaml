@@ -461,6 +461,12 @@
       value: false
       kind: optional
 
+    - name: scanner-v4
+      description: Use Scanner V4
+      help: Scanner V4 or if "false" then use Scanner V2
+      value: true
+      kind: optional
+
   artifacts:
     - name: admin-password
       description: Admin password for StackRox console

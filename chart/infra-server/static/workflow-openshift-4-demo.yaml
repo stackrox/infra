@@ -21,6 +21,8 @@ spec:
       - name: credentials-mode
       - name: region
       - name: ssd-storage-class
+      - name: scanner-v4
+        value: "true"
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -121,6 +123,8 @@ spec:
             value: '{{ "{{" }}workflow.parameters.credentials-mode{{ "}}" }}'
           - name: SSD_STORAGE_CLASS
             value: '{{ "{{" }}workflow.parameters.ssd-storage-class{{ "}}" }}'
+          - name: SCANNER_V4
+            value: '{{ "{{" }}workflow.parameters.scanner-v4{{ "}}" }}'
 
     - name: pre-install
       script:
