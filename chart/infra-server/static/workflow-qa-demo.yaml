@@ -17,6 +17,8 @@ spec:
       - name: main-image
       - name: central-db-image
         value: ""
+      - name: scanner-v4
+        value: "true"
       - name: scanner-image
         value: ""
       - name: scanner-db-image
@@ -181,6 +183,8 @@ spec:
             value: "demos-rox-systems"
           - name: DOMAIN_NAME
             value: "demos.rox.systems"
+          - name: SCANNER_V4
+            value: '{{ "{{" }}workflow.parameters.scanner-v4{{ "}}" }}'
 
     - name: wait
       suspend: {}
