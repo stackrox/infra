@@ -6,7 +6,7 @@ COPY . .
 
 RUN make server cli
 
-FROM node:22.8.0 as ui-builder
+FROM node:23.2.0 as ui-builder
 
 COPY ui ui
 
