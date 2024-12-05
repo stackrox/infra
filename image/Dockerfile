@@ -1,4 +1,4 @@
-FROM golang:1.23.2 as golang-builder
+FROM golang:1.23.3 as golang-builder
 
 WORKDIR /go/src/github.com/stackrox/infra
 
@@ -6,7 +6,7 @@ COPY . .
 
 RUN make server cli
 
-FROM node:22.8.0 as ui-builder
+FROM node:23.3.0 as ui-builder
 
 COPY ui ui
 
