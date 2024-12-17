@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/jeremywohl/flatten/v2"
@@ -70,8 +71,13 @@ func (cr *ClaimRule) equalCheck(flatTokenClaims map[string]interface{}, jsonPath
 		return errors.Errorf("expected claim %q is not found", jsonPath)
 	}
 
-	if cr.Value != tokenClaimValue {
+	pattern := fmt.Sprintf("^%s$", cr.Value)
+	found, err := regexp.MatchString(pattern, tokenClaimValue.(string))
+	if !found {
 		return errors.Errorf("expected claim %q is not correct", jsonPath)
+	}
+	if err != nil {
+		return errors.Wrapf(err, "error matching claim %s to expected value", tokenClaimValue)
 	}
 
 	return nil

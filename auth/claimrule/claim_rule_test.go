@@ -164,6 +164,39 @@ func getDataSets() map[string]dataSet {
 			}},
 			err: true,
 		},
+		"eq-regex-match": {
+			tokenClaims: map[string]interface{}{
+				"field": "val1",
+			},
+			rules: ClaimRules{{
+				Value: "(val1|val2)",
+				Path:  "field",
+				Op:    "eq",
+			}},
+			err: false,
+		},
+		"eq-regex-no-match": {
+			tokenClaims: map[string]interface{}{
+				"field": "val3",
+			},
+			rules: ClaimRules{{
+				Value: "(val1|val2)",
+				Path:  "field",
+				Op:    "eq",
+			}},
+			err: true,
+		},
+		"in-regex-match": {
+			tokenClaims: map[string]interface{}{
+				"field": []string{"val1", "val2"},
+			},
+			rules: ClaimRules{{
+				Value: "(val2|val3)",
+				Path:  "field",
+				Op:    "in",
+			}},
+			err: false,
+		},
 	}
 }
 
