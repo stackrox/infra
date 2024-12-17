@@ -104,7 +104,7 @@ jobs:
         run: |
           ENVIRONMENT=development TEST_MODE=true make install-argo clean-argo-config install-monitoring helm-deploy
           sleep 10 # wait for old pods to disappear so the svc port-forward doesn't connect to them
-          kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
+          kubectl -n infra port-forward svc/infra-server-service 8443:8443 & > /dev/null 2>&1
           sleep 10
 
           kubectl -n infra logs -l app=infra-server --tail=-1
@@ -115,7 +115,7 @@ jobs:
 
       - name: Check the deployment
         run: |
-          kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
+          kubectl -n infra port-forward svc/infra-server-service 8443:8443 & > /dev/null 2>&1
           sleep 10
 
           version="$($INFRACTL version --json)"
@@ -157,7 +157,7 @@ jobs:
         env:
           INFRA_TOKEN: ${{ secrets.INFRA_TOKEN_DEV }}
         run: |
-          kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
+          kubectl -n infra port-forward svc/infra-server-service 8443:8443 & > /dev/null 2>&1
           sleep 5
 
           $INFRACTL whoami || true
@@ -173,6 +173,6 @@ jobs:
         env:
           INFRA_TOKEN: ${{ secrets.INFRA_TOKEN_DEV }}
         run: |
-          kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
+          kubectl -n infra port-forward svc/infra-server-service 8443:8443 & > /dev/null 2>&1
           sleep 5
           make go-e2e-tests
