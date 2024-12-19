@@ -168,8 +168,6 @@ func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) 
 	// Loop over all of the workflows, and keep only the ones that match our
 	// request criteria.
 	for _, workflow := range workflowList.Items {
-		workflow := workflow
-
 		// This cluster is expired, and we did not request to include expired
 		// clusters.
 		if !request.Expired && isWorkflowExpired(workflow) {
