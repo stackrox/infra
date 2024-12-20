@@ -103,7 +103,10 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer, slackCl
 		return nil, err
 	}
 
-	ctx, argoClient := argov3client.NewAPIClient(context.Background())
+	ctx, argoClient, err := argov3client.NewAPIClient(context.Background())
+	if err != nil {
+		return nil, err
+	}
 	argoWorkflowsClient := argoClient.NewWorkflowServiceClient()
 
 	if os.Getenv("TEST_MODE") == "true" {
