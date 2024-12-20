@@ -14,7 +14,10 @@ import (
 )
 
 func (r *Registry) initWorkflowTemplatesClient() error {
-	ctx, argoClient := argov3client.NewAPIClient(context.Background())
+	ctx, argoClient, err := argov3client.NewAPIClient(context.Background())
+	if err != nil {
+		return err
+	}
 
 	argoWorkflowTemplatesClient, err := argoClient.NewWorkflowTemplateServiceClient()
 	if err != nil {
