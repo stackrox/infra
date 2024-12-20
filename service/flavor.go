@@ -34,7 +34,6 @@ func NewFlavorService(registry *flavor.Registry) (middleware.APIService, error) 
 func (s *flavorImpl) List(_ context.Context, request *v1.FlavorListRequest) (*v1.FlavorListResponse, error) {
 	var resp v1.FlavorListResponse
 	for _, flavor := range s.registry.Flavors() {
-		flavor := flavor
 		if !request.All && flavor.Availability == v1.Flavor_alpha {
 			continue
 		}

@@ -128,7 +128,7 @@ func (c oidcClaims) Valid() error {
 	case !strings.HasSuffix(c.Email, emailSuffixRedHat):
 		errMsg := "email address does not belong to Red Hat"
 		log.AuditLog(logging.INFO, "oidc-claim-validation", errMsg, "email", c.Email)
-		return errors.Errorf(errMsg)
+		return errors.New(errMsg)
 	default:
 		// Use an empty jwt.Expected to skip non-time-related validation and use time.Now()
 		// for the validation.

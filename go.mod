@@ -1,8 +1,8 @@
 module github.com/stackrox/infra
 
-go 1.22
+go 1.23
 
-toolchain go1.22.5
+toolchain go1.23.1
 
 require (
 	cloud.google.com/go/bigquery v1.60.0
