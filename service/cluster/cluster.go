@@ -22,7 +22,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/duration"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/stackrox/infra/bqutil"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	"github.com/stackrox/infra/flavor"
@@ -70,6 +70,8 @@ const (
 )
 
 type clusterImpl struct {
+	v1.UnimplementedClusterServiceServer
+
 	k8sWorkflowsClient  workflowv1.WorkflowInterface
 	k8sPodsClient       k8sv1.PodInterface
 	registry            *flavor.Registry
