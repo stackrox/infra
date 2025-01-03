@@ -14,14 +14,12 @@ import (
 
 func TestListCreated(t *testing.T) {
 	utils.CheckContext()
-	fmt.Println("checked context")
 	clusterID, err := infractlCreateCluster(
 		"simulate", utils.GetUniqueClusterName("list-created"),
 		"--lifespan=30s",
 		"--arg=create-delay-seconds=5",
 		"--arg=destroy-delay-seconds=5",
 	)
-	fmt.Println("infractlCreateCluster ran")
 	assert.NoError(t, err)
 	assert.NotEmpty(t, clusterID)
 	listedClusters, err := infractlList("--prefix=list-created")
