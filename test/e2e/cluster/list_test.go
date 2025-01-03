@@ -1,5 +1,5 @@
-//go:build e2e
-// +build e2e
+//go:build e2e-2
+// +build e2e-2
 
 package cluster_test
 
