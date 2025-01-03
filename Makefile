@@ -36,12 +36,14 @@ image-name:
 # Tool versions.
 protoc-version = 29.2
 protoc-gen-go-version = 1.36.1
+protoc-gen-go-grpc-version = 1.5.1
 protoc-gen-grpc-gateway-version = 2.25.1
 protoc-gen-openapiv2-version = 2.25.1
 
 # Tool binary paths
 protoc = $(GOPATH)/bin/protoc
 protoc-gen-go = $(GOPATH)/bin/protoc-gen-go
+protoc-gen-go-grpc = $(GOPATH)/bin/protoc-gen-go-grpc
 protoc-gen-grpc-gateway = $(GOPATH)/bin/protoc-gen-grpc-gateway
 protoc-gen-openapiv2 = $(GOPATH)/bin/protoc-gen-openapiv2
 
@@ -68,6 +70,12 @@ $(protoc-gen-go):
 	@echo "Installing protoc-gen-go $(protoc-gen-go-version) to $(protoc-gen-go)"
 	@cd /tmp; go install google.golang.org/protobuf/cmd/protoc-gen-go@v$(protoc-gen-go-version)
 
+# This target installs the protoc-gen-go-grpc binary.
+$(protoc-gen-go-grpc):
+	@echo "+ $@"
+	@echo "Installing protoc-gen-go-grpc $(protoc-gen-go-grpc-version) to $(protoc-gen-go-grpc)"
+	@cd /tmp; go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v$(protoc-gen-go-grpc-version)
+
 # This target installs the protoc-gen-grpc-gateway binary.
 $(protoc-gen-grpc-gateway):
 	@echo "+ $@"
@@ -82,7 +90,7 @@ $(protoc-gen-openapiv2):
 
 # This target installs all of the protoc related binaries.
 .PHONY: protoc-tools
-protoc-tools: $(protoc) $(protoc-gen-go) $(protoc-gen-grpc-gateway) $(protoc-gen-openapiv2)
+protoc-tools: $(protoc) $(protoc-gen-go) $(protoc-gen-go-grpc) $(protoc-gen-grpc-gateway) $(protoc-gen-openapiv2)
 
 PROTO_INPUT_DIR   = proto/api/v1
 PROTO_THIRD_PARTY = proto/third_party
