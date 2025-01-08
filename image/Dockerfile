@@ -12,7 +12,7 @@ COPY ui ui
 
 RUN --mount=type=secret,id=npmrc,target=/root/.npmrc make -C ui all
 
-FROM alpine:3.21.0 as app
+FROM alpine:3.21.1 as app
 
 COPY --from=golang-builder /go/src/github.com/stackrox/infra/bin/infra-server-linux-amd64 /infra-server
 
