@@ -7,7 +7,7 @@ require (
 	cloud.google.com/go/storage v1.39.1
 	github.com/argoproj/argo-workflows/v3 v3.6.2
 	github.com/buger/jsonparser v1.1.1
-	github.com/coreos/go-oidc/v3 v3.11.0
+	github.com/coreos/go-oidc/v3 v3.12.0
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/go-jose/go-jose/v4 v4.0.2
 	github.com/gogo/protobuf v1.3.2
