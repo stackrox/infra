@@ -78,7 +78,7 @@ jobs:
         with:
           method: chat.postMessage
           token: ${{ secrets.SLACK_BOT_TOKEN }}
-          payload: >-
+          payload: |
             channel: "CVANK5K5W"
             text: "Infra (${{ inputs.environment }}) was updated."
             blocks: |
