@@ -81,7 +81,7 @@ jobs:
           payload: |
             channel: "CVANK5K5W"
             text: "Infra (${{ inputs.environment }}) was updated."
-            blocks: |
+            blocks:
               - type: "section"
                 text:
                   type: "mrkdwn"
