@@ -74,20 +74,15 @@ jobs:
           ENVIRONMENT=${{ inputs.environment }} make install-argo clean-argo-config install-monitoring helm-deploy
 
       - name: Notify infra channel about new version
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         uses: slackapi/slack-github-action@v2.0.0
         with:
-          channel-id: CVANK5K5W #acs-infra
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: >-
-            {
-                "blocks": [
-                  {
-                    "type": "section",
-                    "text": {
-                      "type": "mrkdwn",
-                      "text": ":ship::tada:*Infra (${{ inputs.environment }}) was updated to <${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ inputs.version }}|${{ inputs.version }}>."
-                    }
-                  }
-                ]
-              }
+            channel: CVANK5K5W #acs-infra
+            text: Infra (${{ inputs.environment }}) was updated.
+            blocks: |
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: ":ship::tada:*Infra (${{ inputs.environment }}) was updated to <${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ inputs.version }}|${{ inputs.version }}>."
