@@ -72,6 +72,11 @@ spec:
               secretKeyRef:
                 name: azure-secrets
                 key: AZURE_SP_TENANT
+          - name: ACR_TO_ATTACH
+            valueFrom:
+              secretKeyRef:
+                name: azure-secrets
+                key: ACR_TO_ATTACH
           - name: NODE_COUNT
             value: '{{ "{{" }}workflow.parameters.nodes{{ "}}" }}'
           - name: INSTANCE_TYPE
