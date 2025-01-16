@@ -72,6 +72,11 @@ spec:
               secretKeyRef:
                 name: azure-secrets
                 key: AZURE_SP_TENANT
+          - name: ACR_TO_ATTACH
+            valueFrom:
+              secretKeyRef:
+                name: azure-secrets
+                key: ACR_TO_ATTACH
           - name: NODE_COUNT
             value: '{{ "{{" }}workflow.parameters.nodes{{ "}}" }}'
           - name: INSTANCE_TYPE
@@ -84,8 +89,6 @@ spec:
             value: '{{ "{{" }}workflow.parameters.network-policy{{ "}}" }}'
           - name: CREATION_SOURCE
             value: "infra"
-          - name: ACR_TO_ATTACH
-            value: "/subscriptions/3fe60802-349e-47c6-ba86-4d3bba2b5650/resourceGroups/stackrox-infra/providers/Microsoft.ContainerRegistry/registries/stackroxinfra"
         volumeMounts:
           - name: data
             mountPath: /data
