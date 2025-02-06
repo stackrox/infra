@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/pkg/errors"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/service/middleware"
@@ -12,6 +12,8 @@ import (
 )
 
 type userImpl struct {
+	v1.UnimplementedUserServiceServer
+
 	generate func(v1.ServiceAccount) (string, error)
 }
 

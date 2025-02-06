@@ -11,6 +11,7 @@ import (
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/logging"
 	"github.com/stackrox/infra/slack"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func getClusterIDFromWorkflow(workflow *v1alpha1.Workflow) string {
@@ -33,10 +34,10 @@ func clusterFromWorkflow(workflow v1alpha1.Workflow) *v1.Cluster {
 		Description: GetDescription(&workflow),
 	}
 
-	cluster.CreatedOn, _ = ptypes.TimestampProto(workflow.Status.StartedAt.Time.UTC())
+	cluster.CreatedOn = timestamppb.New(workflow.Status.StartedAt.Time.UTC())
 
 	if !workflow.Status.FinishedAt.Time.IsZero() {
-		cluster.DestroyedOn, _ = ptypes.TimestampProto(workflow.Status.FinishedAt.Time.UTC())
+		cluster.DestroyedOn = timestamppb.New(workflow.Status.FinishedAt.Time.UTC())
 	}
 
 	return cluster
@@ -50,8 +51,12 @@ func isWorkflowExpired(workflow v1alpha1.Workflow) bool {
 }
 
 func isNearingExpiry(workflow v1alpha1.Workflow) bool {
-	lifespan, _ := ptypes.Duration(GetLifespan(&workflow))
+	dur := GetLifespan(&workflow)
+	if !dur.IsValid() {
+		return false
+	}
 
+	lifespan := dur.AsDuration()
 	workflowExpiryTime := workflow.Status.StartedAt.Time.Add(lifespan)
 	return time.Now().Add(nearExpiry).After(workflowExpiryTime)
 }

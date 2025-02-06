@@ -4,14 +4,16 @@ import (
 	"context"
 
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/buildinfo"
 	"github.com/stackrox/infra/service/middleware"
 	"google.golang.org/grpc"
 )
 
-type versionImpl struct{}
+type versionImpl struct {
+	v1.UnimplementedVersionServiceServer
+}
 
 var (
 	_ middleware.APIService   = (*versionImpl)(nil)
