@@ -22,6 +22,8 @@ updates:
       day: 'wednesday'
     reviewers:
       - 'stackrox/infra'
+    labels:
+      - 'auto-merge'
 
   - package-ecosystem: 'docker'
     directory: 'image/'
@@ -30,11 +32,15 @@ updates:
       day: 'wednesday'
     reviewers:
       - 'stackrox/infra'
+    labels:
+      - 'auto-merge'
 
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: 'github-actions'
+    directory: '/'
     schedule:
       interval: 'weekly'
       day: 'wednesday'
     reviewers:
-    - "stackrox/infra"
+    - 'stackrox/infra'
+    labels:
+      - 'auto-merge'
