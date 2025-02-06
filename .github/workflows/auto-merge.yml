@@ -18,14 +18,14 @@ jobs:
           github-token: "${{ secrets.RHACS_BOT_GITHUB_TOKEN }}"
 
       - name: Approve a PR
-        if: contains(github.event.pull_request.labels, 'auto-merge') && (steps.metadata.outputs.update-type == 'version-update:semver-minor' || steps.metadata.outputs.update-type == 'version-update:semver-patch')
+        if: contains(github.event.pull_request.labels.*.name, 'auto-merge') && (steps.metadata.outputs.update-type == 'version-update:semver-minor' || steps.metadata.outputs.update-type == 'version-update:semver-patch')
         run: gh pr review --approve "${PR_URL}"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.RHACS_BOT_GITHUB_TOKEN }}
 
       - name: Enable auto-merge for Dependabot PRs
-        if: contains(github.event.pull_request.labels, 'auto-merge') && (steps.metadata.outputs.update-type == 'version-update:semver-minor' || steps.metadata.outputs.update-type == 'version-update:semver-patch')
+        if: contains(github.event.pull_request.labels.*.name, 'auto-merge') && (steps.metadata.outputs.update-type == 'version-update:semver-minor' || steps.metadata.outputs.update-type == 'version-update:semver-patch')
         run: gh pr merge --auto --squash "${PR_URL}"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
