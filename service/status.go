@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/kube"
 	"github.com/stackrox/infra/pkg/logging"
@@ -19,6 +19,8 @@ import (
 )
 
 type statusImpl struct {
+	v1.UnimplementedInfraStatusServiceServer
+
 	k8sConfigMapClient k8sv1.ConfigMapInterface
 	infraNamespace     string
 	infraStatusName    string
