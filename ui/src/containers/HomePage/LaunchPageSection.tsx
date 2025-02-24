@@ -36,9 +36,8 @@ function FlavorCards({ showAllFlavors = false }: FlavorCardsProps): ReactElement
   const cards = data.Flavors.map((flavor) => {
     assertDefined(flavor.ID); // swagger definitions are too permitting
     return (
-      <GalleryItem>
+      <GalleryItem key={flavor.ID}>
         <LinkCard
-          key={flavor.ID}
           to={`launch/${flavor.ID}`}
           header={
             <Flex

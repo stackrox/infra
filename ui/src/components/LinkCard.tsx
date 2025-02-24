@@ -20,7 +20,12 @@ export default function LinkCard({
   return (
     <Link className={className} to={to}>
       <Card isClickable>
-        <CardHeader selectableActions={{ to }}>
+        <CardHeader
+          selectableActions={{
+            to,
+            selectableActionAriaLabel: `Navigate to ${to}`,
+          }}
+        >
           <CardTitle>{header}</CardTitle>
         </CardHeader>
         <CardBody>{children}</CardBody>

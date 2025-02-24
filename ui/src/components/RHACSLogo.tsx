@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 
-const RHACSLogo = forwardRef<SVGSVGElement, never>((_, ref) => (
+const RHACSLogo = forwardRef<SVGSVGElement, unknown>((_, ref) => (
   <svg
     id="RHACS-Logo"
     height="50px"
