@@ -1,22 +1,22 @@
-.pf-c-form__group-label {
+.pf-v5-c-form__group-label {
   /* Some more padding for the form field label help icon */
-  --pf-c-form__group-label-help--MarginLeft: var(--pf-global--spacer--sm);
+  --pf-v5-c-form__group-label-help--MarginLeft: var(--pf-v5-global--spacer--sm);
 }
 
-.pf-c-form__group {
+.pf-v5-c-form__group {
   /* Some separation for form fields */
-  margin-bottom: var(--pf-global--spacer--md);
+  margin-bottom: var(--pf-v5-global--spacer--md);
 }
 
 /* Remove padding from homepage bottom panel */
-.home-page .pf-c-drawer__body {
-  --pf-c-drawer--child--PaddingTop: 0;
-  --pf-c-drawer--child--PaddingLeft: 0;
-  --pf-c-drawer--child--PaddingBottom: 0;
-  --pf-c-drawer--child--PaddingRight: 0;
+.home-page .pf-v5-c-drawer__body {
+  --pf-v5-c-drawer--child--PaddingTop: 0;
+  --pf-v5-c-drawer--child--PaddingLeft: 0;
+  --pf-v5-c-drawer--child--PaddingBottom: 0;
+  --pf-v5-c-drawer--child--PaddingRight: 0;
 }
 
-.pf-c-form__label-text {
+.pf-v5-c-form__label-text {
   text-transform: capitalize;
 }
 
@@ -35,19 +35,19 @@
 /* LinkCard */
 
 /* appear to be clickable */
-a:hover > .pf-c-panel {
-  background-color: var(--pf-global--BackgroundColor--200);
+a:hover>.pf-v5-c-panel {
+  background-color: var(--pf-v5-global--BackgroundColor--200);
 }
 
 /* reset to regular font for LinkCard content */
-a > .pf-c-panel {
-  font-weight: var(--pf-global--FontWeight--normal);
+a>.pf-v5-c-panel {
+  font-weight: var(--pf-v5-global--FontWeight--normal);
 }
 
 /* LinkCard title */
-a > .pf-c-panel > .pf-c-panel__header {
-  font-weight: var(--pf-global--FontWeight--bold);
-  font-size: var(--pf-global--FontSize--lg);
+a>.pf-v5-c-panel>.pf-v5-c-panel__header {
+  font-weight: var(--pf-v5-global--FontWeight--bold);
+  font-size: var(--pf-v5-global--FontSize--lg);
 }
 
 /* Form help popovers - rendered with react-markdown */
@@ -56,28 +56,32 @@ a > .pf-c-panel > .pf-c-panel__header {
 .form-help h1,
 h2,
 h3 {
-  font-weight: var(--pf-global--FontWeight--bold);
-  margin-bottom: var(--pf-global--spacer--sm);
+  font-weight: var(--pf-v5-global--FontWeight--bold);
+  margin-bottom: var(--pf-v5-global--spacer--sm);
 }
+
 .form-help h1 {
-  font-size: var(--pf-global--FontSize--xl);
+  font-size: var(--pf-v5-global--FontSize--xl);
 }
+
 .form-help h2 {
-  font-size: var(--pf-global--FontSize--lg);
+  font-size: var(--pf-v5-global--FontSize--lg);
 }
+
 .form-help h3 {
-  font-size: var(--pf-global--FontSize--md);
+  font-size: var(--pf-v5-global--FontSize--md);
 }
 
 /* A text block */
 .form-help p {
-  margin-bottom: var(--pf-global--spacer--lg);
+  margin-bottom: var(--pf-v5-global--spacer--lg);
 }
 
 /* [link](url) */
 .form-help a {
-  color: var(--pf-global--link--Color);
+  color: var(--pf-v5-global--link--Color);
 }
+
 .form-help a:visited {
-  color: var(--pf-global--link--Color--visited);
+  color: var(--pf-v5-global--link--Color--visited);
 }

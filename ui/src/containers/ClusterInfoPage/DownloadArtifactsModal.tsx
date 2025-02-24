@@ -15,7 +15,7 @@ type ArtifactsListProps = {
 
 function ArtifactsList({ artifacts }: ArtifactsListProps): ReactElement {
   return (
-    <List className="pf-u-mb-md">
+    <List className="pf-v5-u-mb-md">
       {artifacts
         .sort((a, b) => {
           if (a.Description && !b.Description) {

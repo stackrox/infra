@@ -1,6 +1,16 @@
 import React, { ReactElement, ReactNode } from 'react';
 import { useField } from 'formik';
-import { FormGroup, Popover, FileUpload, ValidatedOptions } from '@patternfly/react-core';
+import {
+  FormGroup,
+  Popover,
+  FileUpload,
+  ValidatedOptions,
+  Icon,
+  FormHelperText,
+  HelperText,
+  HelperTextItem,
+  DropEvent,
+} from '@patternfly/react-core';
 import { HelpIcon } from '@patternfly/react-icons';
 
 type Props = {
@@ -22,10 +32,7 @@ export default function FileUploadFormField({
   const [filename, setFilename] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
 
-  const handleFileInputChange = (
-    event: React.ChangeEvent<HTMLInputElement> | React.DragEvent<HTMLElement>,
-    file: File
-  ) => {
+  const handleFileInputChange = (event: DropEvent, file: File) => {
     setFilename(file.name);
   };
 
@@ -59,15 +66,15 @@ export default function FileUploadFormField({
               aria-label={`Help for ${name}`}
               onClick={(e) => e.preventDefault()}
               aria-describedby={id}
-              className="pf-c-form__group-label-help"
+              className="pf-v5-c-form__group-label-help"
             >
-              <HelpIcon noVerticalAlign />
+              <Icon>
+                <HelpIcon />
+              </Icon>
             </button>
           </Popover>
         ) : undefined
       }
-      validated={meta.error ? ValidatedOptions.error : ValidatedOptions.default}
-      helperTextInvalid={meta.error}
     >
       <FileUpload
         id={id}
@@ -77,16 +84,23 @@ export default function FileUploadFormField({
         type="text"
         hideDefaultPreview
         onFileInputChange={handleFileInputChange}
-        onDataChange={handleTextOrDataChange}
-        onTextChange={handleTextOrDataChange}
-        onReadStarted={handleFileReadStarted}
-        onReadFinished={handleFileReadFinished}
+        onDataChange={(_event, value: string) => handleTextOrDataChange(value)}
+        onTextChange={(_event, value: string) => handleTextOrDataChange(value)}
+        onReadStarted={(_event, _fileHandle: File) => handleFileReadStarted(_fileHandle)}
+        onReadFinished={(_event, _fileHandle: File) => handleFileReadFinished(_fileHandle)}
         onClearClick={handleClear}
         isLoading={isLoading}
         browseButtonText="Upload"
         aria-describedby={`${id}-helper`}
         validated={meta.error ? ValidatedOptions.error : ValidatedOptions.default}
       />
+      <FormHelperText>
+        <HelperText>
+          <HelperTextItem variant={meta.error ? ValidatedOptions.error : ValidatedOptions.default}>
+            {meta.error}
+          </HelperTextItem>
+        </HelperText>
+      </FormHelperText>
     </FormGroup>
   );
 }

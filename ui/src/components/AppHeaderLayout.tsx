@@ -17,11 +17,13 @@ export default function AppHeaderLayout({ logo, main, ending }: Props): ReactEle
   return (
     <Masthead>
       <MastheadMain>
-        <MastheadBrand className="pf-u-mr-xl">{logo}</MastheadBrand>
+        <MastheadBrand component="a" className="pf-v5-u-mr-xl">
+          {logo}
+        </MastheadBrand>
         <ToolbarItem variant="separator" />
         {main}
       </MastheadMain>
-      <MastheadContent className="pf-u-flex-direction-row-reverse">
+      <MastheadContent className="pf-v5-u-flex-direction-row-reverse">
         <div>{ending}</div>
       </MastheadContent>
     </Masthead>

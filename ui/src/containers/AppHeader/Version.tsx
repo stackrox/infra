@@ -27,7 +27,7 @@ export default function Version(): ReactElement {
   if (loading)
     return (
       <VersionContent
-        icon={<Spinner isSVG size="md" aria-label="Loading version information" />}
+        icon={<Spinner  size="md" aria-label="Loading version information" />}
         text="Loading..."
       />
     );

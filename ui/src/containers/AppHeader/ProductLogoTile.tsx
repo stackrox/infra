@@ -14,7 +14,7 @@ export default function ProductLogoTile(): ReactElement {
         </Link>
       </FlexItem>
       <FlexItem>
-        <span className="pf-u-font-family-redhatVF-heading-sans-serif pf-u-font-size-lg">
+        <span className="pf-v5-u-font-family-redhatVF-heading-sans-serif pf-v5-u-font-size-lg">
           Infra
         </span>
         <Version />

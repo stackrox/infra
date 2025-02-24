@@ -1,6 +1,15 @@
 import React, { ReactElement, ReactNode } from 'react';
 import { useField } from 'formik';
-import { FormGroup, Popover, TextInput, ValidatedOptions } from '@patternfly/react-core';
+import {
+  FormGroup,
+  FormHelperText,
+  HelperText,
+  HelperTextItem,
+  Icon,
+  Popover,
+  TextInput,
+  ValidatedOptions,
+} from '@patternfly/react-core';
 import { HelpIcon } from '@patternfly/react-icons';
 
 type Props = {
@@ -41,20 +50,20 @@ export default function TextFormField({
               aria-label={`Help for ${name}`}
               onClick={(e) => e.preventDefault()}
               aria-describedby={id}
-              className="pf-c-form__group-label-help"
+              className="pf-v5-c-form__group-label-help"
             >
-              <HelpIcon noVerticalAlign />
+              <Icon>
+                <HelpIcon />
+              </Icon>
             </button>
           </Popover>
         ) : undefined
       }
-      validated={meta.error ? ValidatedOptions.error : ValidatedOptions.default}
-      helperTextInvalid={meta.error}
     >
       <TextInput
         id={id}
         name={name}
-        onChange={onChange}
+        onChange={(event, _value: string) => onChange(_value, event)}
         type="text"
         value={field.value} // eslint-disable-line @typescript-eslint/no-unsafe-assignment
         placeholder={placeholder}
@@ -63,6 +72,13 @@ export default function TextFormField({
         aria-describedby={`${id}-helper`}
         validated={meta.error ? ValidatedOptions.error : ValidatedOptions.default}
       />
+      <FormHelperText>
+        <HelperText>
+          <HelperTextItem variant={meta.error ? ValidatedOptions.error : ValidatedOptions.default}>
+            {meta.error}
+          </HelperTextItem>
+        </HelperText>
+      </FormHelperText>
     </FormGroup>
   );
 }

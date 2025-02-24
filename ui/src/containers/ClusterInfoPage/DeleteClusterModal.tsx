@@ -43,7 +43,7 @@ export default function DeleteClusterModal({ cluster, onCancel, onDeleted }: Pro
         header={`Are you sure you want to delete ${cluster.ID}?`}
         buttons={buttons}
       >
-        <span className="pf-u-danger-color-100 pf-u-font-size-2xl">
+        <span className="pf-v5-u-danger-color-100 pf-v5-u-font-size-2xl">
           This action cannot be undone.
         </span>
       </Modal>
@@ -64,7 +64,7 @@ export default function DeleteClusterModal({ cluster, onCancel, onDeleted }: Pro
     const message = `Cannot delete cluster. Server error occurred: "${error.message}".`;
     return (
       <InformationalModal header={`Failed to delete ${cluster.ID}!`} onAcknowledged={onCancel}>
-        <span className="pf-u-danger-color-100 pf-u-font-size-2xl">{message}</span>
+        <span className="pf-v5-u-danger-color-100 pf-v5-u-font-size-2xl">{message}</span>
       </InformationalModal>
     );
   }
@@ -73,7 +73,7 @@ export default function DeleteClusterModal({ cluster, onCancel, onDeleted }: Pro
   const message = `Cluster ${cluster.ID} is being destroyed now.`;
   return (
     <InformationalModal header={`Successfully deleted ${cluster.ID}!`} onAcknowledged={onDeleted}>
-      <span className="pf-u-success-color-100 pf-u-font-size-2xl">{message}</span>
+      <span className="pf-v5-u-success-color-100 pf-v5-u-font-size-2xl">{message}</span>
     </InformationalModal>
   );
 }

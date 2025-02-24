@@ -25,15 +25,15 @@ function ModifiableTimeUnit({
   onChange = (): void => {},
 }: ModifiableTimeUnitProps): ReactElement {
   return (
-    <span className="pf-u-display-inline-flex pf-u-flex-direction-column pf-u-align-items-center">
+    <span className="pf-v5-u-display-inline-flex pf-v5-u-flex-direction-column pf-v5-u-align-items-center">
       <span>
         {`${value}`.padStart(2, '0')}
         {notation}
       </span>
-      <span className="pf-u-display-inline-flex">
+      <span className="pf-v5-u-display-inline-flex">
         <Button
           variant="plain"
-          className="pf-u-mr-sm pf-u-p-0"
+          className="pf-v5-u-mr-sm pf-v5-u-p-0"
           aria-label="Increment"
           onClick={(): void => {
             onChange(notation, 'inc');
@@ -43,7 +43,7 @@ function ModifiableTimeUnit({
         </Button>
         <Button
           variant="plain"
-          className="pf-u-p-0"
+          className="pf-v5-u-p-0"
           aria-label="Decrement"
           onClick={(): void => {
             onChange(notation, 'dec');

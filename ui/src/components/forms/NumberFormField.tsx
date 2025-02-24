@@ -1,6 +1,13 @@
 import React, { ReactElement } from 'react';
 import { useField } from 'formik';
-import { FormGroup, NumberInput, ValidatedOptions } from '@patternfly/react-core';
+import {
+  FormGroup,
+  FormHelperText,
+  HelperText,
+  HelperTextItem,
+  NumberInput,
+  ValidatedOptions,
+} from '@patternfly/react-core';
 
 type Props = {
   name: string;
@@ -39,14 +46,7 @@ export default function NumberFormField({
   };
 
   return (
-    <FormGroup
-      label={label}
-      fieldId={id}
-      isRequired={required}
-      validated={meta.error ? ValidatedOptions.error : ValidatedOptions.default}
-      helperTextInvalid={meta.error}
-      className="capitalize"
-    >
+    <FormGroup label={label} fieldId={id} isRequired={required} className="capitalize">
       <NumberInput
         id={id}
         name={name}
@@ -60,6 +60,13 @@ export default function NumberFormField({
         isDisabled={disabled}
         validated={meta.error ? ValidatedOptions.error : ValidatedOptions.default}
       />
+      <FormHelperText>
+        <HelperText>
+          <HelperTextItem variant={meta.error ? ValidatedOptions.error : ValidatedOptions.default}>
+            {meta.error}
+          </HelperTextItem>
+        </HelperText>
+      </FormHelperText>
     </FormGroup>
   );
 }
