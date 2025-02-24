@@ -8,7 +8,7 @@ import DownloadsPage from 'containers/DownloadsPage';
 import LaunchClusterPage from 'containers/LaunchClusterPage';
 import ClusterInfoPage from 'containers/ClusterInfoPage';
 import FullPageError from 'components/FullPageError';
-import { Flex } from '@patternfly/react-core';
+import { Flex, Page } from '@patternfly/react-core';
 
 function AppRoutes(): ReactElement {
   return (
@@ -31,8 +31,9 @@ export default function App(): ReactElement {
           flexWrap={{ default: 'nowrap' }}
           className="pf-v6-u-h-100 pf-v6-u-w-100"
         >
-          <AppHeader />
-          <AppRoutes />
+          <Page masthead={<AppHeader />}>
+            <AppRoutes />
+          </Page>
         </Flex>
       </UserAuthProvider>
     </Router>

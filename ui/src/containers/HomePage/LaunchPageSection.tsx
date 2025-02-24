@@ -1,13 +1,13 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { ReactElement } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { AxiosPromise } from 'axios';
-import { Gallery, GalleryItem } from '@patternfly/react-core';
+import { Flex, Gallery, GalleryItem, Label, PageSection, Title } from '@patternfly/react-core';
 
 import { V1FlavorListResponse, FlavorServiceApi } from 'generated/client';
 import useApiQuery from 'client/useApiQuery';
 import configuration from 'client/configuration';
-import PageSection from 'components/PageSection';
 import LinkCard from 'components/LinkCard';
 import FullPageSpinner from 'components/FullPageSpinner';
 import FullPageError from 'components/FullPageError';
@@ -40,8 +40,27 @@ function FlavorCards({ showAllFlavors = false }: FlavorCardsProps): ReactElement
         <LinkCard
           key={flavor.ID}
           to={`launch/${flavor.ID}`}
-          header={flavor.Name || 'Unnamed'}
-          footer={<span className="capitalize">{flavor.Availability || 'Alpha'}</span>}
+          header={
+            <Flex
+              alignItems={{ default: 'alignItemsCenter' }}
+              justifyContent={{ default: 'justifyContentSpaceBetween' }}
+            >
+              <span>{flavor.Name || 'Unnamed'}</span>
+              <Label
+                color={
+                  flavor.Availability === 'default'
+                    ? 'blue'
+                    : flavor.Availability === 'stable'
+                    ? 'green'
+                    : flavor.Availability === 'beta'
+                    ? 'orange'
+                    : 'orangered'
+                }
+              >
+                {flavor.Availability || 'Alpha'}
+              </Label>
+            </Flex>
+          }
         >
           <p>{flavor.Description}</p>
         </LinkCard>
@@ -79,28 +98,32 @@ export default function LaunchPageSection(): ReactElement {
 
   const header = (
     <div className="flex justify-between items-center ">
-      <span>{headerText}</span>
+      <Title headingLevel="h2">{headerText}</Title>
       {flavorFilterToggle}
     </div>
   );
   return (
-    <PageSection header={header}>
-      <Gallery
-        hasGutter
-        minWidths={{
-          default: '100%',
-          md: '100px',
-          xl: '300px',
-        }}
-        maxWidths={{
-          md: '200px',
-          xl: '1fr',
-        }}
-      >
-        <FlavorCards showAllFlavors={showAllFlavors} />
-      </Gallery>
-    </PageSection>
+    <>
+      <PageSection>{header}</PageSection>
+      <PageSection>
+        <Gallery
+          hasGutter
+          minWidths={{
+            default: '100%',
+            md: '100px',
+            xl: '300px',
+          }}
+          maxWidths={{
+            md: '200px',
+            xl: '1fr',
+          }}
+        >
+          <FlavorCards showAllFlavors={showAllFlavors} />
+        </Gallery>
+      </PageSection>
+    </>
   );
 }
 
 /* eslint-enable jsx-a11y/label-has-associated-control */
+/* eslint-enable no-nested-ternary */

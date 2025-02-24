@@ -3,13 +3,12 @@ import React, { ReactElement } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { AxiosPromise } from 'axios';
 import moment from 'moment';
-import { Gallery, GalleryItem } from '@patternfly/react-core';
+import { Gallery, GalleryItem, PageSection, Title } from '@patternfly/react-core';
 
 import { V1ClusterListResponse, ClusterServiceApi } from 'generated/client';
 import useApiQuery from 'client/useApiQuery';
 import configuration from 'client/configuration';
 import { useUserAuth } from 'containers/UserAuthProvider';
-import PageSection from 'components/PageSection';
 import LinkCard from 'components/LinkCard';
 import Lifespan from 'components/Lifespan';
 import FullPageSpinner from 'components/FullPageSpinner';
@@ -114,27 +113,30 @@ export default function MyClustersPageSection(): ReactElement {
 
   const header = (
     <div className="flex justify-between items-center ">
-      <span>{headerText}</span>
+      <Title headingLevel="h2">{headerText}</Title>
       {clusterFilterToggle}
     </div>
   );
   return (
-    <PageSection header={header}>
-      <Gallery
-        hasGutter
-        minWidths={{
-          default: '100%',
-          md: '100px',
-          xl: '300px',
-        }}
-        maxWidths={{
-          md: '200px',
-          xl: '1fr',
-        }}
-      >
-        <ClusterCards showAllClusters={showAllClusters} />
-      </Gallery>
-    </PageSection>
+    <>
+      <PageSection>{header}</PageSection>
+      <PageSection>
+        <Gallery
+          hasGutter
+          minWidths={{
+            default: '100%',
+            md: '100px',
+            xl: '300px',
+          }}
+          maxWidths={{
+            md: '200px',
+            xl: '1fr',
+          }}
+        >
+          <ClusterCards showAllClusters={showAllClusters} />
+        </Gallery>
+      </PageSection>
+    </>
   );
 }
 
