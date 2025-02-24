@@ -1,22 +1,4 @@
-.pf-v5-c-form__group-label {
-  /* Some more padding for the form field label help icon */
-  --pf-v5-c-form__group-label-help--MarginLeft: var(--pf-v5-global--spacer--sm);
-}
-
-.pf-v5-c-form__group {
-  /* Some separation for form fields */
-  margin-bottom: var(--pf-v5-global--spacer--md);
-}
-
-/* Remove padding from homepage bottom panel */
-.home-page .pf-v5-c-drawer__body {
-  --pf-v5-c-drawer--child--PaddingTop: 0;
-  --pf-v5-c-drawer--child--PaddingLeft: 0;
-  --pf-v5-c-drawer--child--PaddingBottom: 0;
-  --pf-v5-c-drawer--child--PaddingRight: 0;
-}
-
-.pf-v5-c-form__label-text {
+.pf-v6-c-form__label-text {
   text-transform: capitalize;
 }
 
@@ -35,17 +17,17 @@
 /* LinkCard */
 
 /* appear to be clickable */
-a:hover>.pf-v5-c-panel {
+a:hover>.pf-v6-c-panel {
   background-color: var(--pf-v5-global--BackgroundColor--200);
 }
 
 /* reset to regular font for LinkCard content */
-a>.pf-v5-c-panel {
+a>.pf-v6-c-panel {
   font-weight: var(--pf-v5-global--FontWeight--normal);
 }
 
 /* LinkCard title */
-a>.pf-v5-c-panel>.pf-v5-c-panel__header {
+a>.pf-v6-c-panel>.pf-v6-c-panel__header {
   font-weight: var(--pf-v5-global--FontWeight--bold);
   font-size: var(--pf-v5-global--FontSize--lg);
 }

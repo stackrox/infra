@@ -8,6 +8,7 @@ import DownloadsPage from 'containers/DownloadsPage';
 import LaunchClusterPage from 'containers/LaunchClusterPage';
 import ClusterInfoPage from 'containers/ClusterInfoPage';
 import FullPageError from 'components/FullPageError';
+import { Flex } from '@patternfly/react-core';
 
 function AppRoutes(): ReactElement {
   return (
@@ -25,10 +26,14 @@ export default function App(): ReactElement {
   return (
     <Router>
       <UserAuthProvider>
-        <div className="flex flex-col h-full bg-base-0">
+        <Flex
+          direction={{ default: 'column' }}
+          flexWrap={{ default: 'nowrap' }}
+          className="pf-v6-u-h-100 pf-v6-u-w-100"
+        >
           <AppHeader />
           <AppRoutes />
-        </div>
+        </Flex>
       </UserAuthProvider>
     </Router>
   );

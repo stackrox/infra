@@ -11,9 +11,9 @@ export default function FullPageError({
   IconComponent = AlertCircle,
 }: Props): ReactElement {
   return (
-    <div className="pf-v5-u-display-flex pf-v5-u-align-items-center pf-v5-u-justify-content-center pf-v5-u-h-100">
-      <IconComponent className="pf-v5-u-mr-md" size={64} />
-      <span className="pf-v5-u-font-size-4xl">{message}</span>
+    <div className="pf-v6-u-display-flex pf-v6-u-align-items-center pf-v6-u-justify-content-center pf-v6-u-h-100">
+      <IconComponent className="pf-v6-u-mr-md" size={64} />
+      <span className="pf-v6-u-font-size-4xl">{message}</span>
     </div>
   );
 }

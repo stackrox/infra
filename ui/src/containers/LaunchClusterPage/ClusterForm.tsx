@@ -8,7 +8,7 @@
  */
 
 import React, { useState, ReactElement } from 'react';
-import { Formik, Form, FormikValues, FormikHelpers, useFormikContext } from 'formik';
+import { Formik, FormikValues, FormikHelpers, useFormikContext } from 'formik';
 import * as yup from 'yup';
 import { mapValues } from 'lodash';
 import { ClipLoader } from 'react-spinners';
@@ -23,6 +23,7 @@ import NumberFormField from 'components/forms/NumberFormField';
 import { useUserAuth } from 'containers/UserAuthProvider';
 import assertDefined from 'utils/assertDefined';
 import { generateClusterName } from 'utils/cluster.utils';
+import { Form } from '@patternfly/react-core';
 
 const clusterService = new ClusterServiceApi(configuration);
 

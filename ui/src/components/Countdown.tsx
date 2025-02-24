@@ -25,28 +25,32 @@ function ModifiableTimeUnit({
   onChange = (): void => {},
 }: ModifiableTimeUnitProps): ReactElement {
   return (
-    <span className="pf-v5-u-display-inline-flex pf-v5-u-flex-direction-column pf-v5-u-align-items-center">
+    <span className="pf-v6-u-display-inline-flex pf-v6-u-flex-direction-column pf-v6-u-align-items-center">
       <span>
         {`${value}`.padStart(2, '0')}
         {notation}
       </span>
-      <span className="pf-v5-u-display-inline-flex">
-        <Button icon={<PlusCircle size={12} />}
+      <span className="pf-v6-u-display-inline-flex">
+        <Button
+          icon={<PlusCircle size={16} />}
+          size="sm"
           variant="plain"
-          className="pf-v5-u-mr-sm pf-v5-u-p-0"
+          className="pf-v6-u-p-0"
           aria-label="Increment"
           onClick={(): void => {
             onChange(notation, 'inc');
           }}
-         />
-        <Button icon={<MinusCircle size={12} />}
+        />
+        <Button
+          icon={<MinusCircle size={16} />}
+          size="sm"
           variant="plain"
-          className="pf-v5-u-p-0"
+          className="pf-v6-u-p-0"
           aria-label="Decrement"
           onClick={(): void => {
             onChange(notation, 'dec');
           }}
-         />
+        />
       </span>
     </span>
   );

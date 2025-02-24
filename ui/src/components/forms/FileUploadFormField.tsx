@@ -66,7 +66,7 @@ export default function FileUploadFormField({
               aria-label={`Help for ${name}`}
               onClick={(e) => e.preventDefault()}
               aria-describedby={id}
-              className="pf-v5-c-form__group-label-help"
+              className="pf-v6-c-form__group-label-help"
             >
               <Icon>
                 <HelpIcon />
