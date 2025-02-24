@@ -3,7 +3,15 @@
 import React, { ReactElement } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { AxiosPromise } from 'axios';
-import { Flex, Gallery, GalleryItem, Label, PageSection, Title } from '@patternfly/react-core';
+import {
+  Checkbox,
+  Flex,
+  Gallery,
+  GalleryItem,
+  Label,
+  PageSection,
+  Title,
+} from '@patternfly/react-core';
 
 import { V1FlavorListResponse, FlavorServiceApi } from 'generated/client';
 import useApiQuery from 'client/useApiQuery';
@@ -79,31 +87,24 @@ export default function LaunchPageSection(): ReactElement {
     setSearchParams(newSearchParams);
   }
 
-  const headerText = showAllFlavors ? 'All Flavors' : 'My Flavors';
-  const flavorFilterToggle = (
-    <span className="flex items-center">
-      <label htmlFor="flavor-filter-toggle" className="mr-2 text-lg">
-        Show All Flavors
-      </label>
-      <input
-        type="checkbox"
-        id="flavor-filter-toggle"
-        checked={showAllFlavors}
-        onChange={toggleFlavorFilter}
-        className="w-4 h-4 rounded-sm"
-      />
-    </span>
-  );
-
-  const header = (
-    <div className="flex justify-between items-center ">
-      <Title headingLevel="h2">{headerText}</Title>
-      {flavorFilterToggle}
-    </div>
-  );
   return (
     <>
-      <PageSection>{header}</PageSection>
+      <PageSection>
+        <Flex
+          justifyContent={{ default: 'justifyContentSpaceBetween' }}
+          alignItems={{ default: 'alignItemsCenter' }}
+        >
+          <Title headingLevel="h2">{showAllFlavors ? 'All Flavors' : 'My Flavors'}</Title>
+          <Checkbox
+            labelPosition="start"
+            label="Show All Flavors"
+            id="flavor-filter-toggle"
+            name="flavor-filter-toggle"
+            isChecked={showAllFlavors}
+            onChange={toggleFlavorFilter}
+          />
+        </Flex>
+      </PageSection>
       <PageSection>
         <Gallery
           hasGutter

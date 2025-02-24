@@ -19,7 +19,7 @@ export default function LinkCard({
 }: Props): ReactElement {
   return (
     <Link className={className} to={to}>
-      <Card isClickable>
+      <Card isClickable isCompact>
         <CardHeader
           selectableActions={{
             to,

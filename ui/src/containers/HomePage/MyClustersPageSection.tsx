@@ -3,7 +3,17 @@ import React, { ReactElement } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { AxiosPromise } from 'axios';
 import moment from 'moment';
-import { Gallery, GalleryItem, PageSection, Title } from '@patternfly/react-core';
+import {
+  Bullseye,
+  Checkbox,
+  Flex,
+  Gallery,
+  GalleryItem,
+  Icon,
+  PageSection,
+  Title,
+} from '@patternfly/react-core';
+import { StarIcon } from '@patternfly/react-icons';
 
 import { V1ClusterListResponse, ClusterServiceApi } from 'generated/client';
 import useApiQuery from 'client/useApiQuery';
@@ -23,9 +33,9 @@ const fetchClusters = (): AxiosPromise<V1ClusterListResponse> =>
 
 function NoClustersMessage(): ReactElement {
   return (
-    <div className="m-6 flex w-full justify-center">
-      <span className="text-4xl">You haven‘t created any clusters recently.</span>
-    </div>
+    <Bullseye className="pf-v6-u-w-100 pf-v6-u-h-100">
+      <Title headingLevel="h3">You haven‘t created any clusters recently</Title>
+    </Bullseye>
   );
 }
 
@@ -66,15 +76,23 @@ function ClusterCards({ showAllClusters = false }: ClusterCardsProps): ReactElem
   const cards = sortedClusters.map((cluster) => {
     assertDefined(cluster.ID);
 
-    const extraCardClass = showAllClusters && cluster.Owner === user?.Email ? 'bg-base-200' : '';
+    const isMyCluster = cluster.Owner === user?.Email;
     return (
       <GalleryItem>
         <LinkCard
           key={cluster.ID}
           to={`cluster/${cluster.ID}`}
-          header={cluster.ID || 'No ID'}
+          header={
+            <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }}>
+              <span>{cluster.ID || 'No ID'}</span>
+              {isMyCluster && (
+                <Icon>
+                  <StarIcon className="pf-v6-u-icon-color-favorite" />
+                </Icon>
+              )}
+            </Flex>
+          }
           footer={cluster.Status && <Lifespan cluster={cluster} />}
-          className={extraCardClass}
         >
           {cluster.Description && <p>Description: {cluster.Description}</p>}
           <p>Status: {cluster.Status || 'FAILED'}</p>
@@ -89,37 +107,31 @@ function ClusterCards({ showAllClusters = false }: ClusterCardsProps): ReactElem
 export default function MyClustersPageSection(): ReactElement {
   const [searchParams, setSearchParams] = useSearchParams();
   const showAllClusters = searchParams.get('showAllClusters') === 'true';
+
   function toggleClusterFilter() {
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set('showAllClusters', (!showAllClusters).toString());
     setSearchParams(newSearchParams);
   }
 
-  const headerText = showAllClusters ? 'All Clusters' : 'My Clusters';
-  const clusterFilterToggle = (
-    <span className="flex items-center">
-      <label htmlFor="cluster-filter-toggle" className="mr-2 text-lg">
-        Show All Clusters
-      </label>
-      <input
-        type="checkbox"
-        id="cluster-filter-toggle"
-        checked={showAllClusters}
-        onChange={toggleClusterFilter}
-        className="w-4 h-4 rounded-sm"
-      />
-    </span>
-  );
-
-  const header = (
-    <div className="flex justify-between items-center ">
-      <Title headingLevel="h2">{headerText}</Title>
-      {clusterFilterToggle}
-    </div>
-  );
   return (
     <>
-      <PageSection>{header}</PageSection>
+      <PageSection>
+        <Flex
+          justifyContent={{ default: 'justifyContentSpaceBetween' }}
+          alignItems={{ default: 'alignItemsCenter' }}
+        >
+          <Title headingLevel="h2">{showAllClusters ? 'All Clusters' : 'My Clusters'}</Title>
+          <Checkbox
+            labelPosition="start"
+            label="Show All Clusters"
+            id="cluster-filter-toggle"
+            name="cluster-filter-toggle"
+            isChecked={showAllClusters}
+            onChange={toggleClusterFilter}
+          />
+        </Flex>
+      </PageSection>
       <PageSection>
         <Gallery
           hasGutter
