@@ -31,26 +31,22 @@ function ModifiableTimeUnit({
         {notation}
       </span>
       <span className="pf-v5-u-display-inline-flex">
-        <Button
+        <Button icon={<PlusCircle size={12} />}
           variant="plain"
           className="pf-v5-u-mr-sm pf-v5-u-p-0"
           aria-label="Increment"
           onClick={(): void => {
             onChange(notation, 'inc');
           }}
-        >
-          <PlusCircle size={12} />
-        </Button>
-        <Button
+         />
+        <Button icon={<MinusCircle size={12} />}
           variant="plain"
           className="pf-v5-u-p-0"
           aria-label="Decrement"
           onClick={(): void => {
             onChange(notation, 'dec');
           }}
-        >
-          <MinusCircle size={12} />
-        </Button>
+         />
       </span>
     </span>
   );

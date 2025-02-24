@@ -3,8 +3,7 @@ import React, { forwardRef } from 'react';
 const RHACSLogo = forwardRef<SVGSVGElement, never>((_, ref) => (
   <svg
     id="RHACS-Logo"
-    width="254px"
-    height="60px"
+    height="50px"
     viewBox="0 0 1482.9 350"
     xmlns="http://www.w3.org/2000/svg"
     ref={ref}

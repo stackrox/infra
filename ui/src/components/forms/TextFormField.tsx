@@ -42,7 +42,7 @@ export default function TextFormField({
       label={label}
       fieldId={id}
       isRequired={required}
-      labelIcon={
+      labelHelp={
         helper ? (
           <Popover bodyContent={helper} className="form-help">
             <button

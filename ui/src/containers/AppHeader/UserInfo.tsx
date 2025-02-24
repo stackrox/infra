@@ -13,7 +13,7 @@ export default function UserInfo(): ReactElement {
           alt={user?.Name || 'anonymous'}
           src={user.Picture}
           size="md"
-          border="dark"
+          isBordered
           className="flex justify-center items-center mr-2"
         />
       ) : (

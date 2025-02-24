@@ -58,7 +58,7 @@ export default function FileUploadFormField({
       label={label}
       fieldId={id}
       isRequired={required}
-      labelIcon={
+      labelHelp={
         helper ? (
           <Popover bodyContent={helper}>
             <button
