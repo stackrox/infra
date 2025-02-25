@@ -96,7 +96,7 @@ export default function Countdown({ targetDate, onModify }: CountdownProps): Rea
   const duration = calcDuration(targetDate);
 
   return (
-    <div className="pf-v6-u-font-size-xl">
+    <div>
       {`Expiration: ${moment(targetDate).format('LLL')}`}
       <span>&nbsp;-&nbsp;</span>
       <FormatDuration duration={duration} onModify={onModify} />

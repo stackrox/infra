@@ -3,12 +3,12 @@ import React, { ReactElement } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { AxiosPromise } from 'axios';
 import {
-  Checkbox,
   Flex,
   Gallery,
   GalleryItem,
   Label,
   PageSection,
+  Switch,
   Title,
 } from '@patternfly/react-core';
 
@@ -109,11 +109,10 @@ export default function LaunchPageSection(): ReactElement {
           alignItems={{ default: 'alignItemsCenter' }}
         >
           <Title headingLevel="h2">{showAllFlavors ? 'All Flavors' : 'My Flavors'}</Title>
-          <Checkbox
-            labelPosition="start"
+          <Switch
+            name="flavor-filter-toggle"
             label="Show All Flavors"
             id="flavor-filter-toggle"
-            name="flavor-filter-toggle"
             isChecked={showAllFlavors}
             onChange={toggleFlavorFilter}
           />

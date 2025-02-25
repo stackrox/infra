@@ -5,12 +5,12 @@ import { AxiosPromise } from 'axios';
 import moment from 'moment';
 import {
   Bullseye,
-  Checkbox,
   Flex,
   Gallery,
   GalleryItem,
   Icon,
   PageSection,
+  Switch,
   Title,
 } from '@patternfly/react-core';
 import { StarIcon } from '@patternfly/react-icons';
@@ -137,8 +137,7 @@ export default function MyClustersPageSection(): ReactElement {
           alignItems={{ default: 'alignItemsCenter' }}
         >
           <Title headingLevel="h2">{showAllClusters ? 'All Clusters' : 'My Clusters'}</Title>
-          <Checkbox
-            labelPosition="start"
+          <Switch
             label="Show All Clusters"
             id="cluster-filter-toggle"
             name="cluster-filter-toggle"

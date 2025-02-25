@@ -74,5 +74,9 @@ export default function MutableLifespan({ cluster }: Props): ReactElement {
       });
   };
 
-  return <Lifespan cluster={modifiedCluster} onModify={onModify} />;
+  return (
+    <div className="pf-v6-u-font-size-lg">
+      <Lifespan cluster={modifiedCluster} onModify={onModify} />
+    </div>
+  );
 }
