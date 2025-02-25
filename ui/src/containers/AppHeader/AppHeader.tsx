@@ -2,8 +2,7 @@
 import React, { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import { Avatar, Button, Flex } from '@patternfly/react-core';
-import { TerminalIcon } from '@patternfly/react-icons';
-import { LogOut } from 'react-feather';
+import { OutlinedHandPointRightIcon, TerminalIcon } from '@patternfly/react-icons';
 
 import AppHeaderLayout from 'components/AppHeaderLayout';
 import RHACSLogo from 'components/RHACSLogo';
@@ -34,11 +33,7 @@ export default function AppHeader(): ReactElement {
           ) : (
             <p>{user?.Name || 'anonymous'}</p>
           )}
-          <Button
-            onClick={logout}
-            variant="control"
-            icon={<LogOut className="pf-v6-svg" size={16} />}
-          >
+          <Button onClick={logout} variant="control" icon={<OutlinedHandPointRightIcon />}>
             Logout
           </Button>
         </Flex>

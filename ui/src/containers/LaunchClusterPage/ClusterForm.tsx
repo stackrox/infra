@@ -22,7 +22,7 @@ import NumberFormField from 'components/forms/NumberFormField';
 import { useUserAuth } from 'containers/UserAuthProvider';
 import assertDefined from 'utils/assertDefined';
 import { generateClusterName } from 'utils/cluster.utils';
-import { UploadCloud } from 'react-feather';
+import { CloudUploadAltIcon } from '@patternfly/react-icons';
 
 const clusterService = new ClusterServiceApi(configuration);
 
@@ -202,7 +202,7 @@ function FormContent(props: {
       <Button
         type="submit"
         isDisabled={isSubmitting}
-        icon={isSubmitting ? undefined : <UploadCloud className="pf-v6-svg" size={16} />}
+        icon={isSubmitting ? undefined : <CloudUploadAltIcon />}
         spinnerAriaValueText="Launching cluster"
         spinnerAriaLabel="Launching cluster"
         isLoading={isSubmitting}
