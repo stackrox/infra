@@ -34,7 +34,7 @@ function FlavorCards({ showAllFlavors = false }: FlavorCardsProps): ReactElement
   const { loading, error, data } = useApiQuery(showAllFlavors ? fetchAllFlavors : fetchFlavors);
 
   if (loading) {
-    return <FullPageSpinner />;
+    return <FullPageSpinner title="Loading available cluster flavors" />;
   }
 
   if (error || !data?.Flavors) {
@@ -74,7 +74,22 @@ function FlavorCards({ showAllFlavors = false }: FlavorCardsProps): ReactElement
       </GalleryItem>
     );
   });
-  return <>{cards}</>;
+  return (
+    <Gallery
+      hasGutter
+      minWidths={{
+        default: '100%',
+        md: '100px',
+        xl: '300px',
+      }}
+      maxWidths={{
+        md: '200px',
+        xl: '1fr',
+      }}
+    >
+      {cards}
+    </Gallery>
+  );
 }
 
 export default function LaunchPageSection(): ReactElement {
@@ -106,20 +121,7 @@ export default function LaunchPageSection(): ReactElement {
         </Flex>
       </PageSection>
       <PageSection>
-        <Gallery
-          hasGutter
-          minWidths={{
-            default: '100%',
-            md: '100px',
-            xl: '300px',
-          }}
-          maxWidths={{
-            md: '200px',
-            xl: '1fr',
-          }}
-        >
-          <FlavorCards showAllFlavors={showAllFlavors} />
-        </Gallery>
+        <FlavorCards showAllFlavors={showAllFlavors} />
       </PageSection>
     </>
   );

@@ -14,24 +14,6 @@
   fill: #000000;
 }
 
-/* LinkCard */
-
-/* appear to be clickable */
-a:hover>.pf-v6-c-panel {
-  background-color: var(--pf-v5-global--BackgroundColor--200);
-}
-
-/* reset to regular font for LinkCard content */
-a>.pf-v6-c-panel {
-  font-weight: var(--pf-v5-global--FontWeight--normal);
-}
-
-/* LinkCard title */
-a>.pf-v6-c-panel>.pf-v6-c-panel__header {
-  font-weight: var(--pf-v5-global--FontWeight--bold);
-  font-size: var(--pf-v5-global--FontSize--lg);
-}
-
 /* Form help popovers - rendered with react-markdown */
 
 /* #, ##, ### */

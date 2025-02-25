@@ -49,7 +49,7 @@ function ClusterCards({ showAllClusters = false }: ClusterCardsProps): ReactElem
   const { loading, error, data } = useApiQuery(fetchClusters);
 
   if (loading) {
-    return <FullPageSpinner />;
+    return <FullPageSpinner title="Loading infra clusters" />;
   }
 
   if (error || !data) {
@@ -101,7 +101,22 @@ function ClusterCards({ showAllClusters = false }: ClusterCardsProps): ReactElem
       </GalleryItem>
     );
   });
-  return <>{cards}</>;
+  return (
+    <Gallery
+      hasGutter
+      minWidths={{
+        default: '100%',
+        md: '100px',
+        xl: '300px',
+      }}
+      maxWidths={{
+        md: '200px',
+        xl: '1fr',
+      }}
+    >
+      {cards}
+    </Gallery>
+  );
 }
 
 export default function MyClustersPageSection(): ReactElement {
@@ -133,20 +148,7 @@ export default function MyClustersPageSection(): ReactElement {
         </Flex>
       </PageSection>
       <PageSection>
-        <Gallery
-          hasGutter
-          minWidths={{
-            default: '100%',
-            md: '100px',
-            xl: '300px',
-          }}
-          maxWidths={{
-            md: '200px',
-            xl: '1fr',
-          }}
-        >
-          <ClusterCards showAllClusters={showAllClusters} />
-        </Gallery>
+        <ClusterCards showAllClusters={showAllClusters} />
       </PageSection>
     </>
   );
