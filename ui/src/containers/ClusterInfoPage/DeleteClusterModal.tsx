@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import { Button } from '@patternfly/react-core';
+import { Alert, Button } from '@patternfly/react-core';
 import { ClipLoader } from 'react-spinners';
 
 import { V1Cluster, ClusterServiceApi } from 'generated/client';
@@ -43,9 +43,7 @@ export default function DeleteClusterModal({ cluster, onCancel, onDeleted }: Pro
         header={`Are you sure you want to delete ${cluster.ID}?`}
         buttons={buttons}
       >
-        <span className="pf-v6-u-danger-color-100 pf-v6-u-font-size-2xl">
-          This action cannot be undone.
-        </span>
+        <Alert isInline variant="danger" title="This will permanently delete the cluster" />
       </Modal>
     );
   }

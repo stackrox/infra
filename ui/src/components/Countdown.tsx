@@ -1,17 +1,11 @@
 import React, { ReactElement } from 'react';
 import { Button } from '@patternfly/react-core';
+import { MinusCircleIcon, PlusCircleIcon } from '@patternfly/react-icons';
 import moment from 'moment';
-import { PlusCircle, MinusCircle } from 'react-feather';
 
 function calcDuration(targetDate: Date): moment.Duration {
   return moment.duration(moment(targetDate).diff(moment()));
 }
-
-type Props = {
-  targetDate: Date;
-  className?: string;
-  onModify?: (notation: string, incOrDec: string) => void;
-};
 
 type ModifiableTimeUnitProps = {
   notation: string;
@@ -26,25 +20,25 @@ function ModifiableTimeUnit({
 }: ModifiableTimeUnitProps): ReactElement {
   return (
     <span className="pf-v6-u-display-inline-flex pf-v6-u-flex-direction-column pf-v6-u-align-items-center">
-      <span>
+      <span className="pf-v6-u-font-weight-bold">
         {`${value}`.padStart(2, '0')}
         {notation}
       </span>
       <span className="pf-v6-u-display-inline-flex">
         <Button
-          icon={<PlusCircle size={16} />}
+          icon={<PlusCircleIcon />}
           size="sm"
-          variant="plain"
-          className="pf-v6-u-p-0"
+          variant="control"
+          className="pf-v6-u-p-0 pf-v6-u-mr-xs"
           aria-label="Increment"
           onClick={(): void => {
             onChange(notation, 'inc');
           }}
         />
         <Button
-          icon={<MinusCircle size={16} />}
+          icon={<MinusCircleIcon />}
           size="sm"
-          variant="plain"
+          variant="control"
           className="pf-v6-u-p-0"
           aria-label="Decrement"
           onClick={(): void => {
@@ -93,11 +87,16 @@ function FormatDuration({ duration, onModify }: FormatDurationProps): ReactEleme
   );
 }
 
-export default function Countdown({ targetDate, className = '', onModify }: Props): ReactElement {
+type CountdownProps = {
+  targetDate: Date;
+  onModify?: (notation: string, incOrDec: string) => void;
+};
+
+export default function Countdown({ targetDate, onModify }: CountdownProps): ReactElement {
   const duration = calcDuration(targetDate);
 
   return (
-    <div className={className}>
+    <div className="pf-v6-u-font-size-xl">
       {`Expiration: ${moment(targetDate).format('LLL')}`}
       <span>&nbsp;-&nbsp;</span>
       <FormatDuration duration={duration} onModify={onModify} />
