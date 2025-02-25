@@ -3,12 +3,12 @@ import { EmptyState, EmptyStateBody } from '@patternfly/react-core';
 
 type Props = {
   title?: string;
-  message: string;
+  message?: string;
 };
 
 export default function FullPageError({
   title = 'There was an unexpected error!',
-  message,
+  message = '',
 }: Props): ReactElement {
   return (
     <EmptyState status="danger" variant="lg" titleText={title} headingLevel="h4">

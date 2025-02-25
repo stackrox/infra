@@ -1,5 +1,6 @@
 import React, { ReactElement } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Flex, Page } from '@patternfly/react-core';
 
 import UserAuthProvider from 'containers/UserAuthProvider';
 import AppHeader from 'containers/AppHeader';
@@ -7,8 +8,7 @@ import HomePage from 'containers/HomePage';
 import DownloadsPage from 'containers/DownloadsPage';
 import LaunchClusterPage from 'containers/LaunchClusterPage';
 import ClusterInfoPage from 'containers/ClusterInfoPage';
-import FullPageError from 'components/FullPageError';
-import { Flex, Page } from '@patternfly/react-core';
+import FourOhFour from 'components/FourOhFour';
 
 function AppRoutes(): ReactElement {
   return (
@@ -17,7 +17,7 @@ function AppRoutes(): ReactElement {
       <Route path="/downloads" element={<DownloadsPage />} />
       <Route path="/launch/:flavorId" element={<LaunchClusterPage />} />
       <Route path="/cluster/:clusterId" element={<ClusterInfoPage />} />
-      <Route path="*" element={<FullPageError message="This page doesn't seem to exist." />} />
+      <Route path="*" element={<FourOhFour />} />
     </Routes>
   );
 }
