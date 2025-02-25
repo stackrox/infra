@@ -1,10 +1,10 @@
 import React, { useCallback, ReactElement } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { PageSection, Title } from '@patternfly/react-core';
 
 import { FlavorServiceApi } from 'generated/client';
 import useApiQuery from 'client/useApiQuery';
 import configuration from 'client/configuration';
-import PageSection from 'components/PageSection';
 import FullPageSpinner from 'components/FullPageSpinner';
 import FullPageError from 'components/FullPageError';
 import ClusterForm from './ClusterForm';
@@ -26,7 +26,10 @@ export default function LaunchClusterPage(): ReactElement {
   }
 
   return (
-    <PageSection header={`Launch "${data.Name}" Cluster (${data?.Availability || 'Alpha'})`}>
+    <PageSection>
+      <Title headingLevel="h1" className="pf-v6-u-mb-xl">
+        {`Launch "${data.Name}" Cluster (${data?.Availability || 'Alpha'})`}
+      </Title>
       <ClusterForm
         flavorId={flavorId}
         flavorParameters={data.Parameters}

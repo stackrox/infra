@@ -1,11 +1,11 @@
 import React, { ReactElement, ReactNode } from 'react';
 import { useField } from 'formik';
 import {
+  Button,
   FormGroup,
   FormHelperText,
   HelperText,
   HelperTextItem,
-  Icon,
   Popover,
   TextInput,
   ValidatedOptions,
@@ -45,17 +45,14 @@ export default function TextFormField({
       labelHelp={
         helper ? (
           <Popover bodyContent={helper} className="form-help">
-            <button
-              type="button"
+            <Button
               aria-label={`Help for ${name}`}
               onClick={(e) => e.preventDefault()}
               aria-describedby={id}
               className="pf-v6-c-form__group-label-help"
-            >
-              <Icon>
-                <HelpIcon />
-              </Icon>
-            </button>
+              icon={<HelpIcon />}
+              variant="plain"
+            />
           </Popover>
         ) : undefined
       }

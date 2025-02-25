@@ -11,8 +11,7 @@ import React, { useState, ReactElement } from 'react';
 import { Formik, FormikValues, FormikHelpers, useFormikContext } from 'formik';
 import * as yup from 'yup';
 import { mapValues } from 'lodash';
-import { ClipLoader } from 'react-spinners';
-import { UploadCloud } from 'react-feather';
+import { Button, Form } from '@patternfly/react-core';
 import Markdown from 'react-markdown';
 
 import { ClusterServiceApi, V1Parameter } from 'generated/client';
@@ -23,7 +22,7 @@ import NumberFormField from 'components/forms/NumberFormField';
 import { useUserAuth } from 'containers/UserAuthProvider';
 import assertDefined from 'utils/assertDefined';
 import { generateClusterName } from 'utils/cluster.utils';
-import { Form } from '@patternfly/react-core';
+import { UploadCloud } from 'react-feather';
 
 const clusterService = new ClusterServiceApi(configuration);
 
@@ -194,22 +193,22 @@ function FormContent(props: {
       />
     ));
 
-  const launchBtnContent = (
-    <>
-      <UploadCloud size={16} className="mr-2" />
-      Launch
-    </>
-  );
-
   return (
     <>
       {parameterFields}
 
       <TextFormField name="Description" label="Description" />
 
-      <button type="submit" className="btn btn-base" disabled={isSubmitting}>
-        {isSubmitting ? <ClipLoader size={16} color="currentColor" /> : launchBtnContent}
-      </button>
+      <Button
+        type="submit"
+        isDisabled={isSubmitting}
+        icon={isSubmitting ? undefined : <UploadCloud size={16} />}
+        spinnerAriaValueText="Launching cluster"
+        spinnerAriaLabel="Launching cluster"
+        isLoading={isSubmitting}
+      >
+        {isSubmitting ? 'Launching cluster' : 'Launch'}
+      </Button>
     </>
   );
 }
@@ -275,7 +274,7 @@ export default function ClusterForm({
 
   return (
     <Formik initialValues={initialValues} validationSchema={schema} onSubmit={onSubmit}>
-      <Form className="md:w-1/3">
+      <Form className="pf-v6-u-w-25-on-xl pf-v6-u-w-50-on-md">
         {error && (
           <div className="p-2 mb-2 bg-alert-200">
             {`[Server Error] ${error.message || 'Cluster creation request failed'}`}
