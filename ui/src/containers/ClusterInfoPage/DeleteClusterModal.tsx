@@ -1,6 +1,5 @@
 import React, { ReactElement } from 'react';
 import { Alert, Button } from '@patternfly/react-core';
-import { ClipLoader } from 'react-spinners';
 
 import { V1Cluster, ClusterServiceApi } from 'generated/client';
 import configuration from 'client/configuration';
@@ -49,29 +48,29 @@ export default function DeleteClusterModal({ cluster, onCancel, onDeleted }: Pro
   }
 
   if (loading) {
+    const message = `Cluster ${cluster.ID} is being destroyed now.`;
     // waiting for server response
     return (
       <Modal isOpen onRequestClose={(): void => {}} header={`Deleting ${cluster.ID}...`}>
-        <ClipLoader size={32} color="currentColor" />
+        <Alert isInline variant="info" title={message} />
       </Modal>
     );
   }
 
   if (error) {
     // operation failed
-    const message = `Cannot delete cluster. Server error occurred: "${error.message}".`;
+    const message = `Could not delete cluster. Server error occurred: "${error.message}".`;
     return (
       <InformationalModal header={`Failed to delete ${cluster.ID}!`} onAcknowledged={onCancel}>
-        <span className="pf-v6-u-danger-color-100 pf-v6-u-font-size-2xl">{message}</span>
+        <Alert isInline variant="warning" title={message} />
       </InformationalModal>
     );
   }
 
   // no need to check for data response from the server, "no error happened" means operation was successful
-  const message = `Cluster ${cluster.ID} is being destroyed now.`;
   return (
     <InformationalModal header={`Successfully deleted ${cluster.ID}!`} onAcknowledged={onDeleted}>
-      <span className="pf-v6-u-success-color-100 pf-v6-u-font-size-2xl">{message}</span>
+      <Alert isInline variant="success" title="The cluster was deleted" />
     </InformationalModal>
   );
 }
