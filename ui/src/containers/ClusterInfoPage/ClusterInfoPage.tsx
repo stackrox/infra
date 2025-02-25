@@ -1,6 +1,6 @@
 import React, { useState, useCallback, ReactElement } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button, Flex, PageSection, Title } from '@patternfly/react-core';
+import { Button, Divider, Flex, PageSection, Title } from '@patternfly/react-core';
 import { DownloadIcon, TrashIcon } from '@patternfly/react-icons';
 
 import { ClusterServiceApi, V1Status } from 'generated/client';
@@ -48,19 +48,22 @@ export default function ClusterInfoPage(): ReactElement {
               </Title>
               {!!cluster && <MutableLifespan cluster={cluster} />}
             </Flex>
-            {cluster.Connect && <ClusterConnect connect={cluster.Connect} />}
+            {cluster.Connect && (
+              <>
+                <Divider component="div" />
+                <ClusterConnect connect={cluster.Connect} />
+              </>
+            )}
             {cluster.URL && (
-              <span className="text-base normal-case">
-                URL:{' '}
-                <a
-                  href={cluster.URL}
-                  className="underline text-blue-500"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {cluster.URL}
-                </a>
-              </span>
+              <>
+                <Divider component="div" />
+                <span>
+                  URL:{' '}
+                  <a href={cluster.URL} target="_blank" rel="noreferrer">
+                    {cluster.URL}
+                  </a>
+                </span>
+              </>
             )}
           </Flex>
         </PageSection>
