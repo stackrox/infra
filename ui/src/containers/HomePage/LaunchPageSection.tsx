@@ -1,4 +1,3 @@
-/* eslint-disable no-nested-ternary */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { ReactElement } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -128,4 +127,3 @@ export default function LaunchPageSection(): ReactElement {
 }
 
 /* eslint-enable jsx-a11y/label-has-associated-control */
-/* eslint-enable no-nested-ternary */
