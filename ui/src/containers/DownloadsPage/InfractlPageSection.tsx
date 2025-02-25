@@ -1,6 +1,7 @@
 import React, { ReactElement } from 'react';
+import { Button, Flex, PageSection, Title } from '@patternfly/react-core';
 
-import PageSection from 'components/PageSection';
+import { DownloadIcon } from '@patternfly/react-icons';
 import UserServiceAccountToken from './UserServiceAccountToken';
 
 export default function InfractlPageSection(): ReactElement {
@@ -10,17 +11,25 @@ export default function InfractlPageSection(): ReactElement {
     'Download for Linux': '/downloads/infractl-linux-amd64',
   };
   const infractlLinks = Object.entries(infractlDownloads).map(([label, value]) => (
-    <a key={value} href={value} download className="btn btn-base mr-2">
+    <Button
+      component="a"
+      variant="secondary"
+      key={value}
+      href={value}
+      icon={<DownloadIcon />}
+      download
+    >
       {label}
-    </a>
+    </Button>
   ));
 
   return (
-    <PageSection header="infractl (CLI)">
-      <div className="mb-4 mx-2">{infractlLinks}</div>
-      <div className="md:w-1/2 mx-2">
+    <PageSection>
+      <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsMd' }}>
+        <Title headingLevel="h1">Infractl (CLI)</Title>
+        <Flex spaceItems={{ default: 'spaceItemsMd' }}>{infractlLinks}</Flex>
         <UserServiceAccountToken />
-      </div>
+      </Flex>
     </PageSection>
   );
 }
