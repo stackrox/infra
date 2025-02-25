@@ -202,7 +202,7 @@ function FormContent(props: {
       <Button
         type="submit"
         isDisabled={isSubmitting}
-        icon={isSubmitting ? undefined : <UploadCloud size={16} />}
+        icon={isSubmitting ? undefined : <UploadCloud className="pf-v6-svg" size={16} />}
         spinnerAriaValueText="Launching cluster"
         spinnerAriaLabel="Launching cluster"
         isLoading={isSubmitting}

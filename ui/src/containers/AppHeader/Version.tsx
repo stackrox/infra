@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import { AxiosPromise } from 'axios';
-import { Info, AlertCircle } from 'react-feather';
 import { Flex, FlexItem, Spinner } from '@patternfly/react-core';
+import { InfoAltIcon, InfoCircleIcon } from '@patternfly/react-icons';
 
 import { VersionServiceApi, V1Version } from 'generated/client';
 import configuration from 'client/configuration';
@@ -33,7 +33,12 @@ export default function Version(): ReactElement {
     );
 
   if (error || !data?.Version)
-    return <VersionContent icon={<AlertCircle size={16} />} text="Error occurred" />;
+    return (
+      <VersionContent
+        icon={<InfoCircleIcon color="var(--pf-t--global--icon--color--status--danger--default)" />}
+        text="Could not load server version"
+      />
+    );
 
-  return <VersionContent icon={<Info size={16} />} text={data.Version} />;
+  return <VersionContent icon={<InfoAltIcon />} text={data.Version} />;
 }

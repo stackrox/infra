@@ -34,7 +34,11 @@ export default function AppHeader(): ReactElement {
           ) : (
             <p>{user?.Name || 'anonymous'}</p>
           )}
-          <Button onClick={logout} variant="control" icon={<LogOut size={16} />}>
+          <Button
+            onClick={logout}
+            variant="control"
+            icon={<LogOut className="pf-v6-svg" size={16} />}
+          >
             Logout
           </Button>
         </Flex>
