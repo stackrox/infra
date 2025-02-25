@@ -5,6 +5,7 @@ import useApiQuery from 'client/useApiQuery';
 import configuration from 'client/configuration';
 import FullPageSpinner from 'components/FullPageSpinner';
 import FullPageError from 'components/FullPageError';
+import { CodeBlock, CodeBlockCode } from '@patternfly/react-core';
 
 const clusterService = new ClusterServiceApi(configuration);
 
@@ -34,8 +35,8 @@ export default function ClusterLogs({ clusterId }: Props): ReactElement {
   }).join('\n\n');
 
   return (
-    <pre className="font-300 whitespace-pre-wrap">
-      <code className="h-full pb-5">{logs}</code>
-    </pre>
+    <CodeBlock>
+      <CodeBlockCode>{logs}</CodeBlockCode>
+    </CodeBlock>
   );
 }
