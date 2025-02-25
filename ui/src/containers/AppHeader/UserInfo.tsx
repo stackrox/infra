@@ -1,28 +1,21 @@
 import React, { ReactElement } from 'react';
 
-import { Avatar } from '@patternfly/react-core';
+import { Avatar, Button, Flex } from '@patternfly/react-core';
 import { useUserAuth } from 'containers/UserAuthProvider';
 import { LogOut } from 'react-feather';
 
 export default function UserInfo(): ReactElement {
   const { user, logout } = useUserAuth();
   return (
-    <div className="flex flex-row h-full w-full items-center mr-2">
+    <Flex alignItems={{ default: 'alignItemsCenter' }}>
       {user?.Picture ? (
-        <Avatar
-          alt={user?.Name || 'anonymous'}
-          src={user.Picture}
-          size="md"
-          isBordered
-          className="flex justify-center items-center mr-2"
-        />
+        <Avatar alt={user?.Name || 'anonymous'} src={user.Picture} size="md" isBordered />
       ) : (
-        <p className="flex justify-center items-center mr-2">{user?.Name || 'anonymous'}</p>
+        <p>{user?.Name || 'anonymous'}</p>
       )}
-      <button onClick={logout} type="button" className="btn btn-base">
-        <LogOut size={16} className="mr-2" />
+      <Button onClick={logout} variant="control" icon={<LogOut size={16} />}>
         Logout
-      </button>
-    </div>
+      </Button>
+    </Flex>
   );
 }

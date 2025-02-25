@@ -1,18 +1,29 @@
+/* eslint-disable react/jsx-props-no-spreading */
 import React, { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
-import { Terminal } from 'react-feather';
+import { Button } from '@patternfly/react-core';
+import { TerminalIcon } from '@patternfly/react-icons';
 
 import AppHeaderLayout from 'components/AppHeaderLayout';
 import ProductLogoTile from './ProductLogoTile';
 import UserInfo from './UserInfo';
 
 export default function AppHeader(): ReactElement {
-  const mainArea = (
-    <Link to="/downloads" className="btn btn-base">
-      <Terminal size={16} className="mr-2" />
-      infractl
-    </Link>
+  return (
+    <AppHeaderLayout
+      logo={<ProductLogoTile />}
+      main={
+        <Button
+          component={(props) => <Link {...props} to="/downloads" />}
+          variant="control"
+          icon={<TerminalIcon />}
+        >
+          infractl
+        </Button>
+      }
+      ending={<UserInfo />}
+    />
   );
-
-  return <AppHeaderLayout logo={<ProductLogoTile />} main={mainArea} ending={<UserInfo />} />;
 }
+
+/* eslint-enable react/jsx-props-no-spreading */
