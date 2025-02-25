@@ -1,5 +1,5 @@
 import React, { ReactElement, useCallback } from 'react';
-import { Button, List, ListItem } from '@patternfly/react-core';
+import { Button, ClipboardCopy, Flex, List, ListItem } from '@patternfly/react-core';
 
 import { V1Cluster, ClusterServiceApi, V1Artifact } from 'generated/client';
 import configuration from 'client/configuration';
@@ -27,7 +27,7 @@ function ArtifactsList({ artifacts }: ArtifactsListProps): ReactElement {
           return 0;
         })
         .map((artifact) => (
-          <ListItem key={artifact.Name}>
+          <ListItem key={artifact.URL}>
             <a href={artifact.URL}>{artifact.Name}</a> - {artifact.Description}
           </ListItem>
         ))}
@@ -57,11 +57,12 @@ function Artifacts({ cluster }: ArtifactsProps): ReactElement {
     return (
       <div>
         <ArtifactsList artifacts={artifacts.Artifacts} />
-        <p>
-          Note: You can download all artifacts at the command line with:
-          <br />
-          <code>infractl artifacts --download-dir=&lt;some dir&gt; {cluster.ID}</code>
-        </p>
+        <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsSm' }}>
+          <p>Note: You can download all artifacts at the command line with:</p>
+          <ClipboardCopy isReadOnly hoverTip="Copy command" clickTip="Command copied!">
+            {`infractl artifacts --download-dir=<some dir> ${cluster.ID ?? ''}`}
+          </ClipboardCopy>
+        </Flex>
       </div>
     );
   }
