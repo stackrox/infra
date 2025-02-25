@@ -54,7 +54,7 @@ export default function NumberFormField({
         onChange={onChange}
         onPlus={onPlus}
         type="text"
-        value={field.value} // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+        value={typeof field.value === 'number' ? field.value : parseInt(field.value, 10)}
         min={min}
         max={max}
         isDisabled={disabled}
