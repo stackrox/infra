@@ -29,9 +29,7 @@ module.exports = {
       {
         devDependencies: [
           '**/.eslintrc.js',
-          'tailwind.config.js',
           '.prettierrc.js',
-          '.postcssrc.js',
           'src/setupProxy.js',
           'src/setupTests.ts',
           '**/*.test.tsx',
