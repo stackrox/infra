@@ -1,17 +1,23 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import React, { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
-import { Button } from '@patternfly/react-core';
+import { Avatar, Button, Flex } from '@patternfly/react-core';
 import { TerminalIcon } from '@patternfly/react-icons';
+import { LogOut } from 'react-feather';
 
 import AppHeaderLayout from 'components/AppHeaderLayout';
-import ProductLogoTile from './ProductLogoTile';
-import UserInfo from './UserInfo';
+import RHACSLogo from 'components/RHACSLogo';
+import { useUserAuth } from 'containers/UserAuthProvider';
 
 export default function AppHeader(): ReactElement {
+  const { user, logout } = useUserAuth();
   return (
     <AppHeaderLayout
-      logo={<ProductLogoTile />}
+      logo={
+        <Link to="/">
+          <RHACSLogo />
+        </Link>
+      }
       main={
         <Button
           component={(props) => <Link {...props} to="/downloads" />}
@@ -21,7 +27,18 @@ export default function AppHeader(): ReactElement {
           infractl
         </Button>
       }
-      ending={<UserInfo />}
+      ending={
+        <Flex alignItems={{ default: 'alignItemsCenter' }}>
+          {user?.Picture ? (
+            <Avatar alt={user?.Name || 'anonymous'} src={user.Picture} size="md" isBordered />
+          ) : (
+            <p>{user?.Name || 'anonymous'}</p>
+          )}
+          <Button onClick={logout} variant="control" icon={<LogOut size={16} />}>
+            Logout
+          </Button>
+        </Flex>
+      }
     />
   );
 }
