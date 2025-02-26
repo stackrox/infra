@@ -5,8 +5,7 @@
   "scripts": {
     "start": "PORT=3001 HTTPS=true NODE_OPTIONS=--openssl-legacy-provider EXTEND_ESLINT=true vite",
     "build": "NODE_OPTIONS=--openssl-legacy-provider EXTEND_ESLINT=true vite build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
+    "test": "echo 'Someone should write some tests'",
     "lint-check": "npm-run-all lint-check:*",
     "lint-check:non-src": "prettier --check '**/*.{md,css,json}'",
     "lint-check:src": "eslint --ext .js,.jsx,.ts,.tsx ./",
