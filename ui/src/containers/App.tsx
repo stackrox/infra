@@ -1,6 +1,7 @@
 import React, { ReactElement } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Flex, Page } from '@patternfly/react-core';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import UserAuthProvider from 'containers/UserAuthProvider';
 import AppHeader from 'containers/AppHeader';
@@ -9,6 +10,8 @@ import DownloadsPage from 'containers/DownloadsPage';
 import LaunchClusterPage from 'containers/LaunchClusterPage';
 import ClusterInfoPage from 'containers/ClusterInfoPage';
 import FourOhFour from 'components/FourOhFour';
+
+const queryClient = new QueryClient();
 
 function AppRoutes(): ReactElement {
   return (
@@ -26,15 +29,17 @@ export default function App(): ReactElement {
   return (
     <Router>
       <UserAuthProvider>
-        <Flex
-          direction={{ default: 'column' }}
-          flexWrap={{ default: 'nowrap' }}
-          className="pf-v6-u-h-100 pf-v6-u-w-100"
-        >
-          <Page masthead={<AppHeader />}>
-            <AppRoutes />
-          </Page>
-        </Flex>
+        <QueryClientProvider client={queryClient}>
+          <Flex
+            direction={{ default: 'column' }}
+            flexWrap={{ default: 'nowrap' }}
+            className="pf-v6-u-h-100 pf-v6-u-w-100"
+          >
+            <Page masthead={<AppHeader />}>
+              <AppRoutes />
+            </Page>
+          </Flex>
+        </QueryClientProvider>
       </UserAuthProvider>
     </Router>
   );

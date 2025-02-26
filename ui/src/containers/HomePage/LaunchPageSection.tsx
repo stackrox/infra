@@ -11,6 +11,7 @@ import {
   Switch,
   Title,
 } from '@patternfly/react-core';
+import { useQuery } from '@tanstack/react-query';
 
 import { V1FlavorListResponse, FlavorServiceApi } from 'generated/client';
 import useApiQuery from 'client/useApiQuery';
@@ -30,7 +31,23 @@ type FlavorCardsProps = {
 };
 
 function FlavorCards({ showAllFlavors = false }: FlavorCardsProps): ReactElement {
-  const { loading, error, data } = useApiQuery(showAllFlavors ? fetchAllFlavors : fetchFlavors);
+  const flavorsRequest = useQuery({
+    queryKey: ['flavors'],
+    queryFn: fetchFlavors,
+    staleTime: 30000,
+    enabled: !showAllFlavors,
+  });
+  const allFlavorsRequest = useQuery({
+    queryKey: ['allFlavors'],
+    queryFn: fetchAllFlavors,
+    staleTime: 30000,
+    enabled: showAllFlavors,
+  });
+  const activeQuery = showAllFlavors ? allFlavorsRequest : flavorsRequest;
+
+  const loading = activeQuery.isLoading;
+  const error = activeQuery.error;
+  const data = activeQuery?.data?.data;
 
   if (loading) {
     return <FullPageSpinner title="Loading available cluster flavors" />;
