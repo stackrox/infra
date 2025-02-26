@@ -1,7 +1,6 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { ReactElement } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { AxiosPromise } from 'axios';
 import moment from 'moment';
 import {
   Bullseye,
@@ -15,7 +14,7 @@ import {
 } from '@patternfly/react-core';
 import { StarIcon } from '@patternfly/react-icons';
 
-import { V1ClusterListResponse, ClusterServiceApi } from 'generated/client';
+import { ClusterServiceApi } from 'generated/client';
 import configuration from 'client/configuration';
 import { useUserAuth } from 'containers/UserAuthProvider';
 import LinkCard from 'components/LinkCard';
@@ -26,10 +25,6 @@ import assertDefined from 'utils/assertDefined';
 import { useQuery } from '@tanstack/react-query';
 
 const clusterService = new ClusterServiceApi(configuration);
-
-const FETCH_ALL_CLUSTERS = true;
-const fetchClusters = (): AxiosPromise<V1ClusterListResponse> =>
-  clusterService.list(FETCH_ALL_CLUSTERS);
 
 function NoClustersMessage(): ReactElement {
   return (
@@ -46,10 +41,16 @@ type ClusterCardsProps = {
 function ClusterCards({ showAllClusters = false }: ClusterCardsProps): ReactElement {
   const { user } = useUserAuth();
 
-  const { isLoading: loading, error, data: rawData } = useQuery({
-    queryKey: ['clusters'],
-    queryFn: fetchClusters,
+  const myClustersRequest = useQuery({
+    queryKey: ['clusters', false],
+    queryFn: () => clusterService.list(false),
   });
+  const allClustersRequest = useQuery({
+    queryKey: ['clusters', true],
+    queryFn: () => clusterService.list(true),
+  });
+  const requestToUse = showAllClusters ? allClustersRequest : myClustersRequest;
+  const { isLoading: loading, error, data: rawData } = requestToUse;
   const data = rawData?.data;
 
   if (loading) {
@@ -64,12 +65,8 @@ function ClusterCards({ showAllClusters = false }: ClusterCardsProps): ReactElem
     return <NoClustersMessage />;
   }
 
-  // choose whether to show all or just this user's clusters
-  const clustersToShow = showAllClusters
-    ? data.Clusters
-    : data.Clusters.filter((cluster) => cluster.Owner === user?.Email);
   // sorted in descending order by creation date
-  const sortedClusters = clustersToShow.sort((c1, c2) =>
+  const sortedClusters = data.Clusters.sort((c1, c2) =>
     moment(c1.CreatedOn).isBefore(c2.CreatedOn) ? 1 : -1
   );
 
