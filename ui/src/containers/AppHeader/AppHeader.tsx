@@ -7,6 +7,7 @@ import { OutlinedHandPointRightIcon, TerminalIcon } from '@patternfly/react-icon
 import AppHeaderLayout from 'components/AppHeaderLayout';
 import RHACSLogo from 'components/RHACSLogo';
 import { useUserAuth } from 'containers/UserAuthProvider';
+import ThemeToggleButton from 'components/ThemeToggleButton';
 
 export default function AppHeader(): ReactElement {
   const { user, logout } = useUserAuth();
@@ -28,6 +29,9 @@ export default function AppHeader(): ReactElement {
       }
       ending={
         <Flex alignItems={{ default: 'alignItemsCenter' }}>
+          <div className="pf-v6-u-mr-md">
+            <ThemeToggleButton />
+          </div>
           {user?.Picture ? (
             <Avatar alt={user?.Name || 'anonymous'} src={user.Picture} size="md" isBordered />
           ) : (

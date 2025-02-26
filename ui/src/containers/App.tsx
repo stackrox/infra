@@ -10,6 +10,7 @@ import DownloadsPage from 'containers/DownloadsPage';
 import LaunchClusterPage from 'containers/LaunchClusterPage';
 import ClusterInfoPage from 'containers/ClusterInfoPage';
 import FourOhFour from 'components/FourOhFour';
+import { ThemeProvider } from 'utils/ThemeProvider';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,19 +35,21 @@ function AppRoutes(): ReactElement {
 export default function App(): ReactElement {
   return (
     <Router>
-      <UserAuthProvider>
-        <QueryClientProvider client={queryClient}>
-          <Flex
-            direction={{ default: 'column' }}
-            flexWrap={{ default: 'nowrap' }}
-            className="pf-v6-u-h-100 pf-v6-u-w-100"
-          >
-            <Page masthead={<AppHeader />}>
-              <AppRoutes />
-            </Page>
-          </Flex>
-        </QueryClientProvider>
-      </UserAuthProvider>
+      <ThemeProvider>
+        <UserAuthProvider>
+          <QueryClientProvider client={queryClient}>
+            <Flex
+              direction={{ default: 'column' }}
+              flexWrap={{ default: 'nowrap' }}
+              className="pf-v6-u-h-100 pf-v6-u-w-100"
+            >
+              <Page masthead={<AppHeader />}>
+                <AppRoutes />
+              </Page>
+            </Flex>
+          </QueryClientProvider>
+        </UserAuthProvider>
+      </ThemeProvider>
     </Router>
   );
 }
