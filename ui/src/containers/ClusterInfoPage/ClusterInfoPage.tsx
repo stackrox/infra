@@ -55,7 +55,7 @@ export default function ClusterInfoPage(): ReactElement {
         ) : clusterInfoError || !cluster?.ID ? (
           <FullPageError message={clusterInfoError?.message || 'Unexpected server response'} />
         ) : (
-          <PageSection className="pf-v6-u-h-100" style={{ overflow: 'auto' }}>
+          <PageSection style={{ overflow: 'auto' }}>
             <Flex direction={{ default: 'column' }}>
               <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }}>
                 <Title headingLevel="h1">

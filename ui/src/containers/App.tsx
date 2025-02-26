@@ -43,7 +43,7 @@ export default function App(): ReactElement {
               flexWrap={{ default: 'nowrap' }}
               className="pf-v6-u-h-100 pf-v6-u-w-100"
             >
-              <Page masthead={<AppHeader />}>
+              <Page masthead={<AppHeader />} isContentFilled>
                 <AppRoutes />
               </Page>
             </Flex>
