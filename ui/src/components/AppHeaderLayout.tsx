@@ -21,9 +21,7 @@ export default function AppHeaderLayout({ logo, main, ending }: Props): ReactEle
     <Masthead>
       <MastheadMain>
         <MastheadBrand>
-          <MastheadLogo component="a" className="pf-v6-u-mr-xl">
-            {logo}
-          </MastheadLogo>
+          <MastheadLogo className="pf-v6-u-mr-xl">{logo}</MastheadLogo>
         </MastheadBrand>
       </MastheadMain>
       <MastheadContent>

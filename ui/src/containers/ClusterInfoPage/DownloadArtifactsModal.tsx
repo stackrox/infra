@@ -80,7 +80,7 @@ export default function DownloadArtifactsModal({ clusterId, onClose }: Props): R
   assertDefined(clusterId);
 
   const closeButton = (
-    <Button variant="primary" onClick={onClose}>
+    <Button key="close" variant="primary" onClick={onClose}>
       Close
     </Button>
   );

@@ -79,9 +79,8 @@ function ClusterCards({ showAllClusters = false }: ClusterCardsProps): ReactElem
 
     const isMyCluster = cluster.Owner === user?.Email;
     return (
-      <GalleryItem>
+      <GalleryItem key={cluster.ID}>
         <LinkCard
-          key={cluster.ID}
           to={`cluster/${cluster.ID}`}
           header={
             <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }}>
@@ -102,6 +101,7 @@ function ClusterCards({ showAllClusters = false }: ClusterCardsProps): ReactElem
       </GalleryItem>
     );
   });
+
   return (
     <Gallery
       hasGutter
