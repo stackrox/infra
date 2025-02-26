@@ -5,8 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 
 import FullPageSpinner from 'components/FullPageSpinner';
 import FullPageError from 'components/FullPageError';
-import ClusterForm from './ClusterForm';
 import { flavorInfoQueryOptions } from 'client/flavorInfoQueryOptions';
+import ClusterForm from './ClusterForm';
 
 export default function LaunchClusterPage(): ReactElement {
   const { flavorId = '' } = useParams();

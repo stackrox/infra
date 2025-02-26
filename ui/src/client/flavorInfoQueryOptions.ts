@@ -1,6 +1,6 @@
 import { FlavorServiceApi, V1Flavor } from 'generated/client';
-import configuration from './configuration';
 import { QueryClient } from '@tanstack/react-query';
+import configuration from './configuration';
 
 const flavorService = new FlavorServiceApi(configuration);
 

@@ -53,7 +53,7 @@ function FlavorCards({ showAllFlavors = false }: FlavorCardsProps): ReactElement
   const activeQuery = showAllFlavors ? allFlavorsRequest : flavorsRequest;
 
   const loading = activeQuery.isLoading;
-  const error = activeQuery.error;
+  const { error } = activeQuery;
   const data = activeQuery?.data?.data;
 
   if (loading) {
