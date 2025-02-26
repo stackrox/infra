@@ -1,10 +1,7 @@
 import React, { ReactElement } from 'react';
 
-import { ClusterServiceApi, V1Log } from 'generated/client';
-import configuration from 'client/configuration';
+import { V1Log } from 'generated/client';
 import { CodeBlock, CodeBlockCode } from '@patternfly/react-core';
-
-const clusterService = new ClusterServiceApi(configuration);
 
 type Props = {
   logs: V1Log[];

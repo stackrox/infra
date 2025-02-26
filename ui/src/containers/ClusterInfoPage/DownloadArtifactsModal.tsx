@@ -1,11 +1,11 @@
-import React, { ReactElement, useCallback } from 'react';
+import React, { ReactElement } from 'react';
 import { Button, ClipboardCopy, Flex, List, ListItem } from '@patternfly/react-core';
 
 import { ClusterServiceApi, V1Artifact } from 'generated/client';
 import configuration from 'client/configuration';
 import Modal from 'components/Modal';
-import useApiQuery from 'client/useApiQuery';
 import assertDefined from 'utils/assertDefined';
+import { useQuery } from '@tanstack/react-query';
 
 const clusterService = new ClusterServiceApi(configuration);
 
@@ -40,8 +40,11 @@ type ArtifactsProps = {
 };
 
 function Artifacts({ clusterId }: ArtifactsProps): ReactElement {
-  const fetchArtifacts = useCallback(() => clusterService.artifacts(clusterId || ''), [clusterId]);
-  const { loading, error, data: artifacts } = useApiQuery(fetchArtifacts);
+  const { isLoading: loading, error, data: rawData } = useQuery({
+    queryKey: ['clusterArtifacts', clusterId],
+    queryFn: () => clusterService.artifacts(clusterId || ''),
+  });
+  const artifacts = rawData?.data.Artifacts;
 
   if (loading) {
     return <p>Loading...</p>;
@@ -51,10 +54,10 @@ function Artifacts({ clusterId }: ArtifactsProps): ReactElement {
     return <p>Cannot load artifacts: {error.message}</p>;
   }
 
-  if (artifacts?.Artifacts?.length) {
+  if (artifacts?.length) {
     return (
       <div>
-        <ArtifactsList artifacts={artifacts.Artifacts} />
+        <ArtifactsList artifacts={artifacts} />
         <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsSm' }}>
           <p>Note: You can download all artifacts at the command line with:</p>
           <ClipboardCopy isReadOnly hoverTip="Copy command" clickTip="Command copied!">
