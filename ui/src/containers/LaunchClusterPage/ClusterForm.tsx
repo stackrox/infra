@@ -8,7 +8,7 @@
  */
 
 import React, { useState, ReactElement } from 'react';
-import { Formik, FormikValues, FormikHelpers, useFormikContext } from 'formik';
+import { FormikValues, FormikHelpers, useFormikContext, useFormik, FormikProvider } from 'formik';
 import * as yup from 'yup';
 import { mapValues } from 'lodash';
 import { Button, Form } from '@patternfly/react-core';
@@ -181,7 +181,7 @@ function FormContent(props: {
   flavorParameters: FlavorParameters;
   parameterSchemas: ParameterSchemas;
 }): ReactElement {
-  const { isSubmitting } = useFormikContext();
+  const { isSubmitting, submitForm } = useFormikContext();
   const { flavorParameters, parameterSchemas } = props;
   const parameterFields = Object.values(flavorParameters)
     .sort((a: V1Parameter, b: V1Parameter) => getOrderFromParameter(a) - getOrderFromParameter(b))
@@ -200,7 +200,7 @@ function FormContent(props: {
       <TextFormField name="Description" label="Description" />
 
       <Button
-        type="submit"
+        onClick={submitForm}
         isDisabled={isSubmitting}
         icon={isSubmitting ? undefined : <CloudUploadAltIcon />}
         spinnerAriaValueText="Launching cluster"
@@ -272,8 +272,14 @@ export default function ClusterForm({
     }
   };
 
+  const formik = useFormik({
+    initialValues,
+    validationSchema: schema,
+    onSubmit,
+  });
+
   return (
-    <Formik initialValues={initialValues} validationSchema={schema} onSubmit={onSubmit}>
+    <FormikProvider value={formik}>
       <Form className="pf-v6-u-w-25-on-xl pf-v6-u-w-50-on-md">
         {error && (
           <div className="p-2 mb-2 bg-alert-200">
@@ -283,6 +289,6 @@ export default function ClusterForm({
         )}
         <FormContent flavorParameters={flavorParameters} parameterSchemas={parameterSchemas} />
       </Form>
-    </Formik>
+    </FormikProvider>
   );
 }
