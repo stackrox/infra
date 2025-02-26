@@ -1,22 +1,18 @@
-import React, { useCallback, ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PageSection, Title } from '@patternfly/react-core';
+import { useQuery } from '@tanstack/react-query';
 
-import { FlavorServiceApi } from 'generated/client';
-import useApiQuery from 'client/useApiQuery';
-import configuration from 'client/configuration';
 import FullPageSpinner from 'components/FullPageSpinner';
 import FullPageError from 'components/FullPageError';
 import ClusterForm from './ClusterForm';
-
-const flavorService = new FlavorServiceApi(configuration);
+import { flavorInfoQueryOptions } from 'client/flavorInfoQueryOptions';
 
 export default function LaunchClusterPage(): ReactElement {
   const { flavorId = '' } = useParams();
   const navigate = useNavigate();
-  const fetchFlavorInfo = useCallback(() => flavorService.info(flavorId), [flavorId]);
-  const { loading, error, data } = useApiQuery(fetchFlavorInfo);
-
+  const { isLoading: loading, error, data: rawData } = useQuery(flavorInfoQueryOptions(flavorId));
+  const data = rawData?.data;
   if (loading) {
     return <FullPageSpinner />;
   }

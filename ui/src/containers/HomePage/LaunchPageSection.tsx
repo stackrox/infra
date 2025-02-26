@@ -11,7 +11,7 @@ import {
   Switch,
   Title,
 } from '@patternfly/react-core';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { V1FlavorListResponse, FlavorServiceApi } from 'generated/client';
 import useApiQuery from 'client/useApiQuery';
@@ -20,6 +20,7 @@ import LinkCard from 'components/LinkCard';
 import FullPageSpinner from 'components/FullPageSpinner';
 import FullPageError from 'components/FullPageError';
 import assertDefined from 'utils/assertDefined';
+import { flavorInfoQueryOptions, prefetchFlavors } from 'client/flavorInfoQueryOptions';
 
 const flavorService = new FlavorServiceApi(configuration);
 
@@ -31,16 +32,23 @@ type FlavorCardsProps = {
 };
 
 function FlavorCards({ showAllFlavors = false }: FlavorCardsProps): ReactElement {
+  const queryClient = useQueryClient();
   const flavorsRequest = useQuery({
     queryKey: ['flavors'],
-    queryFn: fetchFlavors,
-    staleTime: 30000,
+    queryFn: () =>
+      fetchFlavors().then((data) => {
+        prefetchFlavors(queryClient, data.data.Flavors ?? []);
+        return data;
+      }),
     enabled: !showAllFlavors,
   });
   const allFlavorsRequest = useQuery({
     queryKey: ['allFlavors'],
-    queryFn: fetchAllFlavors,
-    staleTime: 30000,
+    queryFn: () =>
+      fetchAllFlavors().then((data) => {
+        prefetchFlavors(queryClient, data.data.Flavors ?? []);
+        return data;
+      }),
     enabled: showAllFlavors,
   });
   const activeQuery = showAllFlavors ? allFlavorsRequest : flavorsRequest;

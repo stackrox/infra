@@ -24,6 +24,8 @@ import Lifespan from 'components/Lifespan';
 import FullPageSpinner from 'components/FullPageSpinner';
 import FullPageError from 'components/FullPageError';
 import assertDefined from 'utils/assertDefined';
+import { useQuery } from '@tanstack/react-query';
+import { error } from 'console';
 
 const clusterService = new ClusterServiceApi(configuration);
 
@@ -46,7 +48,11 @@ type ClusterCardsProps = {
 function ClusterCards({ showAllClusters = false }: ClusterCardsProps): ReactElement {
   const { user } = useUserAuth();
 
-  const { loading, error, data } = useApiQuery(fetchClusters);
+  const { isLoading: loading, error, data: rawData } = useQuery({
+    queryKey: ['clusters'],
+    queryFn: fetchClusters,
+  });
+  const data = rawData?.data;
 
   if (loading) {
     return <FullPageSpinner title="Loading infra clusters" />;

@@ -11,7 +11,13 @@ import LaunchClusterPage from 'containers/LaunchClusterPage';
 import ClusterInfoPage from 'containers/ClusterInfoPage';
 import FourOhFour from 'components/FourOhFour';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 10 * 1000,
+    },
+  },
+});
 
 function AppRoutes(): ReactElement {
   return (
