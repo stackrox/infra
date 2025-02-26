@@ -8,7 +8,7 @@ export function flavorInfoQueryOptions(flavorId: string) {
   return {
     queryKey: ['flavorInfo', flavorId],
     queryFn: () => flavorService.info(flavorId),
-    staleTime: 10 * 60 * 1000,
+    staleTime: 60 * 60 * 1000, // One hour - this info almost never changes
   };
 }
 

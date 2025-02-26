@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import { Alert, Button } from '@patternfly/react-core';
 
-import { V1Cluster, ClusterServiceApi } from 'generated/client';
+import { ClusterServiceApi } from 'generated/client';
 import configuration from 'client/configuration';
 import useApiOperation from 'client/useApiOperation';
 import Modal from 'components/Modal';
@@ -11,18 +11,22 @@ import assertDefined from 'utils/assertDefined';
 const clusterService = new ClusterServiceApi(configuration);
 
 type Props = {
-  cluster: V1Cluster;
+  clusterId: string;
   onCancel: () => void;
   onDeleted: () => void;
 };
 
-export default function DeleteClusterModal({ cluster, onCancel, onDeleted }: Props): ReactElement {
+export default function DeleteClusterModal({
+  clusterId,
+  onCancel,
+  onDeleted,
+}: Props): ReactElement {
   const [deleteCluster, { called, loading, error }] = useApiOperation(() => {
-    assertDefined(cluster.ID); // swagger definitions are too permitting
-    return clusterService._delete(cluster.ID); // eslint-disable-line no-underscore-dangle
+    assertDefined(clusterId); // swagger definitions are too permitting
+    return clusterService._delete(clusterId); // eslint-disable-line no-underscore-dangle
   });
 
-  assertDefined(cluster.ID); // swagger definitions are too permitting
+  assertDefined(clusterId); // swagger definitions are too permitting
 
   if (!called) {
     // waiting for user confirmation
@@ -39,7 +43,7 @@ export default function DeleteClusterModal({ cluster, onCancel, onDeleted }: Pro
       <Modal
         isOpen
         onRequestClose={onCancel}
-        header={`Are you sure you want to delete ${cluster.ID}?`}
+        header={`Are you sure you want to delete ${clusterId}?`}
         buttons={buttons}
       >
         <Alert isInline variant="danger" title="This will permanently delete the cluster" />
@@ -48,10 +52,10 @@ export default function DeleteClusterModal({ cluster, onCancel, onDeleted }: Pro
   }
 
   if (loading) {
-    const message = `Cluster ${cluster.ID} is being destroyed now.`;
+    const message = `Cluster ${clusterId} is being destroyed now.`;
     // waiting for server response
     return (
-      <Modal isOpen onRequestClose={(): void => {}} header={`Deleting ${cluster.ID}...`}>
+      <Modal isOpen onRequestClose={(): void => {}} header={`Deleting ${clusterId}...`}>
         <Alert isInline variant="info" title={message} />
       </Modal>
     );
@@ -61,7 +65,7 @@ export default function DeleteClusterModal({ cluster, onCancel, onDeleted }: Pro
     // operation failed
     const message = `Could not delete cluster. Server error occurred: "${error.message}".`;
     return (
-      <InformationalModal header={`Failed to delete ${cluster.ID}!`} onAcknowledged={onCancel}>
+      <InformationalModal header={`Failed to delete ${clusterId}!`} onAcknowledged={onCancel}>
         <Alert isInline variant="warning" title={message} />
       </InformationalModal>
     );
@@ -69,7 +73,7 @@ export default function DeleteClusterModal({ cluster, onCancel, onDeleted }: Pro
 
   // no need to check for data response from the server, "no error happened" means operation was successful
   return (
-    <InformationalModal header={`Successfully deleted ${cluster.ID}!`} onAcknowledged={onDeleted}>
+    <InformationalModal header={`Successfully deleted ${clusterId}!`} onAcknowledged={onDeleted}>
       <Alert isInline variant="success" title="The cluster was deleted" />
     </InformationalModal>
   );

@@ -14,13 +14,12 @@ import {
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { V1FlavorListResponse, FlavorServiceApi } from 'generated/client';
-import useApiQuery from 'client/useApiQuery';
 import configuration from 'client/configuration';
 import LinkCard from 'components/LinkCard';
 import FullPageSpinner from 'components/FullPageSpinner';
 import FullPageError from 'components/FullPageError';
 import assertDefined from 'utils/assertDefined';
-import { flavorInfoQueryOptions, prefetchFlavors } from 'client/flavorInfoQueryOptions';
+import { prefetchFlavors } from 'client/flavorInfoQueryOptions';
 
 const flavorService = new FlavorServiceApi(configuration);
 
