@@ -12,8 +12,8 @@ export function flavorInfoQueryOptions(flavorId: string) {
   };
 }
 
-export async function prefetchFlavors(queryClient: QueryClient, flavors: V1Flavor[]) {
-  for (const { ID } of flavors) {
+export function prefetchFlavors(queryClient: QueryClient, flavors: V1Flavor[]) {
+  flavors.forEach(async ({ ID }) => {
     await queryClient.prefetchQuery(flavorInfoQueryOptions(ID ?? ''));
-  }
+  });
 }

@@ -16,7 +16,6 @@ import {
 import { StarIcon } from '@patternfly/react-icons';
 
 import { V1ClusterListResponse, ClusterServiceApi } from 'generated/client';
-import useApiQuery from 'client/useApiQuery';
 import configuration from 'client/configuration';
 import { useUserAuth } from 'containers/UserAuthProvider';
 import LinkCard from 'components/LinkCard';
@@ -25,7 +24,6 @@ import FullPageSpinner from 'components/FullPageSpinner';
 import FullPageError from 'components/FullPageError';
 import assertDefined from 'utils/assertDefined';
 import { useQuery } from '@tanstack/react-query';
-import { error } from 'console';
 
 const clusterService = new ClusterServiceApi(configuration);
 

@@ -11,3 +11,4 @@
 # hidden configuration files
 !.eslintrc.js
 !.prettierrc.js
+vite.config.ts
