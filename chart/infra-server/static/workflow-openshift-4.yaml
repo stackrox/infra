@@ -103,16 +103,6 @@ spec:
               secretKeyRef:
                 name: redhat-pull-secret
                 key: REDHAT_PULL_SECRET
-          - name: ACME_EAB_KID
-            valueFrom:
-              secretKeyRef:
-                name: gcp-eab-credentials
-                key: EAB_KID
-          - name: ACME_HMAC_KEY
-            valueFrom:
-              secretKeyRef:
-                name: gcp-eab-credentials
-                key: HMAC_KEY
           - name: USER_PULL_SECRET
             value: '{{ "{{" }}workflow.parameters.pull-secret{{ "}}" }}'
           - name: OPENSHIFT_VERSION
