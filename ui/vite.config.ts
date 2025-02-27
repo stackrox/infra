@@ -9,6 +9,9 @@ import setupProxy from './src/setupProxy';
 export default defineConfig(({ mode }) => {
   setEnv(mode);
   return {
+    build: {
+      assetsDir: './static',
+    },
     plugins: [
       react(),
       tsconfigPaths(),
