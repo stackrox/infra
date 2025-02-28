@@ -1,5 +1,5 @@
 import React, { ReactElement, ReactNode } from 'react';
-import { Modal, ModalVariant } from '@patternfly/react-core';
+import { Modal, ModalVariant } from '@patternfly/react-core/deprecated';
 
 type Props = {
   isOpen: boolean;

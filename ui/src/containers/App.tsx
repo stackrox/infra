@@ -1,5 +1,7 @@
 import React, { ReactElement } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Flex, Page } from '@patternfly/react-core';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import UserAuthProvider from 'containers/UserAuthProvider';
 import AppHeader from 'containers/AppHeader';
@@ -7,7 +9,16 @@ import HomePage from 'containers/HomePage';
 import DownloadsPage from 'containers/DownloadsPage';
 import LaunchClusterPage from 'containers/LaunchClusterPage';
 import ClusterInfoPage from 'containers/ClusterInfoPage';
-import FullPageError from 'components/FullPageError';
+import FourOhFour from 'components/FourOhFour';
+import { ThemeProvider } from 'utils/ThemeProvider';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 10 * 1000,
+    },
+  },
+});
 
 function AppRoutes(): ReactElement {
   return (
@@ -16,7 +27,7 @@ function AppRoutes(): ReactElement {
       <Route path="/downloads" element={<DownloadsPage />} />
       <Route path="/launch/:flavorId" element={<LaunchClusterPage />} />
       <Route path="/cluster/:clusterId" element={<ClusterInfoPage />} />
-      <Route path="*" element={<FullPageError message="This page doesn't seem to exist." />} />
+      <Route path="*" element={<FourOhFour />} />
     </Routes>
   );
 }
@@ -24,12 +35,21 @@ function AppRoutes(): ReactElement {
 export default function App(): ReactElement {
   return (
     <Router>
-      <UserAuthProvider>
-        <div className="flex flex-col h-full bg-base-0">
-          <AppHeader />
-          <AppRoutes />
-        </div>
-      </UserAuthProvider>
+      <ThemeProvider>
+        <UserAuthProvider>
+          <QueryClientProvider client={queryClient}>
+            <Flex
+              direction={{ default: 'column' }}
+              flexWrap={{ default: 'nowrap' }}
+              className="pf-v6-u-h-100 pf-v6-u-w-100"
+            >
+              <Page masthead={<AppHeader />} isContentFilled>
+                <AppRoutes />
+              </Page>
+            </Flex>
+          </QueryClientProvider>
+        </UserAuthProvider>
+      </ThemeProvider>
     </Router>
   );
 }

@@ -8,10 +8,7 @@
 # generated sources
 /src/generated
 
-# disabling for copy-pasted tailwind plugins
-/tailwind-plugins
-
 # hidden configuration files
 !.eslintrc.js
 !.prettierrc.js
-!.postcssrc.js
+vite.config.ts

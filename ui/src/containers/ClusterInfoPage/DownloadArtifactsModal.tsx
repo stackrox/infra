@@ -1,11 +1,11 @@
-import React, { ReactElement, useCallback } from 'react';
-import { Button, List, ListItem } from '@patternfly/react-core';
+import React, { ReactElement } from 'react';
+import { Button, ClipboardCopy, Flex, List, ListItem } from '@patternfly/react-core';
 
-import { V1Cluster, ClusterServiceApi, V1Artifact } from 'generated/client';
+import { ClusterServiceApi, V1Artifact } from 'generated/client';
 import configuration from 'client/configuration';
 import Modal from 'components/Modal';
-import useApiQuery from 'client/useApiQuery';
 import assertDefined from 'utils/assertDefined';
+import { useQuery } from '@tanstack/react-query';
 
 const clusterService = new ClusterServiceApi(configuration);
 
@@ -15,7 +15,7 @@ type ArtifactsListProps = {
 
 function ArtifactsList({ artifacts }: ArtifactsListProps): ReactElement {
   return (
-    <List className="pf-u-mb-md">
+    <List className="pf-v6-u-mb-md">
       {artifacts
         .sort((a, b) => {
           if (a.Description && !b.Description) {
@@ -27,7 +27,7 @@ function ArtifactsList({ artifacts }: ArtifactsListProps): ReactElement {
           return 0;
         })
         .map((artifact) => (
-          <ListItem key={artifact.Name}>
+          <ListItem key={artifact.URL}>
             <a href={artifact.URL}>{artifact.Name}</a> - {artifact.Description}
           </ListItem>
         ))}
@@ -36,14 +36,15 @@ function ArtifactsList({ artifacts }: ArtifactsListProps): ReactElement {
 }
 
 type ArtifactsProps = {
-  cluster: V1Cluster;
+  clusterId: string;
 };
 
-function Artifacts({ cluster }: ArtifactsProps): ReactElement {
-  const fetchArtifacts = useCallback(() => clusterService.artifacts(cluster.ID || ''), [
-    cluster.ID,
-  ]);
-  const { loading, error, data: artifacts } = useApiQuery(fetchArtifacts);
+function Artifacts({ clusterId }: ArtifactsProps): ReactElement {
+  const { isLoading: loading, error, data: rawData } = useQuery({
+    queryKey: ['clusterArtifacts', clusterId],
+    queryFn: () => clusterService.artifacts(clusterId || ''),
+  });
+  const artifacts = rawData?.data.Artifacts;
 
   if (loading) {
     return <p>Loading...</p>;
@@ -53,15 +54,16 @@ function Artifacts({ cluster }: ArtifactsProps): ReactElement {
     return <p>Cannot load artifacts: {error.message}</p>;
   }
 
-  if (artifacts?.Artifacts?.length) {
+  if (artifacts?.length) {
     return (
       <div>
-        <ArtifactsList artifacts={artifacts.Artifacts} />
-        <p>
-          Note: You can download all artifacts at the command line with:
-          <br />
-          <code>infractl artifacts --download-dir=&lt;some dir&gt; {cluster.ID}</code>
-        </p>
+        <ArtifactsList artifacts={artifacts} />
+        <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsSm' }}>
+          <p>Note: You can download all artifacts at the command line with:</p>
+          <ClipboardCopy isReadOnly hoverTip="Copy command" clickTip="Command copied!">
+            {`infractl artifacts --download-dir=<some dir> ${clusterId ?? ''}`}
+          </ClipboardCopy>
+        </Flex>
       </div>
     );
   }
@@ -70,15 +72,15 @@ function Artifacts({ cluster }: ArtifactsProps): ReactElement {
 }
 
 type Props = {
-  cluster: V1Cluster;
+  clusterId: string;
   onClose: () => void;
 };
 
-export default function DownloadArtifactsModal({ cluster, onClose }: Props): ReactElement {
-  assertDefined(cluster.ID);
+export default function DownloadArtifactsModal({ clusterId, onClose }: Props): ReactElement {
+  assertDefined(clusterId);
 
   const closeButton = (
-    <Button variant="primary" onClick={onClose}>
+    <Button key="close" variant="primary" onClick={onClose}>
       Close
     </Button>
   );
@@ -87,10 +89,10 @@ export default function DownloadArtifactsModal({ cluster, onClose }: Props): Rea
     <Modal
       isOpen
       onRequestClose={onClose}
-      header={`Artifacts for ${cluster.ID}`}
+      header={`Artifacts for ${clusterId}`}
       buttons={[closeButton]}
     >
-      <Artifacts cluster={cluster} />
+      <Artifacts clusterId={clusterId} />
     </Modal>
   );
 }

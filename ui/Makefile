@@ -9,7 +9,7 @@ all: deps lint-check test build
 deps: package.json
 	yarn install --frozen-lockfile
 
-SOURCES := $(shell ls *.json) tailwind.config.js yarn.lock
+SOURCES := $(shell ls *.json) yarn.lock
 SOURCES += $(shell find public)
 SOURCES += $(shell find src -name '*.ts' -print)
 SOURCES += $(shell find src -name '*.tsx' -print)

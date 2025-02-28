@@ -1,32 +1,36 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { ReactElement } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { AxiosPromise } from 'axios';
 import moment from 'moment';
-import { Gallery, GalleryItem } from '@patternfly/react-core';
+import {
+  Bullseye,
+  Flex,
+  Gallery,
+  GalleryItem,
+  Icon,
+  PageSection,
+  Switch,
+  Title,
+} from '@patternfly/react-core';
+import { StarIcon } from '@patternfly/react-icons';
 
-import { V1ClusterListResponse, ClusterServiceApi } from 'generated/client';
-import useApiQuery from 'client/useApiQuery';
+import { ClusterServiceApi } from 'generated/client';
 import configuration from 'client/configuration';
 import { useUserAuth } from 'containers/UserAuthProvider';
-import PageSection from 'components/PageSection';
 import LinkCard from 'components/LinkCard';
 import Lifespan from 'components/Lifespan';
 import FullPageSpinner from 'components/FullPageSpinner';
 import FullPageError from 'components/FullPageError';
 import assertDefined from 'utils/assertDefined';
+import { useQuery } from '@tanstack/react-query';
 
 const clusterService = new ClusterServiceApi(configuration);
 
-const FETCH_ALL_CLUSTERS = true;
-const fetchClusters = (): AxiosPromise<V1ClusterListResponse> =>
-  clusterService.list(FETCH_ALL_CLUSTERS);
-
 function NoClustersMessage(): ReactElement {
   return (
-    <div className="m-6 flex w-full justify-center">
-      <span className="text-4xl">You haven‘t created any clusters recently.</span>
-    </div>
+    <Bullseye className="pf-v6-u-w-100 pf-v6-u-h-100">
+      <Title headingLevel="h3">You haven‘t created any clusters recently</Title>
+    </Bullseye>
   );
 }
 
@@ -37,10 +41,20 @@ type ClusterCardsProps = {
 function ClusterCards({ showAllClusters = false }: ClusterCardsProps): ReactElement {
   const { user } = useUserAuth();
 
-  const { loading, error, data } = useApiQuery(fetchClusters);
+  const myClustersRequest = useQuery({
+    queryKey: ['clusters', false],
+    queryFn: () => clusterService.list(false),
+  });
+  const allClustersRequest = useQuery({
+    queryKey: ['clusters', true],
+    queryFn: () => clusterService.list(true),
+  });
+  const requestToUse = showAllClusters ? allClustersRequest : myClustersRequest;
+  const { isLoading: loading, error, data: rawData } = requestToUse;
+  const data = rawData?.data;
 
   if (loading) {
-    return <FullPageSpinner />;
+    return <FullPageSpinner title="Loading infra clusters" />;
   }
 
   if (error || !data) {
@@ -51,12 +65,8 @@ function ClusterCards({ showAllClusters = false }: ClusterCardsProps): ReactElem
     return <NoClustersMessage />;
   }
 
-  // choose whether to show all or just this user's clusters
-  const clustersToShow = showAllClusters
-    ? data.Clusters
-    : data.Clusters.filter((cluster) => cluster.Owner === user?.Email);
   // sorted in descending order by creation date
-  const sortedClusters = clustersToShow.sort((c1, c2) =>
+  const sortedClusters = data.Clusters.sort((c1, c2) =>
     moment(c1.CreatedOn).isBefore(c2.CreatedOn) ? 1 : -1
   );
 
@@ -67,15 +77,22 @@ function ClusterCards({ showAllClusters = false }: ClusterCardsProps): ReactElem
   const cards = sortedClusters.map((cluster) => {
     assertDefined(cluster.ID);
 
-    const extraCardClass = showAllClusters && cluster.Owner === user?.Email ? 'bg-base-200' : '';
+    const isMyCluster = cluster.Owner === user?.Email;
     return (
-      <GalleryItem>
+      <GalleryItem key={cluster.ID}>
         <LinkCard
-          key={cluster.ID}
           to={`cluster/${cluster.ID}`}
-          header={cluster.ID || 'No ID'}
+          header={
+            <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }}>
+              <span>{cluster.ID || 'No ID'}</span>
+              {isMyCluster && (
+                <Icon>
+                  <StarIcon className="pf-v6-u-icon-color-favorite" />
+                </Icon>
+              )}
+            </Flex>
+          }
           footer={cluster.Status && <Lifespan cluster={cluster} />}
-          className={extraCardClass}
         >
           {cluster.Description && <p>Description: {cluster.Description}</p>}
           <p>Status: {cluster.Status || 'FAILED'}</p>
@@ -84,57 +101,56 @@ function ClusterCards({ showAllClusters = false }: ClusterCardsProps): ReactElem
       </GalleryItem>
     );
   });
-  return <>{cards}</>;
+
+  return (
+    <Gallery
+      hasGutter
+      minWidths={{
+        default: '100%',
+        md: '100px',
+        xl: '300px',
+      }}
+      maxWidths={{
+        md: '200px',
+        xl: '1fr',
+      }}
+    >
+      {cards}
+    </Gallery>
+  );
 }
 
 export default function MyClustersPageSection(): ReactElement {
   const [searchParams, setSearchParams] = useSearchParams();
   const showAllClusters = searchParams.get('showAllClusters') === 'true';
+
   function toggleClusterFilter() {
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set('showAllClusters', (!showAllClusters).toString());
     setSearchParams(newSearchParams);
   }
 
-  const headerText = showAllClusters ? 'All Clusters' : 'My Clusters';
-  const clusterFilterToggle = (
-    <span className="flex items-center">
-      <label htmlFor="cluster-filter-toggle" className="mr-2 text-lg">
-        Show All Clusters
-      </label>
-      <input
-        type="checkbox"
-        id="cluster-filter-toggle"
-        checked={showAllClusters}
-        onChange={toggleClusterFilter}
-        className="w-4 h-4 rounded-sm"
-      />
-    </span>
-  );
-
-  const header = (
-    <div className="flex justify-between items-center ">
-      <span>{headerText}</span>
-      {clusterFilterToggle}
-    </div>
-  );
   return (
-    <PageSection header={header}>
-      <Gallery
-        hasGutter
-        minWidths={{
-          default: '100%',
-          md: '100px',
-          xl: '300px',
-        }}
-        maxWidths={{
-          md: '200px',
-          xl: '1fr',
-        }}
-      >
+    <>
+      <PageSection>
+        <Flex
+          justifyContent={{ default: 'justifyContentSpaceBetween' }}
+          alignItems={{ default: 'alignItemsCenter' }}
+        >
+          <Title headingLevel="h2">{showAllClusters ? 'All Clusters' : 'My Clusters'}</Title>
+          <Switch
+            label="Show All Clusters"
+            id="cluster-filter-toggle"
+            name="cluster-filter-toggle"
+            isChecked={showAllClusters}
+            onChange={toggleClusterFilter}
+          />
+        </Flex>
+      </PageSection>
+      <PageSection>
         <ClusterCards showAllClusters={showAllClusters} />
-      </Gallery>
-    </PageSection>
+      </PageSection>
+    </>
   );
 }
 

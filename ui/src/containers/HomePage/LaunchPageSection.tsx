@@ -2,16 +2,24 @@
 import React, { ReactElement } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { AxiosPromise } from 'axios';
-import { Gallery, GalleryItem } from '@patternfly/react-core';
+import {
+  Flex,
+  Gallery,
+  GalleryItem,
+  Label,
+  PageSection,
+  Switch,
+  Title,
+} from '@patternfly/react-core';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { V1FlavorListResponse, FlavorServiceApi } from 'generated/client';
-import useApiQuery from 'client/useApiQuery';
 import configuration from 'client/configuration';
-import PageSection from 'components/PageSection';
 import LinkCard from 'components/LinkCard';
 import FullPageSpinner from 'components/FullPageSpinner';
 import FullPageError from 'components/FullPageError';
 import assertDefined from 'utils/assertDefined';
+import { prefetchFlavors } from 'client/flavorInfoQueryOptions';
 
 const flavorService = new FlavorServiceApi(configuration);
 
@@ -23,10 +31,33 @@ type FlavorCardsProps = {
 };
 
 function FlavorCards({ showAllFlavors = false }: FlavorCardsProps): ReactElement {
-  const { loading, error, data } = useApiQuery(showAllFlavors ? fetchAllFlavors : fetchFlavors);
+  const queryClient = useQueryClient();
+  const flavorsRequest = useQuery({
+    queryKey: ['flavors'],
+    queryFn: () =>
+      fetchFlavors().then((data) => {
+        prefetchFlavors(queryClient, data.data.Flavors ?? []);
+        return data;
+      }),
+    enabled: !showAllFlavors,
+  });
+  const allFlavorsRequest = useQuery({
+    queryKey: ['allFlavors'],
+    queryFn: () =>
+      fetchAllFlavors().then((data) => {
+        prefetchFlavors(queryClient, data.data.Flavors ?? []);
+        return data;
+      }),
+    enabled: showAllFlavors,
+  });
+  const activeQuery = showAllFlavors ? allFlavorsRequest : flavorsRequest;
+
+  const loading = activeQuery.isLoading;
+  const { error } = activeQuery;
+  const data = activeQuery?.data?.data;
 
   if (loading) {
-    return <FullPageSpinner />;
+    return <FullPageSpinner title="Loading available cluster flavors" />;
   }
 
   if (error || !data?.Flavors) {
@@ -36,19 +67,52 @@ function FlavorCards({ showAllFlavors = false }: FlavorCardsProps): ReactElement
   const cards = data.Flavors.map((flavor) => {
     assertDefined(flavor.ID); // swagger definitions are too permitting
     return (
-      <GalleryItem>
+      <GalleryItem key={flavor.ID}>
         <LinkCard
-          key={flavor.ID}
           to={`launch/${flavor.ID}`}
-          header={flavor.Name || 'Unnamed'}
-          footer={<span className="capitalize">{flavor.Availability || 'Alpha'}</span>}
+          header={
+            <Flex
+              alignItems={{ default: 'alignItemsCenter' }}
+              justifyContent={{ default: 'justifyContentSpaceBetween' }}
+            >
+              <span>{flavor.Name || 'Unnamed'}</span>
+              <Label
+                color={
+                  flavor.Availability === 'default'
+                    ? 'blue'
+                    : flavor.Availability === 'stable'
+                    ? 'green'
+                    : flavor.Availability === 'beta'
+                    ? 'orange'
+                    : 'orangered'
+                }
+              >
+                {flavor.Availability || 'Alpha'}
+              </Label>
+            </Flex>
+          }
         >
           <p>{flavor.Description}</p>
         </LinkCard>
       </GalleryItem>
     );
   });
-  return <>{cards}</>;
+  return (
+    <Gallery
+      hasGutter
+      minWidths={{
+        default: '100%',
+        md: '100px',
+        xl: '300px',
+      }}
+      maxWidths={{
+        md: '200px',
+        xl: '1fr',
+      }}
+    >
+      {cards}
+    </Gallery>
+  );
 }
 
 export default function LaunchPageSection(): ReactElement {
@@ -61,45 +125,27 @@ export default function LaunchPageSection(): ReactElement {
     setSearchParams(newSearchParams);
   }
 
-  const headerText = showAllFlavors ? 'All Flavors' : 'My Flavors';
-  const flavorFilterToggle = (
-    <span className="flex items-center">
-      <label htmlFor="flavor-filter-toggle" className="mr-2 text-lg">
-        Show All Flavors
-      </label>
-      <input
-        type="checkbox"
-        id="flavor-filter-toggle"
-        checked={showAllFlavors}
-        onChange={toggleFlavorFilter}
-        className="w-4 h-4 rounded-sm"
-      />
-    </span>
-  );
-
-  const header = (
-    <div className="flex justify-between items-center ">
-      <span>{headerText}</span>
-      {flavorFilterToggle}
-    </div>
-  );
   return (
-    <PageSection header={header}>
-      <Gallery
-        hasGutter
-        minWidths={{
-          default: '100%',
-          md: '100px',
-          xl: '300px',
-        }}
-        maxWidths={{
-          md: '200px',
-          xl: '1fr',
-        }}
-      >
+    <>
+      <PageSection>
+        <Flex
+          justifyContent={{ default: 'justifyContentSpaceBetween' }}
+          alignItems={{ default: 'alignItemsCenter' }}
+        >
+          <Title headingLevel="h2">{showAllFlavors ? 'All Flavors' : 'My Flavors'}</Title>
+          <Switch
+            name="flavor-filter-toggle"
+            label="Show All Flavors"
+            id="flavor-filter-toggle"
+            isChecked={showAllFlavors}
+            onChange={toggleFlavorFilter}
+          />
+        </Flex>
+      </PageSection>
+      <PageSection>
         <FlavorCards showAllFlavors={showAllFlavors} />
-      </Gallery>
-    </PageSection>
+      </PageSection>
+    </>
   );
 }
 

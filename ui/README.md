@@ -21,19 +21,6 @@ https://github.com/stackrox/stackrox-env.
   machine, consider using [nvm](https://github.com/creationix/nvm))
 - [Yarn](https://yarnpkg.com/en/)
 
-### GitHub Packages NPM Registry
-
-This project depends on packages with `@stackrox` scope accessible from GitHub
-Packages NPM registry. Get access with:
-
-```
-npm login --auth-type=legacy --registry=https://npm.pkg.github.com
-```
-
-Use your github username and a token with `repo` and `read:packages` rights.
-More details can be found
-[here](https://docs.engineering.redhat.com/display/StackRox/Using+GitHub+Packages+with+NPM).
-
 ### UI Dev Server
 
 To avoid a connection error with node v1.17+ set:
