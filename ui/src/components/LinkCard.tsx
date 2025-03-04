@@ -1,39 +1,28 @@
 import React, { ReactElement, ReactNode } from 'react';
-import { Link } from 'react-router-dom';
-import {
-  Panel,
-  PanelMain,
-  PanelMainBody,
-  PanelHeader,
-  Divider,
-  PanelFooter,
-} from '@patternfly/react-core';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardBody, CardFooter, CardHeader, CardTitle } from '@patternfly/react-core';
 
 type Props = {
   to: string;
-  header: string;
+  header: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
-  className?: string;
 };
 
-export default function LinkCard({
-  to,
-  header,
-  children,
-  footer,
-  className = '',
-}: Props): ReactElement {
+export default function LinkCard({ to, header, children, footer }: Props): ReactElement {
+  const navigate = useNavigate();
   return (
-    <Link className={className} to={to}>
-      <Panel isScrollable variant="raised">
-        <PanelHeader>{header}</PanelHeader>
-        <Divider />
-        <PanelMain>
-          <PanelMainBody>{children}</PanelMainBody>
-        </PanelMain>
-        {!!footer && <PanelFooter>{footer}</PanelFooter>}
-      </Panel>
-    </Link>
+    <Card isClickable isCompact>
+      <CardHeader
+        selectableActions={{
+          onClickAction: () => navigate(to),
+          selectableActionAriaLabel: `Navigate to ${to}`,
+        }}
+      >
+        <CardTitle>{header}</CardTitle>
+      </CardHeader>
+      <CardBody>{children}</CardBody>
+      {!!footer && <CardFooter>{footer}</CardFooter>}
+    </Card>
   );
 }

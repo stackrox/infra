@@ -26,7 +26,7 @@ export default function MutableLifespan({ cluster }: Props): ReactElement {
         header="Cannot change the cluster lifespan"
         onAcknowledged={(): void => setError(null)}
       >
-        <span className="pf-u-danger-color-100 pf-u-font-size-2xl">{message}</span>
+        <span className="pf-v6-u-danger-color-100 pf-v6-u-font-size-2xl">{message}</span>
       </InformationalModal>
     );
   }
@@ -74,5 +74,9 @@ export default function MutableLifespan({ cluster }: Props): ReactElement {
       });
   };
 
-  return <Lifespan cluster={modifiedCluster} onModify={onModify} />;
+  return (
+    <div className="pf-v6-u-font-size-lg">
+      <Lifespan cluster={modifiedCluster} onModify={onModify} />
+    </div>
+  );
 }

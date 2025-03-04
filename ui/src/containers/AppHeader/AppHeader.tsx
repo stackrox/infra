@@ -1,20 +1,49 @@
+/* eslint-disable react/jsx-props-no-spreading */
 import React, { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
-import { Terminal } from 'react-feather';
+import { Avatar, Button, Flex } from '@patternfly/react-core';
+import { OutlinedHandPointRightIcon, TerminalIcon } from '@patternfly/react-icons';
 
 import AppHeaderLayout from 'components/AppHeaderLayout';
-import ProductLogoTile from './ProductLogoTile';
-import UserInfo from './UserInfo';
+import RHACSLogo from 'components/RHACSLogo';
+import { useUserAuth } from 'containers/UserAuthProvider';
+import ThemeToggleButton from 'components/ThemeToggleButton';
 
 export default function AppHeader(): ReactElement {
-  const mainArea = (
-    <div className="flex h-full items-center ml-4">
-      <Link to="/downloads" className="btn btn-base">
-        <Terminal size={16} className="mr-2" />
-        infractl
-      </Link>
-    </div>
+  const { user, logout } = useUserAuth();
+  return (
+    <AppHeaderLayout
+      logo={
+        <Link to="/">
+          <RHACSLogo />
+        </Link>
+      }
+      main={
+        <Button
+          component={(props) => <Link {...props} to="/downloads" />}
+          variant="control"
+          icon={<TerminalIcon />}
+        >
+          infractl
+        </Button>
+      }
+      ending={
+        <Flex alignItems={{ default: 'alignItemsCenter' }}>
+          <div className="pf-v6-u-mr-md">
+            <ThemeToggleButton />
+          </div>
+          {user?.Picture ? (
+            <Avatar alt={user?.Name || 'anonymous'} src={user.Picture} size="md" isBordered />
+          ) : (
+            <p>{user?.Name || 'anonymous'}</p>
+          )}
+          <Button onClick={logout} variant="control" icon={<OutlinedHandPointRightIcon />}>
+            Logout
+          </Button>
+        </Flex>
+      }
+    />
   );
-
-  return <AppHeaderLayout logo={<ProductLogoTile />} main={mainArea} ending={<UserInfo />} />;
 }
+
+/* eslint-enable react/jsx-props-no-spreading */

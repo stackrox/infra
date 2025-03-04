@@ -1,6 +1,15 @@
 import React, { ReactElement, ReactNode } from 'react';
 import { useField } from 'formik';
-import { FormGroup, Popover, TextInput, ValidatedOptions } from '@patternfly/react-core';
+import {
+  Button,
+  FormGroup,
+  FormHelperText,
+  HelperText,
+  HelperTextItem,
+  Popover,
+  TextInput,
+  ValidatedOptions,
+} from '@patternfly/react-core';
 import { HelpIcon } from '@patternfly/react-icons';
 
 type Props = {
@@ -33,28 +42,25 @@ export default function TextFormField({
       label={label}
       fieldId={id}
       isRequired={required}
-      labelIcon={
+      labelHelp={
         helper ? (
           <Popover bodyContent={helper} className="form-help">
-            <button
-              type="button"
+            <Button
               aria-label={`Help for ${name}`}
               onClick={(e) => e.preventDefault()}
               aria-describedby={id}
-              className="pf-c-form__group-label-help"
-            >
-              <HelpIcon noVerticalAlign />
-            </button>
+              className="pf-v6-c-form__group-label-help"
+              icon={<HelpIcon />}
+              variant="plain"
+            />
           </Popover>
         ) : undefined
       }
-      validated={meta.error ? ValidatedOptions.error : ValidatedOptions.default}
-      helperTextInvalid={meta.error}
     >
       <TextInput
         id={id}
         name={name}
-        onChange={onChange}
+        onChange={(event, _value: string) => onChange(_value, event)}
         type="text"
         value={field.value} // eslint-disable-line @typescript-eslint/no-unsafe-assignment
         placeholder={placeholder}
@@ -63,6 +69,13 @@ export default function TextFormField({
         aria-describedby={`${id}-helper`}
         validated={meta.error ? ValidatedOptions.error : ValidatedOptions.default}
       />
+      <FormHelperText>
+        <HelperText>
+          <HelperTextItem variant={meta.error ? ValidatedOptions.error : ValidatedOptions.default}>
+            {meta.error}
+          </HelperTextItem>
+        </HelperText>
+      </FormHelperText>
     </FormGroup>
   );
 }
