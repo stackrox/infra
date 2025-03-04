@@ -287,12 +287,9 @@ install-argo: pre-check
 		argo/argo-workflows \
 		--version 0.16.9 \
 		--install \
+		--values chart/argo-values.yaml \
 		--create-namespace \
 		--namespace argo
-
-.PHONY: clean-argo-config
-clean-argo-config: pre-check
-	kubectl delete configmap argo-workflows-workflow-controller-configmap -n argo || true
 
 .PHONY: install-monitoring
 install-monitoring: pre-check
