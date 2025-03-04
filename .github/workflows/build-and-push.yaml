@@ -21,11 +21,6 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           path: go/src/github.com/stackrox/infra
 
-      - name: Get NPM package access
-        env:
-          GITHUB_TOKEN: ${{ secrets.RHACS_BOT_GITHUB_TOKEN }}
-        run: echo "//npm.pkg.github.com/:_authToken=\"$GITHUB_TOKEN\"" > ~/.npmrc
-
       - name: Setup env
         run: |
           GOPATH="$GITHUB_WORKSPACE/go"
