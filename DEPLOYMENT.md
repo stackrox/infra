@@ -145,3 +145,13 @@ The infra server logs are captured automatically by GCP.
 - [Logs Explorer: Production](https://cloudlogging.app.goo.gl/KqgSyE2mSq83M5Xs9)
 
 Adding `jsonPayload."log-type"="audit"` to the query will filter for audit logs.
+
+## Inspecting live workflows
+
+You can view the UI of the Argo server by forwarding its port:
+
+```bash
+kubectl port-forward -n argo svc/infra-server-argo-workflows-server 2746
+```
+
+and access [http://localhost:2746](http://localhost:2746).
