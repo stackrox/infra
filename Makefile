@@ -223,17 +223,19 @@ endif
 		exit 1; \
 	fi
 
+.PHONY: helm-dependency-update
+helm-dependency-update:
+	@helm dependency update chart/infra-server
+
 ## Render template
 .PHONY: helm-template
-helm-template: pre-check
+helm-template: pre-check helm-dependency-update
 	@./scripts/deploy/helm.sh template $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
 
 ## Deploy
 .PHONY: helm-deploy
 helm-deploy: pre-check
 	@./scripts/deploy/helm.sh deploy $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
-	# Pick up any eventual changes to the workflow controller configmap
-	@make bounce-argo-pods
 
 ## Diff
 .PHONY: helm-diff
@@ -275,31 +277,6 @@ secrets-edit:
 .PHONY: secrets-revert
 secrets-revert:
 	@./scripts/deploy/secrets.sh revert $(ENVIRONMENT) $(SECRET_VERSION)
-
-##################
-## Dependencies ##
-##################
-.PHONY: install-argo
-install-argo: pre-check
-	helm repo add argo https://argoproj.github.io/argo-helm
-	helm upgrade \
-		argo-workflows \
-		argo/argo-workflows \
-		--version 0.16.9 \
-		--install \
-		--values chart/argo-values.yaml \
-		--create-namespace \
-		--namespace argo
-
-.PHONY: install-monitoring
-install-monitoring: pre-check
-	helm dependency update chart/infra-monitoring
-	helm upgrade prometheus-stack chart/infra-monitoring \
-		--install \
-		--namespace monitoring \
-		--create-namespace \
-		--values chart/infra-monitoring/values.yaml \
-		--wait
 
 ###############
 ## Debugging ##

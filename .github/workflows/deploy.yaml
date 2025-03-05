@@ -71,7 +71,7 @@ jobs:
           gcloud container clusters get-credentials infra-${{ inputs.environment }} \
             --project "${PROJECT}" \
             --region us-west2
-          ENVIRONMENT=${{ inputs.environment }} make install-argo install-monitoring helm-deploy
+          ENVIRONMENT=${{ inputs.environment }} make helm-deploy
 
       - name: Notify infra channel about new version
         uses: slackapi/slack-github-action@v2.0.0

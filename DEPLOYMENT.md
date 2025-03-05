@@ -94,14 +94,6 @@ correct tooling installed with:
 
 Use the `deploy` Github action to update development or production environments with a new release.
 
-### Argo Deployment
-
-To install Argo workflow server, run:
-
-`ENVIRONMENT=<development,production> make install-argo`
-
-NOTE: This is a separate step and not a dependant chart for example to avoid too frequent Argo deployments.
-
 ### Manual deployment
 
 To render a copy of the charts (for inspection), run:
