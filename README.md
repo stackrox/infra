@@ -32,7 +32,7 @@ You may also point to a different infra server with the `--endpoint` flag.
 To debug the server, you need to fulfil the prerequisites first.
 
 1. Have an authenticated `gcloud` CLI and GNU `sed` installed.
-1. Have your `KUBECONFIG` point to a cluster where Argo Workflows and the ConfigMaps and Secrets for infra are deployed. This is most easily achieved by connecting to a PR cluster or deploying infra with `ENVIRONMENT=<DEVELOPMENT,PRODUCTION> make install-argo helm-deploy` to a new or local cluster. This cluster will only be used to run workflows.
+1. Have your `KUBECONFIG` point to a cluster where Argo Workflows and the ConfigMaps and Secrets for infra are deployed. This is most easily achieved by connecting to a PR cluster or deploying infra with `ENVIRONMENT=<DEVELOPMENT,PRODUCTION> make helm-deploy` to a new or local cluster. This cluster will only be used to run workflows.
 1. Run `make prepare-local-server-debugging` to set the contents of the `configuration` directory and compile the UI + CLI (for downloads).
 
 Then, you can use the "Debug Server" launch configuration.

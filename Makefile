@@ -227,19 +227,23 @@ endif
 helm-dependency-update:
 	@helm dependency update chart/infra-server
 
+create-namespaces:
+	@kubectl create namespace argo >/dev/null 2>&1 || echo "namespace/argo already exists"; exit 0
+	@kubectl create namespace monitoring >/dev/null 2>&1 || echo "namespace/monitoring already exists"; exit 0
+
 ## Render template
 .PHONY: helm-template
-helm-template: pre-check helm-dependency-update
+helm-template: pre-check helm-dependency-update create-namespaces
 	@./scripts/deploy/helm.sh template $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
 
 ## Deploy
 .PHONY: helm-deploy
-helm-deploy: pre-check helm-dependency-update
+helm-deploy: pre-check helm-dependency-update create-namespaces
 	@./scripts/deploy/helm.sh deploy $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
 
 ## Diff
 .PHONY: helm-diff
-helm-diff: pre-check helm-dependency-update
+helm-diff: pre-check helm-dependency-update create-namespaces
 	@./scripts/deploy/helm.sh diff $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
 
 ## Bounce pods

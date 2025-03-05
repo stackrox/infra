@@ -15,5 +15,5 @@ dependencies:
   version: "0.45.9"
   repository: "https://argoproj.github.io/argo-helm"
 - name: kube-prometheus
-  version: 8.27.0 # TODO: can we update this?
+  version: 11.1.1
   repository: https://charts.bitnami.com/bitnami
