@@ -234,12 +234,12 @@ helm-template: pre-check helm-dependency-update
 
 ## Deploy
 .PHONY: helm-deploy
-helm-deploy: pre-check
+helm-deploy: pre-check helm-dependency-update
 	@./scripts/deploy/helm.sh deploy $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
 
 ## Diff
 .PHONY: helm-diff
-helm-diff: pre-check
+helm-diff: pre-check helm-dependency-update
 	@./scripts/deploy/helm.sh diff $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
 
 ## Bounce pods
