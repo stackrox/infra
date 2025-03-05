@@ -150,7 +150,7 @@ ui:
 
 .PHONY: image
 image:
-	docker build . -t $(IMAGE) -f image/Dockerfile --secret id=npmrc,src=${HOME}/.npmrc
+	docker build . -t $(IMAGE) -f image/Dockerfile
 
 .PHONY: push
 push:

@@ -10,7 +10,7 @@ FROM node:23.8.0 as ui-builder
 
 COPY ui ui
 
-RUN --mount=type=secret,id=npmrc,target=/root/.npmrc make -C ui all
+RUN make -C ui all
 
 FROM alpine:3.21.3 as app
 
