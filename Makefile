@@ -223,21 +223,27 @@ endif
 		exit 1; \
 	fi
 
+.PHONY: helm-dependency-update
+helm-dependency-update:
+	@helm dependency update chart/infra-server
+
+create-namespaces:
+	@kubectl create namespace argo >/dev/null 2>&1 || echo "namespace/argo already exists"; exit 0
+	@kubectl create namespace monitoring >/dev/null 2>&1 || echo "namespace/monitoring already exists"; exit 0
+
 ## Render template
 .PHONY: helm-template
-helm-template: pre-check
+helm-template: pre-check helm-dependency-update create-namespaces
 	@./scripts/deploy/helm.sh template $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
 
 ## Deploy
 .PHONY: helm-deploy
-helm-deploy: pre-check
+helm-deploy: pre-check helm-dependency-update create-namespaces
 	@./scripts/deploy/helm.sh deploy $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
-	# Pick up any eventual changes to the workflow controller configmap
-	@make bounce-argo-pods
 
 ## Diff
 .PHONY: helm-diff
-helm-diff: pre-check
+helm-diff: pre-check helm-dependency-update create-namespaces
 	@./scripts/deploy/helm.sh diff $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
 
 ## Bounce pods
@@ -275,34 +281,6 @@ secrets-edit:
 .PHONY: secrets-revert
 secrets-revert:
 	@./scripts/deploy/secrets.sh revert $(ENVIRONMENT) $(SECRET_VERSION)
-
-##################
-## Dependencies ##
-##################
-.PHONY: install-argo
-install-argo: pre-check
-	helm repo add argo https://argoproj.github.io/argo-helm
-	helm upgrade \
-		argo-workflows \
-		argo/argo-workflows \
-		--version 0.16.9 \
-		--install \
-		--create-namespace \
-		--namespace argo
-
-.PHONY: clean-argo-config
-clean-argo-config: pre-check
-	kubectl delete configmap argo-workflows-workflow-controller-configmap -n argo || true
-
-.PHONY: install-monitoring
-install-monitoring: pre-check
-	helm dependency update chart/infra-monitoring
-	helm upgrade prometheus-stack chart/infra-monitoring \
-		--install \
-		--namespace monitoring \
-		--create-namespace \
-		--values chart/infra-monitoring/values.yaml \
-		--wait
 
 ###############
 ## Debugging ##

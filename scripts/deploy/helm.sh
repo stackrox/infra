@@ -34,6 +34,8 @@ template() {
         --create-namespace \
         --dry-run \
         --namespace "${RELEASE_NAMESPACE}" \
+        --values chart/infra-server/argo-values.yaml \
+        --values chart/infra-server/monitoring-values.yaml \
         --set tag="${TAG}" \
         --set environment="${ENVIRONMENT}" \
         --set testMode="${TEST_MODE}" \
@@ -57,6 +59,8 @@ deploy() {
         --timeout 5m \
         --wait \
         --namespace "${RELEASE_NAMESPACE}" \
+        --values chart/infra-server/argo-values.yaml \
+        --values chart/infra-server/monitoring-values.yaml \
         --set tag="${TAG}" \
         --set environment="${ENVIRONMENT}" \
         --set testMode="${TEST_MODE}" \
@@ -80,6 +84,8 @@ diff() {
         --create-namespace \
         --dry-run \
         --namespace "${RELEASE_NAMESPACE}" \
+        --values chart/infra-server/argo-values.yaml \
+        --values chart/infra-server/monitoring-values.yaml \
         --set tag="${TAG}" \
         --set environment="${ENVIRONMENT}" \
         --set testMode="${TEST_MODE}" \

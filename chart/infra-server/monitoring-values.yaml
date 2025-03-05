@@ -1,4 +1,5 @@
 kube-prometheus:
+  namespaceOverride: monitoring
   operator:
     resources:
       limits:
