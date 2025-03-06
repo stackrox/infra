@@ -23,8 +23,11 @@ $ infractl list --all
 # List clusters whose name matches a prefix.
 $ infractl list --prefix=<match>
 
-# List clusters whose flavor is in the list.
-$ infactl list --flavors <comma separated list of flavor IDs>
+# List only clusters with specified flavor(s).
+$ infractl list --flavor=<flavor> [--flavor=<another>]
+
+$ List only clusters with specified status(es).
+$ infractl list --status=<status> [--status=<another>]
 
 # List only the names of clusters
 $ infractl list --quiet`

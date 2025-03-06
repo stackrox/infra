@@ -191,6 +191,7 @@ func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) 
 			continue
 		}
 
+		// If a status filter exists and the cluster is not one of the allowed, skip.
 		if len(request.AllowedStatuses) > 0 && !isClusterOneOfAllowedStatuses(&workflow, request.AllowedStatuses) {
 			continue
 		}

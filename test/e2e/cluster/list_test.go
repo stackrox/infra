@@ -66,8 +66,8 @@ func TestListOfAFlavor(t *testing.T) {
 	assert.NoError(t, err)
 
 	prefixFilter := fmt.Sprintf("--prefix=%s", baseClusterName)
-	listAllClusters, err := infractlList(prefixFilter)
 
+	listAllClusters, err := infractlList(prefixFilter)
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(listAllClusters.Clusters))
 
@@ -95,8 +95,8 @@ func TestListOfAStatus(t *testing.T) {
 	assert.NoError(t, err)
 
 	prefixFilter := fmt.Sprintf("--prefix=%s", baseClusterName)
-	listAllClusters, err := infractlList(prefixFilter)
 
+	listAllClusters, err := infractlList(prefixFilter)
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(listAllClusters.Clusters))
 
