@@ -77,15 +77,15 @@ spec:
             valueFrom:
               path: /outputs/cluster_name
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-gke-default-0.3.11
+        image: quay.io/stackrox-io/ci:automation-flavors-gke-default-0.10.43
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint
         args:
           - create
-          - "--name={{workflow.parameters.name}}"
-          - "--nodes={{workflow.parameters.nodes}}"
-          - "--machine-type={{workflow.parameters.machine-type}}"
+          - --name={{workflow.parameters.name}}
+          - --nodes={{workflow.parameters.nodes}}
+          - --machine-type={{workflow.parameters.machine-type}}
           - --gcp-project=acs-team-temp-dev
           - --creation-source=infra
           - --k8s-version={{workflow.parameters.k8s-version}}
@@ -102,7 +102,7 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-gke-default-0.3.11
+        image: quay.io/stackrox-io/ci:automation-flavors-gke-default-0.10.43
         imagePullPolicy: Always
         command:
           - /usr/bin/entrypoint
