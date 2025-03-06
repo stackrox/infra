@@ -191,6 +191,10 @@ func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) 
 			continue
 		}
 
+		if len(request.AllowedStatuses) > 0 && !isClusterOneOfAllowedStatuses(&workflow, request.AllowedStatuses) {
+			continue
+		}
+
 		metacluster, err := s.metaClusterFromWorkflow(workflow)
 		if err != nil {
 			log.Log(logging.ERROR, "failed to convert argo workflow to infra meta-cluster", "workflow-name", workflow.GetName(), "error", err)

@@ -3,6 +3,7 @@ package list
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/common"
@@ -45,6 +46,7 @@ func Command() *cobra.Command {
 	cmd.Flags().BoolP("quiet", "q", false, "only output cluster names")
 	cmd.Flags().String("prefix", "", "only include clusters whose names matches this prefix")
 	cmd.Flags().StringSlice("flavor", []string{}, "only include clusters with matching flavor(s)")
+	cmd.Flags().StringSlice("status", []string{}, "only include clusters with matching status(es)")
 	return cmd
 }
 
@@ -54,12 +56,23 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []str
 	quietMode := common.MustBool(cmd.Flags(), "quiet")
 	prefix, _ := cmd.Flags().GetString("prefix")
 	allowedFlavors, _ := cmd.Flags().GetStringSlice("flavor")
+	allowedStatuses, _ := cmd.Flags().GetStringSlice("status")
+
+	protoAllowedStatuses := make([]v1.Status, len(allowedStatuses))
+	for i, s := range allowedStatuses {
+		value, ok := v1.Status_value[s]
+		if !ok {
+			return nil, fmt.Errorf("unknown cluster status: '%s'", s)
+		}
+		protoAllowedStatuses[i] = v1.Status(value)
+	}
 
 	req := v1.ClusterListRequest{
-		All:            includeAll,
-		Expired:        includeExpired,
-		Prefix:         prefix,
-		AllowedFlavors: allowedFlavors,
+		All:             includeAll,
+		Expired:         includeExpired,
+		Prefix:          prefix,
+		AllowedFlavors:  allowedFlavors,
+		AllowedStatuses: protoAllowedStatuses,
 	}
 
 	resp, err := v1.NewClusterServiceClient(conn).List(ctx, &req)

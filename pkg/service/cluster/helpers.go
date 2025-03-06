@@ -62,6 +62,11 @@ func isClusterOneOfAllowedFlavors(workflow *v1alpha1.Workflow, allowedFlavors []
 	return slices.Contains(allowedFlavors, flavor)
 }
 
+func isClusterOneOfAllowedStatuses(workflow *v1alpha1.Workflow, allowedStatuses []v1.Status) bool {
+	status := workflowStatus(workflow.Status)
+	return slices.Contains(allowedStatuses, status)
+}
+
 type metaCluster struct {
 	v1.Cluster
 
