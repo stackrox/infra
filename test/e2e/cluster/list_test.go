@@ -58,7 +58,7 @@ func TestListOfAFlavor(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	_, err = infractlCreateCluster(
-		"gke-lite", utils.GetUniqueClusterName(prefix),
+		"simulate-2", utils.GetUniqueClusterName(prefix),
 		"--lifespan=30s",
 	)
 	assert.NoError(t, err)
