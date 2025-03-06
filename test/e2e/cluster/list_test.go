@@ -5,7 +5,6 @@ package cluster_test
 
 import (
 	"fmt"
-	"strconv"
 	"testing"
 	"time"
 
@@ -50,57 +49,51 @@ func TestListExpired(t *testing.T) {
 func TestListOfAFlavor(t *testing.T) {
 	utils.CheckContext()
 
-	now := strconv.FormatInt(time.Now().Unix(), 32)
-	baseClusterName := fmt.Sprintf("ls-flavor-%s", now)
+	prefix := "ls-flavor"
 	_, err := infractlCreateCluster(
-		"simulate", fmt.Sprintf("%s-%s", baseClusterName, "simulate"),
+		"simulate", utils.GetUniqueClusterName(prefix),
 		"--lifespan=30s",
 		"--arg=create-delay-seconds=5",
 		"--arg=destroy-delay-seconds=5",
 	)
 	assert.NoError(t, err)
 	_, err = infractlCreateCluster(
-		"gke-lite", fmt.Sprintf("%s-%s", baseClusterName, "gke-lite"),
+		"gke-lite", utils.GetUniqueClusterName(prefix),
 		"--lifespan=30s",
 	)
 	assert.NoError(t, err)
 
-	prefixFilter := fmt.Sprintf("--prefix=%s", baseClusterName)
-
-	listAllClusters, err := infractlList(prefixFilter)
+	listAllClusters, err := infractlList(fmt.Sprintf("--prefix=%s", prefix))
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(listAllClusters.Clusters))
 
-	listOnlySimulateClusters, err := infractlList(prefixFilter, "--flavor=simulate")
+	listOnlySimulateClusters, err := infractlList(fmt.Sprintf("--prefix=%s", prefix), "--flavor=simulate")
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(listOnlySimulateClusters.Clusters))
 }
 
 func TestListOfAStatus(t *testing.T) {
 	utils.CheckContext()
+	prefix := "ls-simulate"
 
-	now := strconv.FormatInt(time.Now().Unix(), 32)
-	baseClusterName := fmt.Sprintf("ls-status-%s", now)
 	failedCluster, err := infractlCreateCluster(
-		"simulate", fmt.Sprintf("%s-%s", baseClusterName, "simulate"),
+		"simulate", utils.GetUniqueClusterName(prefix),
 		"--lifespan=30s",
 		"--arg=create-outcome=fail",
 	)
 	assertStatusBecomes(t, failedCluster, "FAILED")
 	assert.NoError(t, err)
 	_, err = infractlCreateCluster(
-		"gke-lite", fmt.Sprintf("%s-%s", baseClusterName, "gke-lite"),
+		"simulate", utils.GetUniqueClusterName(prefix),
 		"--lifespan=30s",
 	)
 	assert.NoError(t, err)
 
-	prefixFilter := fmt.Sprintf("--prefix=%s", baseClusterName)
-
-	listAllClusters, err := infractlList(prefixFilter)
+	listAllClusters, err := infractlList(fmt.Sprintf("--prefix=%s", prefix))
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(listAllClusters.Clusters))
 
-	listOnlyFailedClusters, err := infractlList(prefixFilter, "--status=FAILED")
+	listOnlyFailedClusters, err := infractlList(fmt.Sprintf("--prefix=%s", prefix), "--status=FAILED")
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(listOnlyFailedClusters.Clusters))
 }
