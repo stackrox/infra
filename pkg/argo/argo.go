@@ -24,11 +24,7 @@ type ArgoInterface interface {
 	ResumeWorkflow(workflowName string) error
 }
 
-var (
-	log = logging.CreateProductionLogger()
-
-	_ ArgoInterface = (*argoClientImpl)(nil)
-)
+var log = logging.CreateProductionLogger()
 
 type argoClientImpl struct {
 	client            apiclient.Client
