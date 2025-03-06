@@ -48,52 +48,52 @@ func TestListExpired(t *testing.T) {
 
 func TestListOfAFlavor(t *testing.T) {
 	utils.CheckContext()
+	commonPrefix := utils.GetUniqueClusterName("ls-flavor")
 
-	prefix := "ls-flavor"
 	_, err := infractlCreateCluster(
-		"simulate", utils.GetUniqueClusterName(prefix),
+		"simulate", fmt.Sprintf("%s%d", commonPrefix, 1),
 		"--lifespan=30s",
 		"--arg=create-delay-seconds=5",
 		"--arg=destroy-delay-seconds=5",
 	)
 	assert.NoError(t, err)
 	_, err = infractlCreateCluster(
-		"simulate-2", utils.GetUniqueClusterName(prefix),
+		"simulate-2", fmt.Sprintf("%s%d", commonPrefix, 2),
 		"--lifespan=30s",
 	)
 	assert.NoError(t, err)
 
-	listAllClusters, err := infractlList(fmt.Sprintf("--prefix=%s", prefix))
+	listAllClusters, err := infractlList(fmt.Sprintf("--prefix=%s", commonPrefix))
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(listAllClusters.Clusters))
 
-	listOnlySimulateClusters, err := infractlList(fmt.Sprintf("--prefix=%s", prefix), "--flavor=simulate")
+	listOnlySimulateClusters, err := infractlList(fmt.Sprintf("--prefix=%s", commonPrefix), "--flavor=simulate")
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(listOnlySimulateClusters.Clusters))
 }
 
 func TestListOfAStatus(t *testing.T) {
 	utils.CheckContext()
-	prefix := "ls-simulate"
+	commonPrefix := utils.GetUniqueClusterName("ls-status")
 
 	failedCluster, err := infractlCreateCluster(
-		"simulate", utils.GetUniqueClusterName(prefix),
+		"simulate", fmt.Sprintf("%s%d", commonPrefix, 1),
 		"--lifespan=30s",
 		"--arg=create-outcome=fail",
 	)
 	assertStatusBecomes(t, failedCluster, "FAILED")
 	assert.NoError(t, err)
 	_, err = infractlCreateCluster(
-		"simulate", utils.GetUniqueClusterName(prefix),
+		"simulate", fmt.Sprintf("%s%d", commonPrefix, 2),
 		"--lifespan=30s",
 	)
 	assert.NoError(t, err)
 
-	listAllClusters, err := infractlList(fmt.Sprintf("--prefix=%s", prefix))
+	listAllClusters, err := infractlList(fmt.Sprintf("--prefix=%s", commonPrefix))
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(listAllClusters.Clusters))
 
-	listOnlyFailedClusters, err := infractlList(fmt.Sprintf("--prefix=%s", prefix), "--status=FAILED")
+	listOnlyFailedClusters, err := infractlList(fmt.Sprintf("--prefix=%s", commonPrefix), "--status=FAILED", "--expired")
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(listOnlyFailedClusters.Clusters))
 }
