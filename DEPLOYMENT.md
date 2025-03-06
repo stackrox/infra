@@ -9,7 +9,7 @@ To work with either of the clusters you will need to either be a member of the
 
 To connect to this cluster using kubectl, run:
 
-```
+```bash
 gcloud container clusters get-credentials infra-development \
     --project acs-team-automation \
     --region us-west2
@@ -19,7 +19,7 @@ gcloud container clusters get-credentials infra-development \
 
 To connect to this cluster using kubectl, run:
 
-```
+```bash
 gcloud container clusters get-credentials infra-production \
     --project acs-team-automation \
     --region us-west2
@@ -29,7 +29,7 @@ gcloud container clusters get-credentials infra-production \
 
 Infra uses GKE `Ingress` and `ManagedCertificate` CRDs to handle ingress. Plus two global static IPs:
 
-```
+```bash
 $ gcloud compute addresses list --project stackrox-infra
 NAME                       ADDRESS/RANGE   TYPE      PURPOSE  NETWORK  REGION  SUBNET  STATUS
 infra-address-production   35.227.207.252  EXTERNAL                                    IN_USE
@@ -55,32 +55,6 @@ This will download the secrets to `chart/infra-server/configuration/`.
 
 The connection for the gRPC gateway is secured by a self-generated "localhost" certificate.
 To regenerate the certificate, run: `./scripts/cert/renew.sh <local|development|production>`.
-
-## Creating a Tag for Release
-
-To find the next tag, use:
-
-```bash
-# find the next tag
-git fetch --tags
-git tag -l
-
-# review commits between last release tag and head of mainline branch
-git log --decorate --graph --abbrev-commit --date=relative 0.2.13..master
-```
-
-We often deploy Infra from a tag without creating a full GitHub release, after updating the CHANGELOG on master.
-
-To create a tag for deployment under this scenario:
-
-```bash
-cd $GOPATH/src/github.com/stackrox/infra
-git tag 0.2.14  # for example
-git push origin --tags
-```
-
-Once the tag is ready for deployment &mdash; via full release or manually pushing a
-new tag &mdash; the next step is to deploy to target environments.
 
 ## Deployment
 

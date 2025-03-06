@@ -10,18 +10,18 @@ import (
 	"syscall"
 
 	"github.com/pkg/errors"
-	"github.com/stackrox/infra/auth"
-	"github.com/stackrox/infra/bqutil"
-	"github.com/stackrox/infra/config"
-	"github.com/stackrox/infra/flavor"
+	"github.com/stackrox/infra/pkg/auth"
+	"github.com/stackrox/infra/pkg/bqutil"
 	"github.com/stackrox/infra/pkg/buildinfo"
+	"github.com/stackrox/infra/pkg/config"
+	"github.com/stackrox/infra/pkg/flavor"
 	"github.com/stackrox/infra/pkg/logging"
-	"github.com/stackrox/infra/server"
-	"github.com/stackrox/infra/service"
-	"github.com/stackrox/infra/service/cluster"
-	"github.com/stackrox/infra/service/middleware"
-	"github.com/stackrox/infra/signer"
-	"github.com/stackrox/infra/slack"
+	"github.com/stackrox/infra/pkg/server"
+	"github.com/stackrox/infra/pkg/service"
+	"github.com/stackrox/infra/pkg/service/cluster"
+	"github.com/stackrox/infra/pkg/service/middleware"
+	"github.com/stackrox/infra/pkg/signer"
+	"github.com/stackrox/infra/pkg/slack"
 )
 
 // main is the entry point of the infra server.
