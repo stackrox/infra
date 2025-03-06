@@ -22,6 +22,9 @@ $ infractl list --all
 # List clusters whose name matches a prefix.
 $ infractl list --prefix=<match>
 
+# List clusters whose flavor is in the list.
+$ infactl list --flavors <comma separated list of flavor IDs>
+
 # List only the names of clusters
 $ infractl list --quiet`
 
@@ -41,6 +44,7 @@ func Command() *cobra.Command {
 	cmd.Flags().Bool("expired", false, "include expired clusters")
 	cmd.Flags().BoolP("quiet", "q", false, "only output cluster names")
 	cmd.Flags().String("prefix", "", "only include clusters whose names matches this prefix")
+	cmd.Flags().StringSlice("flavor", []string{}, "only include clusters with matching flavor(s)")
 	return cmd
 }
 
@@ -49,11 +53,13 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []str
 	includeExpired := common.MustBool(cmd.Flags(), "expired")
 	quietMode := common.MustBool(cmd.Flags(), "quiet")
 	prefix, _ := cmd.Flags().GetString("prefix")
+	allowedFlavors, _ := cmd.Flags().GetStringSlice("flavor")
 
 	req := v1.ClusterListRequest{
-		All:     includeAll,
-		Expired: includeExpired,
-		Prefix:  prefix,
+		All:            includeAll,
+		Expired:        includeExpired,
+		Prefix:         prefix,
+		AllowedFlavors: allowedFlavors,
 	}
 
 	resp, err := v1.NewClusterServiceClient(conn).List(ctx, &req)

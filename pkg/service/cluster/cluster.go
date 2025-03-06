@@ -176,13 +176,18 @@ func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) 
 			continue
 		}
 
-		// This cluster is not ours, and we did not request to include all
-		// clusters.
+		// TODO(perf): move this to a listOption for the WorkflowListRequest to do the selection on K8s side
+		// This cluster is not ours, and we did not request to include all clusters.
 		if !request.All && GetOwner(&workflow) != email {
 			continue
 		}
 
 		if request.Prefix != "" && !strings.HasPrefix(getClusterIDFromWorkflow(&workflow), request.Prefix) {
+			continue
+		}
+
+		// If a filter for allowed flavors is active and the cluster is not one of the allowed, skip.
+		if len(request.AllowedFlavors) > 0 && !isClusterOneOfAllowedFlavors(&workflow, request.AllowedFlavors) {
 			continue
 		}
 

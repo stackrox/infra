@@ -105,6 +105,7 @@ func (r *Registry) Get(id string) (v1.Flavor, v1alpha1.Workflow, bool) {
 		return pair.flavor, pair.workflow, true
 	}
 
+	// TODO: This is prone to concurrent map writes!
 	if flavor, workflow := r.getPairFromWorkflowTemplate(id); flavor != nil {
 		return *flavor, *workflow, true
 	}
