@@ -45,7 +45,7 @@ const (
 )
 
 type clusterImpl struct {
-	argoClient         argo.ArgoInterface
+	argoClient         argo.WorkflowInterface
 	bqClient           bqutil.BigQueryClient
 	k8sWorkflowsClient workflowv1.WorkflowInterface
 	k8sPodsClient      k8sv1.PodInterface

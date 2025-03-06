@@ -16,8 +16,8 @@ import (
 	"k8s.io/apimachinery/pkg/selection"
 )
 
-// ArgoInterface represents a type that can interact with the Argo Workflows API.
-type ArgoInterface interface {
+// WorkflowInterface represents a type that can interact with the Argo Workflows API.
+type WorkflowInterface interface {
 	CreateWorkflow(workflow *v1alpha1.Workflow) (*v1alpha1.Workflow, error)
 	GetMostRecentArgoWorkflowFromClusterID(clusterID string) (*v1alpha1.Workflow, error)
 	ListWorkflows() (*v1alpha1.WorkflowList, error)
@@ -55,7 +55,7 @@ func (a *argoClientImpl) CreateWorkflow(workflow *v1alpha1.Workflow) (*v1alpha1.
 		Namespace: a.workflowNamespace,
 	})
 	if err != nil {
-		log.Log(logging.WARN, "creating argo workflow for a new cluster failed", "error", err)
+		log.Log(logging.WARN, "creating argo workflow failed", "error", err)
 		return nil, err
 	}
 	return createdWorkflow, nil

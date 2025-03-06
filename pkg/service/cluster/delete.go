@@ -15,20 +15,20 @@ func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.
 	if err != nil {
 		return nil, err
 	}
-	clusterId := req.GetId()
+	clusterID := req.GetId()
 	log.AuditLog(logging.INFO, "cluster-delete", "received a delete request for infra cluster",
 		"actor", owner,
-		"cluster-id", clusterId,
+		"cluster-id", clusterID,
 	)
 
-	workflow, err := s.argoClient.GetMostRecentArgoWorkflowFromClusterID(clusterId)
+	workflow, err := s.argoClient.GetMostRecentArgoWorkflowFromClusterID(clusterID)
 	if err != nil {
 		return &empty.Empty{}, err
 	}
 
 	// Set lifespan to zero so the workflow is examined in cleanupExpiredClusters().
 	lifespanReq := &v1.LifespanRequest{
-		Id:       clusterId,
+		Id:       clusterID,
 		Lifespan: &duration.Duration{},
 		Method:   v1.LifespanRequest_REPLACE,
 	}

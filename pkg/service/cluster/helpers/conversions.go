@@ -11,6 +11,7 @@ import (
 	"github.com/stackrox/infra/pkg/service/cluster/metadata"
 )
 
+// ClusterParametersFromWorkflow returns the parameters for the cluster from the workflow.
 func ClusterParametersFromWorkflow(workflow v1alpha1.Workflow) []*v1.Parameter {
 	parameters := []*v1.Parameter{}
 	for _, p := range workflow.Spec.Arguments.Parameters {
@@ -53,7 +54,7 @@ func WorkflowFailureDetails(workflowStatus v1alpha1.WorkflowStatus) error {
 	return errors.New("")
 }
 
-// clusterFromWorkflow converts an Argo workflow into an infra cluster.
+// ClusterFromWorkflow converts an Argo workflow into an infra cluster.
 func ClusterFromWorkflow(workflow v1alpha1.Workflow) *v1.Cluster {
 	cluster := &v1.Cluster{
 		ID:          metadata.GetClusterID(&workflow),
@@ -73,7 +74,7 @@ func ClusterFromWorkflow(workflow v1alpha1.Workflow) *v1.Cluster {
 	return cluster
 }
 
-// statusFromWorkflowStatus converts a workflow status to an infra status.
+// StatusFromWorkflowStatus converts a workflow status to an infra status.
 func StatusFromWorkflowStatus(workflowStatus v1alpha1.WorkflowStatus) v1.Status {
 	// https://godoc.org/github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1#WorkflowStatus
 	switch workflowStatus.Phase {

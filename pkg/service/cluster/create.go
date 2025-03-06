@@ -118,6 +118,9 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner string) (*v1.Re
 	)
 
 	created, err := s.argoClient.CreateWorkflow(&workflow)
+	if err != nil {
+		log.Log(logging.ERROR, "creating a new cluster failed", "cluster-id", clusterID)
+	}
 	log.Log(logging.INFO, "created an argo workflow for a new infra cluster",
 		"workflow-name", created.GetName(),
 		"cluster-id", clusterID,

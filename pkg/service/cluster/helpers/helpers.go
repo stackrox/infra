@@ -12,6 +12,7 @@ var (
 	log = logging.CreateProductionLogger()
 )
 
+// HandleArtifactMigration seems to handle the Argo Workflows v3 migration.
 // TODO: what does this do and is it still required? Is this related to an Argo migration or GCP migration?
 // https://github.com/stackrox/infra/pull/695
 func HandleArtifactMigration(workflow v1alpha1.Workflow, artifact v1alpha1.Artifact) (string, string) {
