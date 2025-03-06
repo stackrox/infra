@@ -166,7 +166,7 @@ argo-workflow-lint:
 
 .PHONY: shellcheck
 shellcheck:
-	@shellcheck -x -- **/*.{bats,sh}
+	@shellcheck -x -- **/**/*.{bats,sh}
 
 #############
 ## Testing ##
