@@ -6,7 +6,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
-	"github.com/stackrox/infra/auth/claimrule"
+	"github.com/stackrox/infra/pkg/auth/claimrule"
 )
 
 // Config represents the top-level configuration for infra-server.

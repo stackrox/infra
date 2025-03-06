@@ -13,8 +13,8 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
-	"github.com/stackrox/infra/config"
 	v1 "github.com/stackrox/infra/generated/api/v1"
+	"github.com/stackrox/infra/pkg/config"
 	"github.com/stackrox/infra/pkg/logging"
 )
 

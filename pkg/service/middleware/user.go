@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/stackrox/infra/auth"
 	v1 "github.com/stackrox/infra/generated/api/v1"
+	"github.com/stackrox/infra/pkg/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )

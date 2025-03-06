@@ -7,7 +7,7 @@ import (
 
 	"cloud.google.com/go/bigquery"
 	"github.com/pkg/errors"
-	"github.com/stackrox/infra/config"
+	"github.com/stackrox/infra/pkg/config"
 	"github.com/stackrox/infra/pkg/logging"
 	"google.golang.org/api/option"
 )

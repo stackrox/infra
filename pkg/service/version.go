@@ -7,7 +7,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/buildinfo"
-	"github.com/stackrox/infra/service/middleware"
+	"github.com/stackrox/infra/pkg/service/middleware"
 	"google.golang.org/grpc"
 )
 
