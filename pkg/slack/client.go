@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/slack-go/slack"
-	"github.com/stackrox/infra/config"
+	"github.com/stackrox/infra/pkg/config"
 	"github.com/stackrox/infra/pkg/logging"
 )
 

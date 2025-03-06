@@ -10,7 +10,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/logging"
-	"github.com/stackrox/infra/slack"
+	"github.com/stackrox/infra/pkg/slack"
 )
 
 func getClusterIDFromWorkflow(workflow *v1alpha1.Workflow) string {

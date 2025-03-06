@@ -8,7 +8,7 @@ import (
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/ghodss/yaml"
-	"github.com/stackrox/infra/config"
+	"github.com/stackrox/infra/pkg/config"
 	"golang.org/x/oauth2"
 )
 

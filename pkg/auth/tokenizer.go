@@ -10,8 +10,8 @@ import (
 	"github.com/go-jose/go-jose/v4/jwt"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/pkg/errors"
-	"github.com/stackrox/infra/auth/claimrule"
 	v1 "github.com/stackrox/infra/generated/api/v1"
+	"github.com/stackrox/infra/pkg/auth/claimrule"
 	"github.com/stackrox/infra/pkg/logging"
 	"golang.org/x/oauth2"
 )

@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
 
 # shellcheck disable=SC1091
-source "$BATS_TEST_DIRNAME/../test/bats-lib.sh"
+source "$BATS_TEST_DIRNAME/../../test/bats-lib.sh"
 load_bats_support
 
 setup_file() {

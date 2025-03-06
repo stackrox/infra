@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/stackrox/infra/flavor"
 	v1 "github.com/stackrox/infra/generated/api/v1"
-	"github.com/stackrox/infra/service/middleware"
+	"github.com/stackrox/infra/pkg/flavor"
+	"github.com/stackrox/infra/pkg/service/middleware"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
