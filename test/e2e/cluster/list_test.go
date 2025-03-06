@@ -89,7 +89,7 @@ func TestListOfAStatus(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	listAllClusters, err := infractlList(fmt.Sprintf("--prefix=%s", commonPrefix))
+	listAllClusters, err := infractlList(fmt.Sprintf("--prefix=%s", commonPrefix), "--expired")
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(listAllClusters.Clusters))
 
