@@ -185,7 +185,7 @@ func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) 
 		if request.Prefix != "" && !strings.HasPrefix(getClusterIDFromWorkflow(&workflow), request.Prefix) {
 			continue
 		}
-    
+
 		// If a filter for allowed flavors is active and the cluster is not one of the allowed, skip.
 		if len(request.AllowedFlavors) > 0 && !isClusterOneOfAllowedFlavors(&workflow, request.AllowedFlavors) {
 			continue
