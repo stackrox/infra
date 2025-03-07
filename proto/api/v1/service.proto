@@ -303,6 +303,12 @@ message ClusterListRequest {
 
     // list clusters whose ID matches this prefix.
     string prefix = 3;
+
+    // filter clusters whose Status is in the list
+    repeated Status allowedStatuses = 4;
+
+    // filter clusters whose flavor ID is in the list
+    repeated string allowedFlavors = 5;
 }
 
 // ClusterListResponse represents details about all clusters.

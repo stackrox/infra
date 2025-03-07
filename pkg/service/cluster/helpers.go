@@ -3,6 +3,7 @@ package cluster
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -54,6 +55,16 @@ func isNearingExpiry(workflow v1alpha1.Workflow) bool {
 
 	workflowExpiryTime := workflow.Status.StartedAt.Time.Add(lifespan)
 	return time.Now().Add(nearExpiry).After(workflowExpiryTime)
+}
+
+func isClusterOneOfAllowedFlavors(workflow *v1alpha1.Workflow, allowedFlavors []string) bool {
+	flavor := GetFlavor(workflow)
+	return slices.Contains(allowedFlavors, flavor)
+}
+
+func isClusterOneOfAllowedStatuses(workflow *v1alpha1.Workflow, allowedStatuses []v1.Status) bool {
+	status := workflowStatus(workflow.Status)
+	return slices.Contains(allowedStatuses, status)
 }
 
 type metaCluster struct {
