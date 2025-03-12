@@ -14,6 +14,7 @@ import (
 	"github.com/stackrox/infra/cmd/infractl/cluster/logs"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	"github.com/stackrox/infra/cmd/infractl/flavor"
+	janitorGCP "github.com/stackrox/infra/cmd/infractl/janitor/gcp"
 	statusGet "github.com/stackrox/infra/cmd/infractl/status/get"
 	statusReset "github.com/stackrox/infra/cmd/infractl/status/reset"
 	statusSet "github.com/stackrox/infra/cmd/infractl/status/set"
@@ -42,6 +43,15 @@ func main() {
 		statusSet.Command(),
 	)
 
+	janitorCommand := &cobra.Command{
+		Use:   "janitor gcp",
+		Short: "Runs tasks to clean up infra clusters",
+		Long:  "Can be used to clean up infra clusters that have failed for various reasons and find orphaned VMs.",
+	}
+	janitorCommand.AddCommand(
+		janitorGCP.Command(),
+	)
+
 	// For our version of Cobra, `cmd.Printf(...)` defaults to Stderr.
 	// > Printf is a convenience method to Printf to the defined output, fallback to Stderr if not set.
 	cmd.SetOut(os.Stdout)
@@ -66,6 +76,9 @@ func main() {
 
 		// $ infractl get
 		get.Command(),
+
+		// $ infractl janitor
+		janitorCommand,
 
 		// $ infractl lifespan
 		lifespan.Command(),
