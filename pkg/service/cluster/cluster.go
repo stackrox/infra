@@ -731,7 +731,7 @@ func determinePodName(node v1alpha1.NodeStatus) string {
 	parts := strings.Split(node.ID, "-")
 	baseName := strings.Join(parts[:len(parts)-1], "-")
 	randomNumber := parts[len(parts)-1]
-	return fmt.Sprintf("%s-%s-%s", baseName, node.DisplayName, randomNumber)
+	return fmt.Sprintf("%s-%s-%s", baseName, node.TemplateName, randomNumber)
 }
 
 func (s *clusterImpl) startSlackCheck() {
