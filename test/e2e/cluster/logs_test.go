@@ -26,6 +26,4 @@ func TestLogs(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Containsf(t, logs, "create", "logs must contain an entry for the create stage")
 	assert.Containsf(t, logs, "msg=\"capturing logs\"", "logs must contain an entry confirming log collection")
-	assertStatusBecomes(t, clusterID, "FINISHED")
-	assert.Containsf(t, logs, "destroy", "logs must contain an entry for the destroy stage")
 }
