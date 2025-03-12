@@ -706,7 +706,8 @@ func (s *clusterImpl) getLogs(ctx context.Context, node v1alpha1.NodeStatus) *v1
 		Message: node.Message,
 	}
 
-	stream, err := s.k8sPodsClient.GetLogs(node.ID, &corev1.PodLogOptions{
+	podName := determinePodName(node)
+	stream, err := s.k8sPodsClient.GetLogs(podName, &corev1.PodLogOptions{
 		Container:  "main",
 		Follow:     false,
 		Timestamps: true,
@@ -724,6 +725,13 @@ func (s *clusterImpl) getLogs(ctx context.Context, node v1alpha1.NodeStatus) *v1
 	log.Body = logBody
 
 	return log
+}
+
+func determinePodName(node v1alpha1.NodeStatus) string {
+	parts := strings.Split(node.ID, "-")
+	baseName := strings.Join(parts[:len(parts)-1], "-")
+	randomNumber := parts[len(parts)-1]
+	return fmt.Sprintf("%s-%s-%s", baseName, node.DisplayName, randomNumber)
 }
 
 func (s *clusterImpl) startSlackCheck() {
