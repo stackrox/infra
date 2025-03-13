@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/common"
@@ -23,6 +24,15 @@ func PrepareCommand(cmd *cobra.Command, asJSON bool, args ...string) *bytes.Buff
 	buf := new(bytes.Buffer)
 	cmd.SetOut(buf)
 	return buf
+}
+
+func PrepareCommandStdIn(cmd *cobra.Command, path string) error {
+	file, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	os.Stdin = file
+	return nil
 }
 
 // RetrieveCommandOutput stringifies the contents of a buffer to read a command's output.

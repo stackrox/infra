@@ -1,12 +1,15 @@
 package mock
 
 import (
+	"os"
+
 	infraClusterCreate "github.com/stackrox/infra/cmd/infractl/cluster/create"
 	infraClusterDelete "github.com/stackrox/infra/cmd/infractl/cluster/delete"
 	infraClusterGet "github.com/stackrox/infra/cmd/infractl/cluster/get"
 	infraClusterLifespan "github.com/stackrox/infra/cmd/infractl/cluster/lifespan"
 	infraClusterList "github.com/stackrox/infra/cmd/infractl/cluster/list"
 	infraClusterLogs "github.com/stackrox/infra/cmd/infractl/cluster/logs"
+	infraJanitorFind "github.com/stackrox/infra/cmd/infractl/janitor/find"
 	infraWhoami "github.com/stackrox/infra/cmd/infractl/whoami"
 )
 
@@ -114,4 +117,33 @@ func InfractlWhoami() (string, error) {
 		return "", err
 	}
 	return jsonData.Principal.ServiceAccount.Email, nil
+}
+
+func InfractlJanitorFindGCP(quiet bool) (JanitorFindResponse, error) {
+	findGCPCommand := infraJanitorFind.Command()
+
+	jsonData := JanitorFindResponse{}
+	args := []string{}
+	if quiet {
+		args = append(args, "--quiet")
+	}
+	buf := PrepareCommand(findGCPCommand, true, args...)
+
+	instancesFixtureFile := "../../fixtures/gcp-instances.json"
+	file, err := os.Open(instancesFixtureFile)
+	if err != nil {
+		return jsonData, err
+	}
+
+	defer file.Close()
+	os.Stdin = file
+
+	if err := findGCPCommand.Execute(); err != nil {
+		return jsonData, err
+	}
+
+	if err := RetrieveCommandOutputJSON(buf, &jsonData); err != nil {
+		return jsonData, err
+	}
+	return jsonData, nil
 }

@@ -19,6 +19,7 @@ const commonPrefixThreshold = 3
 
 var (
 	infraFlavorsOnGCP = []string{
+		"simulate", // for e2e tests
 		"gke-default",
 		"demo",
 		"openshift-4",
@@ -39,7 +40,7 @@ const examples = `# List GCP compute instances and matching infra clusters.
 $ infractl janitor find-gcp
 
 # List only instances without matching clusters
-$ infractl janitor find-gcp--quiet`
+$ infractl janitor find-gcp --quiet`
 
 // Command defines the handler for infractl janitor find.
 func Command() *cobra.Command {
@@ -52,6 +53,7 @@ func Command() *cobra.Command {
 		Args:    common.ArgsWithHelp(cobra.ExactArgs(0)),
 		RunE:    common.WithGRPCHandler(run),
 	}
+	cmd.Flags().BoolP("quiet", "q", false, "only output cluster names")
 
 	return cmd
 }
@@ -67,7 +69,19 @@ type ComputeInstance struct {
 
 type candidateMapping map[*ComputeInstance][]*v1.Cluster
 
-func run(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, _ []string) (common.PrettyPrinter, error) {
+func (c candidateMapping) MarshalJSON() ([]byte, error) {
+	mapped := make(map[string][]*v1.Cluster)
+	for instance, clusters := range c {
+		if instance != nil {
+			mapped[instance.OriginalName] = clusters
+		}
+	}
+	return json.Marshal(mapped)
+}
+
+func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []string) (common.PrettyPrinter, error) {
+	quietMode := common.MustBool(cmd.Flags(), "quiet")
+
 	runningClusters, err := listGCPInfraClusters(ctx, conn)
 	if err != nil {
 		return nil, fmt.Errorf("error listing infra clusters on GCP flavors: %v", err)
@@ -80,11 +94,13 @@ func run(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, _ []strin
 
 	instances = FormatInstanceNames(instances)
 
-	instancesWithCandidates := findCandidateClustersForInstances(instances, runningClusters)
-	filterInstancesWithoutCandidates(instancesWithCandidates)
+	instanceCandidateMapping := findCandidateClustersForInstances(instances, runningClusters)
+	if quietMode {
+		filterInstancesWithoutCandidates(instanceCandidateMapping)
+	}
 
 	return prettyJanitorFindResponse{
-		instances: instancesWithCandidates,
+		Instances: instanceCandidateMapping,
 	}, nil
 }
 

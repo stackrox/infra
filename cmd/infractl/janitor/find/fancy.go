@@ -4,17 +4,15 @@ import (
 	"encoding/json"
 
 	"github.com/spf13/cobra"
-
-	v1 "github.com/stackrox/infra/generated/api/v1"
 )
 
 type prettyJanitorFindResponse struct {
-	instances map[*ComputeInstance][]*v1.Cluster
+	Instances candidateMapping `json:"Instances"`
 }
 
 func (p prettyJanitorFindResponse) PrettyPrint(cmd *cobra.Command) {
 	cmd.Printf("INSTANCES\n------------------\n")
-	for instance, clusters := range p.instances {
+	for instance, clusters := range p.Instances {
 		cmd.Printf("%s --> ", instance.OriginalName)
 		for _, c := range clusters {
 			cmd.Printf("%s ", c.ID)
