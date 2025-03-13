@@ -33,13 +33,14 @@ type statusTest struct {
 
 func TestStatusCommand(t *testing.T) {
 	utils.CheckContext()
+	t.Parallel()
 
 	maintainer, err := mock.InfractlWhoami()
 	assert.NoError(t, err)
 
 	tests := []statusTest{
 		{
-			title:    "First mock.Infractl status get initializes inactive maintenance",
+			title:    "First infractl status get initializes inactive maintenance",
 			cmd:      statusGet.Command(),
 			response: mock.StatusResponse{},
 			assertResponse: func(tc statusTest) {

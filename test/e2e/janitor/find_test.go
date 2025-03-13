@@ -13,6 +13,7 @@ import (
 
 func TestFind(t *testing.T) {
 	utils.CheckContext()
+	t.Parallel()
 
 	clusterID, err := mock.InfractlCreateCluster(
 		"simulate", utils.GetUniqueClusterName("find"),

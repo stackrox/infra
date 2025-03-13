@@ -15,6 +15,8 @@ import (
 
 func TestClusterCanRunThroughStandardLifecycle(t *testing.T) {
 	utils.CheckContext()
+	t.Parallel()
+
 	clusterID, err := mock.InfractlCreateCluster(
 		"simulate", utils.GetUniqueClusterName("standard"),
 		"--lifespan=20s",
@@ -29,6 +31,8 @@ func TestClusterCanRunThroughStandardLifecycle(t *testing.T) {
 
 func TestClusterCanFailInCreate(t *testing.T) {
 	utils.CheckContext()
+	t.Parallel()
+
 	clusterID, err := mock.InfractlCreateCluster(
 		"simulate", utils.GetUniqueClusterName("create-fails"),
 		"--lifespan=30s",
@@ -42,6 +46,8 @@ func TestClusterCanFailInCreate(t *testing.T) {
 
 func TestClusterCanFailInDestroy(t *testing.T) {
 	utils.CheckContext()
+	t.Parallel()
+
 	clusterID, err := mock.InfractlCreateCluster(
 		"simulate", utils.GetUniqueClusterName("destroy-fails"),
 		"--lifespan=20s",
@@ -57,6 +63,8 @@ func TestClusterCanFailInDestroy(t *testing.T) {
 
 func TestClusterCanBeDeleted(t *testing.T) {
 	utils.CheckContext()
+	t.Parallel()
+
 	clusterID, err := mock.InfractlCreateCluster(
 		"simulate", utils.GetUniqueClusterName("for-deletion"),
 		"--lifespan=5m",
@@ -75,6 +83,8 @@ func TestClusterCanBeDeleted(t *testing.T) {
 
 func TestClusterCanExpireByChangingLifespan(t *testing.T) {
 	utils.CheckContext()
+	t.Parallel()
+
 	clusterID, err := mock.InfractlCreateCluster(
 		"simulate", utils.GetUniqueClusterName("for-expire"),
 		"--lifespan=5m",
@@ -93,6 +103,8 @@ func TestClusterCanExpireByChangingLifespan(t *testing.T) {
 
 func TestClusterCanBeCreatedWithAliasFlavor(t *testing.T) {
 	utils.CheckContext()
+	t.Parallel()
+
 	clusterID, err := mock.InfractlCreateCluster(
 		"test-alias-1", utils.GetUniqueClusterName("alias-positive"),
 		"--lifespan=30s",
@@ -107,6 +119,8 @@ func TestClusterCanBeCreatedWithAliasFlavor(t *testing.T) {
 
 func TestClusterWontBeCreatedIfAliasNotFound(t *testing.T) {
 	utils.CheckContext()
+	t.Parallel()
+
 	_, err := mock.InfractlCreateCluster(
 		"test-alias-not-set", utils.GetUniqueClusterName("alias-negative"),
 		"--lifespan=30s",
