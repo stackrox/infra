@@ -80,8 +80,6 @@ func (c candidateMapping) MarshalJSON() ([]byte, error) {
 }
 
 func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []string) (common.PrettyPrinter, error) {
-	quietMode := common.MustBool(cmd.Flags(), "quiet")
-
 	runningClusters, err := listGCPInfraClusters(ctx, conn)
 	if err != nil {
 		return nil, fmt.Errorf("error listing infra clusters on GCP flavors: %v", err)
@@ -91,10 +89,10 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []str
 	if err != nil {
 		return nil, fmt.Errorf("error reading instances: %v", err)
 	}
-
 	instances = FormatInstanceNames(instances)
 
 	instanceCandidateMapping := findCandidateClustersForInstances(instances, runningClusters)
+	quietMode := common.MustBool(cmd.Flags(), "quiet")
 	if quietMode {
 		filterInstancesWithoutCandidates(instanceCandidateMapping)
 	}

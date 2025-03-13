@@ -7,7 +7,7 @@ import (
 )
 
 type prettyJanitorFindResponse struct {
-	Instances candidateMapping `json:"Instances"`
+	Instances candidateMapping
 }
 
 func (p prettyJanitorFindResponse) PrettyPrint(cmd *cobra.Command) {
