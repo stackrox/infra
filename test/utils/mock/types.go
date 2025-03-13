@@ -29,6 +29,7 @@ type ListClusterReponse struct {
 	}
 }
 
+// JanitorFindResponse maps to the JSON response for infractl janitor find-gcp operations.
 type JanitorFindResponse struct {
 	Instances map[string][]*v1.Cluster
 }

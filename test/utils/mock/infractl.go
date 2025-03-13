@@ -119,6 +119,7 @@ func InfractlWhoami() (string, error) {
 	return jsonData.Principal.ServiceAccount.Email, nil
 }
 
+// InfractlJanitorFindGCP is a wrapper for infractl janitor find-gcp'.
 func InfractlJanitorFindGCP(quiet bool) (JanitorFindResponse, error) {
 	findGCPCommand := infraJanitorFind.Command()
 
