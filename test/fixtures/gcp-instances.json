@@ -1,0 +1,12 @@
+[
+  {
+    "name": "gke-find-test-1-exists-default-pool-83ce64af-280j",
+    "status": "RUNNING",
+    "zone": "https://www.googleapis.com/compute/v1/projects/acs-team-temp-dev/zones/us-central1-a"
+  },
+  {
+    "name": "gke-not-found-orphaned-default-pool-83as64af-281j",
+    "status": "RUNNING",
+    "zone": "https://www.googleapis.com/compute/v1/projects/acs-team-temp-dev/zones/us-central1-a"
+  }
+]

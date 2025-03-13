@@ -8,13 +8,14 @@ import (
 	"testing"
 	"time"
 
-	utils "github.com/stackrox/infra/test/e2e"
+	"github.com/stackrox/infra/test/utils"
+	"github.com/stackrox/infra/test/utils/mock"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestListCreated(t *testing.T) {
 	utils.CheckContext()
-	clusterID, err := infractlCreateCluster(
+	clusterID, err := mock.InfractlCreateCluster(
 		"simulate", utils.GetUniqueClusterName("list-created"),
 		"--lifespan=30s",
 		"--arg=create-delay-seconds=5",
@@ -22,14 +23,14 @@ func TestListCreated(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, clusterID)
-	listedClusters, err := infractlList("--prefix=list-created")
+	listedClusters, err := mock.InfractlList("--prefix=list-created")
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(listedClusters.Clusters))
 }
 
 func TestListExpired(t *testing.T) {
 	utils.CheckContext()
-	clusterID, err := infractlCreateCluster(
+	clusterID, err := mock.InfractlCreateCluster(
 		"simulate", utils.GetUniqueClusterName("list-created"),
 		"--lifespan=20s",
 		"--arg=create-delay-seconds=5",
@@ -37,11 +38,11 @@ func TestListExpired(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, clusterID)
-	assertStatusBecomesWithin(t, clusterID, "FINISHED", 60*time.Second)
-	listedClusters, err := infractlList(fmt.Sprintf("--prefix=%s", clusterID))
+	utils.AssertStatusBecomesWithin(t, clusterID, "FINISHED", 60*time.Second)
+	listedClusters, err := mock.InfractlList(fmt.Sprintf("--prefix=%s", clusterID))
 	assert.NoError(t, err)
 	assert.Equal(t, 0, len(listedClusters.Clusters))
-	listedClusters, err = infractlList(fmt.Sprintf("--prefix=%s", clusterID), "--expired")
+	listedClusters, err = mock.InfractlList(fmt.Sprintf("--prefix=%s", clusterID), "--expired")
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(listedClusters.Clusters))
 }
@@ -50,24 +51,24 @@ func TestListOfAFlavor(t *testing.T) {
 	utils.CheckContext()
 	commonPrefix := utils.GetUniqueClusterName("ls-flavor")
 
-	_, err := infractlCreateCluster(
+	_, err := mock.InfractlCreateCluster(
 		"simulate", fmt.Sprintf("%s%d", commonPrefix, 1),
 		"--lifespan=30s",
 		"--arg=create-delay-seconds=5",
 		"--arg=destroy-delay-seconds=5",
 	)
 	assert.NoError(t, err)
-	_, err = infractlCreateCluster(
+	_, err = mock.InfractlCreateCluster(
 		"simulate-2", fmt.Sprintf("%s%d", commonPrefix, 2),
 		"--lifespan=30s",
 	)
 	assert.NoError(t, err)
 
-	listAllClusters, err := infractlList(fmt.Sprintf("--prefix=%s", commonPrefix))
+	listAllClusters, err := mock.InfractlList(fmt.Sprintf("--prefix=%s", commonPrefix))
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(listAllClusters.Clusters))
 
-	listOnlySimulateClusters, err := infractlList(fmt.Sprintf("--prefix=%s", commonPrefix), "--flavor=simulate")
+	listOnlySimulateClusters, err := mock.InfractlList(fmt.Sprintf("--prefix=%s", commonPrefix), "--flavor=simulate")
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(listOnlySimulateClusters.Clusters))
 }
@@ -76,24 +77,24 @@ func TestListOfAStatus(t *testing.T) {
 	utils.CheckContext()
 	commonPrefix := utils.GetUniqueClusterName("ls-status")
 
-	failedCluster, err := infractlCreateCluster(
+	failedCluster, err := mock.InfractlCreateCluster(
 		"simulate", fmt.Sprintf("%s%d", commonPrefix, 1),
 		"--lifespan=30s",
 		"--arg=create-outcome=fail",
 	)
-	assertStatusBecomes(t, failedCluster, "FAILED")
+	utils.AssertStatusBecomes(t, failedCluster, "FAILED")
 	assert.NoError(t, err)
-	_, err = infractlCreateCluster(
+	_, err = mock.InfractlCreateCluster(
 		"simulate", fmt.Sprintf("%s%d", commonPrefix, 2),
 		"--lifespan=30s",
 	)
 	assert.NoError(t, err)
 
-	listAllClusters, err := infractlList(fmt.Sprintf("--prefix=%s", commonPrefix), "--expired")
+	listAllClusters, err := mock.InfractlList(fmt.Sprintf("--prefix=%s", commonPrefix), "--expired")
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(listAllClusters.Clusters))
 
-	listOnlyFailedClusters, err := infractlList(fmt.Sprintf("--prefix=%s", commonPrefix), "--status=FAILED", "--expired")
+	listOnlyFailedClusters, err := mock.InfractlList(fmt.Sprintf("--prefix=%s", commonPrefix), "--status=FAILED", "--expired")
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(listOnlyFailedClusters.Clusters))
 }

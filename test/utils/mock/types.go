@@ -1,6 +1,8 @@
-package e2e
+package mock
 
-import v1 "github.com/stackrox/infra/generated/api/v1"
+import (
+	v1 "github.com/stackrox/infra/generated/api/v1"
+)
 
 // StatusResponse helper maps to the JSON response for infractl status operations.
 type StatusResponse struct {
@@ -25,4 +27,9 @@ type ListClusterReponse struct {
 	Clusters []struct {
 		ID string
 	}
+}
+
+// JanitorFindResponse maps to the JSON response for infractl janitor find-gcp operations.
+type JanitorFindResponse struct {
+	Instances map[string][]*v1.Cluster
 }

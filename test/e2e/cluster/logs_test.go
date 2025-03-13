@@ -6,13 +6,14 @@ package cluster_test
 import (
 	"testing"
 
-	utils "github.com/stackrox/infra/test/e2e"
+	"github.com/stackrox/infra/test/utils"
+	"github.com/stackrox/infra/test/utils/mock"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestLogs(t *testing.T) {
 	utils.CheckContext()
-	clusterID, err := infractlCreateCluster(
+	clusterID, err := mock.InfractlCreateCluster(
 		"simulate", utils.GetUniqueClusterName("logs"),
 		"--lifespan=30s",
 		"--arg=create-delay-seconds=5",
@@ -20,9 +21,9 @@ func TestLogs(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, clusterID)
-	assertStatusBecomes(t, clusterID, "READY")
+	utils.AssertStatusBecomes(t, clusterID, "READY")
 
-	logs, err := infractlLogs(clusterID)
+	logs, err := mock.InfractlLogs(clusterID)
 	assert.NoError(t, err)
 	assert.Containsf(t, logs, "create", "logs must contain an entry for the create stage")
 	assert.Containsf(t, logs, "msg=\"capturing logs\"", "logs must contain an entry confirming log collection")
