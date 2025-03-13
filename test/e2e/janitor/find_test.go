@@ -1,7 +1,7 @@
 //go:build e2e
 // +build e2e
 
-package cluster_test
+package find_test
 
 import (
 	"testing"
@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestLogs(t *testing.T) {
+func TestFind(t *testing.T) {
 	utils.CheckContext()
 	clusterID, err := mock.InfractlCreateCluster(
 		"simulate", utils.GetUniqueClusterName("logs"),

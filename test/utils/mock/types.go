@@ -1,4 +1,4 @@
-package e2e
+package mock
 
 import v1 "github.com/stackrox/infra/generated/api/v1"
 

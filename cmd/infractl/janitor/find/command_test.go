@@ -3,7 +3,7 @@ package find_test
 import (
 	"testing"
 
-	find "github.com/stackrox/infra/cmd/infractl/janitor/gcp"
+	"github.com/stackrox/infra/cmd/infractl/janitor/find"
 	"github.com/stretchr/testify/assert"
 )
 

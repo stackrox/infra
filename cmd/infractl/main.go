@@ -14,7 +14,7 @@ import (
 	"github.com/stackrox/infra/cmd/infractl/cluster/logs"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	"github.com/stackrox/infra/cmd/infractl/flavor"
-	janitorGCP "github.com/stackrox/infra/cmd/infractl/janitor/gcp"
+	janitorFind "github.com/stackrox/infra/cmd/infractl/janitor/find"
 	statusGet "github.com/stackrox/infra/cmd/infractl/status/get"
 	statusReset "github.com/stackrox/infra/cmd/infractl/status/reset"
 	statusSet "github.com/stackrox/infra/cmd/infractl/status/set"
@@ -49,7 +49,7 @@ func main() {
 		Long:  "Can be used to clean up infra clusters that have failed for various reasons and find orphaned VMs.",
 	}
 	janitorCommand.AddCommand(
-		janitorGCP.Command(),
+		janitorFind.Command(),
 	)
 
 	// For our version of Cobra, `cmd.Printf(...)` defaults to Stderr.

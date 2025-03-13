@@ -15,7 +15,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-const prefixThreshold = 3
+const commonPrefixThreshold = 3
 
 var (
 	infraFlavorsOnGCP = []string{
@@ -36,16 +36,16 @@ var (
 )
 
 const examples = `# List GCP compute instances and matching infra clusters.
-$ infractl janitor gcp
+$ infractl janitor find-gcp
 
 # List only instances without matching clusters
-$ infractl janitor --quiet`
+$ infractl janitor find-gcp--quiet`
 
 // Command defines the handler for infractl janitor find.
 func Command() *cobra.Command {
-	// $ infractl janitor find
+	// $ infractl janitor find-gcp
 	cmd := &cobra.Command{
-		Use:     "gcp",
+		Use:     "find-gcp",
 		Short:   "Find orphaned GCP VMs",
 		Long:    "Find orphaned GCP compute instances by matching them to running clusters",
 		Example: examples,
@@ -56,6 +56,7 @@ func Command() *cobra.Command {
 	return cmd
 }
 
+// ComputeInstance represents the type for a GCP compute instance as returned by 'gcloud instances list --json'.
 type ComputeInstance struct {
 	Name         string
 	Status       string
@@ -64,7 +65,7 @@ type ComputeInstance struct {
 	OriginalName string
 }
 
-type CandidateMapping map[*ComputeInstance][]*v1.Cluster
+type candidateMapping map[*ComputeInstance][]*v1.Cluster
 
 func run(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, _ []string) (common.PrettyPrinter, error) {
 	runningClusters, err := listGCPInfraClusters(ctx, conn)
@@ -121,7 +122,7 @@ func FormatInstanceNames(instances []*ComputeInstance) []*ComputeInstance {
 	for _, i := range instances {
 		i.OriginalName = i.Name
 		i.Name = re.ReplaceAllString(i.Name, "")
-		handleQaDemoClusters(i)
+		handleDemoClusters(i)
 		i.Name = strings.ReplaceAll(i.Name, "-", "")
 		if !uniqueMap[i.Name] {
 			uniqueMap[i.Name] = true
@@ -133,8 +134,8 @@ func FormatInstanceNames(instances []*ComputeInstance) []*ComputeInstance {
 	return result
 }
 
-// handleQaDemoClusters takes the name of the cluster from the labels instead of the
-func handleQaDemoClusters(i *ComputeInstance) {
+// handleDemoClusters takes the name of the cluster from the labels instead of the instance itself.
+func handleDemoClusters(i *ComputeInstance) {
 	if _, ok := i.Labels["name"]; ok {
 		i.Name = strings.TrimSuffix(i.Labels["name"], "-prod")
 	}
@@ -146,49 +147,33 @@ func sortInstances(instances []*ComputeInstance) {
 	})
 }
 
-type clusterRegistry interface {
-	lookup(*ComputeInstance) []string
-}
-
-type clusterRegistryImpl struct {
-	clusters []*v1.Cluster
-}
-
 func findCandidateClustersForInstances(instances []*ComputeInstance, runningClusters []*v1.Cluster) map[*ComputeInstance][]*v1.Cluster {
-	result := CandidateMapping{}
-	registry := newClusterRegistry(runningClusters)
+	result := candidateMapping{}
 	for _, vm := range instances {
-		result[vm] = registry.lookup(vm)
+		result[vm] = listMatchingClustersForInstance(vm, runningClusters)
 	}
 	return result
 }
 
-func newClusterRegistry(clusters []*v1.Cluster) *clusterRegistryImpl {
-	return &clusterRegistryImpl{clusters: clusters}
-}
-
-// lookup checks all known clusters for ownership of the VM.
-func (c *clusterRegistryImpl) lookup(vm *ComputeInstance) []*v1.Cluster {
+// listMatchingClustersForInstance returns a list of clusters that have the same prefix as the instance.
+func listMatchingClustersForInstance(vm *ComputeInstance, clusters []*v1.Cluster) []*v1.Cluster {
 	out := []*v1.Cluster{}
-	for _, cluster := range c.clusters {
+	for _, cluster := range clusters {
 		normalizedClusterID := strings.ReplaceAll(cluster.ID, "-", "")
-		commonPrefix := findCommonPrefix([2]string{vm.Name, normalizedClusterID})
-		if len(commonPrefix) >= prefixThreshold {
+		commonPrefix := findCommonPrefix(vm.Name, normalizedClusterID)
+		if len(commonPrefix) >= commonPrefixThreshold {
 			out = append(out, cluster)
 		}
 	}
 	return out
 }
 
-func findCommonPrefix(data [2]string) string {
-	a, b := data[0], data[1]
+func findCommonPrefix(a, b string) string {
 	shorterStringLen := compareLen(a, b)
-
 	i := 0
 	for i < shorterStringLen && a[i] == b[i] {
 		i++
 	}
-
 	return a[:i]
 }
 
@@ -199,7 +184,7 @@ func compareLen(a, b string) int {
 	return len(b)
 }
 
-func filterInstancesWithoutCandidates(clusters CandidateMapping) {
+func filterInstancesWithoutCandidates(clusters candidateMapping) {
 	for instance, candidates := range clusters {
 		if len(candidates) > 0 {
 			delete(clusters, instance)
