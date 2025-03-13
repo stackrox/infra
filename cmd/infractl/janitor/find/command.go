@@ -37,6 +37,8 @@ var (
 )
 
 const examples = `# List GCP compute instances and matching infra clusters.
+# Expects the output of gcloud compute instances list --format json on the standard input.
+
 $ infractl janitor find-gcp
 
 # List only instances without matching clusters
@@ -53,7 +55,7 @@ func Command() *cobra.Command {
 		Args:    common.ArgsWithHelp(cobra.ExactArgs(0)),
 		RunE:    common.WithGRPCHandler(run),
 	}
-	cmd.Flags().BoolP("quiet", "q", false, "only output cluster names")
+	cmd.Flags().BoolP("quiet", "q", false, "only output cluster instances without matches")
 
 	return cmd
 }
