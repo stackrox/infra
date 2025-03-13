@@ -7,13 +7,13 @@ home: https://github.com/stackrox/infra
 sources:
   - https://github.com/stackrox/infra
 annotations:
-  acsDemoVersion: 4.6.2
-  automationFlavorsVersion: 0.10.43
+  acsDemoVersion: 4.7.0
+  automationFlavorsVersion: 0.10.46
   ocpCredentialsMode: Passthrough
 dependencies:
-- name: argo-workflows
-  version: "0.45.9"
-  repository: "https://argoproj.github.io/argo-helm"
-- name: kube-prometheus
-  version: 11.1.1
-  repository: https://charts.bitnami.com/bitnami
+  - name: argo-workflows
+    version: "0.45.9"
+    repository: "https://argoproj.github.io/argo-helm"
+  - name: kube-prometheus
+    version: 11.1.1
+    repository: https://charts.bitnami.com/bitnami

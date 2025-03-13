@@ -12,6 +12,7 @@ import (
 	infraClusterGet "github.com/stackrox/infra/cmd/infractl/cluster/get"
 	infraClusterLifespan "github.com/stackrox/infra/cmd/infractl/cluster/lifespan"
 	infraClusterList "github.com/stackrox/infra/cmd/infractl/cluster/list"
+	infraClusterLogs "github.com/stackrox/infra/cmd/infractl/cluster/logs"
 	infraWhoami "github.com/stackrox/infra/cmd/infractl/whoami"
 	utils "github.com/stackrox/infra/test/e2e"
 )
@@ -121,6 +122,20 @@ func infractlList(args ...string) (utils.ListClusterReponse, error) {
 		return jsonData, err
 	}
 	return jsonData, nil
+}
+
+func infractlLogs(clusterID string) (string, error) {
+	infraLogsCmd := infraClusterLogs.Command()
+	buf := utils.PrepareCommand(infraLogsCmd, false, clusterID)
+	err := infraLogsCmd.Execute()
+	if err != nil {
+		return "", err
+	}
+	logs, err := utils.RetrieveCommandOutput(buf)
+	if err != nil {
+		return "", err
+	}
+	return logs, nil
 }
 
 func infractlWhoami() (string, error) {
