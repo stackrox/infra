@@ -16,8 +16,6 @@ func TestLogs(t *testing.T) {
 	clusterID, err := mock.InfractlCreateCluster(
 		"simulate", utils.GetUniqueClusterName("logs"),
 		"--lifespan=30s",
-		"--arg=create-delay-seconds=5",
-		"--arg=destroy-delay-seconds=5",
 	)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, clusterID)

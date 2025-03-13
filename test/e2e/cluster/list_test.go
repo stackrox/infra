@@ -17,13 +17,11 @@ func TestListCreated(t *testing.T) {
 	utils.CheckContext()
 	clusterID, err := mock.InfractlCreateCluster(
 		"simulate", utils.GetUniqueClusterName("list-created"),
-		"--lifespan=30s",
-		"--arg=create-delay-seconds=5",
-		"--arg=destroy-delay-seconds=5",
+		"--lifespan=10s",
 	)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, clusterID)
-	listedClusters, err := mock.InfractlList("--prefix=list-created")
+	listedClusters, err := mock.InfractlList(fmt.Sprintf("--prefix=%s", clusterID))
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(listedClusters.Clusters))
 }
@@ -31,10 +29,8 @@ func TestListCreated(t *testing.T) {
 func TestListExpired(t *testing.T) {
 	utils.CheckContext()
 	clusterID, err := mock.InfractlCreateCluster(
-		"simulate", utils.GetUniqueClusterName("list-created"),
-		"--lifespan=20s",
-		"--arg=create-delay-seconds=5",
-		"--arg=destroy-delay-seconds=5",
+		"simulate", utils.GetUniqueClusterName("list-expired"),
+		"--lifespan=5s",
 	)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, clusterID)
@@ -54,8 +50,6 @@ func TestListOfAFlavor(t *testing.T) {
 	_, err := mock.InfractlCreateCluster(
 		"simulate", fmt.Sprintf("%s%d", commonPrefix, 1),
 		"--lifespan=30s",
-		"--arg=create-delay-seconds=5",
-		"--arg=destroy-delay-seconds=5",
 	)
 	assert.NoError(t, err)
 	_, err = mock.InfractlCreateCluster(
@@ -77,17 +71,18 @@ func TestListOfAStatus(t *testing.T) {
 	utils.CheckContext()
 	commonPrefix := utils.GetUniqueClusterName("ls-status")
 
-	failedCluster, err := mock.InfractlCreateCluster(
+	_, err := mock.InfractlCreateCluster(
 		"simulate", fmt.Sprintf("%s%d", commonPrefix, 1),
-		"--lifespan=30s",
+		"--lifespan=20s",
+	)
+	assert.NoError(t, err)
+
+	failedCluster, err := mock.InfractlCreateCluster(
+		"simulate", fmt.Sprintf("%s%d", commonPrefix, 2),
+		"--lifespan=20s",
 		"--arg=create-outcome=fail",
 	)
 	utils.AssertStatusBecomes(t, failedCluster, "FAILED")
-	assert.NoError(t, err)
-	_, err = mock.InfractlCreateCluster(
-		"simulate", fmt.Sprintf("%s%d", commonPrefix, 2),
-		"--lifespan=30s",
-	)
 	assert.NoError(t, err)
 
 	listAllClusters, err := mock.InfractlList(fmt.Sprintf("--prefix=%s", commonPrefix), "--expired")
