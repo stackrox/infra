@@ -22,6 +22,8 @@ func PrepareCommand(cmd *cobra.Command, asJSON bool, args ...string) *bytes.Buff
 	cmd.SetArgs(args)
 	buf := new(bytes.Buffer)
 	cmd.SetOut(buf)
+	// Set stderr to something to avoid spamming the Terminal/GHA output.
+	cmd.SetErr(new(bytes.Buffer))
 	return buf
 }
 
