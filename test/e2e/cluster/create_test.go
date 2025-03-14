@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stackrox/infra/cmd/infractl/cluster/create"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/test/utils"
 	"github.com/stackrox/infra/test/utils/mock"
@@ -75,6 +76,113 @@ func TestCannotCreateClusterWithInvalidLifespan(t *testing.T) {
 		"--lifespan=3w",
 	)
 	assert.ErrorContains(t, err, "invalid argument \"3w\" for \"--lifespan\" flag")
+}
+
+// #######
+// QA DEMO
+// #######
+func mockRootDir(path string) func() string {
+	return func() string {
+		return path
+	}
+}
+
+func mockMakeTag(tag string) func(string) string {
+	return func(rootDir string) string {
+		return tag
+	}
+}
+
+func TestQaDemoDefaultToTag(t *testing.T) {
+	create.GetRootDir = mockRootDir("stackrox/stackrox")
+	create.GetMakeTag = mockMakeTag("4.6.0")
+	clusterID, err := mock.InfractlCreateCluster(
+		"test-qa-demo",
+		"--lifespan=20s",
+	)
+	assert.NoError(t, err)
+	assert.Contains(t, clusterID, "4-6-0")
+
+	cluster, err := mock.InfractlGetCluster(clusterID)
+	assert.NoError(t, err)
+
+	p, err := findParameter(cluster.Parameters, "main-image")
+	assert.NoError(t, err)
+	assert.Equal(t, "quay.io/stackrox-io/main:4.6.0", p.GetValue())
+}
+
+func TestQaDemoDefaultToTagWithoutDirty(t *testing.T) {
+	create.GetRootDir = mockRootDir("stackrox/stackrox")
+	create.GetMakeTag = mockMakeTag("4.6.0-dirty")
+	clusterID, err := mock.InfractlCreateCluster(
+		"test-qa-demo",
+		"--lifespan=20s",
+	)
+	assert.NoError(t, err)
+	assert.Contains(t, clusterID, "4-6-0")
+	assert.NotContains(t, clusterID, "-dirty")
+}
+
+func TestQaDemoDefaultToRhacsMainImageFromTag(t *testing.T) {
+	create.GetRootDir = mockRootDir("stackrox/stackrox")
+	create.GetMakeTag = mockMakeTag("4.6.0")
+	clusterID, err := mock.InfractlCreateCluster(
+		"test-qa-demo",
+		"--rhacs",
+		"--lifespan=20s",
+	)
+	assert.NoError(t, err)
+	assert.Contains(t, clusterID, "4-6-0")
+
+	cluster, err := mock.InfractlGetCluster(clusterID)
+	assert.NoError(t, err)
+
+	p, err := findParameter(cluster.Parameters, "main-image")
+	assert.NoError(t, err)
+	assert.Equal(t, "quay.io/rhacs-eng/main:4.6.0", p.GetValue())
+}
+
+func TestQaDemoDefaultToDateNotGit(t *testing.T) {
+	clusterID, err := mock.InfractlCreateCluster(
+		"test-qa-demo",
+		"--lifespan=20s",
+		"--arg=main-image=test",
+	)
+	assert.NoError(t, err)
+	assert.Contains(t, clusterID, time.Now().Format("01-02"))
+}
+
+func TestQaDemoNotGitMustHaveMainImage(t *testing.T) {
+	_, err := mock.InfractlCreateCluster(
+		"test-qa-demo",
+		"--lifespan=20s",
+	)
+	assert.ErrorContains(t, err, "parameter \"main-image\" was not provided")
+}
+
+func TestQaDemoOtherGitUseDate(t *testing.T) {
+	create.GetRootDir = mockRootDir("stackrox/collector")
+	create.GetMakeTag = mockMakeTag("a.b.c")
+
+	clusterID, err := mock.InfractlCreateCluster(
+		"test-qa-demo",
+		"--lifespan=20s",
+		"--arg=main-image=test",
+	)
+	assert.NoError(t, err)
+	assert.NotContains(t, clusterID, "a.b.c")
+	assert.Contains(t, clusterID, time.Now().Format("01-02"))
+}
+
+func TestQaDemoOtherGitMustHaveMainImage(t *testing.T) {
+	create.GetRootDir = mockRootDir("stackrox/collector")
+	create.GetMakeTag = mockMakeTag("a.b.c")
+
+	_, err := mock.InfractlCreateCluster(
+		"test-qa-demo",
+		"--lifespan=20s",
+	)
+	assert.ErrorContains(t, err, "parameter \"main-image\" was not provided")
 }
 
 func TestQaDemoDefaultsOverrideMainImage(t *testing.T) {
