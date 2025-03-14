@@ -33,7 +33,6 @@ type statusTest struct {
 
 func TestStatusCommand(t *testing.T) {
 	utils.CheckContext()
-	t.Parallel()
 
 	maintainer, err := mock.InfractlWhoami()
 	assert.NoError(t, err)

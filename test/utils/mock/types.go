@@ -33,3 +33,13 @@ type ListClusterReponse struct {
 type JanitorFindResponse struct {
 	Instances map[string][]*v1.Cluster
 }
+
+// FlavorResponse maps to the JSON response for infractl flavor get operations.
+type FlavorResponse struct {
+	ID           string
+	Name         string
+	Description  string
+	Availability string
+	Parameters   map[string]v1.Parameter
+	Artifacts    map[string]v1.FlavorArtifact
+}

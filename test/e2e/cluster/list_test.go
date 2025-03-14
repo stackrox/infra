@@ -15,7 +15,6 @@ import (
 
 func TestListCreated(t *testing.T) {
 	utils.CheckContext()
-	t.Parallel()
 
 	clusterID, err := mock.InfractlCreateCluster(
 		"simulate", utils.GetUniqueClusterName("list-created"),
@@ -47,7 +46,6 @@ func TestListExpired(t *testing.T) {
 
 func TestListOfAFlavor(t *testing.T) {
 	utils.CheckContext()
-	t.Parallel()
 
 	commonPrefix := utils.GetUniqueClusterName("ls-flavor")
 
@@ -73,7 +71,6 @@ func TestListOfAFlavor(t *testing.T) {
 
 func TestListOfAStatus(t *testing.T) {
 	utils.CheckContext()
-	t.Parallel()
 
 	commonPrefix := utils.GetUniqueClusterName("ls-status")
 
