@@ -42,11 +42,6 @@ func TestDefaultNamesDoNotConflict(t *testing.T) {
 	assert.Regexp(t, pattern, firstClusterID)
 }
 
-//	@test "provided name failed validation because too short" {
-//		run infractl create test-qa-demo ab
-//		assert_failure
-//		assert_output --partial "Error: cluster name too short"
-//	  }
 func TestNameValidationTooShort(t *testing.T) {
 	_, err := mock.InfractlCreateCluster(
 		"simulate", "ab",
