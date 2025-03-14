@@ -5,13 +5,9 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"os/exec"
-	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/cluster/artifacts"
@@ -72,13 +68,7 @@ func Command() *cobra.Command {
 	cmd.Flags().Bool("no-slack", false, "skip sending Slack messages for lifecycle events")
 	cmd.Flags().Bool("slack-me", false, "send slack messages directly and not to the #infra_notifications channel")
 	cmd.Flags().StringP("download-dir", "d", "", "wait for readiness and download artifacts to this dir")
-	for _, osArg := range os.Args {
-		if strings.Contains(osArg, "qa-demo") {
-			cmd.Flags().Bool("rhacs", false, "use Red Hat branded images for qa-demo (the default is to use open source images)")
-			// Abort loop if found, otherwise 'infractl create qa-demo prefix-qa-demo' will attempt to add another --rhacs flag.
-			break
-		}
-	}
+	cmd.Flags().Bool("rhacs", false, "use Red Hat branded images (only for qa-demo, defaults to open source images)")
 	return cmd
 }
 
@@ -122,25 +112,16 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 		req.Parameters[parts[0]] = parts[1]
 	}
 
-	determineWorkingEnvironment()
-	displayUserNotes(cmd, args, &req)
+	currentWorkingEnvironment := newCurrentWorkingEnvironment()
+	displayUserNotes(cmd, args, &req, currentWorkingEnvironment)
 
-	if len(args) > 1 {
-		name := args[1]
-		err := utils.ValidateClusterName(name)
-		if err != nil {
-			return nil, err
-		}
-		req.Parameters["name"] = name
-	} else {
-		name, err := determineName(ctx, conn, args[0])
-		if err != nil {
-			return nil, err
-		}
-		req.Parameters["name"] = name
+	name, err := determineClusterName(ctx, conn, currentWorkingEnvironment, args)
+	if err != nil {
+		return nil, err
 	}
+	req.Parameters["name"] = name
 
-	assignDefaults(cmd, &req)
+	assignDefaults(cmd, &req, currentWorkingEnvironment)
 
 	clusterID, err := client.Create(ctx, &req)
 	if err != nil {
@@ -159,145 +140,16 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 	return prettyResourceByID(*clusterID), nil
 }
 
-func determineWorkingEnvironment() {
-	workingEnvironment.gitTopLevel = ""
-	workingEnvironment.tag = ""
-
-	topLevel := exec.Command("git", "rev-parse", "--show-toplevel")
-	out, err := topLevel.Output()
-	if err != nil {
-		return
-	}
-	rootDir := string(out)
-	rootDir = strings.TrimSpace(rootDir)
-	workingEnvironment.gitTopLevel = rootDir
-
-	makeTag := exec.Command("make", "--quiet", "tag")
-	makeTag.Dir = rootDir
-	out, err = makeTag.Output()
-	if err != nil {
-		return
-	}
-	tag := string(out)
-	tag = strings.TrimSpace(tag)
-	workingEnvironment.tag = tag
-}
-
-func determineName(ctx context.Context, conn *grpc.ClientConn, flavorID string) (string, error) {
-	initials, err := getUserInitials(ctx, conn)
-	if err != nil {
-		return "", err
-	}
-
-	suffix := getNameForFlavor(flavorID)
-	if suffix == "" {
-		suffix = time.Now().Format("01-02")
-	}
-
-	unconflicted, err := avoidConflicts(ctx, conn, initials+"-"+suffix)
-	if err != nil {
-		return "", err
-	}
-
-	return unconflicted, nil
-}
-
-func getUserInitials(ctx context.Context, conn *grpc.ClientConn) (string, error) {
-	resp, err := v1.NewUserServiceClient(conn).Whoami(ctx, &empty.Empty{})
-	if err != nil {
-		return "", err
-	}
-	switch resp := resp.Principal.(type) {
-	case *v1.WhoamiResponse_User:
-		return "", errors.New("authenticating as a user is not possible in this context")
-	case *v1.WhoamiResponse_ServiceAccount:
-		initials := ""
-		name := resp.ServiceAccount.GetName()
-		for _, part := range regexp.MustCompile(`[\s-_\.]+`).Split(name, -1) {
-			initials += strings.ToLower(part[:1])
-		}
-		if len(initials) < 2 {
-			return "", errors.Errorf("Cannot determine a default name for %s", name)
-		}
-		if len(initials) > 4 {
-			initials = initials[:4]
-		}
-		return initials, nil
-	case nil:
-		return "", errors.New("anonymous authentication is not possible in this context")
-	}
-
-	panic("unexpected")
-}
-
-func getNameForFlavor(flavorID string) string {
-	switch flavorID {
-	case "qa-demo", "test-qa-demo":
-		return getNameForQaDemoFlavor()
-	}
-	return ""
-}
-
-func getNameForQaDemoFlavor() string {
-	if !strings.Contains(workingEnvironment.gitTopLevel, "stackrox/stackrox") {
-		return ""
-	}
-
-	if workingEnvironment.tag == "" {
-		return ""
-	}
-
-	name := strings.TrimSuffix(workingEnvironment.tag, "-dirty")
-	name = strings.ReplaceAll(name, ".", "-")
-
-	// Ensure that the generated name is a maximum of 28 characters long and does not end with hyphen.
-	if len(name) > 28 {
-		name = name[:28]
-		name = strings.TrimSuffix(name, "-")
-	}
-
-	return name
-}
-
-func avoidConflicts(ctx context.Context, conn *grpc.ClientConn, nameSoFar string) (string, error) {
-	req := v1.ClusterListRequest{
-		All:     true,
-		Expired: true,
-		Prefix:  nameSoFar,
-	}
-
-	resp, err := v1.NewClusterServiceClient(conn).List(ctx, &req)
-	if err != nil {
-		return "", err
-	}
-
-	for i := 1; i <= 11; i++ {
-		potential := nameSoFar + "-" + strconv.Itoa(i)
-		var inUse bool
-		for _, cluster := range resp.GetClusters() {
-			if cluster.ID == potential {
-				inUse = true
-				break
-			}
-		}
-		if !inUse {
-			return potential, nil
-		}
-	}
-
-	return "", errors.New("could not find a default name for this cluster")
-}
-
-func assignDefaults(cmd *cobra.Command, req *v1.CreateClusterRequest) {
-	if !strings.Contains(req.ID, "qa-demo") {
+func assignDefaults(cmd *cobra.Command, req *v1.CreateClusterRequest, cwe *currentWorkingEnvironment) {
+	if !isQaDemoFlavor(req.GetID()) {
 		return
 	}
 
-	if req.Parameters["main-image"] != "" {
+	if req.GetParameters()["main-image"] != "" {
 		return
 	}
 
-	if !strings.Contains(workingEnvironment.gitTopLevel, "stackrox/stackrox") {
+	if !cwe.isInStackroxRepo() {
 		return
 	}
 
@@ -306,8 +158,7 @@ func assignDefaults(cmd *cobra.Command, req *v1.CreateClusterRequest) {
 		registry = rhacsRegistry
 	}
 
-	tag := strings.TrimSuffix(workingEnvironment.tag, "-dirty")
-	req.Parameters["main-image"] = registry + "/main:" + tag
+	req.Parameters["main-image"] = registry + "/main:" + getCleaned(cwe.tag)
 }
 
 func waitForCluster(client v1.ClusterServiceClient, clusterID *v1.ResourceByID) error {
@@ -340,18 +191,15 @@ func waitForCluster(client v1.ClusterServiceClient, clusterID *v1.ResourceByID) 
 	}
 }
 
-func displayUserNotes(cmd *cobra.Command, args []string, req *v1.CreateClusterRequest) {
-	if len(args) >= 2 && args[1] != "" {
-		if strings.Contains(args[0], "qa-demo") &&
-			strings.Contains(workingEnvironment.gitTopLevel, "stackrox/stackrox") {
+func displayUserNotes(cmd *cobra.Command, args []string, req *v1.CreateClusterRequest, cwe *currentWorkingEnvironment) {
+	if wasNameProvided(args) {
+		if isQaDemoFlavor(args[0]) && cwe.isInStackroxRepo() {
 			cmd.PrintErrln(nameProvidedToQaDemoInStackroxContext)
 		} else {
 			cmd.PrintErrln(nameProvidedToOther)
 		}
 	}
-	if len(args) >= 1 && strings.Contains(args[0], "qa-demo") &&
-		strings.Contains(workingEnvironment.gitTopLevel, "stackrox/stackrox") &&
-		req.Parameters["main-image"] != "" {
+	if isQaDemoFlavor(args[0]) && cwe.isInStackroxRepo() && req.Parameters["main-image"] != "" {
 		cmd.PrintErrln(mainImageProvidedToQaDemoInStackroxContext)
 	}
 }

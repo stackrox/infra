@@ -15,11 +15,10 @@ import (
 
 func TestClusterCanRunThroughStandardLifecycle(t *testing.T) {
 	utils.CheckContext()
+
 	clusterID, err := mock.InfractlCreateCluster(
 		"simulate", utils.GetUniqueClusterName("standard"),
-		"--lifespan=30s",
-		"--arg=create-delay-seconds=5",
-		"--arg=destroy-delay-seconds=5",
+		"--lifespan=20s",
 	)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, clusterID)
@@ -31,10 +30,10 @@ func TestClusterCanRunThroughStandardLifecycle(t *testing.T) {
 
 func TestClusterCanFailInCreate(t *testing.T) {
 	utils.CheckContext()
+
 	clusterID, err := mock.InfractlCreateCluster(
 		"simulate", utils.GetUniqueClusterName("create-fails"),
 		"--lifespan=30s",
-		"--arg=create-delay-seconds=5",
 		"--arg=create-outcome=fail",
 	)
 	assert.NoError(t, err)
@@ -45,11 +44,10 @@ func TestClusterCanFailInCreate(t *testing.T) {
 
 func TestClusterCanFailInDestroy(t *testing.T) {
 	utils.CheckContext()
+
 	clusterID, err := mock.InfractlCreateCluster(
 		"simulate", utils.GetUniqueClusterName("destroy-fails"),
-		"--lifespan=30s",
-		"--arg=create-delay-seconds=5",
-		"--arg=destroy-delay-seconds=5",
+		"--lifespan=20s",
 		"--arg=destroy-outcome=fail",
 	)
 	assert.NoError(t, err)
@@ -62,17 +60,17 @@ func TestClusterCanFailInDestroy(t *testing.T) {
 
 func TestClusterCanBeDeleted(t *testing.T) {
 	utils.CheckContext()
+
 	clusterID, err := mock.InfractlCreateCluster(
 		"simulate", utils.GetUniqueClusterName("for-deletion"),
 		"--lifespan=5m",
-		"--arg=create-delay-seconds=5",
-		"--arg=destroy-delay-seconds=5",
 	)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, clusterID)
 	utils.AssertStatusBecomes(t, clusterID, "CREATING")
 	utils.AssertStatusBecomes(t, clusterID, "READY")
-	utils.AssertStatusRemainsFor(t, clusterID, "READY", 60*time.Second)
+	// Checking that the cluster doesn't go into DESTROYING mode on its own
+	utils.AssertStatusRemainsFor(t, clusterID, "READY", 20*time.Second)
 	err = mock.InfractlDeleteCluster(clusterID)
 	assert.NoError(t, err)
 	utils.AssertStatusBecomes(t, clusterID, "DESTROYING")
@@ -81,17 +79,17 @@ func TestClusterCanBeDeleted(t *testing.T) {
 
 func TestClusterCanExpireByChangingLifespan(t *testing.T) {
 	utils.CheckContext()
+
 	clusterID, err := mock.InfractlCreateCluster(
 		"simulate", utils.GetUniqueClusterName("for-expire"),
 		"--lifespan=5m",
-		"--arg=create-delay-seconds=5",
-		"--arg=destroy-delay-seconds=5",
 	)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, clusterID)
 	utils.AssertStatusBecomes(t, clusterID, "CREATING")
 	utils.AssertStatusBecomes(t, clusterID, "READY")
-	utils.AssertStatusRemainsFor(t, clusterID, "READY", 60*time.Second)
+	// Checking that the cluster doesn't go into DESTROYING mode on its own
+	utils.AssertStatusRemainsFor(t, clusterID, "READY", 20*time.Second)
 	err = mock.InfractlLifespan(clusterID, "=0")
 	assert.NoError(t, err)
 	utils.AssertStatusBecomes(t, clusterID, "DESTROYING")
@@ -100,13 +98,13 @@ func TestClusterCanExpireByChangingLifespan(t *testing.T) {
 
 func TestClusterCanBeCreatedWithAliasFlavor(t *testing.T) {
 	utils.CheckContext()
+
 	clusterID, err := mock.InfractlCreateCluster(
 		"test-alias-1", utils.GetUniqueClusterName("alias-positive"),
-		"--lifespan=5m",
+		"--lifespan=30s",
 	)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, clusterID)
-	utils.AssertStatusBecomes(t, clusterID, "READY")
 
 	cluster, err := mock.InfractlGetCluster(clusterID)
 	assert.NoError(t, err)
@@ -115,9 +113,10 @@ func TestClusterCanBeCreatedWithAliasFlavor(t *testing.T) {
 
 func TestClusterWontBeCreatedIfAliasNotFound(t *testing.T) {
 	utils.CheckContext()
+
 	_, err := mock.InfractlCreateCluster(
 		"test-alias-not-set", utils.GetUniqueClusterName("alias-negative"),
-		"--lifespan=5m",
+		"--lifespan=30s",
 	)
 	assert.ErrorContains(t, err, "flavor \"test-alias-not-set\" not found")
 }

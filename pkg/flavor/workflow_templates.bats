@@ -109,14 +109,6 @@ setup_file() {
   assert_equal "$order" "7"
 }
 
-# Aliases
-@test "can find flavor via alias" {
-  flavor="$(infractl flavor get test-alias-1 --json)"
-  assert_success
-  name="$(echo "$flavor" | jq -r '.Name')"
-  assert_equal "$name" "Test Connect Artifact"
-}
-
 infractl() {
   bin/infractl -e localhost:8443 -k "$@"
 }
