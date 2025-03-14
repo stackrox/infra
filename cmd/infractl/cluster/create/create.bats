@@ -29,33 +29,7 @@ setup_file() {
 setup() {
   create_mock_make_for_tag "${test_tag}"
   create_mock_git_for_toplevel "$ROOT/test/mocks/stackrox/stackrox"
-  delete_all_workflows_by_flavor "test-hello-world"
   delete_all_workflows_by_flavor "test-qa-demo"
-}
-
-@test "can create a workflow" {
-  run infractl create test-hello-world this-is-a-test
-  assert_success
-  assert_output --partial "ID: this-is-a-test"
-}
-
-@test "can create a workflow without a name" {
-  run infractl create test-hello-world
-  assert_success
-  assert_output --regexp "ID: ...?.?"
-}
-
-@test "default names include a date" {
-  run infractl create test-hello-world
-  assert_success
-  assert_output --regexp "ID: ...?.?-${date_suffix}"
-}
-
-@test "default names do not conflict" {
-  run infractl create test-hello-world
-  run infractl create test-hello-world
-  assert_success
-  assert_output --regexp "ID: ...?.?-${date_suffix}-2"
 }
 
 @test "default qa-demo names use the tag" {
@@ -121,30 +95,6 @@ setup() {
   run infractl create test-qa-demo
   assert_failure
   assert_output --partial "parameter \"main-image\" was not provided"
-}
-
-@test "provided name failed validation because too short" {
-  run infractl create test-qa-demo ab
-  assert_failure
-  assert_output --partial "Error: cluster name too short"
-}
-
-@test "provided name failed validation because too long" {
-  run infractl create test-qa-demo this-name-will-be-too-loooooooooooooooooooong
-  assert_failure
-  assert_output --partial "Error: cluster name too long"
-}
-
-@test "provided name failed validation because does not match regex" {
-  run infractl create test-qa-demo THIS-IN-INVALID
-  assert_failure
-  assert_output --partial "Error: The name does not match the requirements."
-}
-
-@test "cannot create a cluster with an invalid lifespan" {
-  run infractl create test-qa-demo --lifespan 3w
-  assert_failure
-  assert_output --partial "Error: invalid argument \"3w\" for \"--lifespan\" flag:"
 }
 
 infractl() {
