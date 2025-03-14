@@ -60,13 +60,6 @@ setup() {
   assert_equal "$arg" "quay.io/rhacs-eng/main:${test_tag}"
 }
 
-@test "does not override main-image if passed" {
-  run infractl create test-qa-demo --arg main-image=a.b.c
-  assert_success
-  arg="$(kubectl get workflows -o json | jq -r '.items[].spec.arguments.parameters[] | select(.name=="main-image") | .value')"
-  assert_equal "$arg" "a.b.c"
-}
-
 @test "default qa-demo names use the date when not in a git context" {
   create_mock_git_that_fails
   run infractl create test-qa-demo --arg main-image=test

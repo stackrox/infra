@@ -4,10 +4,13 @@
 package cluster_test
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 	"time"
 
+	v1 "github.com/stackrox/infra/generated/api/v1"
+	"github.com/stackrox/infra/test/utils"
 	"github.com/stackrox/infra/test/utils/mock"
 	"github.com/stretchr/testify/assert"
 )
@@ -72,4 +75,30 @@ func TestCannotCreateClusterWithInvalidLifespan(t *testing.T) {
 		"--lifespan=3w",
 	)
 	assert.ErrorContains(t, err, "invalid argument \"3w\" for \"--lifespan\" flag")
+}
+
+func TestQaDemoDefaultsOverrideMainImage(t *testing.T) {
+	clusterID, err := mock.InfractlCreateCluster(
+		"test-qa-demo", utils.GetUniqueClusterName("qa-demo-override"),
+		"--arg=main-image=a.b.c",
+		"--lifespan=20s",
+	)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, clusterID)
+
+	cluster, err := mock.InfractlGetCluster(clusterID)
+	assert.NoError(t, err)
+
+	p, err := findParameter(cluster.Parameters, "main-image")
+	assert.NoError(t, err)
+	assert.Equal(t, "a.b.c", p.GetValue())
+}
+
+func findParameter(parameters []v1.Parameter, name string) (v1.Parameter, error) {
+	for _, p := range parameters {
+		if p.GetName() == name {
+			return p, nil
+		}
+	}
+	return v1.Parameter{}, errors.New("parameter not found in cluster")
 }

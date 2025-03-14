@@ -17,9 +17,10 @@ type WhoamiResponse struct {
 // ClusterResponse helper maps to the JSON response for infractl operations related to clusters.
 // We use this instead of v1.Cluster because Go cannot parse the Status string back to the enum.
 type ClusterResponse struct {
-	ID     string
-	Status string
-	Flavor string
+	ID         string
+	Status     string
+	Flavor     string
+	Parameters []v1.Parameter
 }
 
 // ListClusterReponse maps to the JSON response for infractl list operations.
