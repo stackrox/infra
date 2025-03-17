@@ -1,6 +1,7 @@
 package flavor_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -10,31 +11,46 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestWorkflow2TemplateExpectsDescription(t *testing.T) {
-	template, err := readWorkflowTemplateFromFixture("testdata/missing-flavor-description-in-annotation.yaml")
-	assert.NoError(t, err)
-	f, validationErrors := flavor.WorkflowTemplate2Flavor(template)
-	assert.Nil(t, f, "flavor must be nil, because a validation error occurred")
-	assert.Len(t, validationErrors, 1)
-	assert.Equal(t, "ignoring a workflow template without infra.stackrox.io/description annotation", validationErrors[0].Error())
+type workflowTemplateTest struct {
+	title                               string
+	pathToWorkflowTemplate              string
+	expectedValidationErrorLen          int
+	expectedFirstValidationErrorMessage string
 }
 
-func TestWorkflow2TemplateNeedsValidAvailability(t *testing.T) {
-	template, err := readWorkflowTemplateFromFixture("testdata/invalid-availability.yaml")
-	assert.NoError(t, err)
-	f, validationErrors := flavor.WorkflowTemplate2Flavor(template)
-	assert.Nil(t, f, "flavor must be nil, because a validation error occurred")
-	assert.Len(t, validationErrors, 1)
-	assert.Equal(t, "ignoring a workflow template with an unknown infra.stackrox.io/availability annotation", validationErrors[0].Error())
-}
+func TestWorkflow2TemplateTransformation(t *testing.T) {
+	tests := []workflowTemplateTest{
+		{
+			title:                               "workflow template must have an annotation for the flavor description",
+			pathToWorkflowTemplate:              "testdata/missing-flavor-description-in-annotation.yaml",
+			expectedValidationErrorLen:          1,
+			expectedFirstValidationErrorMessage: "ignoring a workflow template without infra.stackrox.io/description annotation",
+		},
+		{
+			title:                               "workflow template must have an annotation for a valid availability",
+			pathToWorkflowTemplate:              "testdata/invalid-availability.yaml",
+			expectedValidationErrorLen:          1,
+			expectedFirstValidationErrorMessage: "ignoring a workflow template with an unknown infra.stackrox.io/availability annotation",
+		},
+		{
+			title:                               "workflow template parameter must have a description",
+			pathToWorkflowTemplate:              "testdata/missing-parameter-description.yaml",
+			expectedValidationErrorLen:          3,
+			expectedFirstValidationErrorMessage: "ignoring a workflow template with a parameter that has no description: pod-security-policy",
+		},
+	}
 
-func TestWorkflow2TemplateParametersNeedDescription(t *testing.T) {
-	template, err := readWorkflowTemplateFromFixture("testdata/missing-parameter-description.yaml")
-	assert.NoError(t, err)
-	f, validationErrors := flavor.WorkflowTemplate2Flavor(template)
-	assert.Nil(t, f, "flavor must be nil, because a validation error occurred")
-	assert.Len(t, validationErrors, 3)
-	assert.Equal(t, "ignoring a workflow template with a parameter that has no description: pod-security-policy", validationErrors[0].Error())
+	for index, tc := range tests {
+		name := fmt.Sprintf("%d %s", index+1, tc.title)
+		t.Run(name, func(t *testing.T) {
+			template, err := readWorkflowTemplateFromFixture(tc.pathToWorkflowTemplate)
+			assert.NoError(t, err)
+			f, validationErrors := flavor.WorkflowTemplate2Flavor(template)
+			assert.Nil(t, f, "flavor must be nil, because a validation error occurred")
+			assert.Len(t, validationErrors, tc.expectedValidationErrorLen)
+			assert.Equal(t, tc.expectedFirstValidationErrorMessage, validationErrors[0].Error())
+		})
+	}
 }
 
 func readWorkflowTemplateFromFixture(path string) (*v1alpha1.WorkflowTemplate, error) {
