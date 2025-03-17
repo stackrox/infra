@@ -94,8 +94,13 @@ func mockMakeTag(tag string) func(string) string {
 }
 
 func TestQaDemoDefaultToTag(t *testing.T) {
+	origGetRootDir := create.GetRootDir
 	create.GetRootDir = mockRootDir("stackrox/stackrox")
+	defer func() { create.GetRootDir = origGetRootDir }()
+	origGetMakeTag := create.GetMakeTag
 	create.GetMakeTag = mockMakeTag("4.6.0")
+	defer func() { create.GetMakeTag = origGetMakeTag }()
+
 	clusterID, err := mock.InfractlCreateCluster(
 		"test-qa-demo",
 		"--lifespan=20s",
@@ -112,8 +117,13 @@ func TestQaDemoDefaultToTag(t *testing.T) {
 }
 
 func TestQaDemoDefaultToTagWithoutDirty(t *testing.T) {
+	origGetRootDir := create.GetRootDir
 	create.GetRootDir = mockRootDir("stackrox/stackrox")
-	create.GetMakeTag = mockMakeTag("4.6.0-dirty")
+	defer func() { create.GetRootDir = origGetRootDir }()
+	origGetMakeTag := create.GetMakeTag
+	create.GetMakeTag = mockMakeTag("4.6.0")
+	defer func() { create.GetMakeTag = origGetMakeTag }()
+
 	clusterID, err := mock.InfractlCreateCluster(
 		"test-qa-demo",
 		"--lifespan=20s",
@@ -124,8 +134,13 @@ func TestQaDemoDefaultToTagWithoutDirty(t *testing.T) {
 }
 
 func TestQaDemoDefaultToRhacsMainImageFromTag(t *testing.T) {
+	origGetRootDir := create.GetRootDir
 	create.GetRootDir = mockRootDir("stackrox/stackrox")
+	defer func() { create.GetRootDir = origGetRootDir }()
+	origGetMakeTag := create.GetMakeTag
 	create.GetMakeTag = mockMakeTag("4.6.0")
+	defer func() { create.GetMakeTag = origGetMakeTag }()
+
 	clusterID, err := mock.InfractlCreateCluster(
 		"test-qa-demo",
 		"--rhacs",
