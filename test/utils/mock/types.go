@@ -44,3 +44,7 @@ type FlavorResponse struct {
 	Parameters   map[string]v1.Parameter
 	Artifacts    map[string]v1.FlavorArtifact
 }
+
+type FlavorListResponse struct {
+	Flavors []FlavorResponse
+}

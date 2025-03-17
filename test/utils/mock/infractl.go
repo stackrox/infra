@@ -10,6 +10,7 @@ import (
 	infraClusterList "github.com/stackrox/infra/cmd/infractl/cluster/list"
 	infraClusterLogs "github.com/stackrox/infra/cmd/infractl/cluster/logs"
 	infraFlavorGet "github.com/stackrox/infra/cmd/infractl/flavor/get"
+	infraFlavorList "github.com/stackrox/infra/cmd/infractl/flavor/list"
 	infraJanitorFind "github.com/stackrox/infra/cmd/infractl/janitor/find"
 	infraWhoami "github.com/stackrox/infra/cmd/infractl/whoami"
 	v1 "github.com/stackrox/infra/generated/api/v1"
@@ -152,7 +153,7 @@ func InfractlJanitorFindGCP(quiet bool) (JanitorFindResponse, error) {
 	return jsonData, nil
 }
 
-// InfractlFlavorGet is a wrapper for 'infractl flavor get <flavorID>'.
+// InfractlFlavorGet is a wrapper for 'infractl flavor get <flavorID> --json'.
 func InfractlFlavorGet(flavorID string) (FlavorResponse, error) {
 	flavorGetCommand := infraFlavorGet.Command()
 	jsonData := FlavorResponse{}
@@ -167,4 +168,21 @@ func InfractlFlavorGet(flavorID string) (FlavorResponse, error) {
 		return jsonData, err
 	}
 	return jsonData, nil
+}
+
+// InfractlFlavorList is a wrapper for 'infractl flavor list --json'.
+func InfractlFlavorList() (FlavorListResponse, error) {
+	flavorListCommand := infraFlavorList.Command()
+	jsonData := FlavorListResponse{}
+	buf := PrepareCommand(flavorListCommand, true)
+	err := flavorListCommand.Execute()
+	if err != nil {
+		return jsonData, err
+	}
+
+	err = RetrieveCommandOutputJSON(buf, &jsonData)
+	if err != nil {
+		return jsonData, err
+	}
+	return jsonData, err
 }
