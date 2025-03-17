@@ -1,7 +1,7 @@
 //go:build e2e
 // +build e2e
 
-package cluster_test
+package status_test
 
 import (
 	"fmt"
@@ -14,7 +14,8 @@ import (
 	statusGet "github.com/stackrox/infra/cmd/infractl/status/get"
 	statusReset "github.com/stackrox/infra/cmd/infractl/status/reset"
 	statusSet "github.com/stackrox/infra/cmd/infractl/status/set"
-	utils "github.com/stackrox/infra/test/e2e"
+	"github.com/stackrox/infra/test/utils"
+	"github.com/stackrox/infra/test/utils/mock"
 )
 
 func setup(t *testing.T) {
@@ -25,7 +26,7 @@ func setup(t *testing.T) {
 type statusTest struct {
 	title             string
 	cmd               *cobra.Command
-	response          utils.StatusResponse
+	response          mock.StatusResponse
 	assertResponse    func(statusTest)
 	assertLogContents func(string)
 }
@@ -33,14 +34,14 @@ type statusTest struct {
 func TestStatusCommand(t *testing.T) {
 	utils.CheckContext()
 
-	maintainer, err := infractlWhoami()
+	maintainer, err := mock.InfractlWhoami()
 	assert.NoError(t, err)
 
 	tests := []statusTest{
 		{
-			title:    "First infractl status get initializes inactive maintenance",
+			title:    "First mock.Infractl status get initializes inactive maintenance",
 			cmd:      statusGet.Command(),
-			response: utils.StatusResponse{},
+			response: mock.StatusResponse{},
 			assertResponse: func(tc statusTest) {
 				assert.False(t, tc.response.Status.MaintenanceActive)
 				assert.Equal(t, tc.response.Status.Maintainer, "")
@@ -52,9 +53,9 @@ func TestStatusCommand(t *testing.T) {
 		{
 			title:    "infractl status set enables maintenance and makes caller maintainer",
 			cmd:      statusSet.Command(),
-			response: utils.StatusResponse{},
+			response: mock.StatusResponse{},
 			assertResponse: func(tc statusTest) {
-				maintainer, err := infractlWhoami()
+				maintainer, err := mock.InfractlWhoami()
 				assert.NoError(t, err)
 				assert.True(t, tc.response.Status.MaintenanceActive)
 				assert.Equal(t, tc.response.Status.Maintainer, maintainer)
@@ -66,7 +67,7 @@ func TestStatusCommand(t *testing.T) {
 		{
 			title:    "infractl status reset returns no active maintenance",
 			cmd:      statusReset.Command(),
-			response: utils.StatusResponse{},
+			response: mock.StatusResponse{},
 			assertResponse: func(tc statusTest) {
 				assert.False(t, tc.response.Status.MaintenanceActive)
 				assert.Equal(t, tc.response.Status.Maintainer, "")
@@ -85,12 +86,12 @@ func TestStatusCommand(t *testing.T) {
 			testStartTime := metav1.Now()
 
 			// running command
-			buf := utils.PrepareCommand(tc.cmd, true)
+			buf := mock.PrepareCommand(tc.cmd, true)
 			err := tc.cmd.Execute()
 			assert.NoError(t, err)
 
 			// getting output from command
-			err = utils.RetrieveCommandOutputJSON(buf, &tc.response)
+			err = mock.RetrieveCommandOutputJSON(buf, &tc.response)
 			assert.NoError(t, err)
 
 			// assert outputs
