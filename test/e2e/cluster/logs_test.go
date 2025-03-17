@@ -13,7 +13,6 @@ import (
 
 func TestLogs(t *testing.T) {
 	utils.CheckContext()
-
 	clusterID, err := mock.InfractlCreateCluster(
 		"simulate", utils.GetUniqueClusterName("logs"),
 		"--lifespan=30s",

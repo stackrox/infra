@@ -15,7 +15,6 @@ import (
 
 func TestListCreated(t *testing.T) {
 	utils.CheckContext()
-
 	clusterID, err := mock.InfractlCreateCluster(
 		"simulate", utils.GetUniqueClusterName("list-created"),
 		"--lifespan=10s",

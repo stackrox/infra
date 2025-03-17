@@ -39,7 +39,7 @@ func TestStatusCommand(t *testing.T) {
 
 	tests := []statusTest{
 		{
-			title:    "First infractl status get initializes inactive maintenance",
+			title:    "First mock.Infractl status get initializes inactive maintenance",
 			cmd:      statusGet.Command(),
 			response: mock.StatusResponse{},
 			assertResponse: func(tc statusTest) {
