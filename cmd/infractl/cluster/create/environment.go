@@ -40,7 +40,7 @@ func newCurrentWorkingEnvironment() *currentWorkingEnvironment {
 }
 
 func (cwe *currentWorkingEnvironment) isInStackroxRepo() bool {
-	return cwe.gitTopLevel == stackroxRepo
+	return strings.Contains(cwe.gitTopLevel, stackroxRepo)
 }
 
 func (cwe *currentWorkingEnvironment) isTagged() bool {

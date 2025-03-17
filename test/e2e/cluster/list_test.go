@@ -50,20 +50,20 @@ func TestListOfAFlavor(t *testing.T) {
 
 	_, err := mock.InfractlCreateCluster(
 		"simulate", fmt.Sprintf("%s%d", commonPrefix, 1),
-		"--lifespan=30s",
+		"--lifespan=10s",
 	)
 	assert.NoError(t, err)
 	_, err = mock.InfractlCreateCluster(
 		"simulate-2", fmt.Sprintf("%s%d", commonPrefix, 2),
-		"--lifespan=30s",
+		"--lifespan=10s",
 	)
 	assert.NoError(t, err)
 
-	listAllClusters, err := mock.InfractlList(fmt.Sprintf("--prefix=%s", commonPrefix))
+	listAllClusters, err := mock.InfractlList(fmt.Sprintf("--prefix=%s", commonPrefix), "--expired")
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(listAllClusters.Clusters))
 
-	listOnlySimulateClusters, err := mock.InfractlList(fmt.Sprintf("--prefix=%s", commonPrefix), "--flavor=simulate")
+	listOnlySimulateClusters, err := mock.InfractlList(fmt.Sprintf("--prefix=%s", commonPrefix), "--flavor=simulate", "--expired")
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(listOnlySimulateClusters.Clusters))
 }
@@ -75,13 +75,13 @@ func TestListOfAStatus(t *testing.T) {
 
 	_, err := mock.InfractlCreateCluster(
 		"simulate", fmt.Sprintf("%s%d", commonPrefix, 1),
-		"--lifespan=20s",
+		"--lifespan=10s",
 	)
 	assert.NoError(t, err)
 
 	failedCluster, err := mock.InfractlCreateCluster(
 		"simulate", fmt.Sprintf("%s%d", commonPrefix, 2),
-		"--lifespan=20s",
+		"--lifespan=10s",
 		"--arg=create-outcome=fail",
 	)
 	utils.AssertStatusBecomes(t, failedCluster, "FAILED")
