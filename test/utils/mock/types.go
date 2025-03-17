@@ -45,6 +45,7 @@ type FlavorResponse struct {
 	Artifacts    map[string]v1.FlavorArtifact
 }
 
+// FlavorListResponse maps to the JSON response for infractl flavor list operations.
 type FlavorListResponse struct {
 	Flavors []FlavorResponse
 }
