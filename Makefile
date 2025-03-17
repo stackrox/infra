@@ -166,7 +166,7 @@ argo-workflow-lint:
 
 .PHONY: shellcheck
 shellcheck:
-	@shellcheck -x -- **/**/*.{bats,sh}
+	@shellcheck -x -- **/**/*.sh
 
 #############
 ## Testing ##
@@ -176,11 +176,6 @@ shellcheck:
 unit-test: proto-generated-srcs
 	@echo "+ $@"
 	@go test -v ./...
-
-.PHONY: bats-e2e-tests
-bats-e2e-tests:
-	@kubectl apply -f "test/fixtures/workflows/*.yaml"
-	@bats --recursive .
 
 .PHONY: go-e2e-tests
 go-e2e-tests: proto-generated-srcs

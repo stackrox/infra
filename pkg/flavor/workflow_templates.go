@@ -3,12 +3,14 @@ package flavor
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
 	argov3client "github.com/argoproj/argo-workflows/v3/cmd/argo/commands/client"
 	workflowtemplatepkg "github.com/argoproj/argo-workflows/v3/pkg/apiclient/workflowtemplate"
 	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
+	"github.com/pkg/errors"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/logging"
 )
@@ -41,8 +43,8 @@ func (r *Registry) addWorkflowTemplates(results []v1.Flavor) []v1.Flavor {
 	}
 
 	for i := range templates.Items {
-		flavor := workflowTemplate2Flavor(&templates.Items[i])
-		if flavor != nil {
+		flavor, errs := WorkflowTemplate2Flavor(&templates.Items[i])
+		if len(errs) == 0 {
 			results = append(results, *flavor)
 		}
 	}
@@ -85,40 +87,44 @@ func (r *Registry) getPairFromWorkflowTemplate(id string) (*v1.Flavor, *v1alpha1
 	}
 	workflow.Spec = *template.Spec.DeepCopy()
 
-	return workflowTemplate2Flavor(template), workflow
+	flavor, _ := WorkflowTemplate2Flavor(template)
+	return flavor, workflow
 }
 
-func workflowTemplate2Flavor(template *v1alpha1.WorkflowTemplate) *v1.Flavor {
-	valid := true
+func WorkflowTemplate2Flavor(template *v1alpha1.WorkflowTemplate) (*v1.Flavor, []error) {
+	var validationErrors []error
 	if template.ObjectMeta.Annotations["infra.stackrox.io/description"] == "" {
-		log.Log(logging.WARN, "ignoring a workflow template without infra.stackrox.io/description annotation",
+		err := errors.New("ignoring a workflow template without infra.stackrox.io/description annotation")
+		validationErrors = append(validationErrors, err)
+		log.Log(logging.WARN, err.Error(),
 			"template-name", template.GetObjectMeta().GetName(),
 		)
-		valid = false
 	}
 	availability := v1.Flavor_alpha
 	if template.ObjectMeta.Annotations["infra.stackrox.io/availability"] != "" {
 		value, ok := v1.FlavorAvailability_value[template.ObjectMeta.Annotations["infra.stackrox.io/availability"]]
 		if !ok {
-			log.Log(logging.WARN, "ignoring a workflow template with an unknown infra.stackrox.io/availability annotation",
+			err := errors.New("ignoring a workflow template with an unknown infra.stackrox.io/availability annotation")
+			validationErrors = append(validationErrors, err)
+			log.Log(logging.WARN, err.Error(),
 				"template-name", template.GetObjectMeta().GetName(),
 				"template-availability", template.GetObjectMeta().GetAnnotations()["infra.stackrox.io/availability"],
 			)
-			valid = false
 		}
 		availability = v1.FlavorAvailability(value)
 	}
 	for _, wfParameter := range template.Spec.Arguments.Parameters {
 		if wfParameter.Description == nil {
-			log.Log(logging.WARN, "ignoring a workflow template with a parameter that has no description",
+			err := fmt.Errorf("ignoring a workflow template with a parameter that has no description: %s", wfParameter.Name)
+			validationErrors = append(validationErrors, err)
+			log.Log(logging.WARN, err.Error(),
 				"template-name", template.GetObjectMeta().GetName(),
 				"parameter", wfParameter.Name,
 			)
-			valid = false
 		}
 	}
-	if !valid {
-		return nil
+	if len(validationErrors) > 0 {
+		return nil, validationErrors
 	}
 
 	flavor := &v1.Flavor{
@@ -130,7 +136,7 @@ func workflowTemplate2Flavor(template *v1alpha1.WorkflowTemplate) *v1.Flavor {
 		Artifacts:    make(map[string]*v1.FlavorArtifact),
 	}
 
-	return flavor
+	return flavor, nil
 }
 
 func getParametersFromWorkflowTemplate(template *v1alpha1.WorkflowTemplate) map[string]*v1.Parameter {
