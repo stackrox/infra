@@ -41,7 +41,7 @@ func TestDefaultNamesDoNotConflict(t *testing.T) {
 	assert.NotEmpty(t, secondClusterID)
 
 	today := time.Now().Format("01-02")
-	pattern := fmt.Sprintf(`-%s(-\d)?$`, today)
+	pattern := fmt.Sprintf(`-%s(-\d+)?$`, today)
 	assert.NotEqual(t, firstClusterID, secondClusterID)
 	assert.Regexp(t, pattern, firstClusterID)
 }

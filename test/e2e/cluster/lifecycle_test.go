@@ -17,7 +17,7 @@ func TestClusterCanRunThroughStandardLifecycle(t *testing.T) {
 	utils.CheckContext()
 	clusterID, err := mock.InfractlCreateCluster(
 		"simulate", utils.GetUniqueClusterName("standard"),
-		"--lifespan=20s",
+		"--lifespan=10s",
 	)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, clusterID)
