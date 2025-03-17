@@ -91,6 +91,7 @@ func (r *Registry) getPairFromWorkflowTemplate(id string) (*v1.Flavor, *v1alpha1
 	return flavor, workflow
 }
 
+// WorkflowTemplate2Flavor converts an Argo WorkflowTemplate to an Infra Flavor.
 func WorkflowTemplate2Flavor(template *v1alpha1.WorkflowTemplate) (*v1.Flavor, []error) {
 	var validationErrors []error
 	if template.ObjectMeta.Annotations["infra.stackrox.io/description"] == "" {
