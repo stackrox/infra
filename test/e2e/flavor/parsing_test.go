@@ -6,6 +6,7 @@ package flavor_test
 import (
 	"testing"
 
+	"github.com/stackrox/infra/pkg/flavor"
 	"github.com/stackrox/infra/test/utils/mock"
 	"github.com/stretchr/testify/assert"
 )
@@ -51,4 +52,22 @@ func TestParseFlavor(t *testing.T) {
 	// Parameter order follows workflow template order
 	assert.Equal(t, int32(1), nameParam.Order)
 	assert.Equal(t, int32(4), k8sVersion.Order)
+}
+
+func TestFlavorMustHaveName(t *testing.T) {
+	registry, err := flavor.NewFromConfig("../../fixtures/flavors/must-have-name.yaml")
+	assert.Nil(t, registry)
+	assert.ErrorContains(t, err, "flavor ID, name or description is missing")
+}
+
+func TestFlavorMustHaveValidAvailability(t *testing.T) {
+	registry, err := flavor.NewFromConfig("../../fixtures/flavors/must-have-valid-availability.yaml")
+	assert.Nil(t, registry)
+	assert.ErrorContains(t, err, "unknown availability for flavor")
+}
+
+func TestFlavorParametersMustHaveDescription(t *testing.T) {
+	registry, err := flavor.NewFromConfig("../../fixtures/flavors/parameters-must-have-name.yaml")
+	assert.Nil(t, registry)
+	assert.ErrorContains(t, err, "failed to validate parameters for flavor")
 }
