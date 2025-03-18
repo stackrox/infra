@@ -1207,18 +1207,18 @@
       value: ""
     - name: create-delay-seconds
       description: how long to spend in create
-      default: 10
+      value: "10"
       kind: optional
     - name: create-outcome
       description: success or fail
-      default: success
+      value: success
       kind: optional
     - name: destroy-delay-seconds
       description: how long to spend in destroy
-      default: 10
+      value: "10"
       kind: optional
     - name: destroy-outcome
       description: success or fail
-      default: success
+      value: success
       kind: optional
 {{ end }}

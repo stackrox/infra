@@ -8,13 +8,13 @@ spec:
     parameters:
       - name: name
       - name: create-delay-seconds
-        value: "10"
+        value: ""
       - name: create-outcome
-        value: success
+        value: ""
       - name: destroy-delay-seconds
-        value: "10"
+        value: ""
       - name: destroy-outcome
-        value: "success"
+        value: ""
 
   templates:
     - name: start
