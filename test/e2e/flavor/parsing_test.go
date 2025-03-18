@@ -14,11 +14,11 @@ func TestParseFlavor(t *testing.T) {
 	flavor, err := mock.InfractlFlavorGet("test-gke-lite")
 	assert.NoError(t, err)
 
-	// Gets a name from metadata.name
-	assert.Equal(t, "test-gke-lite", flavor.Name)
+	// Has a name
+	assert.Equal(t, "Test GKE Lite", flavor.Name)
 
 	// Availability can be set
-	assert.Equal(t, "stable", flavor.Availability)
+	assert.Equal(t, "test", flavor.Availability)
 
 	// Parameters
 	// Required parameter shows as such
@@ -28,7 +28,7 @@ func TestParseFlavor(t *testing.T) {
 	assert.False(t, nameParam.Internal)
 
 	// A parameter may have a description
-	assert.Equal(t, "The name for the GKE cluster (tests required parameters)", nameParam.Description)
+	assert.Equal(t, "cluster name", nameParam.Description)
 
 	// An optional parameter shows as such
 	nodesParam, ok := flavor.Parameters["nodes"]
@@ -51,11 +51,4 @@ func TestParseFlavor(t *testing.T) {
 	// Parameter order follows workflow template order
 	assert.Equal(t, int32(1), nameParam.Order)
 	assert.Equal(t, int32(4), k8sVersion.Order)
-}
-
-func TestDefaultAvailability(t *testing.T) {
-	flavor, err := mock.InfractlFlavorGet("default-availability")
-	assert.NoError(t, err)
-
-	assert.Equal(t, "alpha", flavor.Availability)
 }

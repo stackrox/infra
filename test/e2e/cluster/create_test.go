@@ -18,7 +18,7 @@ import (
 
 func TestCanCreateWorkflowWithoutName(t *testing.T) {
 	clusterID, err := mock.InfractlCreateCluster(
-		"simulate",
+		"test-simulate",
 		"--lifespan=20s",
 	)
 	assert.NoError(t, err)
@@ -28,13 +28,13 @@ func TestCanCreateWorkflowWithoutName(t *testing.T) {
 
 func TestDefaultNamesDoNotConflict(t *testing.T) {
 	firstClusterID, err := mock.InfractlCreateCluster(
-		"simulate",
+		"test-simulate",
 		"--lifespan=20s",
 	)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, firstClusterID)
 	secondClusterID, err := mock.InfractlCreateCluster(
-		"simulate",
+		"test-simulate",
 		"--lifespan=20s",
 	)
 	assert.NoError(t, err)
@@ -48,7 +48,7 @@ func TestDefaultNamesDoNotConflict(t *testing.T) {
 
 func TestNameValidationTooShort(t *testing.T) {
 	_, err := mock.InfractlCreateCluster(
-		"simulate", "ab",
+		"test-simulate", "ab",
 		"--lifespan=20s",
 	)
 	assert.ErrorContains(t, err, "cluster name too short")
@@ -56,7 +56,7 @@ func TestNameValidationTooShort(t *testing.T) {
 
 func TestNameValidationTooLong(t *testing.T) {
 	_, err := mock.InfractlCreateCluster(
-		"simulate", "this-name-will-be-too-loooooooooooooooooooong",
+		"test-simulate", "this-name-will-be-too-loooooooooooooooooooong",
 		"--lifespan=20s",
 	)
 	assert.ErrorContains(t, err, "cluster name too long")
@@ -64,7 +64,7 @@ func TestNameValidationTooLong(t *testing.T) {
 
 func TestNameValidationNoRegexMatch(t *testing.T) {
 	_, err := mock.InfractlCreateCluster(
-		"simulate", "THIS-IN-INVALID",
+		"test-simulate", "THIS-IN-INVALID",
 		"--lifespan=20s",
 	)
 	assert.ErrorContains(t, err, "The name does not match the requirements")
@@ -72,7 +72,7 @@ func TestNameValidationNoRegexMatch(t *testing.T) {
 
 func TestCannotCreateClusterWithInvalidLifespan(t *testing.T) {
 	_, err := mock.InfractlCreateCluster(
-		"simulate",
+		"test-simulate",
 		"--lifespan=3w",
 	)
 	assert.ErrorContains(t, err, "invalid argument \"3w\" for \"--lifespan\" flag")

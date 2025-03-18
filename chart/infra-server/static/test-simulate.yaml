@@ -1,29 +1,20 @@
 apiVersion: argoproj.io/v1alpha1
-kind: WorkflowTemplate
+kind: Workflow
 metadata:
-  name: simulate
   generateName: simulate-
-  annotations:
-    infra.stackrox.io/description: Simulates the standard workflow of create, wait and destroy
-    infra.stackrox.io/availability: alpha
 spec:
   entrypoint: start
   arguments:
     parameters:
       - name: name
-        description: cluster name
       - name: create-delay-seconds
-        description: how long to spend in create
-        default: 10
+        value: "10"
       - name: create-outcome
-        description: success or fail
-        default: success
+        value: success
       - name: destroy-delay-seconds
-        description: how long to spend in destroy
-        default: 10
+        value: "10"
       - name: destroy-outcome
-        description: success or fail
-        default: success
+        value: "success"
 
   templates:
     - name: start
@@ -33,9 +24,9 @@ spec:
             arguments:
               parameters:
               - name: delay-seconds
-                value: "{{ workflow.parameters.create-delay-seconds }}"
+                value: '{{ "{{" }}workflow.parameters.create-delay-seconds{{ "}}" }}'
               - name: outcome
-                value: "{{ workflow.parameters.create-outcome }}"
+                value: '{{ "{{" }}workflow.parameters.create-outcome{{ "}}" }}'
         - - name: wait
             template: wait
         - - name: destroy
@@ -43,9 +34,9 @@ spec:
             arguments:
               parameters:
               - name: delay-seconds
-                value: "{{ workflow.parameters.destroy-delay-seconds }}"
+                value: '{{ "{{" }}workflow.parameters.destroy-delay-seconds{{ "}}" }}'
               - name: outcome
-                value: "{{ workflow.parameters.destroy-outcome }}"
+                value: '{{ "{{" }}workflow.parameters.destroy-outcome{{ "}}" }}'
 
     - name: simulate
       inputs:
@@ -59,11 +50,11 @@ spec:
           set -x
           start=0
           while sleep 1; do
-            if [[ $((start++)) -ge {{inputs.parameters.delay-seconds}} ]]; then
+            if [[ $((start++)) -ge {{ "{{" }}inputs.parameters.delay-seconds{{ "}}" }} ]]; then
               break
             fi
           done
-          [[ "{{inputs.parameters.outcome}}" == "success" ]] || exit 1
+          [[ "{{ "{{" }}inputs.parameters.outcome{{ "}}" }}" == "success" ]] || exit 1
 
     - name: wait
       suspend: {}

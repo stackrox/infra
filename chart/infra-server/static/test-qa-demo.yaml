@@ -1,19 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
-kind: WorkflowTemplate
+kind: Workflow
 metadata:
-  name: test-qa-demo
   generateName: test-qa-demo-
-  annotations:
-    infra.stackrox.io/description: just a test
-    infra.stackrox.io/availability: stable
 spec:
   entrypoint: start
   arguments:
     parameters:
       - name: name
-        description: say hello to?
       - name: main-image
-        description: what to demo
   templates:
     - name: start
       steps:
@@ -28,7 +22,9 @@ spec:
       container:
         image: docker/whalesay:latest
         command: [cowsay]
-        args: ["hello world to: ", "{{workflow.parameters.name}}"]
+        args:
+          - "hello world to: "
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
 
     - name: wait
       suspend: {}
