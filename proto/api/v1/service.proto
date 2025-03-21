@@ -190,6 +190,9 @@ message Flavor {
 
         // test are flavors for e2e and unit testing
         test = 4;
+
+        // janitorDelete is for deleting clusters with the Infra Janitor.
+        janitorDelete = 5;
     }
 
     // Description is an availability classification for the flavor.
