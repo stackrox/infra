@@ -16,7 +16,7 @@ import (
 func TestClusterCanRunThroughStandardLifecycle(t *testing.T) {
 	utils.CheckContext()
 	clusterID, err := mock.InfractlCreateCluster(
-		"simulate", utils.GetUniqueClusterName("standard"),
+		"test-simulate", utils.GetUniqueClusterName("standard"),
 		"--lifespan=10s",
 	)
 	assert.NoError(t, err)
@@ -30,7 +30,7 @@ func TestClusterCanRunThroughStandardLifecycle(t *testing.T) {
 func TestClusterCanFailInCreate(t *testing.T) {
 	utils.CheckContext()
 	clusterID, err := mock.InfractlCreateCluster(
-		"simulate", utils.GetUniqueClusterName("create-fails"),
+		"test-simulate", utils.GetUniqueClusterName("create-fails"),
 		"--lifespan=30s",
 		"--arg=create-outcome=fail",
 	)
@@ -43,7 +43,7 @@ func TestClusterCanFailInCreate(t *testing.T) {
 func TestClusterCanFailInDestroy(t *testing.T) {
 	utils.CheckContext()
 	clusterID, err := mock.InfractlCreateCluster(
-		"simulate", utils.GetUniqueClusterName("destroy-fails"),
+		"test-simulate", utils.GetUniqueClusterName("destroy-fails"),
 		"--lifespan=20s",
 		"--arg=destroy-outcome=fail",
 	)
@@ -58,7 +58,7 @@ func TestClusterCanFailInDestroy(t *testing.T) {
 func TestClusterCanBeDeleted(t *testing.T) {
 	utils.CheckContext()
 	clusterID, err := mock.InfractlCreateCluster(
-		"simulate", utils.GetUniqueClusterName("for-deletion"),
+		"test-simulate", utils.GetUniqueClusterName("for-deletion"),
 		"--lifespan=5m",
 	)
 	assert.NoError(t, err)
@@ -76,7 +76,7 @@ func TestClusterCanBeDeleted(t *testing.T) {
 func TestClusterCanExpireByChangingLifespan(t *testing.T) {
 	utils.CheckContext()
 	clusterID, err := mock.InfractlCreateCluster(
-		"simulate", utils.GetUniqueClusterName("for-expire"),
+		"test-simulate", utils.GetUniqueClusterName("for-expire"),
 		"--lifespan=5m",
 	)
 	assert.NoError(t, err)

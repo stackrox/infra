@@ -6,6 +6,7 @@ package flavor_test
 import (
 	"testing"
 
+	"github.com/stackrox/infra/pkg/flavor"
 	"github.com/stackrox/infra/test/utils/mock"
 	"github.com/stretchr/testify/assert"
 )
@@ -14,11 +15,11 @@ func TestParseFlavor(t *testing.T) {
 	flavor, err := mock.InfractlFlavorGet("test-gke-lite")
 	assert.NoError(t, err)
 
-	// Gets a name from metadata.name
-	assert.Equal(t, "test-gke-lite", flavor.Name)
+	// Has a name
+	assert.Equal(t, "Test GKE Lite", flavor.Name)
 
 	// Availability can be set
-	assert.Equal(t, "stable", flavor.Availability)
+	assert.Equal(t, "test", flavor.Availability)
 
 	// Parameters
 	// Required parameter shows as such
@@ -28,7 +29,7 @@ func TestParseFlavor(t *testing.T) {
 	assert.False(t, nameParam.Internal)
 
 	// A parameter may have a description
-	assert.Equal(t, "The name for the GKE cluster (tests required parameters)", nameParam.Description)
+	assert.Equal(t, "cluster name", nameParam.Description)
 
 	// An optional parameter shows as such
 	nodesParam, ok := flavor.Parameters["nodes"]
@@ -53,9 +54,20 @@ func TestParseFlavor(t *testing.T) {
 	assert.Equal(t, int32(4), k8sVersion.Order)
 }
 
-func TestDefaultAvailability(t *testing.T) {
-	flavor, err := mock.InfractlFlavorGet("default-availability")
-	assert.NoError(t, err)
+func TestFlavorMustHaveName(t *testing.T) {
+	registry, err := flavor.NewFromConfig("../../fixtures/flavors/must-have-name.yaml")
+	assert.Nil(t, registry)
+	assert.ErrorContains(t, err, "flavor ID, name or description is missing")
+}
 
-	assert.Equal(t, "alpha", flavor.Availability)
+func TestFlavorMustHaveValidAvailability(t *testing.T) {
+	registry, err := flavor.NewFromConfig("../../fixtures/flavors/must-have-valid-availability.yaml")
+	assert.Nil(t, registry)
+	assert.ErrorContains(t, err, "unknown availability for flavor")
+}
+
+func TestFlavorParametersMustHaveDescription(t *testing.T) {
+	registry, err := flavor.NewFromConfig("../../fixtures/flavors/parameters-must-have-name.yaml")
+	assert.Nil(t, registry)
+	assert.ErrorContains(t, err, "failed to validate parameters for flavor")
 }

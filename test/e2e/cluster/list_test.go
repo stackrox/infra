@@ -16,7 +16,7 @@ import (
 func TestListCreated(t *testing.T) {
 	utils.CheckContext()
 	clusterID, err := mock.InfractlCreateCluster(
-		"simulate", utils.GetUniqueClusterName("list-created"),
+		"test-simulate", utils.GetUniqueClusterName("list-created"),
 		"--lifespan=10s",
 	)
 	assert.NoError(t, err)
@@ -29,7 +29,7 @@ func TestListCreated(t *testing.T) {
 func TestListExpired(t *testing.T) {
 	utils.CheckContext()
 	clusterID, err := mock.InfractlCreateCluster(
-		"simulate", utils.GetUniqueClusterName("list-expired"),
+		"test-simulate", utils.GetUniqueClusterName("list-expired"),
 		"--lifespan=5s",
 	)
 	assert.NoError(t, err)
@@ -49,12 +49,12 @@ func TestListOfAFlavor(t *testing.T) {
 	commonPrefix := utils.GetUniqueClusterName("ls-flavor")
 
 	_, err := mock.InfractlCreateCluster(
-		"simulate", fmt.Sprintf("%s%d", commonPrefix, 1),
+		"test-simulate", fmt.Sprintf("%s%d", commonPrefix, 1),
 		"--lifespan=10s",
 	)
 	assert.NoError(t, err)
 	_, err = mock.InfractlCreateCluster(
-		"simulate-2", fmt.Sprintf("%s%d", commonPrefix, 2),
+		"test-connect-artifact", fmt.Sprintf("%s%d", commonPrefix, 2),
 		"--lifespan=10s",
 	)
 	assert.NoError(t, err)
@@ -63,7 +63,7 @@ func TestListOfAFlavor(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(listAllClusters.Clusters))
 
-	listOnlySimulateClusters, err := mock.InfractlList(fmt.Sprintf("--prefix=%s", commonPrefix), "--flavor=simulate", "--expired")
+	listOnlySimulateClusters, err := mock.InfractlList(fmt.Sprintf("--prefix=%s", commonPrefix), "--flavor=test-simulate", "--expired")
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(listOnlySimulateClusters.Clusters))
 }
@@ -74,13 +74,13 @@ func TestListOfAStatus(t *testing.T) {
 	commonPrefix := utils.GetUniqueClusterName("ls-status")
 
 	_, err := mock.InfractlCreateCluster(
-		"simulate", fmt.Sprintf("%s%d", commonPrefix, 1),
+		"test-simulate", fmt.Sprintf("%s%d", commonPrefix, 1),
 		"--lifespan=10s",
 	)
 	assert.NoError(t, err)
 
 	failedCluster, err := mock.InfractlCreateCluster(
-		"simulate", fmt.Sprintf("%s%d", commonPrefix, 2),
+		"test-simulate", fmt.Sprintf("%s%d", commonPrefix, 2),
 		"--lifespan=10s",
 		"--arg=create-outcome=fail",
 	)
