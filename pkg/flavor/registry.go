@@ -8,7 +8,6 @@ import (
 	"os"
 	"sort"
 
-	workflowtemplatepkg "github.com/argoproj/argo-workflows/v3/pkg/apiclient/workflowtemplate"
 	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/golang/protobuf/ptypes/empty"
@@ -28,14 +27,10 @@ type pair struct {
 
 // Registry represents the set of all configured flavors.
 type Registry struct {
-	flavors                        map[string]pair
-	defaultFlavor                  string
-	argoWorkflowTemplatesClient    workflowtemplatepkg.WorkflowTemplateServiceClient
-	argoClientCtx                  context.Context
-	workflowTemplateNamespace      string
-	workflowTemplateCache          map[string]*v1alpha1.WorkflowTemplate
-	workflowTemplateCacheTimestamp int64
-	aliasRegistry                  map[string]string
+	flavors       map[string]pair
+	defaultFlavor string
+	argoClientCtx context.Context
+	aliasRegistry map[string]string
 }
 
 // Flavors returns a sorted list of all registered flavors.
@@ -44,7 +39,6 @@ func (r *Registry) Flavors() []v1.Flavor {
 	for _, pair := range r.flavors {
 		results = append(results, pair.flavor)
 	}
-	results = r.addWorkflowTemplates(results)
 
 	sort.Slice(results, func(i, j int) bool {
 		if results[i].Availability != results[j].Availability {
@@ -105,11 +99,6 @@ func (r *Registry) Get(id string) (v1.Flavor, v1alpha1.Workflow, bool) {
 		return pair.flavor, pair.workflow, true
 	}
 
-	// TODO: This is prone to concurrent map writes!
-	if flavor, workflow := r.getPairFromWorkflowTemplate(id); flavor != nil {
-		return *flavor, *workflow, true
-	}
-
 	if pair, found := r.getFlavorFromAlias(id); found {
 		return pair.flavor, pair.workflow, true
 	}
@@ -151,19 +140,22 @@ func NewFromConfig(filename string) (*Registry, error) {
 		aliasRegistry: make(map[string]string),
 	}
 
-	if err := registry.initWorkflowTemplatesClient(); err != nil {
-		return nil, err
-	}
-
 	for _, flavorCfg := range flavorsCfg {
+		if err := validateFlavor(flavorCfg); err != nil {
+			return nil, errors.Wrapf(err, "failed to validate flavor %s", flavorCfg.WorkflowFile)
+		}
+
 		// Sanity check and convert the configured availability.
 		availability, found := v1.FlavorAvailability_value[flavorCfg.Availability]
 		if !found {
-			return nil, fmt.Errorf("unknown availability %q", flavorCfg.Availability)
+			return nil, fmt.Errorf("unknown availability for flavor %s", flavorCfg.ID)
 		}
 
 		parameters := make(map[string]*v1.Parameter, len(flavorCfg.Parameters))
 		for order, parameter := range flavorCfg.Parameters {
+			if err := validateParameter(parameter); err != nil {
+				return nil, errors.Wrapf(err, "failed to validate parameters for flavor %s", flavorCfg.ID)
+			}
 			param := &v1.Parameter{
 				Name:        parameter.Name,
 				Description: parameter.Description,
@@ -190,6 +182,9 @@ func NewFromConfig(filename string) (*Registry, error) {
 
 		artifacts := make(map[string]*v1.FlavorArtifact, len(flavorCfg.Artifacts))
 		for _, artifact := range flavorCfg.Artifacts {
+			if err := validateArtifact(artifact); err != nil {
+				return nil, errors.Wrapf(err, "failed to validate artifact for flavor %s", flavorCfg.ID)
+			}
 			// Pack the list of tags into a set of tags.
 			tags := make(map[string]*empty.Empty, len(artifact.Tags))
 			for _, tag := range artifact.Tags {
@@ -228,7 +223,6 @@ func NewFromConfig(filename string) (*Registry, error) {
 		if err := registry.add(flavor, workflow); err != nil {
 			return nil, err
 		}
-
 	}
 
 	return registry.check()

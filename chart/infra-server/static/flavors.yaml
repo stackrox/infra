@@ -1089,7 +1089,7 @@
 - id: test-url-artifact
   name: Test URL Artifact
   description: Test URL Artifact
-  availability: stable
+  availability: test
   workflow: configuration/test-url-artifact.yaml
   parameters:
     - name: name
@@ -1106,7 +1106,7 @@
 - id: test-connect-artifact
   name: Test Connect Artifact
   description: Test Connect Artifact
-  availability: stable
+  availability: test
   aliases:
     - test-alias-1
     - test-alias-2
@@ -1119,4 +1119,106 @@
     - name: connect
       description: connect for test
       tags: [connect]
+
+- id: test-gke-lite
+  name: Test GKE Lite
+  description: A lightweight single node GKE cluster
+  availability: test
+  workflow: configuration/test-gke-lite.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      value: example1
+
+    - name: nodes
+      description: number of nodes
+      value: "1"
+      kind: optional
+
+    - name: machine-type
+      description: node machine type
+      value: e2-standard-2
+      kind: hardcoded
+
+    - name: k8s-version
+      description: GKE kubernetes version
+      value: ""
+      kind: optional
+      help: |
+        e.g. 1.19.12-gke.2100. Use `gcloud container get-server-config
+        --zone=us-central1 --project acs-team-temp-dev` to see all versions.
+
+    - name: pod-security-policy
+      description: Enable pod security policy
+      value: false
+      kind: optional
+      help: Enables The Pod Security Policy Admission Controller For The Cluster
+
+    - name: gcp-image-type
+      description: The GCP image type to use for the cluster
+      value: ""
+      kind: optional
+      help: |
+        List of image types:
+        [node-images](https://cloud.google.com/kubernetes-engine/docs/concepts/node-images)
+
+    - name: gcp-zone
+      description: Google Cloud zone to deploy infrastructure into.
+      value: us-central1-a
+      kind: optional
+
+  artifacts:
+    - name: kubeconfig
+      description: Kube config for connecting to this cluster
+
+    - name: connect
+      description: Shell script for adding this clusters connect information to your kubeconfig
+      tags: [connect]
+
+    - name: SSH_ACCESS
+      description: Instructions for obtaining SSH access to instances in your cluster
+
+- id: test-qa-demo
+  name: Test QA Demo
+  description: A test duplicate for the QA Demo flavor
+  availability: test
+  workflow: configuration/test-qa-demo.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      value: example1
+
+    - name: main-image
+      description: StackRox Central image Docker name
+      value: quay.io/stackrox-io/main:{{ .Chart.Annotations.acsDemoVersion }}
+      help: |
+        This must be a fully qualified image e.g. quay.io/stackrox-io/main:{{ .Chart.Annotations.acsDemoVersion }}.
+        Private images from quay.io/rhacs-eng and stackrox.io (legacy) can also be used.
+        Other public images should also be OK.
+
+- id: test-simulate
+  name: Test Simulated Lifecycle
+  description: Simulates the standard workflow of create, wait and destroy
+  availability: test
+  workflow: configuration/test-simulate.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      value: ""
+    - name: create-delay-seconds
+      description: how long to spend in create
+      value: "10"
+      kind: optional
+    - name: create-outcome
+      description: success or fail
+      value: success
+      kind: optional
+    - name: destroy-delay-seconds
+      description: how long to spend in destroy
+      value: "10"
+      kind: optional
+    - name: destroy-outcome
+      description: success or fail
+      value: success
+      kind: optional
 {{ end }}

@@ -1,39 +1,22 @@
 apiVersion: argoproj.io/v1alpha1
-kind: WorkflowTemplate
+kind: Workflow
 metadata:
-  name: gke-lite
   generateName: gke-lite-
-  annotations:
-    infra.stackrox.io/description: A lightweight single node GKE cluster
-    infra.stackrox.io/availability: alpha
 spec:
   entrypoint: start
   arguments:
     parameters:
-# name is mandatory
       - name: name
-        description: cluster name
-# nodes & machine-type are optional with defaults
       - name: nodes
-        description: number of nodes
-        default: 1
       - name: machine-type
-        description: node machine type
-        default: e2-standard-2
-# these other parameters are optional without defaults at the workflow level.
-# presumably good defaults are provided by the automation-flavors image.
       - name: k8s-version
-        description: GKE kubernetes version
-        default: ""
+        value: ""
       - name: pod-security-policy
-        description: Enables the pod security policy admission controller for the cluster
-        default: ""
+        value: ""
       - name: gcp-image-type
-        description: The GCP image type to use for the cluster
-        default: ""
+        value: ""
       - name: gcp-zone
-        description: The zone in GCP to create the cluster in
-        default: ""
+        value: ""
 
   volumes:
     - name: credentials
@@ -52,7 +35,7 @@ spec:
             arguments:
               parameters:
                 - name: name
-                  value: "{{steps.create.outputs.parameters.cluster_name}}"
+                  value: '{{ "{{" }}steps.create.outputs.parameters.cluster_name{{ "}}" }}'
 
     - name: create
       activeDeadlineSeconds: 3600
@@ -83,15 +66,15 @@ spec:
           - /usr/bin/entrypoint
         args:
           - create
-          - --name={{workflow.parameters.name}}
-          - --nodes={{workflow.parameters.nodes}}
-          - --machine-type={{workflow.parameters.machine-type}}
+          - --name={{ "{{" }}workflow.parameters.name{{ "}}" }}
+          - --nodes={{ "{{" }}workflow.parameters.nodes{{ "}}" }}
+          - --machine-type={{ "{{" }}workflow.parameters.machine-type{{ "}}" }}
           - --gcp-project=acs-team-temp-dev
           - --creation-source=infra
-          - --k8s-version={{workflow.parameters.k8s-version}}
-          - --pod-security-policy={{workflow.parameters.pod-security-policy}}
-          - --gcp-image-type={{workflow.parameters.gcp-image-type}}
-          - --gcp-zone={{workflow.parameters.gcp-zone}}
+          - --k8s-version={{ "{{" }}workflow.parameters.k8s-version{{ "}}" }}
+          - --pod-security-policy={{ "{{" }}workflow.parameters.pod-security-policy{{ "}}" }}
+          - --gcp-image-type={{ "{{" }}workflow.parameters.gcp-image-type{{ "}}" }}
+          - --gcp-zone={{ "{{" }}workflow.parameters.gcp-zone{{ "}}" }}
         volumeMounts:
           - name: credentials
             mountPath: /tmp
@@ -108,9 +91,9 @@ spec:
           - /usr/bin/entrypoint
         args:
           - destroy
-          - "--name={{workflow.parameters.name}}"
+          - --name={{ "{{" }}workflow.parameters.name{{ "}}" }}
           - --gcp-project=acs-team-temp-dev
-          - --gcp-zone={{workflow.parameters.gcp-zone}}
+          - --gcp-zone={{ "{{" }}workflow.parameters.gcp-zone{{ "}}" }}
         volumeMounts:
           - name: credentials
             mountPath: /tmp

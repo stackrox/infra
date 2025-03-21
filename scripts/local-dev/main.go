@@ -105,7 +105,7 @@ func renderFile(path, content string, decodeString bool) error {
 	// Use a simple template engine to render the template
 	tmpl, err := template.New("template").Parse(content)
 	if err != nil {
-		return fmt.Errorf("error while parsing the template: %v", err)
+		return fmt.Errorf("error while parsing the template at %s: %v", path, err)
 	}
 
 	outputFile, err := os.Create(configPath)

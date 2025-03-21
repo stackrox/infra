@@ -15,7 +15,7 @@ func TestFind(t *testing.T) {
 	utils.CheckContext()
 
 	clusterID, err := mock.InfractlCreateCluster(
-		"simulate", utils.GetUniqueClusterName("find"),
+		"test-simulate", utils.GetUniqueClusterName("find"),
 		"--lifespan=30s",
 	)
 	assert.NoError(t, err)

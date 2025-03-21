@@ -104,10 +104,10 @@ type FlavorConfig struct {
 	Availability string `json:"availability"`
 
 	// Parameters is the list of parameters required for launching this flavor.
-	Parameters []parameter `json:"parameters"`
+	Parameters []Parameter `json:"parameters"`
 
 	// Artifacts is the list of artifacts produced by this flavor.
-	Artifacts []artifact `json:"artifacts"`
+	Artifacts []Artifact `json:"artifacts"`
 
 	// WorkflowFile is the filename of an Argo workflow definition.
 	WorkflowFile string `json:"workflow"`
@@ -116,8 +116,8 @@ type FlavorConfig struct {
 	Aliases []string `json:"aliases"`
 }
 
-// parameter represents a single parameter that is needed to launch a flavor.
-type parameter struct {
+// Parameter represents a single Parameter that is needed to launch a flavor.
+type Parameter struct {
 	// Name is the unique name of the parameter.
 	Name string `json:"name"`
 
@@ -145,8 +145,8 @@ type parameter struct {
 	FromFile bool `json:"fromFile"`
 }
 
-// artifact represents a single artifact that is produced by this flavor.
-type artifact struct {
+// Artifact represents a single Artifact that is produced by this flavor.
+type Artifact struct {
 	// Name is the unique name of the artifact.
 	Name string `json:"name"`
 

@@ -1,0 +1,15 @@
+- id: has-missing-parameter-description
+  name: Has missing parameter description
+  description: Test Connect Artifact
+  availability: test
+  aliases:
+    - test-alias-1
+    - test-alias-2
+  workflow: configuration/test-connect-artifact.yaml
+  parameters:
+    - description: a parameter without a name
+
+  artifacts:
+    - name: connect
+      description: connect for test
+      tags: [connect]

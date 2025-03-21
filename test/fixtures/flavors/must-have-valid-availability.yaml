@@ -1,0 +1,16 @@
+- id: has-invalid-availability
+  name: Has invalid availability
+  description: Test Connect Artifact
+  availability: woot!
+  aliases:
+    - test-alias-1
+    - test-alias-2
+  workflow: configuration/test-connect-artifact.yaml
+  parameters:
+    - name: name
+      description: cluster name
+
+  artifacts:
+    - name: connect
+      description: connect for test
+      tags: [connect]

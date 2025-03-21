@@ -187,6 +187,9 @@ message Flavor {
         // default is stable, and available for customer demo consumption.
         // Exactly 1 flavor should be configured as default.
         default = 3;
+
+        // test are flavors for e2e and unit testing
+        test = 4;
     }
 
     // Description is an availability classification for the flavor.

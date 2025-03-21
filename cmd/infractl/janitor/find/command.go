@@ -19,7 +19,7 @@ const commonPrefixThreshold = 3
 
 var (
 	infraFlavorsOnGCP = []string{
-		"simulate", // for e2e tests
+		"test-simulate", // for e2e tests
 		"gke-default",
 		"demo",
 		"openshift-4",

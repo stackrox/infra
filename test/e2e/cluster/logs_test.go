@@ -14,10 +14,8 @@ import (
 func TestLogs(t *testing.T) {
 	utils.CheckContext()
 	clusterID, err := mock.InfractlCreateCluster(
-		"simulate", utils.GetUniqueClusterName("logs"),
+		"test-simulate", utils.GetUniqueClusterName("logs"),
 		"--lifespan=30s",
-		"--arg=create-delay-seconds=5",
-		"--arg=destroy-delay-seconds=5",
 	)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, clusterID)
@@ -25,6 +23,6 @@ func TestLogs(t *testing.T) {
 
 	logs, err := mock.InfractlLogs(clusterID)
 	assert.NoError(t, err)
-	assert.Containsf(t, logs, "create", "logs must contain an entry for the create stage")
-	assert.Containsf(t, logs, "msg=\"capturing logs\"", "logs must contain an entry confirming log collection")
+	assert.Containsf(t, logs.Logs[0].Name, "create", "logs must contain an entry for the create stage")
+	assert.Containsf(t, string(logs.Logs[0].Body), "msg=\"capturing logs\"", "logs must contain an entry confirming log collection")
 }
