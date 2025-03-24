@@ -89,14 +89,14 @@ jobs:
           echo 'For 30 minutes, list and delete child clusters that are not failed.'
           for I in {1..30}; do
             if [[ $($INFRACTL list --all --expired --status='READY,CREATING,DESTROYING' | tee >(cat >&2) | wc -l) -gt 0 ]]; then
-              echo "Active clusters found. Deleting ..."
+              echo 'Active clusters found. Deleting ...'
             else
-              echo "No active clusters found."
+              echo 'No active clusters found.'
               break
             fi
             $INFRACTL list --all --expired --status='READY,FAILED,CREATING' | grep '^[^ ]' \
               | xargs -I{} $INFRACTL delete {}
-            echo "(sleep 1 minute then check again)"
+            echo "(sleep 1 minute then check again. try $I/30)"
             sleep 60
           done
 
