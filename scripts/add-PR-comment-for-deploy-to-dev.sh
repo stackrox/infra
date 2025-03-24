@@ -68,7 +68,8 @@ kubectl -n infra logs -l app=infra-server --tail=1 -f
 
 EOT
 
-    hub-comment -type deploy -template-file "$tmpfile"
+    hub-comment -type deploy -template-file "$tmpfile" \
+      || gh pr comment "${url}" --edit-last --create-if-none --body-file "$tmpfile"
 }
 
 add_PR_comment_for_deploy_to_dev "$@"
