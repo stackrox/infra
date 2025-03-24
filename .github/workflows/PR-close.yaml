@@ -79,9 +79,6 @@ jobs:
 
       - name: Destroy created clusters still running
         run: |
-          # shellcheck disable=SC2086
-          true
-
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 > /dev/null 2>&1 &
           sleep 10
 
@@ -95,6 +92,7 @@ jobs:
               echo 'No active clusters found.'
               break
             fi
+            # shellcheck disable=SC2086
             $INFRACTL list --all --expired --status='READY,FAILED,CREATING' | grep '^[^ ]' \
               | xargs -I{} $INFRACTL delete {}
             echo "(sleep 1 minute then check again. try $I/30)"
