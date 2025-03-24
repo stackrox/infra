@@ -21,7 +21,7 @@ add_PR_comment_for_deploy_to_dev() {
 
     local tmpfile
     tmpfile=$(mktemp)
-    cat > "$tmpfile" <<- EOT
+    cat > "$tmpfile" <<-EOT
       A single node development cluster (${DEV_CLUSTER_NAME}) was allocated in production infra for this PR.
       
       CI will attempt to deploy \`${IMAGE_NAME}\` to it.

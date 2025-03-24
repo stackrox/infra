@@ -142,7 +142,8 @@ jobs:
         run: |
           set -x
           gh pr comment "${{ github.event.issue.number }}" \
-            --body "Deployment to development cluster completed."
+            --body "Deployment to development cluster completed." || true
+          cat <<<"${{ github.event }}"
 
       - name: Install Argo CLI
         run: |
