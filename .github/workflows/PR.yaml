@@ -64,7 +64,7 @@ jobs:
       - create-dev-cluster
     runs-on: ubuntu-latest
     env:
-      KUBECONFIG: /github/home/artifacts/kubeconfig
+      KUBECONFIG: /tmp/kubeconfig
       INFRA_TOKEN: ${{ secrets.INFRA_TOKEN }}
       INFRACTL: bin/infractl -k -e localhost:8443
       USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
@@ -96,7 +96,7 @@ jobs:
 
       - name: Download artifacts
         run: |
-          ~/.local/bin/infractl artifacts "$CLUSTER_NAME" -d /github/home/artifacts >> "$GITHUB_STEP_SUMMARY"
+          ~/.local/bin/infractl artifacts "$CLUSTER_NAME" -d /tmp/ >> "$GITHUB_STEP_SUMMARY"
           kubectl get nodes -o wide || true
 
       - name: Deploy infra to dev cluster
