@@ -79,7 +79,9 @@ jobs:
 
       - name: Destroy created clusters still running
         run: |
-          #!/usr/bin/env bash  # shellcheck disable=SC2086
+          #!/usr/bin/env bash
+          # shellcheck disable=SC2086
+
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 > /dev/null 2>&1 &
           sleep 10
 
