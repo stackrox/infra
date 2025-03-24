@@ -63,7 +63,7 @@ jobs:
 
       - name: Download artifacts
         run: |
-          /github/home/.local/bin/infractl artifacts "$CLUSTER_NAME" -d /github/home/artifacts >> "$GITHUB_STEP_SUMMARY"
+          ~/.local/bin/infractl artifacts "$CLUSTER_NAME" -d /github/home/artifacts >> "$GITHUB_STEP_SUMMARY"
           kubectl get nodes -o wide || true
 
       - name: Download branch infractl
