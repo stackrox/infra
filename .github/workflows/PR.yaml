@@ -63,8 +63,6 @@ jobs:
       - build-and-push
       - create-dev-cluster
     runs-on: ubuntu-latest
-    container:
-      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.4.4
     env:
       KUBECONFIG: /github/home/artifacts/kubeconfig
       INFRA_TOKEN: ${{ secrets.INFRA_TOKEN }}
@@ -164,7 +162,6 @@ jobs:
         env:
           INFRA_TOKEN: ${{ secrets.INFRA_TOKEN_DEV }}
         run: |
-          #!/usr/bin/env bash
           # shellcheck disable=SC2086
 
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 > /dev/null 2>&1 &
