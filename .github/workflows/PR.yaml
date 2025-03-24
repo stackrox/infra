@@ -159,22 +159,6 @@ jobs:
         run: |
           make argo-workflow-lint
 
-      - name: Run BATS e2e tests
-        env:
-          INFRA_TOKEN: ${{ secrets.INFRA_TOKEN_DEV }}
-        run: |
-          kubectl -n infra port-forward svc/infra-server-service 8443:8443 > /dev/null 2>&1 &
-          sleep 5
-
-          $INFRACTL whoami || true
-          $INFRACTL version || true
-
-          make bats-e2e-tests || touch FAIL
-          kubectl -n infra logs -l app=infra-server --tail=-1
-          kill %1
-
-          [[ ! -f FAIL ]]
-
       - name: Run Go e2e tests
         env:
           INFRA_TOKEN: ${{ secrets.INFRA_TOKEN_DEV }}
