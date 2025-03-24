@@ -1,0 +1,108 @@
+name: PR Workflow
+
+on:
+  pull_request:
+    types:
+      - closed
+
+defaults:
+  run:
+    working-directory: go/src/github.com/stackrox/infra
+
+concurrency: pr-${{ github.ref }}
+
+env:
+  CLUSTER_NAME: infra-pr-${{ github.event.pull_request.number }}
+  GH_TOKEN: ${{ secrets.RHACS_BOT_GITHUB_TOKEN }}
+
+jobs:
+  create-dev-cluster:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: stackrox/actions/infra/create-cluster@v1
+        with:
+          flavor: gke-default
+          name: infra-pr-${{ github.event.pull_request.number }}
+          args: machine-type=e2-medium,nodes=3,gcp-image-type=ubuntu_containerd
+          lifespan: ${{ github.actor == 'dependabot[bot]' && '1h' || '24h' }}
+          wait: true
+          token: ${{ secrets.INFRA_TOKEN }}
+
+  deploy-and-test:
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.4.4
+    env:
+      KUBECONFIG: /github/home/artifacts/kubeconfig
+      INFRA_TOKEN: ${{ secrets.INFRA_TOKEN }}
+      INFRACTL: bin/infractl -k -e localhost:8443
+      USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
+
+    steps:
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: go/src/github.com/stackrox/infra
+
+      - name: Authenticate to GCloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.INFRA_CI_AUTOMATION_GCP_SA }}
+
+      - name: Set up Cloud SDK
+        uses: "google-github-actions/setup-gcloud@v2"
+        with:
+          install_components: "gke-gcloud-auth-plugin"
+
+      - name: Download production infractl
+        uses: stackrox/actions/infra/install-infractl@v1
+
+      - name: Download artifacts
+        run: |
+          /github/home/.local/bin/infractl artifacts "$CLUSTER_NAME" -d /github/home/artifacts >> "$GITHUB_STEP_SUMMARY"
+          kubectl get nodes -o wide || true
+
+      - name: Download branch infractl
+        run: |
+          kubectl -n infra port-forward svc/infra-server-service 8443:8443 > /dev/null 2>&1 &
+          sleep 10
+
+          kubectl -n infra logs -l app=infra-server --tail=-1
+
+          make pull-infractl-from-dev-server
+
+          kill %1
+
+      - name: Destroy created clusters still running
+        run: |
+          kubectl -n infra port-forward svc/infra-server-service 8443:8443 > /dev/null 2>&1 &
+          sleep 10
+
+          $INFRACTL version
+
+          echo 'For 30 minutes, list and delete child clusters that are not failed.'
+          for I in {1..30}; do
+            if [[ $($INFRACTL list --all --expired --status='READY,CREATING,DESTROYING' | tee >(cat >&2) | wc -l) -gt 0 ]]; then
+              echo "Active clusters found. Deleting ..."
+            else
+              echo "No active clusters found."
+              break
+            fi
+            $INFRACTL list --all --expired --status='READY,FAILED,CREATING' | grep '^[^ ]' \
+              | xargs -I{} $INFRACTL delete {}
+            echo "(sleep 1 minute then check again)"
+            sleep 60
+          done
+
+          kill %1
+
+      - name: Destroy PR dev cluster
+        run: |
+          /github/home/.local/bin/infractl delete "$CLUSTER_NAME"
+
