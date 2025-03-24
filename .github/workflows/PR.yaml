@@ -143,6 +143,12 @@ jobs:
 
           kill %1
 
+      - name: Comment on PR
+        run: |
+          set -x
+          gh pr comment "${{ github.event.issue.number }}" \
+            --body "Deployment to development cluster completed."
+
       - name: Install Argo CLI
         run: |
           ARGO_VERSION=$(grep "github.com/argoproj/argo-workflows/v3" go.mod | awk '{ print $2 }')
