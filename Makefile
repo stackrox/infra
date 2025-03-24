@@ -194,7 +194,7 @@ pull-infractl-from-dev-server:
 	@mkdir -p bin
 	@rm -f bin/infractl
 	set -o pipefail; \
-	curl --retry 3 --insecure --silent --show-error --fail --location https://localhost:8443/v1/cli/$(shell go env GOOS)/$(shell go env GOARCH)/upgrade \
+	curl --retry 3 --retry-all-errors --retry-delay 5 --insecure --silent --show-error --fail --location https://localhost:8443/v1/cli/$(shell go env GOOS)/$(shell go env GOARCH)/upgrade \
           | jq -r ".result.fileChunk" \
           | base64 -d \
           > bin/infractl
