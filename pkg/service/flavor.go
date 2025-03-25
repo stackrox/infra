@@ -34,11 +34,14 @@ func NewFlavorService(registry *flavor.Registry) (middleware.APIService, error) 
 func (s *flavorImpl) List(_ context.Context, request *v1.FlavorListRequest) (*v1.FlavorListResponse, error) {
 	var resp v1.FlavorListResponse
 	for _, flavor := range s.registry.Flavors() {
-		if !request.All && flavor.Availability == v1.Flavor_alpha {
+		if flavor.GetAvailability() == v1.Flavor_janitorDelete {
+			continue
+		}
+		if !request.GetAll() && flavor.GetAvailability() == v1.Flavor_alpha {
 			continue
 		}
 		scrubInternalParameters(&flavor)
-		resp.Flavors = append(resp.Flavors, &flavor)
+		resp.Flavors = append(resp.GetFlavors(), &flavor)
 	}
 
 	return &resp, nil

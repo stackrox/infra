@@ -1,0 +1,76 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: janitor-delete-openshift-aro-
+spec:
+  entrypoint: start
+  arguments:
+    parameters:
+      - name: name
+      - name: nodes
+        value: "4"
+      - name: machine-type
+        value: "Standard_D4s_v3"
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 10Mi
+
+  templates:
+    - name: start
+      steps:
+        - - name: create
+            template: create
+
+        - - name: gather
+            template: gather
+
+        - - name: wait
+            template: wait
+
+        - - name: destroy
+            template: destroy
+
+    - name: destroy
+      activeDeadlineSeconds: 3600
+      container:
+        image: quay.io/stackrox-io/ci:automation-flavors-aro-{{ .Chart.Annotations.automationFlavorsVersion }}
+        imagePullPolicy: Always
+        command:
+          - ./entrypoint.sh
+        args:
+          - destroy
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
+        env:
+          - name: AZURE_SUBSCRIPTION_ID
+            valueFrom:
+              secretKeyRef:
+                name: aro-cluster-manager
+                key: AZURE_SUBSCRIPTION_ID
+          - name: AZURE_SP_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: aro-cluster-manager
+                key: AZURE_SP_CLIENT_ID
+          - name: AZURE_SP_TENANT_ID
+            valueFrom:
+              secretKeyRef:
+                name: aro-cluster-manager
+                key: AZURE_SP_TENANT_ID
+          - name: AZURE_SP_SECRET_VAL
+            valueFrom:
+              secretKeyRef:
+                name: aro-cluster-manager
+                key: AZURE_SP_SECRET_VAL
+          - name: REDHAT_PULL_SECRET_BASE64
+            valueFrom:
+              secretKeyRef:
+                name: aro-cluster-manager
+                key: REDHAT_PULL_SECRET_BASE64
+        volumeMounts:
+          - name: data
+            mountPath: /data

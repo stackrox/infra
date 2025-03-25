@@ -142,7 +142,7 @@ func renderWorkflows() error {
 	}
 	for _, file := range files {
 		fileName := file.Name()
-		if (strings.HasPrefix(fileName, "test-") || strings.HasPrefix(fileName, "workflow-")) && strings.HasSuffix(fileName, ".yaml") {
+		if (strings.HasPrefix(fileName, "test-") || strings.HasPrefix(fileName, "workflow-") || strings.HasPrefix(fileName, "janitor")) && strings.HasSuffix(fileName, ".yaml") {
 			fileContent, err := os.ReadFile(fmt.Sprintf("%s/%s", staticPath, fileName))
 			if err != nil {
 				return err
