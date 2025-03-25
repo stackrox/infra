@@ -48,9 +48,7 @@ jobs:
 
       - name: Wait for cluster
         run: |
-          set +e
-          set -x
-          set -o pipefail
+          set -xo pipefail
           for I in {1..60}; do
             ~/.local/bin/infractl get "$CLUSTER_NAME" | tee >( cat >&2 ) | grep READY && break || echo $?
             sleep 60
@@ -74,28 +72,6 @@ jobs:
 
           kill %1
 
-      - name: create test clusters
-        env:
-          INFRA_TOKEN: ${{ secrets.INFRA_TOKEN_DEV }}
-        run: |
-          set +e
-          set -x
-          kubectl -n infra port-forward svc/infra-server-service 8443:8443 > /dev/null 2>&1 &
-          sleep 10
-          $INFRACTL list --all --quiet
-
-          $INFRACTL create gke-default tstlonglifer --lifespan 8h
-          $INFRACTL create gke-default tstshortlifer --lifespan 30s
-          $INFRACTL create gke-default tstexpired --lifespan 20m
-          $INFRACTL create gke-default tstdestroyed --lifespan 2h
-          $INFRACTL create rosahcp tstrosahcp --lifespan 45m
-
-          $INFRACTL delete tstdestroyed --json
-
-          $INFRACTL list --all --expired --quiet
-
-          kill %1
-
       - name: Destroy created clusters still running
         env:
           INFRA_TOKEN: ${{ secrets.INFRA_TOKEN_DEV }}
@@ -106,7 +82,7 @@ jobs:
 
           echo 'For 30 minutes, list and delete child clusters that are not failed.'
           for I in {1..30}; do
-            $INFRACTL list --all --expired
+            $INFRACTL list --all --quiet
             count=0
             for cluster in $($INFRACTL list --all --quiet --expired --status='READY,CREATING,DESTROYING'); do
               echo "$(( ++count )): ${cluster}"
@@ -130,4 +106,9 @@ jobs:
 
       - name: Destroy PR dev cluster
         run: |
-          echo would ~/.local/bin/infractl delete "$CLUSTER_NAME"
+          ~/.local/bin/infractl delete "$CLUSTER_NAME"
+
+      - name: Comment on PR
+        run: |
+          gh pr comment "${{ github.event.number }}" \
+            --body "Development cluster deleted."
