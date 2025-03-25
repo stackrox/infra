@@ -75,6 +75,8 @@ jobs:
           kill %1
 
       - name: Destroy created clusters still running
+        env:
+          INFRA_TOKEN: ${{ secrets.INFRA_TOKEN_DEV }}
         run: |
           set -x
           set +e
@@ -137,4 +139,3 @@ jobs:
       - name: Destroy PR dev cluster
         run: |
           echo "would now run:" ~/.local/bin/infractl delete "$CLUSTER_NAME"
-
