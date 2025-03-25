@@ -53,6 +53,10 @@ jobs:
             ~/.local/bin/infractl get "$CLUSTER_NAME" | tee >( cat >&2 ) | grep READY && break
             sleep 60
           done
+          for I in {1..60}; do
+            kubectl -n infra rollout status deploy/infra-server-service --timeout=60s && break
+            sleep 60
+          done
 
       - name: Download artifacts
         run: |
