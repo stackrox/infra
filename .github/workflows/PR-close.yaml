@@ -55,6 +55,8 @@ jobs:
             ~/.local/bin/infractl get "$CLUSTER_NAME" | tee >( cat >&2 ) | grep READY && break || echo $?
             sleep 60
           done
+          ~/.local/bin/infractl artifacts "$CLUSTER_NAME" -d /tmp/
+          kubectl get nodes -o wide || true
           for I in {1..60}; do
             kubectl -n infra rollout status deploy/infra-server-service --timeout=60s && break || echo $?
             sleep 60
@@ -80,11 +82,6 @@ jobs:
           $INFRACTL list --all --expired --quiet
 
           kill %1
-
-      - name: Download artifacts
-        run: |
-          ~/.local/bin/infractl artifacts "$CLUSTER_NAME" -d /tmp/ >> "$GITHUB_STEP_SUMMARY"
-          kubectl get nodes -o wide || true
 
       - name: Download branch infractl
         run: |
