@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: rosa-
+  generateName: janitor-delete-openshift-rosa-
 spec:
   entrypoint: start
   arguments:
