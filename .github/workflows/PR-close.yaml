@@ -57,8 +57,8 @@ jobs:
           done
           ~/.local/bin/infractl artifacts "$CLUSTER_NAME" -d /tmp/
           kubectl get nodes -o wide || true
-          for I in {1..60}; do
-            kubectl -n infra rollout status deploy/infra-server-service --timeout=60s && break || echo $?
+          for I in {1..5}; do
+            kubectl -n infra rollout status deploy/infra-server-deployment --timeout=300s && break || echo $?
             sleep 60
           done
 
@@ -70,6 +70,7 @@ jobs:
           set -x
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 > /dev/null 2>&1 &
           sleep 10
+          $INFRACTL list --all --quiet
 
           $INFRACTL create gke-default tstlonglifer --lifespan 8h
           $INFRACTL create gke-default tstshortlifer --lifespan 30s
