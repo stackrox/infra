@@ -70,6 +70,7 @@ jobs:
           kubectl -n infra logs -l app=infra-server --tail=-1
 
           make pull-infractl-from-dev-server
+          $INFRACTL version
 
           kill %1
 
@@ -103,14 +104,12 @@ jobs:
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 > /dev/null 2>&1 &
           sleep 10
 
-          $INFRACTL version
-
           echo 'For 30 minutes, list and delete child clusters that are not failed.'
           for I in {1..30}; do
             $INFRACTL list --all --expired
             count=0
             for cluster in $($INFRACTL list --all --quiet --expired --status='READY,CREATING,DESTROYING'); do
-              echo "$(( ++ count )): ${cluster}"
+              echo "$(( ++count )): ${cluster}"
             done
             if [[ $count -gt 0 ]]; then
               echo 'Active clusters found. Deleting ...'
@@ -119,8 +118,10 @@ jobs:
               break
             fi
             # shellcheck disable=SC2086
-            $INFRACTL list --all --expired --quiet --status='READY,FAILED,CREATING' | grep '^[^ ]' \
-              | xargs -I{} $INFRACTL delete {}
+            for cluster in $($INFRACTL list --all --expired --quiet --status='READY,CREATING'); do
+              $INFRACTL get "${cluster}" \
+                && $INFRACTL delete "${cluster}"
+            done
             echo "(sleep 1 minute then check again. try $I/30)"
             sleep 60
           done
@@ -129,4 +130,4 @@ jobs:
 
       - name: Destroy PR dev cluster
         run: |
-          ~/.local/bin/infractl delete "$CLUSTER_NAME"
+          echo would ~/.local/bin/infractl delete "$CLUSTER_NAME"
