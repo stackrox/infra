@@ -165,4 +165,5 @@ jobs:
         run: |
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 > /dev/null 2>&1 &
           sleep 5
+          export GOPATH=$(go env GOPATH)
           make go-e2e-tests
