@@ -3,6 +3,7 @@ name: PR Workflow
 on:
   pull_request:
     types:
+      - synchronize
       - closed
 
 defaults:
@@ -16,19 +17,7 @@ env:
   GH_TOKEN: ${{ secrets.RHACS_BOT_GITHUB_TOKEN }}
 
 jobs:
-  create-dev-cluster:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: stackrox/actions/infra/create-cluster@v1
-        with:
-          flavor: gke-default
-          name: infra-pr-${{ github.event.pull_request.number }}
-          args: machine-type=e2-medium,nodes=3,gcp-image-type=ubuntu_containerd
-          lifespan: ${{ github.actor == 'dependabot[bot]' && '1h' || '24h' }}
-          wait: true
-          token: ${{ secrets.INFRA_TOKEN }}
-
-  deploy-and-test:
+  destroy:
     runs-on: ubuntu-latest
     env:
       KUBECONFIG: /tmp/kubeconfig
@@ -37,26 +26,12 @@ jobs:
       USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
 
     steps:
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "1.23"
-
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
           path: go/src/github.com/stackrox/infra
-
-      - name: Authenticate to GCloud
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.INFRA_CI_AUTOMATION_GCP_SA }}
-
-      - name: Set up Cloud SDK
-        uses: "google-github-actions/setup-gcloud@v2"
-        with:
-          install_components: "gke-gcloud-auth-plugin"
 
       - name: Download production infractl
         uses: stackrox/actions/infra/install-infractl@v1
