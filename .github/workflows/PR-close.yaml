@@ -64,6 +64,9 @@ jobs:
 
       - name: Destroy created clusters still running
         run: |
+          set -x
+          set +e
+          sleep 3600
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 > /dev/null 2>&1 &
           sleep 10
 
@@ -71,7 +74,41 @@ jobs:
 
           echo 'For 30 minutes, list and delete child clusters that are not failed.'
           for I in {1..30}; do
+            $INFRACTL list --all --expired --quiet
             if [[ $($INFRACTL list --all --expired --status='READY,CREATING,DESTROYING' | tee >(cat >&2) | wc -l) -gt 0 ]]; then
+              echo 'Active clusters found. Deleting ...'
+            else
+              echo 'No active clusters found.'
+              break
+            fi
+            # shellcheck disable=SC2086
+            $INFRACTL list --all --expired --status='READY,FAILED,CREATING' | grep '^[^ ]' \
+              | xargs -I{} $INFRACTL delete {}
+            echo "(sleep 1 minute then check again. try $I/30)"
+            sleep 60
+          done
+          for I in {1..10}; do
+            $INFRACTL list --all --expired --quiet
+            count=$($INFRACTL list --all --expired --status='READY,CREATING,DESTROYING' | tee >(cat >&2) | wc -l)
+            if [[ $count -gt 0 ]]; then
+              echo 'Active clusters found. Deleting ...'
+            else
+              echo 'No active clusters found.'
+              break
+            fi
+            # shellcheck disable=SC2086
+            $INFRACTL list --all --expired --status='READY,FAILED,CREATING' | grep '^[^ ]' \
+              | xargs -I{} $INFRACTL delete {}
+            echo "(sleep 1 minute then check again. try $I/30)"
+            sleep 60
+          done
+          for I in {1..10}; do
+            $INFRACTL list --all --expired
+            count=0
+            for cluster in $($INFRACTL list --all --quiet --expired --status='READY,CREATING,DESTROYING'); do
+              echo "$(( ++ count )): ${cluster}"
+            done
+            if [[ $count -gt 0 ]]; then
               echo 'Active clusters found. Deleting ...'
             else
               echo 'No active clusters found.'
@@ -88,5 +125,5 @@ jobs:
 
       - name: Destroy PR dev cluster
         run: |
-          ~/.local/bin/infractl delete "$CLUSTER_NAME"
+          echo "would now run:" ~/.local/bin/infractl delete "$CLUSTER_NAME"
 
