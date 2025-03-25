@@ -49,14 +49,37 @@ jobs:
       - name: Wait for cluster
         run: |
           set +e
+          set -x
+          set -o pipefail
           for I in {1..60}; do
-            ~/.local/bin/infractl get "$CLUSTER_NAME" | tee >( cat >&2 ) | grep READY && break
+            ~/.local/bin/infractl get "$CLUSTER_NAME" | tee >( cat >&2 ) | grep READY && break || echo $?
             sleep 60
           done
           for I in {1..60}; do
-            kubectl -n infra rollout status deploy/infra-server-service --timeout=60s && break
+            kubectl -n infra rollout status deploy/infra-server-service --timeout=60s && break || echo $?
             sleep 60
           done
+
+      - name: create test clusters
+        env:
+          INFRA_TOKEN: ${{ secrets.INFRA_TOKEN_DEV }}
+        run: |
+          set +e
+          set -x
+          kubectl -n infra port-forward svc/infra-server-service 8443:8443 > /dev/null 2>&1 &
+          sleep 10
+
+          $INFRACTL create gke-default tstlonglifer --lifespan 8h
+          $INFRACTL create gke-default tstshortlifer --lifespan 30s
+          $INFRACTL create gke-default tstexpired --lifespan 20m
+          $INFRACTL create gke-default tstdestroyed --lifespan 2h
+          $INFRACTL create rosahcp tstrosahcp --lifespan 45m
+
+          $INFRACTL delete tstdestroyed --json
+
+          $INFRACTL list --all --expired --quiet
+
+          kill %1
 
       - name: Download artifacts
         run: |
