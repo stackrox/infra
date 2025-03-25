@@ -10,7 +10,7 @@ defaults:
   run:
     working-directory: go/src/github.com/stackrox/infra
 
-concurrency: pr-${{ github.ref }}
+concurrency: pr-${{ github.ref }}-close
 
 env:
   CLUSTER_NAME: infra-pr-${{ github.event.pull_request.number }}
