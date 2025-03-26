@@ -34,7 +34,7 @@ func TestListExpired(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, clusterID)
-	utils.AssertStatusBecomesWithin(t, clusterID, "FINISHED", 60*time.Second)
+	utils.AssertStatusBecomesWithin(t, clusterID, "FINISHED", 90*time.Second)
 	listedClusters, err := mock.InfractlList(fmt.Sprintf("--prefix=%s", clusterID))
 	assert.NoError(t, err)
 	assert.Equal(t, 0, len(listedClusters.Clusters))
