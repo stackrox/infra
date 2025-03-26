@@ -3,14 +3,13 @@ name: PR Workflow
 on:
   pull_request:
     types:
-      - synchronize
       - closed
 
 defaults:
   run:
     working-directory: go/src/github.com/stackrox/infra
 
-concurrency: pr-${{ github.ref }}-close
+concurrency: pr-${{ github.ref }}
 
 env:
   CLUSTER_NAME: infra-pr-${{ github.event.pull_request.number }}
@@ -84,20 +83,22 @@ jobs:
           for I in {1..30}; do
             $INFRACTL list --all --quiet
             count=0
-            for cluster in $($INFRACTL list --all --quiet --expired --status='READY,CREATING,DESTROYING'); do
+            # Continue if running or destroying
+            for cluster in $($INFRACTL list --all --quiet --status='READY,CREATING,DESTROYING'); do
               echo "$(( ++count )): ${cluster}"
             done
             if [[ $count -gt 0 ]]; then
-              echo 'Active clusters found. Deleting ...'
+              echo 'Active clusters found. Deleting ...' | tee -a "$GITHUB_STEP_SUMMARY"
             else
               echo 'No active clusters found.'
               break
             fi
             # shellcheck disable=SC2086
-            for cluster in $($INFRACTL list --all --expired --quiet --status='READY,CREATING'); do
+            for cluster in $($INFRACTL list --all --quiet --status='READY,CREATING'); do
               $INFRACTL get "${cluster}" \
                 && $INFRACTL delete "${cluster}"
-            done
+            done \
+              | tee -a "$GITHUB_STEP_SUMMARY"
             echo "(sleep 1 minute then check again. try $I/30)"
             sleep 60
           done
@@ -107,6 +108,7 @@ jobs:
       - name: Destroy PR dev cluster
         run: |
           ~/.local/bin/infractl delete "$CLUSTER_NAME"
+          echo "Deleted PR dev cluster ${CLUSTER_NAME}" | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Comment on PR
         run: |
