@@ -9,8 +9,11 @@ import (
 	infraClusterLifespan "github.com/stackrox/infra/cmd/infractl/cluster/lifespan"
 	infraClusterList "github.com/stackrox/infra/cmd/infractl/cluster/list"
 	infraClusterLogs "github.com/stackrox/infra/cmd/infractl/cluster/logs"
+	infraFlavorGet "github.com/stackrox/infra/cmd/infractl/flavor/get"
+	infraFlavorList "github.com/stackrox/infra/cmd/infractl/flavor/list"
 	infraJanitorFind "github.com/stackrox/infra/cmd/infractl/janitor/find"
 	infraWhoami "github.com/stackrox/infra/cmd/infractl/whoami"
+	v1 "github.com/stackrox/infra/generated/api/v1"
 )
 
 // InfractlGetStatusForID is a wrapper for 'infractl get <clusterID> --json'.
@@ -87,19 +90,20 @@ func InfractlList(args ...string) (ListClusterReponse, error) {
 	return jsonData, nil
 }
 
-// InfractlLogs is a wrapper for 'infractl logs <clusterID>'.
-func InfractlLogs(clusterID string) (string, error) {
+// InfractlLogs is a wrapper for 'infractl logs <clusterID> --json'.
+func InfractlLogs(clusterID string) (v1.LogsResponse, error) {
+	jsonData := v1.LogsResponse{}
 	infraLogsCmd := infraClusterLogs.Command()
-	buf := PrepareCommand(infraLogsCmd, false, clusterID)
+	buf := PrepareCommand(infraLogsCmd, true, clusterID)
 	err := infraLogsCmd.Execute()
 	if err != nil {
-		return "", err
+		return jsonData, err
 	}
-	logs, err := RetrieveCommandOutput(buf)
+	err = RetrieveCommandOutputJSON(buf, &jsonData)
 	if err != nil {
-		return "", err
+		return jsonData, err
 	}
-	return logs, nil
+	return jsonData, nil
 }
 
 // InfractlWhoami is a wrapper for 'infractl whoami'.
@@ -147,4 +151,38 @@ func InfractlJanitorFindGCP(quiet bool) (JanitorFindResponse, error) {
 		return jsonData, err
 	}
 	return jsonData, nil
+}
+
+// InfractlFlavorGet is a wrapper for 'infractl flavor get <flavorID> --json'.
+func InfractlFlavorGet(flavorID string) (FlavorResponse, error) {
+	flavorGetCommand := infraFlavorGet.Command()
+	jsonData := FlavorResponse{}
+	buf := PrepareCommand(flavorGetCommand, true, flavorID)
+	err := flavorGetCommand.Execute()
+	if err != nil {
+		return jsonData, err
+	}
+
+	err = RetrieveCommandOutputJSON(buf, &jsonData)
+	if err != nil {
+		return jsonData, err
+	}
+	return jsonData, nil
+}
+
+// InfractlFlavorList is a wrapper for 'infractl flavor list --json'.
+func InfractlFlavorList() (FlavorListResponse, error) {
+	flavorListCommand := infraFlavorList.Command()
+	jsonData := FlavorListResponse{}
+	buf := PrepareCommand(flavorListCommand, true)
+	err := flavorListCommand.Execute()
+	if err != nil {
+		return jsonData, err
+	}
+
+	err = RetrieveCommandOutputJSON(buf, &jsonData)
+	if err != nil {
+		return jsonData, err
+	}
+	return jsonData, err
 }
