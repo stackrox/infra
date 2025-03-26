@@ -1,3 +1,4 @@
+// Package metrics exposes custom metrics for the infra server.
 package metrics
 
 import "github.com/prometheus/client_golang/prometheus"

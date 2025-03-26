@@ -1,3 +1,4 @@
+// Package claimrule implements checks for access tokens.
 package claimrule
 
 import (

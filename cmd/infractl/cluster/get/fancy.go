@@ -6,8 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
-
 	"github.com/spf13/cobra"
 
 	"github.com/buger/jsonparser"
@@ -22,10 +20,10 @@ type prettyCluster struct {
 
 func (p prettyCluster) PrettyPrint(cmd *cobra.Command) {
 	var (
-		createdOn, _   = ptypes.Timestamp(p.CreatedOn)
-		lifespan, _    = ptypes.Duration(p.Lifespan)
-		destroyedOn, _ = ptypes.Timestamp(p.DestroyedOn)
-		remaining      = time.Until(createdOn.Add(lifespan))
+		createdOn   = p.CreatedOn.AsTime()
+		lifespan    = p.Lifespan.AsDuration()
+		destroyedOn = p.DestroyedOn.AsTime()
+		remaining   = time.Until(createdOn.Add(lifespan))
 	)
 
 	cmd.Printf("ID:          %s\n", p.ID)

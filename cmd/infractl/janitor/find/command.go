@@ -1,3 +1,4 @@
+// Package find implements the infractl janitor find-gcp command.
 package find
 
 import (

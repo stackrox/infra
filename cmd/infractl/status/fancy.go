@@ -1,3 +1,4 @@
+// Package status implements the infractl status command.
 package status
 
 import (

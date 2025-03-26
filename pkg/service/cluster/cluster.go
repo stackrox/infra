@@ -17,7 +17,6 @@ import (
 	workflowpkg "github.com/argoproj/argo-workflows/v3/pkg/apiclient/workflow"
 	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
 	workflowv1 "github.com/argoproj/argo-workflows/v3/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
-	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/duration"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -34,6 +33,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/durationpb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -269,7 +270,7 @@ func (s *clusterImpl) lifespan(ctx context.Context, req *v1.LifespanRequest, wor
 		"lifespan", req.GetLifespan().String(),
 	)
 
-	lifespanRequest, _ := ptypes.Duration(req.Lifespan)
+	lifespanRequest := req.Lifespan.AsDuration()
 	lifespanCurrent := time.Duration(0)
 	lifespanUpdated := time.Duration(0)
 
@@ -277,7 +278,7 @@ func (s *clusterImpl) lifespan(ctx context.Context, req *v1.LifespanRequest, wor
 	// need to know the current lifespan. Get the named workflow to obtain said
 	// current lifespan.
 	if req.Method != v1.LifespanRequest_REPLACE {
-		lifespanCurrent, _ = ptypes.Duration(GetLifespan(workflow))
+		lifespanCurrent = GetLifespan(workflow).AsDuration()
 	}
 
 	// Compute the updated lifespan using the requested method.
@@ -310,7 +311,7 @@ func (s *clusterImpl) lifespan(ctx context.Context, req *v1.LifespanRequest, wor
 
 	// Return the remaining lifespan.
 	remaining := time.Until(workflow.CreationTimestamp.Add(lifespanUpdated))
-	return ptypes.DurationProto(remaining), nil
+	return durationpb.New(remaining), nil
 }
 
 // Create implements ClusterService.Create.
@@ -345,7 +346,7 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 	// Use the user supplied name as the root of Argo workflow name and the Infra cluster Id.
 	clusterID, ok := req.Parameters["name"]
 	if ok {
-		workflow.ObjectMeta.GenerateName = clusterID + "-"
+		workflow.GenerateName = clusterID + "-"
 	} else {
 		return nil, fmt.Errorf("parameter 'name' was not provided")
 	}
@@ -378,7 +379,7 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 
 	// Determine the lifespan for this cluster. Apply some sanity/bounds
 	// checking on provided lifespans.
-	lifespan, _ := ptypes.Duration(req.Lifespan)
+	lifespan := req.Lifespan.AsDuration()
 	if lifespan <= 0 {
 		lifespan = 3 * time.Hour
 	}
@@ -682,7 +683,7 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 				log.Log(logging.WARN, "failed to resume argo workflow", "workflow-name", workflow.GetName(), "error", err)
 			}
 
-			clusterID := strings.TrimSuffix(workflow.ObjectMeta.GenerateName, "-")
+			clusterID := strings.TrimSuffix(workflow.GenerateName, "-")
 			err = s.bqClient.InsertClusterDeletionRecord(context.Background(), clusterID, workflow.GetName())
 			if err != nil {
 				log.Log(logging.WARN, "failed to record cluster deletion", "workflow-name", workflow.GetName(), "error", err)
@@ -698,7 +699,7 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 
 func (s *clusterImpl) getLogs(ctx context.Context, node v1alpha1.NodeStatus) *v1.Log {
 	var body []byte
-	started, _ := ptypes.TimestampProto(node.StartedAt.UTC())
+	started := timestamppb.New(node.StartedAt.UTC())
 	log := &v1.Log{
 		Name:    node.DisplayName,
 		Body:    body,
@@ -814,7 +815,7 @@ func (s *clusterImpl) slackCheckWorkflow(workflow v1alpha1.Workflow) {
 		_, err = s.k8sWorkflowsClient.Patch(context.Background(), workflow.GetName(), types.JSONPatchType, payloadBytes, metav1.PatchOptions{})
 		if err != nil {
 			log.Log(logging.ERROR, "failed to patch Slack annotation",
-				"cluster-id", metacluster.Cluster.ID,
+				"cluster-id", metacluster.ID,
 				"workflow-name", workflow.GetName(),
 				"error", err,
 			)
@@ -824,8 +825,8 @@ func (s *clusterImpl) slackCheckWorkflow(workflow v1alpha1.Workflow) {
 }
 
 func slackTemplateContext(client slack.Slacker, cluster *metaCluster, failureDetails string) slack.TemplateData {
-	createdOn, _ := ptypes.Timestamp(cluster.CreatedOn)
-	lifespan, _ := ptypes.Duration(cluster.Lifespan)
+	createdOn := cluster.CreatedOn.AsTime()
+	lifespan := cluster.Lifespan.AsDuration()
 	remaining := time.Until(createdOn.Add(lifespan))
 
 	data := slack.TemplateData{

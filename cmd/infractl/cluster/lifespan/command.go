@@ -6,12 +6,12 @@ import (
 	"errors"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/cluster/utils"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
 const examples = `# Add an hour to cluster example-s3maj.
@@ -68,7 +68,7 @@ func run(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, args []st
 
 	resp, err := v1.NewClusterServiceClient(conn).Lifespan(ctx, &v1.LifespanRequest{
 		Id:       args[0],
-		Lifespan: ptypes.DurationProto(lifespan),
+		Lifespan: durationpb.New(lifespan),
 		Method:   method,
 	})
 	if err != nil {

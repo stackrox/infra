@@ -1,3 +1,4 @@
+// Package service implements the backend services for the infra server.
 package service
 
 import (
