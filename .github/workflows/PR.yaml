@@ -187,6 +187,7 @@ jobs:
           make go-e2e-tests
 
       - name: Wait for cluster
+        if: always()
         run: |
           set -xo pipefail
           for I in {1..60}; do
@@ -201,6 +202,7 @@ jobs:
           done
 
       - name: Destroy created clusters still running
+        if: always()
         env:
           INFRA_TOKEN: ${{ secrets.INFRA_TOKEN_DEV }}
         run: |
@@ -235,11 +237,9 @@ jobs:
           kill %1
 
       - name: Destroy PR dev cluster
+        if: always()
         run: |
           ~/.local/bin/infractl delete "$CLUSTER_NAME"
           echo "Deleted PR dev cluster ${CLUSTER_NAME}" | tee -a "$GITHUB_STEP_SUMMARY"
-
-      - name: Comment on PR
-        run: |
           gh pr comment "${{ github.event.number }}" \
             --body "Development cluster deleted."
