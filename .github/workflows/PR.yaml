@@ -212,7 +212,7 @@ jobs:
 
           echo 'For 30 minutes, list and delete child clusters that are not failed.'
           for I in {1..30}; do
-            $INFRACTL list --all --quiet
+            $INFRACTL list --all
             count=0
             # Continue if running or destroying
             for cluster in $($INFRACTL list --all --quiet --status='READY,CREATING,DESTROYING'); do
