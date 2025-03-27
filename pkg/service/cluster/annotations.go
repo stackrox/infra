@@ -3,8 +3,8 @@ package cluster
 import (
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/duration"
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
 const (
@@ -61,7 +61,7 @@ func GetLifespan(a Annotated) *duration.Duration {
 		// Ensure that the lifespan isn't negative.
 		lifespan = 0
 	}
-	return ptypes.DurationProto(lifespan)
+	return durationpb.New(lifespan)
 }
 
 // GetEventID returns the event ID if it exists.

@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
-	"github.com/golang/protobuf/ptypes"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/logging"
 	"github.com/stackrox/infra/pkg/slack"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func getClusterIDFromWorkflow(workflow *v1alpha1.Workflow) string {
@@ -34,26 +34,24 @@ func clusterFromWorkflow(workflow v1alpha1.Workflow) *v1.Cluster {
 		Description: GetDescription(&workflow),
 	}
 
-	cluster.CreatedOn, _ = ptypes.TimestampProto(workflow.Status.StartedAt.Time.UTC())
+	cluster.CreatedOn = timestamppb.New(workflow.Status.StartedAt.UTC())
 
 	if !workflow.Status.FinishedAt.Time.IsZero() {
-		cluster.DestroyedOn, _ = ptypes.TimestampProto(workflow.Status.FinishedAt.Time.UTC())
+		cluster.DestroyedOn = timestamppb.New(workflow.Status.FinishedAt.UTC())
 	}
 
 	return cluster
 }
 
 func isWorkflowExpired(workflow v1alpha1.Workflow) bool {
-	lifespan, _ := ptypes.Duration(GetLifespan(&workflow))
-
-	workflowExpiryTime := workflow.Status.StartedAt.Time.Add(lifespan)
+	lifespan := GetLifespan(&workflow).AsDuration()
+	workflowExpiryTime := workflow.Status.StartedAt.Add(lifespan)
 	return time.Now().After(workflowExpiryTime)
 }
 
 func isNearingExpiry(workflow v1alpha1.Workflow) bool {
-	lifespan, _ := ptypes.Duration(GetLifespan(&workflow))
-
-	workflowExpiryTime := workflow.Status.StartedAt.Time.Add(lifespan)
+	lifespan := GetLifespan(&workflow).AsDuration()
+	workflowExpiryTime := workflow.Status.StartedAt.Add(lifespan)
 	return time.Now().Add(nearExpiry).After(workflowExpiryTime)
 }
 
@@ -223,7 +221,8 @@ func workflowStatus(workflowStatus v1alpha1.WorkflowStatus) v1.Status {
 		// https://godoc.org/github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1#Nodes
 		for _, node := range workflowStatus.Nodes {
 			// https://godoc.org/github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1#NodeType
-			if node.Type == v1alpha1.NodeTypePod {
+			switch nodeType := node.Type; nodeType {
+			case v1alpha1.NodeTypePod:
 				if strings.Contains(node.Message, "ImagePullBackOff") {
 					return v1.Status_FAILED
 				}
@@ -233,7 +232,7 @@ func workflowStatus(workflowStatus v1alpha1.WorkflowStatus) v1.Status {
 				if strings.Contains(node.Message, "Pod was active on the node longer than the specified deadline") {
 					return v1.Status_FAILED
 				}
-			} else if node.Type == v1alpha1.NodeTypeSuspend {
+			case v1alpha1.NodeTypeSuspend:
 				switch node.Phase {
 				case v1alpha1.NodeSucceeded:
 					return v1.Status_DESTROYING

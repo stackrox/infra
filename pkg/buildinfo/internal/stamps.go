@@ -1,3 +1,4 @@
+// Package internal implements version and build information variables.
 package internal
 
 import (

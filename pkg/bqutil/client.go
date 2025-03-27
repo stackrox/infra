@@ -1,3 +1,4 @@
+// Package bqutil implements a client for BigQuery.
 package bqutil
 
 import (

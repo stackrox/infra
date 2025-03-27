@@ -1,3 +1,4 @@
+// Package utils implements helper functions for the e2e tests.
 package utils
 
 import (
