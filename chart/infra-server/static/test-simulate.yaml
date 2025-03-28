@@ -4,6 +4,7 @@ metadata:
   generateName: simulate-
 spec:
   entrypoint: start
+  onExit: stop
   arguments:
     parameters:
       - name: name
@@ -29,6 +30,8 @@ spec:
                 value: '{{ "{{" }}workflow.parameters.create-outcome{{ "}}" }}'
         - - name: wait
             template: wait
+    - name: stop
+      steps:
         - - name: destroy
             template: simulate
             arguments:
