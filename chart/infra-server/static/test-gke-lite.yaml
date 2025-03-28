@@ -38,7 +38,7 @@ spec:
             arguments:
               parameters:
                 - name: name
-                  value: '{{ "{{" }}steps.create.outputs.parameters.cluster_name{{ "}}" }}'
+                  value: '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
 
     - name: create
       activeDeadlineSeconds: 3600
