@@ -46,10 +46,9 @@ jobs:
           {name: "ocp-4", "args": "", "uniqueness": "g"},
           {name: "ocp-4-demo", "args": "", "uniqueness": "h"},
           {name: "ocp-4-perf-scale", "args": "", "uniqueness": "i"},
-          {name: "ocp-3", "args": "", "uniqueness": "j"},
           {name: "osd-on-aws", "args": "", "uniqueness": "k"},
           {name: "osd-on-gcp", "args": "", "uniqueness": "l"},
-          {name: "qa-demo", "args": "main-image=quay.io/rhacs-eng/main:4.3.4", "uniqueness": "m"},
+          {name: "qa-demo", "args": "main-image=quay.io/rhacs-eng/main:4.7.0", "uniqueness": "m"},
           {name: "rosa", "args": "", "uniqueness": "n"},
           {name: "rosahcp", "args": "", "uniqueness": "o"},
         ]
