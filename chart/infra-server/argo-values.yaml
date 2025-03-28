@@ -12,10 +12,10 @@ argo-workflows:
           argo: workflows
       spec:
         ttlStrategy:
-          # Keep the workflow pods & logs available for 30 days
-          secondsAfterCompletion: 2592000
-          secondsAfterSuccess: 2592000
-          secondsAfterFailure: 2592000
+          # Keep the workflow objects available for 7 days
+          secondsAfterCompletion: 604800
+          secondsAfterSuccess: 604800
+          secondsAfterFailure: 604800
 
   artifactRepository:
     archiveLogs: true
