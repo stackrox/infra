@@ -1091,7 +1091,7 @@
       description: cluster name
       help: Name of the cluster that was leaked and should be destroyed.
     - name: gcp-zone
-      description: Google Cloud zone to deploy infrastructure into.
+      description: Google Cloud zone to delete infrastructure from.
       value: us-central1-a
 
 - id: janitor-delete-openshift-4
@@ -1114,7 +1114,7 @@
       description: cluster name
       help: Name of the cluster that was leaked and should be destroyed.
     - name: aws-region
-      description: AWS region to deploy into.
+      description: AWS region to delete from.
       value: us-east-1
       kind: optional
 
