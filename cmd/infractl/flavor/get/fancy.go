@@ -35,7 +35,7 @@ func (p prettyFlavor) PrettyPrint(cmd *cobra.Command) {
 			cmd.Printf("    Example:     %q\n", parameter.GetValue())
 		}
 		if parameter.GetHelp() != "" {
-			cmd.Printf("    %s\n", parameter.GetHelp())
+			cmd.Printf("    Help:        %s\n", parameter.GetHelp())
 		}
 	}
 }

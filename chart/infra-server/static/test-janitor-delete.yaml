@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: test-janitor-delete-
+spec:
+  entrypoint: delete
+  arguments:
+    parameters:
+      - name: name
+
+  templates:
+    - name: delete
+      steps:
+        - - name: destroy
+            template: destroy
+
+    - name: destroy
+      script:
+        image: debian:9.4
+        command: [bash]
+        source: |
+          set -x
+          start=0
+          while sleep 1; do
+            if [[ $((start++)) -ge 10 ]]; then
+              break
+            fi
+          done
