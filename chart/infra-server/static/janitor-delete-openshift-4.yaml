@@ -3,7 +3,7 @@ kind: Workflow
 metadata:
   generateName: janitor-delete-openshift-4-
 spec:
-  entrypoint: start
+  entrypoint: delete
   arguments:
     parameters:
       - name: name
@@ -21,7 +21,7 @@ spec:
         secretName: openshift-4-gcp-service-account
 
   templates:
-    - name: start
+    - name: delete
       steps:
         - - name: destroy
             template: destroy
