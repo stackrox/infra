@@ -5,7 +5,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/golang/protobuf/ptypes"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 )
 
@@ -36,7 +35,7 @@ func printVersion(cmd *cobra.Command, title string, version *v1.Version) {
 		return
 	}
 
-	timestamp, _ := ptypes.Timestamp(version.GetBuildDate())
+	timestamp := version.GetBuildDate().AsTime()
 	cmd.Printf("%s\n", title)
 	cmd.Printf("  Version:    %s\n", version.GetVersion())
 	cmd.Printf("  Commit:     %s\n", version.GetGitCommit())

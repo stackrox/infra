@@ -4,19 +4,17 @@ import (
 	"encoding/json"
 
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/types/known/durationpb"
 
-	"github.com/golang/protobuf/ptypes"
-	durpb "github.com/golang/protobuf/ptypes/duration"
 	"github.com/stackrox/infra/cmd/infractl/common"
 )
 
 type prettyDuration struct {
-	*durpb.Duration
+	*durationpb.Duration
 }
 
 func (p prettyDuration) PrettyPrint(cmd *cobra.Command) {
-	remaining, _ := ptypes.Duration(p.Duration)
-
+	remaining := p.AsDuration()
 	cmd.Println(common.FormatExpiration(remaining))
 }
 

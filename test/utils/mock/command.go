@@ -1,3 +1,4 @@
+// Package mock implements helpers to mock infractl calls and outputs for tests.
 package mock
 
 import (

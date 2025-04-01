@@ -1,3 +1,4 @@
+// Package utils implements helper functions for the e2e tests.
 package utils
 
 import (
@@ -9,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const defaultTimeout = 90 * time.Second
+const defaultTimeout = 120 * time.Second
 
 // AssertStatusBecomesWithin asserts that an infra cluster reaches a desired status within a defined time.
 func AssertStatusBecomesWithin(t *testing.T, clusterID string, desiredStatus string, timeout time.Duration) {

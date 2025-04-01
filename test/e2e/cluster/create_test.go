@@ -67,7 +67,7 @@ func TestNameValidationNoRegexMatch(t *testing.T) {
 		"test-simulate", "THIS-IN-INVALID",
 		"--lifespan=20s",
 	)
-	assert.ErrorContains(t, err, "The name does not match the requirements")
+	assert.ErrorContains(t, err, "the name does not match the requirements")
 }
 
 func TestCannotCreateClusterWithInvalidLifespan(t *testing.T) {
