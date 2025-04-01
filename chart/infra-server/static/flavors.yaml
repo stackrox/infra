@@ -1257,4 +1257,17 @@
       description: success or fail
       value: success
       kind: optional
+
+################
+# Test Janitor #
+################
+- id: test-janitor-delete
+  name: Test Janitor delete
+  description: Flavor to test delete
+  availability: janitorDelete
+  workflow: configuration/test-janitor-delete.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      help: Name of the cluster that was leaked and should be destroyed.
 {{ end }}
