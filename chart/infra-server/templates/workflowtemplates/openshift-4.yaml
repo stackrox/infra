@@ -1,0 +1,153 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: openshift-4
+spec:
+  templates:
+    - name: create
+      inputs:
+        parameters:
+          - name: name
+          - name: openshift-version
+          - name: pull-secret
+          - name: master-node-count
+          - name: worker-node-count
+          - name: master-node-type
+          - name: worker-node-type
+          - name: region
+          - name: fips-enabled
+          - name: trusted-certs-enabled
+          - name: credentials-mode
+          - name: keep-failed-cluster
+          - name: ssd-storage-class
+      outputs:
+        artifacts:
+          - name: kubeconfig
+            path: /data/auth/kubeconfig
+            archive:
+              none: {}
+          - name: kubeadmin-password
+            path: /data/auth/kubeadmin-password
+            archive:
+              none: {}
+          - name: url
+            path: /data/url
+            archive:
+              none: {}
+          - name: dotenv
+            path: /data/dotenv
+            archive:
+              none: {}
+          - name: SSH_ACCESS
+            path: /data/ssh/SSH_ACCESS.md
+            archive:
+              none: {}
+          - name: data
+            path: /data
+            archive:
+              tar: {}
+      container:
+      image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-{{ .Chart.Annotations.automationFlavorsVersion }}
+      imagePullPolicy: Always
+      command:
+        - entrypoint.sh
+      args:
+        - create
+        - '{{ "{{" }}inputs.parameters.name{{ "}}" }}'
+        - ocp.infra.rox.systems
+      env:
+        - name: GOOGLE_CREDENTIALS
+          valueFrom:
+              secretKeyRef:
+              name: openshift-4-gcp-service-account
+              key: google-credentials.json
+        - name: GCP_PROJECT
+          value : "acs-team-temp-dev"
+        - name: PULL_SECRET
+          valueFrom:
+              secretKeyRef:
+              name: redhat-pull-secret
+              key: REDHAT_PULL_SECRET
+        - name: USER_PULL_SECRET
+          value: '{{ "{{" }}inputs.parameters.pull-secret{{ "}}" }}'
+        - name: OPENSHIFT_VERSION
+          value: '{{ "{{" }}inputs.parameters.openshift-version{{ "}}" }}'
+        - name: MASTER_NODE_COUNT
+          value: '{{ "{{" }}inputs.parameters.master-node-count{{ "}}" }}'
+        - name: WORKER_NODE_COUNT
+          value: '{{ "{{" }}inputs.parameters.worker-node-count{{ "}}" }}'
+        - name: MASTER_NODE_TYPE
+          value: '{{ "{{" }}inputs.parameters.master-node-type{{ "}}" }}'
+        - name: WORKER_NODE_TYPE
+          value: '{{ "{{" }}inputs.parameters.worker-node-type{{ "}}" }}'
+        - name: REGION
+          value: '{{ "{{" }}inputs.parameters.region{{ "}}" }}'
+        - name: FIPS_ENABLED
+          value: '{{ "{{" }}inputs.parameters.fips-enabled{{ "}}" }}'
+        - name: TRUSTED_CERTS_ENABLED
+          value: '{{ "{{" }}inputs.parameters.trusted-certs-enabled{{ "}}" }}'
+        - name: CREDENTIALS_MODE
+          value: '{{ "{{" }}inputs.parameters.credentials-mode{{ "}}" }}'
+        - name: KEEP_FAILED_CLUSTER
+          value: '{{ "{{" }}inputs.parameters.keep-failed-cluster{{ "}}" }}'
+        - name: SSD_STORAGE_CLASS
+          value: '{{ "{{" }}inputs.parameters.ssd-storage-class{{ "}}" }}'
+      volumeMounts:
+        - name: data
+          mountPath: /data
+
+    - name: gather
+      script:
+        image: busybox
+        command: [sh]
+        source: |
+          cd /data
+          . ./dotenv
+          echo "${OPENSHIFT_CONSOLE_URL}" > cluster-console-url
+          echo "${OPENSHIFT_CONSOLE_USERNAME}" > cluster-console-username
+          echo "${OPENSHIFT_CONSOLE_PASSWORD}" > cluster-console-password
+        volumeMounts:
+          - name: data
+            mountPath: /data
+      outputs:
+        artifacts:
+          - name: cluster-console-url
+            path: /data/cluster-console-url
+            archive:
+              none: {}
+          - name: cluster-console-username
+            path: /data/cluster-console-username
+            archive:
+              none: {}
+          - name: cluster-console-password
+            path: /data/cluster-console-password
+            archive:
+              none: {}
+
+    - name: wait
+      suspend: {}
+
+    - name: destroy
+      inputs:
+        parameters:
+          - name: name
+      container:
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-{{ .Chart.Annotations.automationFlavorsVersion }}
+        imagePullPolicy: Always
+        command:
+          - entrypoint.sh
+        args:
+          - destroy
+          - '{{ "{{" }}inputs.parameters.name{{ "}}" }}'
+        env:
+          - name: GOOGLE_CREDENTIALS
+            valueFrom:
+              secretKeyRef:
+                name: openshift-4-gcp-service-account
+                key: google-credentials.json
+          - name: GCP_PROJECT
+            value : "acs-team-temp-dev"
+        volumeMounts:
+          - name: data
+            mountPath: /data
