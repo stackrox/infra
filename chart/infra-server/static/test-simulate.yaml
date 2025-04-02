@@ -8,53 +8,36 @@ spec:
     parameters:
       - name: name
       - name: create-delay-seconds
-        value: ""
       - name: create-outcome
-        value: ""
       - name: destroy-delay-seconds
-        value: ""
       - name: destroy-outcome
-        value: ""
 
   templates:
     - name: start
       steps:
         - - name: create
-            template: simulate
+            templateRef:
+              name: test-simulate
+              template: simulate
             arguments:
               parameters:
               - name: delay-seconds
                 value: '{{ "{{" }}workflow.parameters.create-delay-seconds{{ "}}" }}'
               - name: outcome
                 value: '{{ "{{" }}workflow.parameters.create-outcome{{ "}}" }}'
+
         - - name: wait
-            template: wait
+            templateRef:
+              name: common
+              template: wait
+
         - - name: destroy
-            template: simulate
+            templateRef:
+              name: test-simulate
+              template: simulate
             arguments:
               parameters:
               - name: delay-seconds
                 value: '{{ "{{" }}workflow.parameters.destroy-delay-seconds{{ "}}" }}'
               - name: outcome
                 value: '{{ "{{" }}workflow.parameters.destroy-outcome{{ "}}" }}'
-
-    - name: simulate
-      inputs:
-        parameters:
-        - name: delay-seconds
-        - name: outcome
-      script:
-        image: debian:9.4
-        command: [bash]
-        source: |
-          set -x
-          start=0
-          while sleep 1; do
-            if [[ $((start++)) -ge {{ "{{" }}inputs.parameters.delay-seconds{{ "}}" }} ]]; then
-              break
-            fi
-          done
-          [[ "{{ "{{" }}inputs.parameters.outcome{{ "}}" }}" == "success" ]] || exit 1
-
-    - name: wait
-      suspend: {}
