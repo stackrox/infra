@@ -34,11 +34,14 @@ func NewFlavorService(registry *flavor.Registry) (middleware.APIService, error) 
 func (s *flavorImpl) List(_ context.Context, request *v1.FlavorListRequest) (*v1.FlavorListResponse, error) {
 	var resp v1.FlavorListResponse
 	for _, flavor := range s.registry.Flavors() {
-		if !request.All && flavor.Availability == v1.Flavor_alpha {
+		if flavor.GetAvailability() == v1.Flavor_janitorDelete {
+			continue
+		}
+		if !request.GetAll() && flavor.GetAvailability() == v1.Flavor_alpha {
 			continue
 		}
 		scrubInternalParameters(&flavor)
-		resp.Flavors = append(resp.Flavors, &flavor)
+		resp.Flavors = append(resp.GetFlavors(), &flavor)
 	}
 
 	return &resp, nil
@@ -47,7 +50,7 @@ func (s *flavorImpl) List(_ context.Context, request *v1.FlavorListRequest) (*v1
 // Info implements FlavorService.Info.
 func (s *flavorImpl) Info(_ context.Context, flavorID *v1.ResourceByID) (*v1.Flavor, error) {
 	flavor, _, found := s.registry.Get(flavorID.Id)
-	if !found {
+	if !found || flavor.GetAvailability() == v1.Flavor_janitorDelete {
 		return nil, status.Errorf(codes.NotFound, "flavor %q not found", flavorID.Id)
 	}
 	scrubInternalParameters(&flavor)

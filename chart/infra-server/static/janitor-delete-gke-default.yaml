@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: janitor-delete-gke-default-
+spec:
+  entrypoint: delete
+  arguments:
+    parameters:
+      - name: name
+      - name: gcp-zone
+        value: ""
+
+  volumes:
+    - name: credentials
+      secret:
+        secretName: google-credentials
+
+  templates:
+    - name: delete
+      steps:
+        - - name: destroy
+            template: destroy
+
+    - name: destroy
+      activeDeadlineSeconds: 3600
+      container:
+        image: quay.io/stackrox-io/ci:automation-flavors-gke-default-{{ .Chart.Annotations.automationFlavorsVersion }}
+        imagePullPolicy: Always
+        command:
+          - /usr/bin/entrypoint
+        args:
+          - destroy
+          - --name={{ "{{" }}workflow.parameters.name{{ "}}" }}
+          - --gcp-project=acs-team-temp-dev
+          - --gcp-zone={{ "{{" }}workflow.parameters.gcp-zone{{ "}}" }}
+        volumeMounts:
+          - name: credentials
+            mountPath: /tmp
