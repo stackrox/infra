@@ -1,0 +1,10 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: common
+  namespace: default
+spec:
+  templates:
+    - name: wait
+      suspend: {}

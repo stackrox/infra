@@ -14,6 +14,7 @@ TEST_MODE="${TEST_MODE:-false}"
 SECRETS_PROJECT="acs-team-automation"
 RELEASE_NAMESPACE="infra"
 RELEASE_NAME="infra-server"
+ARGO_WORKFLOWS_APP_VERSION="v3.6.5"
 
 check_not_empty() {
     for V in "$@"; do
@@ -23,6 +24,11 @@ check_not_empty() {
             exit 1
         fi
     done
+}
+
+install_crds() {
+    kubectl apply --kustomize \
+        "https://github.com/argoproj/argo-workflows/manifests/base/crds/minimal?ref=${ARGO_WORKFLOWS_APP_VERSION}"
 }
 
 template() {
@@ -102,4 +108,5 @@ diff() {
 }
 
 check_not_empty TASK TAG ENVIRONMENT
+install_crds
 eval "$TASK"
