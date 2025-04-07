@@ -4,6 +4,7 @@ metadata:
   generateName: simulate-
 spec:
   entrypoint: start
+  onExit: stop
   arguments:
     parameters:
       - name: name
@@ -14,8 +15,9 @@ spec:
 
   templates:
     - name: start
-      steps:
-        - - name: create
+      dag:
+        tasks:
+          - name: create
             templateRef:
               name: test-simulate
               template: simulate
@@ -26,12 +28,16 @@ spec:
               - name: outcome
                 value: '{{ "{{" }}workflow.parameters.create-outcome{{ "}}" }}'
 
-        - - name: wait
+          - name: wait
+            dependencies: [create]
             templateRef:
               name: common
               template: wait
 
-        - - name: destroy
+    - name: stop
+      dag:
+        tasks:
+          - name: destroy
             templateRef:
               name: test-simulate
               template: simulate

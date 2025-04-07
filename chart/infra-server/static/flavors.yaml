@@ -494,7 +494,7 @@
   name: OpenShift 4.x Perf&Scale
   description: OpenShift 4.x Perf&Scale
   availability: stable
-  workflow: configuration/workflow-openshift-4-perf-scale.yaml
+  workflow: configuration/workflow-openshift-4.yaml
   aliases:
     - ocp-4-perf-scale
   parameters:
@@ -578,6 +578,13 @@
       help: |
         Consult OCP documentation for details. {{ .Chart.Annotations.ocpCredentialsMode }} is the value used by
         stackrox CI.
+
+    - name: keep-failed-cluster
+      description: Keep failed cluster
+      value: false
+      kind: optional
+      help: |
+          *Only for debugging infra issues.* If in doubt, please keep to false.
 
     - name: ssd-storage-class
       description: Ensure an SSD StorageClass is the default StorageClass for the cluster
