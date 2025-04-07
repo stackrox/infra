@@ -1,0 +1,25 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: test-simulate
+  namespace: default
+spec:
+  templates:
+    - name: simulate
+      inputs:
+        parameters:
+        - name: delay-seconds
+        - name: outcome
+      script:
+        image: debian:9.4
+        command: [bash]
+        source: |
+          set -x
+          start=0
+          while sleep 1; do
+            if [[ $((start++)) -ge {{ "{{" }}inputs.parameters.delay-seconds{{ "}}" }} ]]; then
+              break
+            fi
+          done
+          [[ "{{ "{{" }}inputs.parameters.outcome{{ "}}" }}" == "success" ]] || exit 1
