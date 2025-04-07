@@ -24,7 +24,7 @@ spec:
       - name: fips-enabled
       - name: trusted-certs-enabled
       - name: credentials-mode
-      - name: keep-failed-cluster
+      - name: keep-failed-cluster # this not present in openshift-4-perf-scale
       - name: ssd-storage-class
   volumeClaimTemplates:
     - metadata:
