@@ -17,6 +17,11 @@ spec:
       - name: destroy-outcome
         value: ""
 
+  volumes:
+    - name: credentials
+      secret:
+        secretName: google-credentials
+
   templates:
     - name: start
       steps:
@@ -47,10 +52,28 @@ spec:
         - name: delay-seconds
         - name: outcome
       script:
-        image: debian:9.4
+        image: gcr.io/google.com/cloudsdktool/google-cloud-cli:stable
         command: [bash]
         source: |
           set -x
+
+          gcloud auth activate-service-account --key-file /tmp/google-credentials.json
+          gcloud config set core/disable_prompts True
+
+          BUCKET_NAME="infra-e2e-upload-test"
+          FILE="{{ "{{" }}workflow.name{{ "}}" }}"
+          touch "${FILE}"
+
+          DESTINATION="gs://${BUCKET_NAME}/${FILE}"
+
+          if gsutil -q stat "${DESTINATION}"; then
+            echo "File exists. Deleting..."
+            gsutil rm "${DESTINATION}"
+          else
+            echo "File does not exist. Proceeding to upload."
+            gsutil cp "${FILE}" "${DESTINATION}"
+          fi
+
           start=0
           while sleep 1; do
             if [[ $((start++)) -ge {{ "{{" }}inputs.parameters.delay-seconds{{ "}}" }} ]]; then
@@ -58,6 +81,10 @@ spec:
             fi
           done
           [[ "{{ "{{" }}inputs.parameters.outcome{{ "}}" }}" == "success" ]] || exit 1
+
+        volumeMounts:
+          - name: credentials
+            mountPath: /tmp
 
     - name: wait
       suspend: {}

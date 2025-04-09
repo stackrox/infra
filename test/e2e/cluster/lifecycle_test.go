@@ -4,6 +4,7 @@
 package cluster_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -15,6 +16,8 @@ import (
 
 func TestClusterCanRunThroughStandardLifecycle(t *testing.T) {
 	utils.CheckContext()
+	ctx := context.Background()
+
 	clusterID, err := mock.InfractlCreateCluster(
 		"test-simulate", utils.GetUniqueClusterName("standard"),
 		"--lifespan=10s",
@@ -23,8 +26,14 @@ func TestClusterCanRunThroughStandardLifecycle(t *testing.T) {
 	assert.NotEmpty(t, clusterID)
 	utils.AssertStatusBecomes(t, clusterID, "CREATING")
 	utils.AssertStatusBecomes(t, clusterID, "READY")
+	exists, err := utils.CheckGCSObjectExists(ctx, clusterID)
+	assert.NoError(t, err)
+	assert.True(t, exists)
 	utils.AssertStatusBecomes(t, clusterID, "DESTROYING")
 	utils.AssertStatusBecomes(t, clusterID, "FINISHED")
+	exists, err = utils.CheckGCSObjectExists(ctx, clusterID)
+	assert.NoError(t, err)
+	assert.False(t, exists)
 }
 
 func TestClusterCanFailInCreate(t *testing.T) {
