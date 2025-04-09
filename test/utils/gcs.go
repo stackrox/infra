@@ -14,6 +14,7 @@ import (
 
 const bucketName = "infra-e2e-upload-test"
 
+// CheckGCSObjectExists confirms that an object exists in the GCS bucket.
 func CheckGCSObjectExists(ctx context.Context, clusterID string) (bool, error) {
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -34,6 +35,7 @@ func CheckGCSObjectExists(ctx context.Context, clusterID string) (bool, error) {
 	return true, nil
 }
 
+// CheckGCSObjectEventuallyDeleted confirms that an object is eventually deletion from the GCS bucket.
 func CheckGCSObjectEventuallyDeleted(ctx context.Context, t *testing.T, clusterID string) {
 	tick := 1 * time.Second
 	conditionMet := func() bool {
