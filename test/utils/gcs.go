@@ -3,8 +3,12 @@ package utils
 import (
 	"context"
 	"fmt"
+	"log"
+	"testing"
+	"time"
 
 	"cloud.google.com/go/storage"
+	"github.com/stretchr/testify/assert"
 	"google.golang.org/api/iterator"
 )
 
@@ -28,4 +32,19 @@ func CheckGCSObjectExists(ctx context.Context, clusterID string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func CheckGCSObjectEventuallyDeleted(ctx context.Context, t *testing.T, clusterID string) {
+	tick := 1 * time.Second
+	conditionMet := func() bool {
+		exists, err := CheckGCSObjectExists(ctx, clusterID)
+		if err != nil {
+			log.Printf("error when looking for object: %v", err)
+			return false
+		}
+
+		return !exists
+	}
+
+	assert.Eventually(t, conditionMet, defaultTimeout, tick)
 }
