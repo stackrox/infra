@@ -62,6 +62,7 @@ github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kd
 github.com/apache/arrow/go/v15 v15.0.2 h1:60IliRbiyTWCWjERBCkO1W4Qun9svcYoZrSLcyOsMLE=
 github.com/apache/arrow/go/v15 v15.0.2/go.mod h1:DGXsR3ajT524njufqf95822i+KTh+yea1jass9YXgjA=
 github.com/argoproj/argo-events v1.9.1 h1:X7Sp8Xrj6OlUtrHJyJLOt6flzRwOAsKUifnf/sLJDac=
+github.com/argoproj/argo-events v1.9.1/go.mod h1:yPwsLeU/Vp9nAEd4OBT8fOMEbIrmuvC4SIIqx5uJnxY=
 github.com/argoproj/argo-workflows/v3 v3.6.5 h1:0dvQr+CrhYgCc7ZJ4ZxusLVL/LKwHnpkT1lw/BP4+W4=
 github.com/argoproj/argo-workflows/v3 v3.6.5/go.mod h1:w6kuZAqk9vLskhg8hT/67xCu89SFq5FE6sFk5POQD0o=
 github.com/argoproj/pkg v0.13.7-0.20240704113442-a69fd34a8117 h1:iOmb5RDUnQ80ZLaBYCbfgNxMJ7qC0boM267nlzMyFjo=

@@ -1,6 +1,7 @@
 module github.com/stackrox/infra
 
 go 1.23.1
+
 require (
 	cloud.google.com/go/bigquery v1.66.2
 	cloud.google.com/go/storage v1.50.0
@@ -49,6 +50,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.3.0 // indirect
 	github.com/Masterminds/sprig/v3 v3.3.0 // indirect
 	github.com/apache/arrow/go/v15 v15.0.2 // indirect
+	github.com/argoproj/argo-events v1.9.1 // indirect
 	github.com/argoproj/pkg v0.13.7-0.20240704113442-a69fd34a8117 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
