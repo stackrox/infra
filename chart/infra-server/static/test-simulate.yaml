@@ -64,7 +64,16 @@ spec:
         source: |
           set -x
 
-          if [[ "{{ "{{" }}inputs.parameters.test-gcs{{ "}}" }}" == "true" ]]; then
+          delay() {
+            start=0
+            while sleep 1; do
+              if [[ $((start++)) -ge {{ "{{" }}inputs.parameters.delay-seconds{{ "}}" }} ]]; then
+                break
+              fi
+            done
+          }
+
+          upload_or_delete_gcs_object() {
             gcloud auth activate-service-account --key-file /tmp/google-credentials.json
             gcloud config set core/disable_prompts True
 
@@ -81,14 +90,16 @@ spec:
               echo "File does not exist. Proceeding to upload."
               gsutil cp "${FILE}" "${DESTINATION}"
             fi
+          }
+
+          if [[ "{{ "{{" }}inputs.parameters.test-gcs{{ "}}" }}" == "true" ]]; then
+            upload_or_delete_gcs_object
           fi
 
-          start=0
-          while sleep 1; do
-            if [[ $((start++)) -ge {{ "{{" }}inputs.parameters.delay-seconds{{ "}}" }} ]]; then
-              break
-            fi
-          done
+          if [[ {{ "{{" }}inputs.parameters.delay-seconds{{ "}}" }} -gt 0 ]]; then
+            delay
+          fi
+
           [[ "{{ "{{" }}inputs.parameters.outcome{{ "}}" }}" == "success" ]] || exit 1
 
         volumeMounts:

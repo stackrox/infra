@@ -32,9 +32,7 @@ func TestClusterCanRunThroughStandardLifecycle(t *testing.T) {
 	assert.True(t, exists)
 	utils.AssertStatusBecomes(t, clusterID, "DESTROYING")
 	utils.AssertStatusBecomes(t, clusterID, "FINISHED")
-	exists, err = utils.CheckGCSObjectExists(ctx, clusterID)
-	assert.NoError(t, err)
-	assert.False(t, exists)
+	utils.CheckGCSObjectEventuallyDeleted(ctx, t, clusterID)
 }
 
 func TestClusterCanFailInCreate(t *testing.T) {

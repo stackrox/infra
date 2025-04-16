@@ -1227,7 +1227,7 @@
     - name: main-image
       description: StackRox Central image Docker name
       value: quay.io/stackrox-io/main:{{ .Chart.Annotations.acsDemoVersion }}
-      help: |
+      help: |g
         This must be a fully qualified image e.g. quay.io/stackrox-io/main:{{ .Chart.Annotations.acsDemoVersion }}.
         Private images from quay.io/rhacs-eng and stackrox.io (legacy) can also be used.
         Other public images should also be OK.
@@ -1243,7 +1243,7 @@
       value: ""
     - name: create-delay-seconds
       description: how long to spend in create
-      value: "10"
+      value: "0"
       kind: optional
     - name: create-outcome
       description: success or fail
@@ -1251,7 +1251,7 @@
       kind: optional
     - name: destroy-delay-seconds
       description: how long to spend in destroy
-      value: "10"
+      value: "0"
       kind: optional
     - name: destroy-outcome
       description: success or fail
