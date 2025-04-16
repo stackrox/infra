@@ -16,6 +16,8 @@ spec:
         value: ""
       - name: destroy-outcome
         value: ""
+      - name: test-gcs
+        value: ""
 
   volumes:
     - name: credentials
@@ -33,6 +35,8 @@ spec:
                 value: '{{ "{{" }}workflow.parameters.create-delay-seconds{{ "}}" }}'
               - name: outcome
                 value: '{{ "{{" }}workflow.parameters.create-outcome{{ "}}" }}'
+              - name: test-gcs
+                value: '{{ "{{"}}workflow.parameters.test-gcs{{ "}}" }}'
         - - name: wait
             template: wait
     - name: stop
@@ -45,33 +49,38 @@ spec:
                 value: '{{ "{{" }}workflow.parameters.destroy-delay-seconds{{ "}}" }}'
               - name: outcome
                 value: '{{ "{{" }}workflow.parameters.destroy-outcome{{ "}}" }}'
+              - name: test-gcs
+                value: '{{ "{{"}}workflow.parameters.test-gcs{{ "}}" }}'
 
     - name: simulate
       inputs:
         parameters:
         - name: delay-seconds
         - name: outcome
+        - name: test-gcs
       script:
         image: gcr.io/google.com/cloudsdktool/google-cloud-cli:stable
         command: [bash]
         source: |
           set -x
 
-          gcloud auth activate-service-account --key-file /tmp/google-credentials.json
-          gcloud config set core/disable_prompts True
+          if [[ "{{ "{{" }}inputs.parameters.test-gcs{{ "}}" }}" == "true" ]]; then
+            gcloud auth activate-service-account --key-file /tmp/google-credentials.json
+            gcloud config set core/disable_prompts True
 
-          BUCKET_NAME="infra-e2e-upload-test"
-          FILE="{{ "{{" }}workflow.name{{ "}}" }}"
-          touch "${FILE}"
+            BUCKET_NAME="infra-e2e-upload-test"
+            FILE="{{ "{{" }}workflow.name{{ "}}" }}"
+            touch "${FILE}"
 
-          DESTINATION="gs://${BUCKET_NAME}/${FILE}"
+            DESTINATION="gs://${BUCKET_NAME}/${FILE}"
 
-          if gsutil -q stat "${DESTINATION}"; then
-            echo "File exists. Deleting..."
-            gsutil rm "${DESTINATION}"
-          else
-            echo "File does not exist. Proceeding to upload."
-            gsutil cp "${FILE}" "${DESTINATION}"
+            if gsutil -q stat "${DESTINATION}"; then
+              echo "File exists. Deleting..."
+              gsutil rm "${DESTINATION}"
+            else
+              echo "File does not exist. Proceeding to upload."
+              gsutil cp "${FILE}" "${DESTINATION}"
+            fi
           fi
 
           start=0

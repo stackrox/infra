@@ -98,6 +98,7 @@ func TestClusterCanExpireByChangingLifespan(t *testing.T) {
 	clusterID, err := mock.InfractlCreateCluster(
 		"test-simulate", utils.GetUniqueClusterName("for-expire"),
 		"--lifespan=5m",
+		"--arg=test-gcs=true",
 	)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, clusterID)
