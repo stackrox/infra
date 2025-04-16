@@ -1081,6 +1081,42 @@
       description: The URL for the openshift console
       tags: [url]
 
+- id: janitor-delete-gke-default
+  name: Janitor delete GKE Default
+  description: Flavor to delete GKE Default clusters
+  availability: janitorDelete
+  workflow: configuration/janitor-delete-gke-default.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      help: Name of the cluster that was leaked and should be destroyed.
+    - name: gcp-zone
+      description: Google Cloud zone to delete infrastructure from.
+      value: us-central1-a
+
+- id: janitor-delete-openshift-4
+  name: Janitor delete Openshift
+  description: Flavor to delete Openshift 4 clusters
+  availability: janitorDelete
+  workflow: configuration/janitor-delete-openshift-4.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      help: Name of the cluster that was leaked and should be destroyed.
+
+- id: janitor-delete-openshift-rosa
+  name: Janitor delete ROSA
+  description: Flavor to delete ROSA (incl HCP) clusters
+  availability: janitorDelete
+  workflow: configuration/janitor-delete-openshift-rosa.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      help: Name of the cluster that was leaked and should be destroyed.
+    - name: aws-region
+      description: AWS region to delete from.
+      value: us-east-1
+      kind: optional
 
 {{ if ne .Values.environment "production" -}}
 #################
@@ -1225,4 +1261,17 @@
       description: whether to upload or delete a test artifact in GCS
       value: "false"
       kind: optional
+
+################
+# Test Janitor #
+################
+- id: test-janitor-delete
+  name: Test Janitor delete
+  description: Flavor to test delete
+  availability: janitorDelete
+  workflow: configuration/test-janitor-delete.yaml
+  parameters:
+    - name: name
+      description: cluster name
+      help: Name of the cluster that was leaked and should be destroyed.
 {{ end }}

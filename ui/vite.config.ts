@@ -19,7 +19,6 @@ export default defineConfig(({ mode }) => {
       devServerPlugin(),
       sourcemapPlugin(),
       buildPathPlugin(),
-      basePlugin(),
       importPrefixPlugin(),
       htmlPlugin(mode),
 
@@ -119,20 +118,6 @@ function buildPathPlugin(): Plugin {
         build: {
           outDir: BUILD_PATH || 'build',
         },
-      };
-    },
-  };
-}
-
-// Migration guide: Follow the guide below and remove homepage field in package.json
-// https://vitejs.dev/config/shared-options.html#base
-function basePlugin(): Plugin {
-  return {
-    name: 'base-plugin',
-    config(_, { mode }) {
-      const { PUBLIC_URL } = loadEnv(mode, '.', ['PUBLIC_URL']);
-      return {
-        base: PUBLIC_URL || '',
       };
     },
   };
