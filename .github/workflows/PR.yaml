@@ -34,7 +34,7 @@ jobs:
         with:
           flavor: gke-default
           name: infra-pr-${{ github.event.pull_request.number }}
-          args: machine-type=e2-medium,nodes=3,gcp-image-type=ubuntu_containerd
+          args: machine-type=e2-standard-4,nodes=3,gcp-image-type=ubuntu_containerd
           lifespan: ${{ github.actor == 'dependabot[bot]' && '1h' || '24h' }}
           wait: true
           token: ${{ secrets.INFRA_TOKEN }}
