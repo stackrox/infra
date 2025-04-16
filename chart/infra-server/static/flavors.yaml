@@ -1227,7 +1227,7 @@
     - name: main-image
       description: StackRox Central image Docker name
       value: quay.io/stackrox-io/main:{{ .Chart.Annotations.acsDemoVersion }}
-      help: |g
+      help: |
         This must be a fully qualified image e.g. quay.io/stackrox-io/main:{{ .Chart.Annotations.acsDemoVersion }}.
         Private images from quay.io/rhacs-eng and stackrox.io (legacy) can also be used.
         Other public images should also be OK.
