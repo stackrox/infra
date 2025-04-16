@@ -21,6 +21,7 @@ func TestClusterCanRunThroughStandardLifecycle(t *testing.T) {
 	clusterID, err := mock.InfractlCreateCluster(
 		"test-simulate", utils.GetUniqueClusterName("standard"),
 		"--lifespan=10s",
+		"--arg=test-gcs=true",
 	)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, clusterID)
@@ -44,6 +45,7 @@ func TestClusterCanFailInCreate(t *testing.T) {
 		"test-simulate", utils.GetUniqueClusterName("create-fails"),
 		"--lifespan=30s",
 		"--arg=create-outcome=fail",
+		"--arg=test-gcs=true",
 	)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, clusterID)
@@ -74,6 +76,7 @@ func TestClusterCanBeDeleted(t *testing.T) {
 	clusterID, err := mock.InfractlCreateCluster(
 		"test-simulate", utils.GetUniqueClusterName("for-deletion"),
 		"--lifespan=5m",
+		"--arg=test-gcs=true",
 	)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, clusterID)
