@@ -4,6 +4,7 @@ metadata:
   generateName: gke-default-
 spec:
   entrypoint: start
+  onExit: stop
   arguments:
     parameters:
       - name: name
@@ -30,12 +31,15 @@ spec:
             template: create
         - - name: wait
             template: wait
+
+    - name: stop
+      steps:
         - - name: destroy
             template: destroy
             arguments:
               parameters:
                 - name: name
-                  value: '{{ "{{" }}steps.create.outputs.parameters.cluster_name{{ "}}" }}'
+                  value: '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
 
     - name: create
       activeDeadlineSeconds: 3600

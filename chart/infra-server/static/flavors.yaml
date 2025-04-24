@@ -1243,7 +1243,7 @@
       value: ""
     - name: create-delay-seconds
       description: how long to spend in create
-      value: "10"
+      value: "0"
       kind: optional
     - name: create-outcome
       description: success or fail
@@ -1251,11 +1251,15 @@
       kind: optional
     - name: destroy-delay-seconds
       description: how long to spend in destroy
-      value: "10"
+      value: "0"
       kind: optional
     - name: destroy-outcome
       description: success or fail
       value: success
+      kind: optional
+    - name: test-gcs
+      description: whether to upload or delete a test artifact in GCS
+      value: "false"
       kind: optional
 
 ################
