@@ -128,3 +128,9 @@ spec:
               secretKeyRef:
                 name: azure-secrets
                 key: AZURE_SP_TENANT
+        volumeMounts:
+          - name: data
+            mountPath: /data
+      volumes:
+        - name: data
+          emptyDir: {}

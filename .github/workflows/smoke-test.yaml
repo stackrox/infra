@@ -37,18 +37,18 @@ jobs:
     strategy:
       matrix:
         flavors: [
-          {name: "demo", "args": "", "uniqueness": "a"},
-          {name: "aks", "args": "", "uniqueness": "b"},
-          {name: "aro", "args": "", "uniqueness": "c"},
-          {name: "eks", "args": "user-arns=arn:aws:iam::393282794030:user/joey@stackrox.com", "uniqueness": "d"},
-          {name: "gke", "args": "", "uniqueness": "e"},
-          {name: "ibmroks", "args": "", "uniqueness": "f"},
-          {name: "ocp-4", "args": "", "uniqueness": "g"},
-          {name: "ocp-4-demo", "args": "", "uniqueness": "h"},
-          {name: "ocp-4-perf-scale", "args": "", "uniqueness": "i"},
+          x{name: "demo", "args": "", "uniqueness": "a"},
+          x{name: "aks", "args": "", "uniqueness": "b"},
+          x{name: "aro", "args": "", "uniqueness": "c"},
+          x{name: "eks", "args": "user-arns=arn:aws:iam::393282794030:user/joey@stackrox.com", "uniqueness": "d"}, # --> grep fails after deletion
+          x{name: "gke", "args": "", "uniqueness": "e"},
+          x{name: "ibmroks", "args": "", "uniqueness": "f"},
+          x{name: "ocp-4", "args": "", "uniqueness": "g"},
+          x{name: "ocp-4-demo", "args": "", "uniqueness": "h"},
+          x{name: "ocp-4-perf-scale", "args": "", "uniqueness": "i"},
           {name: "osd-on-aws", "args": "", "uniqueness": "k"},
           {name: "osd-on-gcp", "args": "", "uniqueness": "l"},
-          {name: "qa-demo", "args": "main-image=quay.io/rhacs-eng/main:4.7.0", "uniqueness": "m"},
+          x{name: "qa-demo", "args": "main-image=quay.io/rhacs-eng/main:4.7.0", "uniqueness": "m"},
           {name: "rosa", "args": "", "uniqueness": "n"},
           {name: "rosahcp", "args": "", "uniqueness": "o"},
         ]
