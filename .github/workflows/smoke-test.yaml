@@ -27,8 +27,56 @@ jobs:
         echo "Cluster: ${{ inputs.cluster }}"
         echo "Prefix: ${{ inputs.prefix }}"
 
+  create-cluster:
+    runs-on: ubuntu-latest
+    outputs:
+      cluster-name: ${{ steps.determine-cluster-name.outputs.cluster-name }}
+    steps:
+      - name: Determine cluster name
+        id: determine-cluster-name
+        run: |
+          echo "cluster-name=daily-smoke-test-$(date +%s)" >> ${GITHUB_OUTPUT}
+
+      - uses: stackrox/actions/infra/create-cluster@v1
+        with:
+          token: ${{ secrets.INFRA_TOKEN }}
+          flavor: gke-default
+          name: ${{ steps.determine-cluster-name.outputs.cluster-name }}
+          lifespan: 8h
+          wait: true
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Authenticate to GCloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.INFRA_CI_AUTOMATION_GCP_SA }}
+
+      - name: Set up Cloud SDK
+        uses: "google-github-actions/setup-gcloud@v2"
+        with:
+          install_components: "gke-gcloud-auth-plugin"
+
+      - name: Download production infractl
+        uses: stackrox/actions/infra/install-infractl@v1
+
+      - name: Download artifacts
+        env:
+          INFRA_TOKEN: ${{ secrets.INFRA_TOKEN }}
+        run: |
+          /home/runner/.local/bin/infractl artifacts "${{ steps.determine-cluster-name.outputs.cluster-name }}" -d /home/runner/artifacts >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Deploy infra to smoke test cluster
+        run: |
+          ENVIRONMENT=development TEST_MODE=true make install-argo clean-argo-config install-monitoring helm-deploy
+
   smoke-test:
     runs-on: ubuntu-latest
+    needs: [create-cluster]
     env:
       KUBECONFIG: /home/runner/artifacts/kubeconfig
       INFRA_TOKEN_PROD: ${{ secrets.INFRA_TOKEN }}
@@ -67,12 +115,12 @@ jobs:
       - name: Download production infractl
         uses: stackrox/actions/infra/install-infractl@v1
 
-      - name: Download artifacts for cluster ${{ inputs.cluster }}
+      - name: Download artifacts for cluster ${{ needs.create-cluster.outputs.cluster-name }}
         env:
           INFRA_TOKEN: ${{ env.INFRA_TOKEN_PROD }}
         run: |
           set -uo pipefail
-          infractl artifacts "${{ inputs.cluster }}" -d "/home/runner/artifacts" >> "$GITHUB_STEP_SUMMARY"
+          infractl artifacts "${{ needs.create-cluster.outputs.cluster-name }}" -d "/home/runner/artifacts" >> "$GITHUB_STEP_SUMMARY"
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
           sleep 10
 
@@ -87,3 +135,4 @@ jobs:
           endpoint: localhost:8443
           insecure: true
           args: ${{ matrix.flavors.args }}
+          no-slack: true
