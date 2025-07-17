@@ -301,7 +301,7 @@
 
     - name: ssd-storage-class
       description: Ensure an SSD StorageClass is the default StorageClass for the cluster
-      value: false
+      value: true
       kind: optional
 
   artifacts:
@@ -452,7 +452,7 @@
 
     - name: ssd-storage-class
       description: Ensure an SSD StorageClass is the default StorageClass for the cluster
-      value: false
+      value: true
       kind: optional
 
   artifacts:
@@ -581,7 +581,7 @@
 
     - name: ssd-storage-class
       description: Ensure an SSD StorageClass is the default StorageClass for the cluster
-      value: false
+      value: true
       kind: optional
 
   artifacts:
