@@ -189,6 +189,11 @@
       value: us-central1-a
       kind: optional
 
+    - name: set-ssd-storage-default
+      description: Ensure an SSD StorageClass is the default StorageClass for the cluster
+      value: false
+      kind: optional
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster

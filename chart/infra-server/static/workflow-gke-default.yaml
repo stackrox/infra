@@ -18,6 +18,8 @@ spec:
         value: ""
       - name: gcp-zone
         value: ""
+      - name: set-ssd-storage-default
+        value: ""
 
   volumes:
     - name: credentials
@@ -79,6 +81,7 @@ spec:
           - --pod-security-policy={{ "{{" }}workflow.parameters.pod-security-policy{{ "}}" }}
           - --gcp-image-type={{ "{{" }}workflow.parameters.gcp-image-type{{ "}}" }}
           - --gcp-zone={{ "{{" }}workflow.parameters.gcp-zone{{ "}}" }}
+          - --set-ssd-storage-default={{ "{{" }}workflow.parameters.set-ssd-storage-default{{ "}}" }}
         volumeMounts:
           - name: credentials
             mountPath: /tmp
