@@ -284,6 +284,11 @@
       value: false
       kind: optional
 
+    - name: install-hypershift
+      description: should Hypershift be installed
+      value: false
+      kind: optional
+
     - name: keep-failed-cluster
       description: Keep failed cluster
       value: false

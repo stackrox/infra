@@ -23,6 +23,7 @@ spec:
       - name: pull-secret
         value: ""
       - name: fips-enabled
+      - name: install-hypershift
       - name: trusted-certs-enabled
       - name: credentials-mode
       - name: keep-failed-cluster
@@ -101,6 +102,16 @@ spec:
                 key: google-credentials.json
           - name: GCP_PROJECT
             value : "acs-team-temp-dev"
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: aws-access-secrets
+                key: AWS_ACCESS_KEY_ID
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: aws-access-secrets
+                key: AWS_SECRET_ACCESS_KEY
           - name: PULL_SECRET
             valueFrom:
               secretKeyRef:
@@ -122,6 +133,8 @@ spec:
             value: '{{ "{{" }}workflow.parameters.region{{ "}}" }}'
           - name: FIPS_ENABLED
             value: '{{ "{{" }}workflow.parameters.fips-enabled{{ "}}" }}'
+          - name: INSTALL_HYPERSHIFT
+            value: '{{ "{{" }}workflow.parameters.install-hypershift{{ "}}" }}'
           - name: TRUSTED_CERTS_ENABLED
             value: '{{ "{{" }}workflow.parameters.trusted-certs-enabled{{ "}}" }}'
           - name: CREDENTIALS_MODE
