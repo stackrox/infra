@@ -55,7 +55,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Authenticate to GCloud
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v3
         with:
           credentials_json: ${{ secrets.INFRA_CI_AUTOMATION_GCP_SA }}
 
