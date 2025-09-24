@@ -50,6 +50,6 @@ updates:
       interval: weekly
       day: wednesday
     assignees:
-    - stackrox/infra
+      - stackrox/infra
     labels:
       - auto-merge
