@@ -8,8 +8,8 @@ readonly GREEN='\033[0;32m'
 readonly NC='\033[0m' # No Color
 
 # Script directory and project root
-readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 # Files to manage
 readonly MAIN_GO_MOD="${PROJECT_ROOT}/go.mod"
