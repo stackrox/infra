@@ -1292,9 +1292,8 @@
   name: Test Deprecated Flavor
   description: A deprecated test flavor that should not be listed by default
   availability: deprecated
-  workflow: configuration/test-simulate.yaml
+  workflow: configuration/test-url-artifact.yaml
   parameters:
     - name: name
       description: cluster name
-      value: ""
 {{ end }}
