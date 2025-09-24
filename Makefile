@@ -282,3 +282,15 @@ secrets-revert:
 .PHONY: prepare-local-server-debugging
 prepare-local-server-debugging:
 	@./scripts/local-dev/prepare.sh
+
+######################
+## Go Version Sync  ##
+######################
+
+.PHONY: sync-go-version
+sync-go-version:
+	@./scripts/ci/sync-go-version.sh sync
+
+.PHONY: check-needs-sync-go-version
+check-needs-sync-go-version:
+	@./scripts/ci/sync-go-version.sh check
