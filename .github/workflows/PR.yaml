@@ -51,8 +51,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
         with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
           path: go/src/github.com/stackrox/infra
 
       - name: Add PR comment for deploy to dev
