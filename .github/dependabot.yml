@@ -5,42 +5,51 @@
 
 version: 2
 updates:
-  - package-ecosystem: 'npm'
-    directory: 'ui/'
-    open-pull-requests-limit: 0
+  - package-ecosystem: npm
+    directory: ui/
     schedule:
-      interval: 'weekly'
-      day: 'wednesday'
-    reviewers:
-      - 'stackrox/ui-dep-updaters'
-      - 'stackrox/infra'
+      interval: weekly
+      day: wednesday
+    assignees:
+      - stackrox/ui-dep-updaters
+      - stackrox/infra
 
-  - package-ecosystem: 'gomod'
-    directory: '/'
+  - package-ecosystem: gomod
+    directory: /
     schedule:
-      interval: 'weekly'
-      day: 'wednesday'
-    reviewers:
-      - 'stackrox/infra'
+      interval: weekly
+      day: wednesday
+    assignees:
+      - stackrox/infra
     labels:
-      - 'auto-merge'
+      - auto-merge
 
-  - package-ecosystem: 'docker'
-    directory: 'image/'
+  - package-ecosystem: gomod
+    directory: scripts/local-dev/
     schedule:
-      interval: 'weekly'
-      day: 'wednesday'
-    reviewers:
-      - 'stackrox/infra'
+      interval: weekly
+      day: wednesday
+    assignees:
+      - stackrox/infra
     labels:
-      - 'auto-merge'
+      - auto-merge
 
-  - package-ecosystem: 'github-actions'
-    directory: '/'
+  - package-ecosystem: docker
+    directory: image/
     schedule:
-      interval: 'weekly'
-      day: 'wednesday'
-    reviewers:
-    - 'stackrox/infra'
+      interval: weekly
+      day: wednesday
+    assignees:
+      - stackrox/infra
     labels:
-      - 'auto-merge'
+      - auto-merge
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: wednesday
+    assignees:
+    - stackrox/infra
+    labels:
+      - auto-merge
