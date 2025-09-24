@@ -84,6 +84,8 @@ function FlavorCards({ showAllFlavors = false }: FlavorCardsProps): ReactElement
                     ? 'green'
                     : flavor.Availability === 'beta'
                     ? 'orange'
+                    : flavor.Availability === 'deprecated'
+                    ? 'red'
                     : 'orangered'
                 }
               >

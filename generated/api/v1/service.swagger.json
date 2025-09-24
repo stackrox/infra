@@ -461,10 +461,11 @@
         "stable",
         "default",
         "test",
-        "janitorDelete"
+        "janitorDelete",
+        "deprecated"
       ],
       "default": "alpha",
-      "description": "availability represents the availability classification levels.\n\n - alpha: alpha is completely experemental, and is not expected to work in any way.\n - beta: beta is being tested, and is expected to work with minor issues.\n - stable: stable is available for public consumption, and works without issue.\n - default: default is stable, and available for customer demo consumption.\nExactly 1 flavor should be configured as default.\n - test: test are flavors for e2e and unit testing\n - janitorDelete: janitorDelete is for deleting clusters with the Infra Janitor."
+      "description": "availability represents the availability classification levels.\n\n - alpha: alpha is completely experemental, and is not expected to work in any way.\n - beta: beta is being tested, and is expected to work with minor issues.\n - stable: stable is available for public consumption, and works without issue.\n - default: default is stable, and available for customer demo consumption.\nExactly 1 flavor should be configured as default.\n - test: test are flavors for e2e and unit testing\n - janitorDelete: janitorDelete is for deleting clusters with the Infra Janitor.\n - deprecated: deprecated is a flavor that is no longer supported and will be removed in the future."
     },
     "LifespanRequestMethod": {
       "type": "string",

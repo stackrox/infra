@@ -193,6 +193,9 @@ message Flavor {
 
         // janitorDelete is for deleting clusters with the Infra Janitor.
         janitorDelete = 5;
+
+        // deprecated is a flavor that is no longer supported and will be removed in the future.
+        deprecated = 6;
     }
 
     // Description is an availability classification for the flavor.
