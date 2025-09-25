@@ -6,15 +6,32 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/backoff"
 	"google.golang.org/grpc/credentials"
 )
 
 // GetGRPCConnection gets a grpc connection to the infra-server with the correct auth.
 func GetGRPCConnection() (*grpc.ClientConn, context.Context, func(), error) {
+	// Disable Event Engine to fix authentication handshake issues
+	// This addresses known performance and timeout issues with gRPC v1.75+
+	os.Setenv("GRPC_POLL_STRATEGY", "poll")
+
+	ctx, cancel := ContextWithTimeout()
 	allDialOpts := []grpc.DialOption{
 		grpc.WithPerRPCCredentials(bearerToken(token())),
+		// Add connection timeout to prevent hanging on handshake
+		grpc.WithConnectParams(grpc.ConnectParams{
+			Backoff: backoff.Config{
+				BaseDelay:  1.0 * time.Second,
+				Multiplier: 1.6,
+				Jitter:     0.2,
+				MaxDelay:   120 * time.Second,
+			},
+			MinConnectTimeout: 20 * time.Second,
+		}),
 	}
 
 	// The insecure flag (--insecure) was given.
@@ -28,14 +45,11 @@ func GetGRPCConnection() (*grpc.ClientConn, context.Context, func(), error) {
 		allDialOpts = append(allDialOpts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{})))
 	}
 
-	// Create connection (lazy with grpc.NewClient)
+	// Dial our specified endpoint.
 	conn, err := grpc.NewClient(endpoint(), allDialOpts...)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, cancel, err
 	}
-
-	// Create timeout context when actually needed for RPC calls
-	ctx, cancel := ContextWithTimeout()
 
 	// done cancels the underlying context, and closes the gRPC connection.
 	done := func() {
