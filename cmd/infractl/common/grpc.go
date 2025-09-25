@@ -13,7 +13,6 @@ import (
 
 // GetGRPCConnection gets a grpc connection to the infra-server with the correct auth.
 func GetGRPCConnection() (*grpc.ClientConn, context.Context, func(), error) {
-	ctx, cancel := ContextWithTimeout()
 	allDialOpts := []grpc.DialOption{
 		grpc.WithPerRPCCredentials(bearerToken(token())),
 	}
@@ -29,11 +28,14 @@ func GetGRPCConnection() (*grpc.ClientConn, context.Context, func(), error) {
 		allDialOpts = append(allDialOpts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{})))
 	}
 
-	// Dial our specified endpoint.
+	// Create connection (lazy with grpc.NewClient)
 	conn, err := grpc.NewClient(endpoint(), allDialOpts...)
 	if err != nil {
-		return nil, nil, cancel, err
+		return nil, nil, nil, err
 	}
+
+	// Create timeout context when actually needed for RPC calls
+	ctx, cancel := ContextWithTimeout()
 
 	// done cancels the underlying context, and closes the gRPC connection.
 	done := func() {
