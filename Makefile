@@ -33,11 +33,11 @@ image-name:
 ##############
 ## Protobuf ##
 ##############
-# Tool versions - updated for gRPC v1.75+ compatibility
-protoc-version = 3.25.1
-protoc-gen-go-version = 1.34.2
+# Tool versions - updated to latest versions (September 2025)
+protoc-version = 32.0
+protoc-gen-go-version = 1.36.9
 protoc-gen-go-grpc-version = 1.5.1
-protoc-gen-grpc-gateway-version = 2.22.0
+protoc-gen-grpc-gateway-version = 2.27.2
 protoc-gen-swagger-version = 1.16.0
 
 # Tool binary paths
