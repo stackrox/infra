@@ -131,7 +131,7 @@ func (s *server) RunServer() (<-chan error, error) {
 	}
 
 	log.Log(logging.INFO, "starting gRPC-Gateway client", "connect-address", connectAddress)
-	conn, err := grpc.Dial(connectAddress, dialOption)
+	conn, err := grpc.NewClient(connectAddress, dialOption)
 	if err != nil {
 		return nil, errors.Wrap(err, "dialing gRPC")
 	}
