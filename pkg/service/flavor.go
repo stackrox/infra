@@ -13,6 +13,7 @@ import (
 )
 
 type flavorImpl struct {
+	v1.UnimplementedFlavorServiceServer
 	registry *flavor.Registry
 }
 

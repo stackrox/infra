@@ -70,6 +70,7 @@ const (
 )
 
 type clusterImpl struct {
+	v1.UnimplementedClusterServiceServer
 	k8sWorkflowsClient  workflowv1.WorkflowInterface
 	k8sPodsClient       k8sv1.PodInterface
 	registry            *flavor.Registry

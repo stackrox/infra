@@ -12,6 +12,7 @@ import (
 )
 
 type userImpl struct {
+	v1.UnimplementedUserServiceServer
 	generate func(v1.ServiceAccount) (string, error)
 }
 

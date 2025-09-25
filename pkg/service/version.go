@@ -11,7 +11,9 @@ import (
 	"google.golang.org/grpc"
 )
 
-type versionImpl struct{}
+type versionImpl struct {
+	v1.UnimplementedVersionServiceServer
+}
 
 var (
 	_ middleware.APIService   = (*versionImpl)(nil)

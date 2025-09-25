@@ -32,6 +32,7 @@ import (
 )
 
 type FakeClusterServiceClient struct {
+	v1.UnimplementedClusterServiceServer
 	infoFn      func(ctx context.Context, clusterID *v1.ResourceByID) (*v1.Cluster, error)
 	listFn      func(ctx context.Context, req *v1.ClusterListRequest) (*v1.ClusterListResponse, error)
 	lifespanFn  func(ctx context.Context, req *v1.LifespanRequest) (*durationpb.Duration, error)

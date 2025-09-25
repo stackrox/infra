@@ -17,6 +17,7 @@ import (
 const bufferSize = 1000 * 1024
 
 type cliImpl struct {
+	v1.UnimplementedCliServiceServer
 	staticDir string
 }
 

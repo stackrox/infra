@@ -19,6 +19,7 @@ import (
 )
 
 type statusImpl struct {
+	v1.UnimplementedInfraStatusServiceServer
 	k8sConfigMapClient k8sv1.ConfigMapInterface
 	infraNamespace     string
 	infraStatusName    string
