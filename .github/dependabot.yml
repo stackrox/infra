@@ -24,16 +24,6 @@ updates:
     labels:
       - auto-merge
 
-  - package-ecosystem: gomod
-    directory: scripts/local-dev/
-    schedule:
-      interval: weekly
-      day: wednesday
-    assignees:
-      - stackrox/infra
-    labels:
-      - auto-merge
-
   - package-ecosystem: docker
     directory: image/
     schedule:
