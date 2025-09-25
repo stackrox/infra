@@ -13,7 +13,6 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 # Files to manage
 readonly MAIN_GO_MOD="${PROJECT_ROOT}/go.mod"
-readonly LOCALDEV_GO_MOD="${PROJECT_ROOT}/scripts/local-dev/go.mod"
 readonly DOCKERFILE="${PROJECT_ROOT}/image/Dockerfile"
 
 usage() {
@@ -28,7 +27,6 @@ Commands:
 Files managed:
     - go.mod (source of truth)
     - image/Dockerfile
-    - scripts/local-dev/go.mod
 EOF
 }
 
@@ -42,7 +40,7 @@ get_dockerfile_version() {
 }
 
 cleanup_backups() {
-    rm -f "$DOCKERFILE.bak" "$LOCALDEV_GO_MOD.bak"
+    rm -f "$DOCKERFILE.bak"
 }
 
 sync_versions() {
@@ -55,23 +53,20 @@ sync_versions() {
     trap cleanup_backups EXIT INT TERM
 
     sed -i.bak 's/FROM golang:[^ ]*/FROM golang:'"$go_version"'/' "$DOCKERFILE"
-    sed -i.bak 's/^go .*/go '"$go_version"'/' "$LOCALDEV_GO_MOD"
 
     echo -e "${GREEN}✅ Go version synced to $go_version${NC}"
 }
 
 check_versions() {
-    local go_version dockerfile_version localdev_version
+    local go_version dockerfile_version
 
     go_version=$(get_go_mod_version "${MAIN_GO_MOD}")
     dockerfile_version=$(get_dockerfile_version)
-    localdev_version=$(get_go_mod_version "${LOCALDEV_GO_MOD}")
 
     echo "go.mod: $go_version"
     echo "Dockerfile: $dockerfile_version"
-    echo "local-dev: $localdev_version"
 
-    if [[ "$go_version" == "$dockerfile_version" && "$go_version" == "$localdev_version" ]]; then
+    if [[ "$go_version" == "$dockerfile_version" ]]; then
         echo -e "${GREEN}✅ All versions synchronized${NC}"
         return 0
     else
