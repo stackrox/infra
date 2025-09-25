@@ -1284,4 +1284,16 @@
     - name: name
       description: cluster name
       help: Name of the cluster that was leaked and should be destroyed.
+
+####################
+#  Test Deprecated #
+####################
+- id: test-deprecated
+  name: Test Deprecated Flavor
+  description: A deprecated test flavor that should not be listed by default
+  availability: deprecated
+  workflow: configuration/test-url-artifact.yaml
+  parameters:
+    - name: name
+      description: cluster name
 {{ end }}

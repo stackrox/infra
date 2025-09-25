@@ -1,6 +1,7 @@
 package mock
 
 import (
+	"fmt"
 	"os"
 
 	infraClusterCreate "github.com/stackrox/infra/cmd/infractl/cluster/create"
@@ -171,10 +172,10 @@ func InfractlFlavorGet(flavorID string) (FlavorResponse, error) {
 }
 
 // InfractlFlavorList is a wrapper for 'infractl flavor list --json'.
-func InfractlFlavorList() (FlavorListResponse, error) {
+func InfractlFlavorList(all bool) (FlavorListResponse, error) {
 	flavorListCommand := infraFlavorList.Command()
 	jsonData := FlavorListResponse{}
-	buf := PrepareCommand(flavorListCommand, true)
+	buf := PrepareCommand(flavorListCommand, true, fmt.Sprintf("--all=%t", all))
 	err := flavorListCommand.Execute()
 	if err != nil {
 		return jsonData, err

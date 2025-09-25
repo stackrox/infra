@@ -19,7 +19,7 @@ import globalAxios, { AxiosPromise, AxiosInstance } from 'axios';
 import { BASE_PATH, COLLECTION_FORMATS, RequestArgs, BaseAPI, RequiredError } from './base';
 
 /**
- * availability represents the availability classification levels.   - alpha: alpha is completely experemental, and is not expected to work in any way.  - beta: beta is being tested, and is expected to work with minor issues.  - stable: stable is available for public consumption, and works without issue.  - default: default is stable, and available for customer demo consumption. Exactly 1 flavor should be configured as default.
+ * availability represents the availability classification levels.   - alpha: alpha is completely experemental, and is not expected to work in any way.  - beta: beta is being tested, and is expected to work with minor issues.  - stable: stable is available for public consumption, and works without issue.  - default: default is stable, and available for customer demo consumption. Exactly 1 flavor should be configured as default.  - test: test are flavors for e2e and unit testing  - janitorDelete: janitorDelete is for deleting clusters with the Infra Janitor.  - deprecated: deprecated is a flavor that is no longer supported and will be removed in the future.
  * @export
  * @enum {string}
  */
@@ -28,6 +28,9 @@ export enum Flavoravailability {
   Beta = 'beta',
   Stable = 'stable',
   Default = 'default',
+  Test = 'test',
+  JanitorDelete = 'janitorDelete',
+  Deprecated = 'deprecated',
 }
 
 /**
@@ -207,6 +210,12 @@ export interface V1Cluster {
    * @memberof V1Cluster
    */
   Connect?: string;
+  /**
+   * Parameters is a list of options to configure the cluster creation.
+   * @type {Array<V1Parameter>}
+   * @memberof V1Cluster
+   */
+  Parameters?: Array<V1Parameter>;
 }
 /**
  *
@@ -319,6 +328,12 @@ export interface V1Flavor {
    * @memberof V1Flavor
    */
   Artifacts?: { [key: string]: V1FlavorArtifact };
+  /**
+   * Aliases are alternative IDs of the flavor.
+   * @type {Array<string>}
+   * @memberof V1Flavor
+   */
+  Aliases?: Array<string>;
 }
 /**
  * FlavorArtifact represents a single artifact that is produced by a flavor.
@@ -363,6 +378,25 @@ export interface V1FlavorListResponse {
    * @memberof V1FlavorListResponse
    */
   Flavors?: Array<V1Flavor>;
+}
+/**
+ *
+ * @export
+ * @interface V1InfraStatus
+ */
+export interface V1InfraStatus {
+  /**
+   * MaintenanceActive is an indicator whether a maintenance is ongoing.
+   * @type {boolean}
+   * @memberof V1InfraStatus
+   */
+  MaintenanceActive?: boolean;
+  /**
+   * Maintainer is the email of the person currently doing maintenance.
+   * @type {string}
+   * @memberof V1InfraStatus
+   */
+  Maintainer?: string;
 }
 /**
  *
@@ -520,11 +554,29 @@ export interface V1ServiceAccount {
    */
   Description?: string;
   /**
-   * Email is the StackRox email address for the service account.
+   * Email is the Red Hat email address for the service account.
    * @type {string}
    * @memberof V1ServiceAccount
    */
   Email?: string;
+  /**
+   * IssuedAt is the time of issuing the service account token.
+   * @type {string}
+   * @memberof V1ServiceAccount
+   */
+  IssuedAt?: string;
+  /**
+   * NotBefore is the beginning of service account token valid time period.
+   * @type {string}
+   * @memberof V1ServiceAccount
+   */
+  NotBefore?: string;
+  /**
+   * ExpiresAt is the end of service account token valid time period.
+   * @type {string}
+   * @memberof V1ServiceAccount
+   */
+  ExpiresAt?: string;
 }
 /**
  * Status represents the various cluster states.   - FAILED: FAILED is the state when the cluster has failed in one way or another.  - CREATING: CREATING is the state when the cluster is being created.  - READY: READY is the state when the cluster is available and ready for use.  - DESTROYING: DESTROYING is the state when the cluster is being destroyed.  - FINISHED: FINISHED is the state when the cluster has been successfully destroyed.
@@ -1081,10 +1133,20 @@ export const ClusterServiceApiAxiosParamCreator = function (configuration?: Conf
      * @summary CreateToken generates an arbitrary service account token
      * @param {boolean} [all] all indicates that all clusters should be returned, not just the ones owned by the user.
      * @param {boolean} [expired] expired indicates that expired clusters should be returned, not just the ones that are launching/ready.
+     * @param {string} [prefix] list clusters whose ID matches this prefix.
+     * @param {Array<'FAILED' | 'CREATING' | 'READY' | 'DESTROYING' | 'FINISHED'>} [allowedStatuses] filter clusters whose Status is in the list.   - FAILED: FAILED is the state when the cluster has failed in one way or another.  - CREATING: CREATING is the state when the cluster is being created.  - READY: READY is the state when the cluster is available and ready for use.  - DESTROYING: DESTROYING is the state when the cluster is being destroyed.  - FINISHED: FINISHED is the state when the cluster has been successfully destroyed.
+     * @param {Array<string>} [allowedFlavors] filter clusters whose flavor ID is in the list.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    list: async (all?: boolean, expired?: boolean, options: any = {}): Promise<RequestArgs> => {
+    list: async (
+      all?: boolean,
+      expired?: boolean,
+      prefix?: string,
+      allowedStatuses?: Array<'FAILED' | 'CREATING' | 'READY' | 'DESTROYING' | 'FINISHED'>,
+      allowedFlavors?: Array<string>,
+      options: any = {}
+    ): Promise<RequestArgs> => {
       const localVarPath = `/v1/cluster`;
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, 'https://example.com');
@@ -1103,6 +1165,18 @@ export const ClusterServiceApiAxiosParamCreator = function (configuration?: Conf
 
       if (expired !== undefined) {
         localVarQueryParameter['expired'] = expired;
+      }
+
+      if (prefix !== undefined) {
+        localVarQueryParameter['prefix'] = prefix;
+      }
+
+      if (allowedStatuses) {
+        localVarQueryParameter['allowedStatuses'] = allowedStatuses;
+      }
+
+      if (allowedFlavors) {
+        localVarQueryParameter['allowedFlavors'] = allowedFlavors;
       }
 
       const queryParameters = new URLSearchParams(localVarUrlObj.search);
@@ -1306,17 +1380,26 @@ export const ClusterServiceApiFp = function (configuration?: Configuration) {
      * @summary CreateToken generates an arbitrary service account token
      * @param {boolean} [all] all indicates that all clusters should be returned, not just the ones owned by the user.
      * @param {boolean} [expired] expired indicates that expired clusters should be returned, not just the ones that are launching/ready.
+     * @param {string} [prefix] list clusters whose ID matches this prefix.
+     * @param {Array<'FAILED' | 'CREATING' | 'READY' | 'DESTROYING' | 'FINISHED'>} [allowedStatuses] filter clusters whose Status is in the list.   - FAILED: FAILED is the state when the cluster has failed in one way or another.  - CREATING: CREATING is the state when the cluster is being created.  - READY: READY is the state when the cluster is available and ready for use.  - DESTROYING: DESTROYING is the state when the cluster is being destroyed.  - FINISHED: FINISHED is the state when the cluster has been successfully destroyed.
+     * @param {Array<string>} [allowedFlavors] filter clusters whose flavor ID is in the list.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async list(
       all?: boolean,
       expired?: boolean,
+      prefix?: string,
+      allowedStatuses?: Array<'FAILED' | 'CREATING' | 'READY' | 'DESTROYING' | 'FINISHED'>,
+      allowedFlavors?: Array<string>,
       options?: any
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1ClusterListResponse>> {
       const localVarAxiosArgs = await ClusterServiceApiAxiosParamCreator(configuration).list(
         all,
         expired,
+        prefix,
+        allowedStatuses,
+        allowedFlavors,
         options
       );
       return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
@@ -1428,12 +1511,22 @@ export const ClusterServiceApiFactory = function (
      * @summary CreateToken generates an arbitrary service account token
      * @param {boolean} [all] all indicates that all clusters should be returned, not just the ones owned by the user.
      * @param {boolean} [expired] expired indicates that expired clusters should be returned, not just the ones that are launching/ready.
+     * @param {string} [prefix] list clusters whose ID matches this prefix.
+     * @param {Array<'FAILED' | 'CREATING' | 'READY' | 'DESTROYING' | 'FINISHED'>} [allowedStatuses] filter clusters whose Status is in the list.   - FAILED: FAILED is the state when the cluster has failed in one way or another.  - CREATING: CREATING is the state when the cluster is being created.  - READY: READY is the state when the cluster is available and ready for use.  - DESTROYING: DESTROYING is the state when the cluster is being destroyed.  - FINISHED: FINISHED is the state when the cluster has been successfully destroyed.
+     * @param {Array<string>} [allowedFlavors] filter clusters whose flavor ID is in the list.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    list(all?: boolean, expired?: boolean, options?: any): AxiosPromise<V1ClusterListResponse> {
+    list(
+      all?: boolean,
+      expired?: boolean,
+      prefix?: string,
+      allowedStatuses?: Array<'FAILED' | 'CREATING' | 'READY' | 'DESTROYING' | 'FINISHED'>,
+      allowedFlavors?: Array<string>,
+      options?: any
+    ): AxiosPromise<V1ClusterListResponse> {
       return ClusterServiceApiFp(configuration)
-        .list(all, expired, options)
+        .list(all, expired, prefix, allowedStatuses, allowedFlavors, options)
         .then((request) => request(axios, basePath));
     },
     /**
@@ -1533,13 +1626,23 @@ export class ClusterServiceApi extends BaseAPI {
    * @summary CreateToken generates an arbitrary service account token
    * @param {boolean} [all] all indicates that all clusters should be returned, not just the ones owned by the user.
    * @param {boolean} [expired] expired indicates that expired clusters should be returned, not just the ones that are launching/ready.
+   * @param {string} [prefix] list clusters whose ID matches this prefix.
+   * @param {Array<'FAILED' | 'CREATING' | 'READY' | 'DESTROYING' | 'FINISHED'>} [allowedStatuses] filter clusters whose Status is in the list.   - FAILED: FAILED is the state when the cluster has failed in one way or another.  - CREATING: CREATING is the state when the cluster is being created.  - READY: READY is the state when the cluster is available and ready for use.  - DESTROYING: DESTROYING is the state when the cluster is being destroyed.  - FINISHED: FINISHED is the state when the cluster has been successfully destroyed.
+   * @param {Array<string>} [allowedFlavors] filter clusters whose flavor ID is in the list.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof ClusterServiceApi
    */
-  public list(all?: boolean, expired?: boolean, options?: any) {
+  public list(
+    all?: boolean,
+    expired?: boolean,
+    prefix?: string,
+    allowedStatuses?: Array<'FAILED' | 'CREATING' | 'READY' | 'DESTROYING' | 'FINISHED'>,
+    allowedFlavors?: Array<string>,
+    options?: any
+  ) {
     return ClusterServiceApiFp(this.configuration)
-      .list(all, expired, options)
+      .list(all, expired, prefix, allowedStatuses, allowedFlavors, options)
       .then((request) => request(this.axios, this.basePath));
   }
 
@@ -1778,6 +1881,290 @@ export class FlavorServiceApi extends BaseAPI {
   public list(all?: boolean, options?: any) {
     return FlavorServiceApiFp(this.configuration)
       .list(all, options)
+      .then((request) => request(this.axios, this.basePath));
+  }
+}
+
+/**
+ * InfraStatusServiceApi - axios parameter creator
+ * @export
+ */
+export const InfraStatusServiceApiAxiosParamCreator = function (configuration?: Configuration) {
+  return {
+    /**
+     *
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getStatus: async (options: any = {}): Promise<RequestArgs> => {
+      const localVarPath = `/v1/status`;
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, 'https://example.com');
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      const queryParameters = new URLSearchParams(localVarUrlObj.search);
+      for (const key in localVarQueryParameter) {
+        queryParameters.set(key, localVarQueryParameter[key]);
+      }
+      for (const key in options.query) {
+        queryParameters.set(key, options.query[key]);
+      }
+      localVarUrlObj.search = new URLSearchParams(queryParameters).toString();
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      };
+
+      return {
+        url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     *
+     * @summary CreateToken generates an arbitrary service account token
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    resetStatus: async (options: any = {}): Promise<RequestArgs> => {
+      const localVarPath = `/v1/status`;
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, 'https://example.com');
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      const queryParameters = new URLSearchParams(localVarUrlObj.search);
+      for (const key in localVarQueryParameter) {
+        queryParameters.set(key, localVarQueryParameter[key]);
+      }
+      for (const key in options.query) {
+        queryParameters.set(key, options.query[key]);
+      }
+      localVarUrlObj.search = new URLSearchParams(queryParameters).toString();
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      };
+
+      return {
+        url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     *
+     * @summary Token generates a service account token for the current user.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    setStatus: async (options: any = {}): Promise<RequestArgs> => {
+      const localVarPath = `/v1/status`;
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, 'https://example.com');
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      const queryParameters = new URLSearchParams(localVarUrlObj.search);
+      for (const key in localVarQueryParameter) {
+        queryParameters.set(key, localVarQueryParameter[key]);
+      }
+      for (const key in options.query) {
+        queryParameters.set(key, options.query[key]);
+      }
+      localVarUrlObj.search = new URLSearchParams(queryParameters).toString();
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      };
+
+      return {
+        url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
+        options: localVarRequestOptions,
+      };
+    },
+  };
+};
+
+/**
+ * InfraStatusServiceApi - functional programming interface
+ * @export
+ */
+export const InfraStatusServiceApiFp = function (configuration?: Configuration) {
+  return {
+    /**
+     *
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getStatus(
+      options?: any
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1InfraStatus>> {
+      const localVarAxiosArgs = await InfraStatusServiceApiAxiosParamCreator(
+        configuration
+      ).getStatus(options);
+      return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+        const axiosRequestArgs = {
+          ...localVarAxiosArgs.options,
+          url: (configuration?.basePath || basePath) + localVarAxiosArgs.url,
+        };
+        return axios.request(axiosRequestArgs);
+      };
+    },
+    /**
+     *
+     * @summary CreateToken generates an arbitrary service account token
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async resetStatus(
+      options?: any
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1InfraStatus>> {
+      const localVarAxiosArgs = await InfraStatusServiceApiAxiosParamCreator(
+        configuration
+      ).resetStatus(options);
+      return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+        const axiosRequestArgs = {
+          ...localVarAxiosArgs.options,
+          url: (configuration?.basePath || basePath) + localVarAxiosArgs.url,
+        };
+        return axios.request(axiosRequestArgs);
+      };
+    },
+    /**
+     *
+     * @summary Token generates a service account token for the current user.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async setStatus(
+      options?: any
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<V1InfraStatus>> {
+      const localVarAxiosArgs = await InfraStatusServiceApiAxiosParamCreator(
+        configuration
+      ).setStatus(options);
+      return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+        const axiosRequestArgs = {
+          ...localVarAxiosArgs.options,
+          url: (configuration?.basePath || basePath) + localVarAxiosArgs.url,
+        };
+        return axios.request(axiosRequestArgs);
+      };
+    },
+  };
+};
+
+/**
+ * InfraStatusServiceApi - factory interface
+ * @export
+ */
+export const InfraStatusServiceApiFactory = function (
+  configuration?: Configuration,
+  basePath?: string,
+  axios?: AxiosInstance
+) {
+  return {
+    /**
+     *
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getStatus(options?: any): AxiosPromise<V1InfraStatus> {
+      return InfraStatusServiceApiFp(configuration)
+        .getStatus(options)
+        .then((request) => request(axios, basePath));
+    },
+    /**
+     *
+     * @summary CreateToken generates an arbitrary service account token
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    resetStatus(options?: any): AxiosPromise<V1InfraStatus> {
+      return InfraStatusServiceApiFp(configuration)
+        .resetStatus(options)
+        .then((request) => request(axios, basePath));
+    },
+    /**
+     *
+     * @summary Token generates a service account token for the current user.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    setStatus(options?: any): AxiosPromise<V1InfraStatus> {
+      return InfraStatusServiceApiFp(configuration)
+        .setStatus(options)
+        .then((request) => request(axios, basePath));
+    },
+  };
+};
+
+/**
+ * InfraStatusServiceApi - object-oriented interface
+ * @export
+ * @class InfraStatusServiceApi
+ * @extends {BaseAPI}
+ */
+export class InfraStatusServiceApi extends BaseAPI {
+  /**
+   *
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof InfraStatusServiceApi
+   */
+  public getStatus(options?: any) {
+    return InfraStatusServiceApiFp(this.configuration)
+      .getStatus(options)
+      .then((request) => request(this.axios, this.basePath));
+  }
+
+  /**
+   *
+   * @summary CreateToken generates an arbitrary service account token
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof InfraStatusServiceApi
+   */
+  public resetStatus(options?: any) {
+    return InfraStatusServiceApiFp(this.configuration)
+      .resetStatus(options)
+      .then((request) => request(this.axios, this.basePath));
+  }
+
+  /**
+   *
+   * @summary Token generates a service account token for the current user.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof InfraStatusServiceApi
+   */
+  public setStatus(options?: any) {
+    return InfraStatusServiceApiFp(this.configuration)
+      .setStatus(options)
       .then((request) => request(this.axios, this.basePath));
   }
 }

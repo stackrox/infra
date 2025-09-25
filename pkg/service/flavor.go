@@ -37,7 +37,7 @@ func (s *flavorImpl) List(_ context.Context, request *v1.FlavorListRequest) (*v1
 		if flavor.GetAvailability() == v1.Flavor_janitorDelete {
 			continue
 		}
-		if !request.GetAll() && flavor.GetAvailability() == v1.Flavor_alpha {
+		if !request.GetAll() && (flavor.GetAvailability() == v1.Flavor_alpha || flavor.GetAvailability() == v1.Flavor_deprecated) {
 			continue
 		}
 		scrubInternalParameters(&flavor)
