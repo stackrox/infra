@@ -37,7 +37,7 @@ func (a OidcAuth) ValidateUser(token string) (*v1.User, error) {
 
 // GenerateServiceAccountToken generates a service account JWT containing a
 // v1.User struct.
-func (a OidcAuth) GenerateServiceAccountToken(svcacct v1.ServiceAccount) (string, error) {
+func (a OidcAuth) GenerateServiceAccountToken(svcacct *v1.ServiceAccount) (string, error) {
 	return a.jwtSvcAcct.Generate(svcacct)
 }
 

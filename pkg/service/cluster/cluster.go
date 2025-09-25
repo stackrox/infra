@@ -147,7 +147,7 @@ func (s *clusterImpl) Info(_ context.Context, clusterID *v1.ResourceByID) (*v1.C
 		return nil, err
 	}
 
-	return &metacluster.Cluster, nil
+	return metacluster.Cluster, nil
 }
 
 // List implements ClusterService.List.
@@ -205,7 +205,7 @@ func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) 
 		}
 
 		// This cluster wasn't rejected, so we'll keep it for the response.
-		clusters = append(clusters, &metacluster.Cluster)
+		clusters = append(clusters, metacluster.Cluster)
 	}
 
 	resp := &v1.ClusterListResponse{
