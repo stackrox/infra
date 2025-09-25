@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"math/rand"
-	"os"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -85,10 +84,6 @@ func DeleteStatusConfigmap(namespace string) error {
 
 // CheckContext aborts an execution if the current kubectl context is not an infra-pr cluster.
 func CheckContext() {
-	// Fix gRPC Event Engine issues that cause authentication handshake failures
-	// and performance degradation in gRPC v1.75+
-	os.Setenv("GRPC_POLL_STRATEGY", "poll")
-
 	cmd := exec.Command("kubectl", "config", "current-context")
 	out, err := cmd.Output()
 	if err != nil {

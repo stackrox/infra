@@ -321,6 +321,8 @@ func grpcLocalCredentials(certFile string) (grpc.DialOption, error) {
 		credentials.NewTLS(&tls.Config{
 			RootCAs:    rootCAs,
 			ServerName: "localhost",
+			// Add ALPN support for gRPC v1.67+ compatibility
+			NextProtos: []string{"h2", "http/1.1"},
 		}),
 	), nil
 }

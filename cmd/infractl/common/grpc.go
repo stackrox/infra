@@ -15,10 +15,6 @@ import (
 
 // GetGRPCConnection gets a grpc connection to the infra-server with the correct auth.
 func GetGRPCConnection() (*grpc.ClientConn, context.Context, func(), error) {
-	// Disable Event Engine to fix authentication handshake issues
-	// This addresses known performance and timeout issues with gRPC v1.75+
-	os.Setenv("GRPC_POLL_STRATEGY", "poll")
-
 	ctx, cancel := ContextWithTimeout()
 	allDialOpts := []grpc.DialOption{
 		grpc.WithPerRPCCredentials(bearerToken(token())),
@@ -39,10 +35,15 @@ func GetGRPCConnection() (*grpc.ClientConn, context.Context, func(), error) {
 		allDialOpts = append(allDialOpts,
 			grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
 				InsecureSkipVerify: true,
+				// Add ALPN support for gRPC v1.67+ compatibility
+				NextProtos: []string{"h2", "http/1.1"},
 			})),
 		)
 	} else {
-		allDialOpts = append(allDialOpts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{})))
+		allDialOpts = append(allDialOpts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
+			// Add ALPN support for gRPC v1.67+ compatibility
+			NextProtos: []string{"h2", "http/1.1"},
+		})))
 	}
 
 	// Dial our specified endpoint.

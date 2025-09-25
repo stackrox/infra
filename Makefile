@@ -179,7 +179,7 @@ unit-test: proto-generated-srcs
 
 .PHONY: go-e2e-tests
 go-e2e-tests: proto-generated-srcs
-	@GRPC_POLL_STRATEGY=poll go test ./test/e2e/... -tags=e2e -v -parallel=1 -timeout 1h
+	@go test ./test/e2e/... -tags=e2e -v -parallel=1 -timeout 1h
 
 # Assuming a local dev infra server is running and accessible via a port-forward
 # i.e. nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
