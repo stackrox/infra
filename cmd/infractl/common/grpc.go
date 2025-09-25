@@ -11,6 +11,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/backoff"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/keepalive"
 )
 
 // GetGRPCConnection gets a grpc connection to the infra-server with the correct auth.
@@ -21,12 +22,18 @@ func GetGRPCConnection() (*grpc.ClientConn, context.Context, func(), error) {
 		// Add connection timeout to prevent hanging on handshake
 		grpc.WithConnectParams(grpc.ConnectParams{
 			Backoff: backoff.Config{
-				BaseDelay:  1.0 * time.Second,
+				BaseDelay:  100 * time.Millisecond,
 				Multiplier: 1.6,
 				Jitter:     0.2,
-				MaxDelay:   120 * time.Second,
+				MaxDelay:   5 * time.Second,
 			},
-			MinConnectTimeout: 20 * time.Second,
+			MinConnectTimeout: 3 * time.Second,
+		}),
+		// Add keepalive to prevent connection drops
+		grpc.WithKeepaliveParams(keepalive.ClientParameters{
+			Time:                10 * time.Second,
+			Timeout:             3 * time.Second,
+			PermitWithoutStream: true,
 		}),
 	}
 

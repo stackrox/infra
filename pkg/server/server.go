@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -24,6 +25,7 @@ import (
 	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/keepalive"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
@@ -60,6 +62,15 @@ func (s *server) RunServer() (<-chan error, error) {
 
 	// Create the server.
 	server := grpc.NewServer(
+		// Add server-side keepalive to prevent connection drops
+		grpc.KeepaliveParams(keepalive.ServerParameters{
+			Time:    10 * time.Second,
+			Timeout: 3 * time.Second,
+		}),
+		grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
+			MinTime:             5 * time.Second,
+			PermitWithoutStream: true,
+		}),
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			// Extract user from JWT token stored in HTTP cookie.
 			middleware.ContextInterceptor(middleware.UserEnricher(s.oidc)),
