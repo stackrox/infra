@@ -1,6 +1,4 @@
 version: "2"
-run:
-  go: "1.23"
 output:
   formats:
     text:
@@ -91,6 +89,9 @@ linters:
       - linters:
           - revive
         text: don't use leading k in Go names
+      - linters:
+          - revive
+        text: avoid meaningless package names
     paths:
       - third_party$
       - builtin$

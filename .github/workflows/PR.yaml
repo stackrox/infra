@@ -51,8 +51,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
         with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
           path: go/src/github.com/stackrox/infra
 
       - name: Add PR comment for deploy to dev
@@ -75,16 +73,17 @@ jobs:
       USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
 
     steps:
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "1.23"
-
       - name: Checkout
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
           path: go/src/github.com/stackrox/infra
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go/src/github.com/stackrox/infra/go.mod
+
 
       - name: Authenticate to GCloud
         uses: google-github-actions/auth@v3
