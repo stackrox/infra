@@ -43,7 +43,7 @@ func (a OidcAuth) GenerateServiceAccountToken(svcacct *v1.ServiceAccount) (strin
 
 // ValidateServiceAccountToken validates a service account JWT and returns the
 // contained v1.ServiceAccount struct.
-func (a OidcAuth) ValidateServiceAccountToken(token string) (v1.ServiceAccount, error) {
+func (a OidcAuth) ValidateServiceAccountToken(token string) (*v1.ServiceAccount, error) {
 	return a.jwtSvcAcct.Validate(token)
 }
 
