@@ -162,4 +162,4 @@ jobs:
         run: |
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 > /dev/null 2>&1 &
           sleep 5
-          make go-e2e-tests
+          make go-e2e-tests-debug

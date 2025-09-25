@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -24,6 +25,8 @@ import (
 	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/grpclog"
+	"google.golang.org/grpc/keepalive"
 )
 
 var log = logging.CreateProductionLogger()
@@ -44,6 +47,11 @@ func New(serverCfg config.Config, oidc auth.OidcAuth, services ...middleware.API
 }
 
 func (s *server) RunServer() (<-chan error, error) {
+	// Enable server-side gRPC logging for debugging
+	if os.Getenv("GRPC_GO_LOG_VERBOSITY_LEVEL") != "" {
+		grpclog.SetLoggerV2(grpclog.NewLoggerV2(os.Stdout, os.Stderr, os.Stderr))
+	}
+
 	// listenAddress is the address that the server will listen on. Must bind
 	// to INADDR_ANY in order for the server to be reachable outside the
 	// container.
@@ -76,6 +84,18 @@ func (s *server) RunServer() (<-chan error, error) {
 			// Collect and expose Prometheus metrics
 			grpc_prometheus.StreamServerInterceptor,
 		),
+		// Add server-side keepalive settings for better connection management
+		grpc.KeepaliveParams(keepalive.ServerParameters{
+			MaxConnectionIdle:     15 * time.Minute, // Close idle connections after 15 minutes
+			MaxConnectionAge:      30 * time.Minute, // Close connections after 30 minutes
+			MaxConnectionAgeGrace: 5 * time.Minute,  // Allow 5 minutes for pending RPCs to complete
+			Time:                  5 * time.Minute,  // Send keepalive pings every 5 minutes
+			Timeout:               1 * time.Minute,  // Wait 1 minute for ping ack before closing connection
+		}),
+		grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
+			MinTime:             30 * time.Second, // Minimum time between client pings
+			PermitWithoutStream: true,             // Allow pings even when no active streams
+		}),
 	)
 
 	// Register the gRPC API service.
@@ -120,7 +140,19 @@ func (s *server) RunServer() (<-chan error, error) {
 
 	log.Log(logging.INFO, "starting gRPC server", "listen-address", listenAddress)
 	go func() {
-		if err := http.ListenAndServeTLS(listenAddress, s.cfg.Server.CertFile, s.cfg.Server.KeyFile, h2c.NewHandler(muxHandler, &http2.Server{})); err != nil {
+		// Create HTTP server with optimized TLS configuration
+		httpServer := &http.Server{
+			Addr:    listenAddress,
+			Handler: h2c.NewHandler(muxHandler, &http2.Server{}),
+			TLSConfig: &tls.Config{
+				// Add ALPN support for gRPC v1.67+ compatibility
+				NextProtos: []string{"h2", "http/1.1"},
+				// Optimize TLS settings for better performance
+				MinVersion:               tls.VersionTLS12,
+				PreferServerCipherSuites: true,
+			},
+		}
+		if err := httpServer.ListenAndServeTLS(s.cfg.Server.CertFile, s.cfg.Server.KeyFile); err != nil {
 			errCh <- err
 		}
 	}()
