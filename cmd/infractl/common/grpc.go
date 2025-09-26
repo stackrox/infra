@@ -52,7 +52,7 @@ func GetGRPCConnection() (*grpc.ClientConn, context.Context, func(), error) {
 	}
 
 	// Dial our specified endpoint.
-	conn, err := grpc.DialContext(ctx, endpoint(), allDialOpts...)
+	conn, err := grpc.NewClient(endpoint(), allDialOpts...)
 	if err != nil {
 		return nil, nil, cancel, err
 	}
