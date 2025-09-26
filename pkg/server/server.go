@@ -333,7 +333,7 @@ func grpcLocalCredentials(certFile string) (grpc.DialOption, error) {
 		credentials.NewTLS(&tls.Config{
 			RootCAs:    rootCAs,
 			ServerName: "localhost",
-			NextProtos: []string{"h2"},
+			NextProtos: []string{"h2", "http/1.1"},
 		}),
 	), nil
 }
