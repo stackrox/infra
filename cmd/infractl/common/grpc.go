@@ -23,10 +23,13 @@ func GetGRPCConnection() (*grpc.ClientConn, context.Context, func(), error) {
 		allDialOpts = append(allDialOpts,
 			grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
 				InsecureSkipVerify: true,
+				NextProtos:         []string{"h2"},
 			})),
 		)
 	} else {
-		allDialOpts = append(allDialOpts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{})))
+		allDialOpts = append(allDialOpts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
+			NextProtos: []string{"h2"},
+		})))
 	}
 
 	// Dial our specified endpoint.

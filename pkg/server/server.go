@@ -96,11 +96,15 @@ func (s *server) RunServer() (<-chan error, error) {
 		mux := http.NewServeMux()
 		mux.Handle("/metrics", promhttp.Handler())
 
-		if err := http.ListenAndServeTLS(
-			listenAddress,
-			s.cfg.Server.CertFile, s.cfg.Server.KeyFile,
-			mux,
-		); err != nil {
+		// Create TLS server for metrics with ALPN support
+		metricsServer := &http.Server{
+			Addr:    listenAddress,
+			Handler: mux,
+			TLSConfig: &tls.Config{
+				NextProtos: []string{"h2", "http/1.1"},
+			},
+		}
+		if err := metricsServer.ListenAndServeTLS(s.cfg.Server.CertFile, s.cfg.Server.KeyFile); err != nil {
 			errCh <- err
 		}
 	}()
@@ -120,7 +124,15 @@ func (s *server) RunServer() (<-chan error, error) {
 
 	log.Log(logging.INFO, "starting gRPC server", "listen-address", listenAddress)
 	go func() {
-		if err := http.ListenAndServeTLS(listenAddress, s.cfg.Server.CertFile, s.cfg.Server.KeyFile, h2c.NewHandler(muxHandler, &http2.Server{})); err != nil {
+		// Create TLS server with ALPN support for HTTP/2 and gRPC
+		server := &http.Server{
+			Addr:    listenAddress,
+			Handler: h2c.NewHandler(muxHandler, &http2.Server{}),
+			TLSConfig: &tls.Config{
+				NextProtos: []string{"h2", "http/1.1"},
+			},
+		}
+		if err := server.ListenAndServeTLS(s.cfg.Server.CertFile, s.cfg.Server.KeyFile); err != nil {
 			errCh <- err
 		}
 	}()
@@ -321,6 +333,7 @@ func grpcLocalCredentials(certFile string) (grpc.DialOption, error) {
 		credentials.NewTLS(&tls.Config{
 			RootCAs:    rootCAs,
 			ServerName: "localhost",
+			NextProtos: []string{"h2"},
 		}),
 	), nil
 }
