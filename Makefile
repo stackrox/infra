@@ -105,7 +105,7 @@ PROTO_OUTPUT_DIR  = generated/api/v1
 proto-generated-srcs: protoc-tools
 	@echo "+ $@"
 	@mkdir -p $(PROTO_OUTPUT_DIR)
-	# Generate gRPC bindings (updated for newer protoc-gen-go)
+	# Generate gRPC bindings
 	$(protoc) -I$(PROTO_INPUT_DIR) \
 		-I$(PROTO_THIRD_PARTY) \
 		--go_out=$(PROTO_OUTPUT_DIR) \
@@ -114,7 +114,7 @@ proto-generated-srcs: protoc-tools
 		--go-grpc_opt=paths=source_relative \
 		$(PROTO_FILES)
 
-	# Generate gRPC-Gateway bindings (updated for v2)
+	# Generate gRPC-Gateway bindings
 	$(protoc) -I$(PROTO_INPUT_DIR) \
 		-I$(PROTO_THIRD_PARTY) \
 		--grpc-gateway_out=$(PROTO_OUTPUT_DIR) \
@@ -127,14 +127,6 @@ proto-generated-srcs: protoc-tools
 		-I$(PROTO_THIRD_PARTY) \
 		--swagger_out=logtostderr=true:$(PROTO_OUTPUT_DIR) \
 		$(PROTO_FILES)
-
-# Clean and regenerate protobuf files to fix gRPC v1.75+ compatibility issues
-.PHONY: proto-clean-regenerate
-proto-clean-regenerate:
-	@echo "Cleaning old protobuf generated files..."
-	@rm -rf $(PROTO_OUTPUT_DIR)/*
-	@echo "Regenerating protobuf files with updated tools..."
-	@$(MAKE) proto-generated-srcs
 
 ###########
 ## Build ##

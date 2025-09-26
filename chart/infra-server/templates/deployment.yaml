@@ -31,8 +31,6 @@ spec:
               value: /configuration/google-credentials.json
             - name: TEST_MODE
               value: "{{ .Values.testMode }}"
-            - name: GRPC_GO_LOG_SEVERITY_LEVEL
-              value: info
           readinessProbe:
             httpGet:
               path: /

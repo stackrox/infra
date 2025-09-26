@@ -115,31 +115,31 @@ jobs:
 
           kill %1
 
-      # - name: Check the deployment
-      #   run: |
-      #     kubectl -n infra port-forward svc/infra-server-service 8443:8443 > /dev/null 2>&1 &
-      #     sleep 10
+      - name: Check the deployment
+        run: |
+          kubectl -n infra port-forward svc/infra-server-service 8443:8443 > /dev/null 2>&1 &
+          sleep 10
 
-      #     version="$($INFRACTL version --json)"
-      #     echo "$version"
-      #     client="$(echo "$version" | jq -r '.Client.Version')"
-      #     server="$(echo "$version" | jq -r '.Server.Version')"
-      #     if [[ "$client" == "$server" ]]; then
-      #       echo "Client and server versions match"
-      #     else
-      #       echo "Client and server versions are mismatched"
-      #       exit 1
-      #     fi
+          version="$($INFRACTL version --json)"
+          echo "$version"
+          client="$(echo "$version" | jq -r '.Client.Version')"
+          server="$(echo "$version" | jq -r '.Server.Version')"
+          if [[ "$client" == "$server" ]]; then
+            echo "Client and server versions match"
+          else
+            echo "Client and server versions are mismatched"
+            exit 1
+          fi
 
-      #     tag="$(make tag)"
-      #     if [[ "$client" == "$tag" ]]; then
-      #       echo "Infra and make tag match"
-      #     else
-      #       echo "Infra and make tag are mismatched (make tag: $tag)"
-      #       exit 1
-      #     fi
+          tag="$(make tag)"
+          if [[ "$client" == "$tag" ]]; then
+            echo "Infra and make tag match"
+          else
+            echo "Infra and make tag are mismatched (make tag: $tag)"
+            exit 1
+          fi
 
-      #     kill %1
+          kill %1
 
       - name: Install Argo CLI
         run: |
