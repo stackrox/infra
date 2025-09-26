@@ -8,7 +8,9 @@ import (
 	v1 "github.com/stackrox/infra/generated/api/v1"
 )
 
-type prettyWhoamiResp v1.WhoamiResponse
+type prettyWhoamiResp struct {
+	*v1.WhoamiResponse
+}
 
 func (p prettyWhoamiResp) PrettyPrint(cmd *cobra.Command) {
 	switch p := p.Principal.(type) {
@@ -25,7 +27,7 @@ func (p prettyWhoamiResp) PrettyPrint(cmd *cobra.Command) {
 }
 
 func (p prettyWhoamiResp) PrettyJSONPrint(cmd *cobra.Command) error {
-	data, err := json.MarshalIndent(p, "", "  ")
+	data, err := json.MarshalIndent(p.WhoamiResponse, "", "  ")
 	if err != nil {
 		return err
 	}

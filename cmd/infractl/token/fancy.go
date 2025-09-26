@@ -9,7 +9,9 @@ import (
 	v1 "github.com/stackrox/infra/generated/api/v1"
 )
 
-type prettyTokenResponse v1.TokenResponse
+type prettyTokenResponse struct {
+	*v1.TokenResponse
+}
 
 func (p prettyTokenResponse) PrettyPrint(cmd *cobra.Command) {
 	cmd.Println("# Run the following command to configure your environment")
@@ -17,7 +19,7 @@ func (p prettyTokenResponse) PrettyPrint(cmd *cobra.Command) {
 }
 
 func (p prettyTokenResponse) PrettyJSONPrint(cmd *cobra.Command) error {
-	data, err := json.MarshalIndent(p, "", "  ")
+	data, err := json.MarshalIndent(p.TokenResponse, "", "  ")
 	if err != nil {
 		return err
 	}
