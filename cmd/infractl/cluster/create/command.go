@@ -137,7 +137,7 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 		}
 	}
 
-	return prettyResourceByID(*clusterID), nil
+	return prettyResourceByID{clusterID}, nil
 }
 
 func assignDefaults(cmd *cobra.Command, req *v1.CreateClusterRequest, cwe *currentWorkingEnvironment) {

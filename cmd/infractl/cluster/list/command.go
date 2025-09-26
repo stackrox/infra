@@ -84,7 +84,7 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []str
 	}
 
 	return prettyClusterListResponse{
-		ClusterListResponse: *resp,
+		ClusterListResponse: resp,
 		QuietMode:           quietMode,
 	}, nil
 }

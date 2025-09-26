@@ -11,7 +11,7 @@ import (
 )
 
 type prettyClusterListResponse struct {
-	v1.ClusterListResponse
+	*v1.ClusterListResponse
 	QuietMode bool
 }
 
@@ -40,7 +40,7 @@ func (p prettyClusterListResponse) PrettyPrint(cmd *cobra.Command) {
 }
 
 func (p prettyClusterListResponse) PrettyJSONPrint(cmd *cobra.Command) error {
-	data, err := json.MarshalIndent(p, "", "  ")
+	data, err := json.MarshalIndent(p.ClusterListResponse, "", "  ")
 	if err != nil {
 		return err
 	}

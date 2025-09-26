@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/flavor"
 	"github.com/stackrox/infra/pkg/service/middleware"
@@ -13,6 +13,7 @@ import (
 )
 
 type flavorImpl struct {
+	v1.UnimplementedFlavorServiceServer
 	registry *flavor.Registry
 }
 
@@ -40,8 +41,8 @@ func (s *flavorImpl) List(_ context.Context, request *v1.FlavorListRequest) (*v1
 		if !request.GetAll() && (flavor.GetAvailability() == v1.Flavor_alpha || flavor.GetAvailability() == v1.Flavor_deprecated) {
 			continue
 		}
-		scrubInternalParameters(&flavor)
-		resp.Flavors = append(resp.GetFlavors(), &flavor)
+		scrubInternalParameters(flavor)
+		resp.Flavors = append(resp.GetFlavors(), flavor)
 	}
 
 	return &resp, nil
@@ -53,9 +54,9 @@ func (s *flavorImpl) Info(_ context.Context, flavorID *v1.ResourceByID) (*v1.Fla
 	if !found || flavor.GetAvailability() == v1.Flavor_janitorDelete {
 		return nil, status.Errorf(codes.NotFound, "flavor %q not found", flavorID.Id)
 	}
-	scrubInternalParameters(&flavor)
+	scrubInternalParameters(flavor)
 
-	return &flavor, nil
+	return flavor, nil
 }
 
 // scrubInternalParameters drops any internal parameters from the given flavor,

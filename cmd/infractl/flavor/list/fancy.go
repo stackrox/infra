@@ -10,7 +10,7 @@ import (
 )
 
 type prettyFlavorListResponse struct {
-	v1.FlavorListResponse
+	*v1.FlavorListResponse
 }
 
 func (p prettyFlavorListResponse) PrettyPrint(cmd *cobra.Command) {
@@ -29,7 +29,7 @@ func (p prettyFlavorListResponse) PrettyPrint(cmd *cobra.Command) {
 func (p prettyFlavorListResponse) PrettyJSONPrint(cmd *cobra.Command) error {
 	b := new(bytes.Buffer)
 	m := jsonpb.Marshaler{EnumsAsInts: false, EmitDefaults: true, Indent: "  "}
-	if err := m.Marshal(b, &p.FlavorListResponse); err != nil {
+	if err := m.Marshal(b, p.FlavorListResponse); err != nil {
 		return err
 	}
 	data := b.Bytes()

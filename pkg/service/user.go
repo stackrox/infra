@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/pkg/errors"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/service/middleware"
@@ -12,7 +12,8 @@ import (
 )
 
 type userImpl struct {
-	generate func(v1.ServiceAccount) (string, error)
+	v1.UnimplementedUserServiceServer
+	generate func(*v1.ServiceAccount) (string, error)
 }
 
 var (
@@ -21,7 +22,7 @@ var (
 )
 
 // NewUserService creates a new UserService.
-func NewUserService(generator func(v1.ServiceAccount) (string, error)) (middleware.APIService, error) {
+func NewUserService(generator func(*v1.ServiceAccount) (string, error)) (middleware.APIService, error) {
 	return &userImpl{
 		generate: generator,
 	}, nil
@@ -30,7 +31,7 @@ func NewUserService(generator func(v1.ServiceAccount) (string, error)) (middlewa
 // CreateToken implements UserService.CreateToken.
 func (s *userImpl) CreateToken(_ context.Context, req *v1.ServiceAccount) (*v1.TokenResponse, error) {
 	// Generate the service account token.
-	token, err := s.generate(*req)
+	token, err := s.generate(req)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to generate token")
 	}

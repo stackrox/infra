@@ -8,14 +8,16 @@ import (
 	v1 "github.com/stackrox/infra/generated/api/v1"
 )
 
-type id v1.ResourceByID
+type id struct {
+	*v1.ResourceByID
+}
 
 func (p id) PrettyPrint(cmd *cobra.Command) {
 	cmd.Printf("ID: %s\n", p.Id)
 }
 
 func (p id) PrettyJSONPrint(cmd *cobra.Command) error {
-	data, err := json.MarshalIndent(p, "", "  ")
+	data, err := json.MarshalIndent(p.ResourceByID, "", "  ")
 	if err != nil {
 		return err
 	}

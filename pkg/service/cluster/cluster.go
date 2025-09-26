@@ -19,7 +19,7 @@ import (
 	workflowv1 "github.com/argoproj/argo-workflows/v3/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
 	"github.com/golang/protobuf/ptypes/duration"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/bqutil"
@@ -70,6 +70,7 @@ const (
 )
 
 type clusterImpl struct {
+	v1.UnimplementedClusterServiceServer
 	k8sWorkflowsClient  workflowv1.WorkflowInterface
 	k8sPodsClient       k8sv1.PodInterface
 	registry            *flavor.Registry
@@ -146,7 +147,7 @@ func (s *clusterImpl) Info(_ context.Context, clusterID *v1.ResourceByID) (*v1.C
 		return nil, err
 	}
 
-	return &metacluster.Cluster, nil
+	return metacluster.Cluster, nil
 }
 
 // List implements ClusterService.List.
@@ -204,7 +205,7 @@ func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) 
 		}
 
 		// This cluster wasn't rejected, so we'll keep it for the response.
-		clusters = append(clusters, &metacluster.Cluster)
+		clusters = append(clusters, metacluster.Cluster)
 	}
 
 	resp := &v1.ClusterListResponse{

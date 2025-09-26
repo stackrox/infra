@@ -92,17 +92,17 @@ func InfractlList(args ...string) (ListClusterReponse, error) {
 }
 
 // InfractlLogs is a wrapper for 'infractl logs <clusterID> --json'.
-func InfractlLogs(clusterID string) (v1.LogsResponse, error) {
-	jsonData := v1.LogsResponse{}
+func InfractlLogs(clusterID string) (*v1.LogsResponse, error) {
+	jsonData := &v1.LogsResponse{}
 	infraLogsCmd := infraClusterLogs.Command()
 	buf := PrepareCommand(infraLogsCmd, true, clusterID)
 	err := infraLogsCmd.Execute()
 	if err != nil {
-		return jsonData, err
+		return nil, err
 	}
-	err = RetrieveCommandOutputJSON(buf, &jsonData)
+	err = RetrieveCommandOutputJSON(buf, jsonData)
 	if err != nil {
-		return jsonData, err
+		return nil, err
 	}
 	return jsonData, nil
 }

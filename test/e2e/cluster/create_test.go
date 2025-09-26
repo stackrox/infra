@@ -218,9 +218,10 @@ func TestQaDemoDefaultsOverrideMainImage(t *testing.T) {
 }
 
 func findParameter(parameters []v1.Parameter, name string) (v1.Parameter, error) {
-	for _, p := range parameters {
+	for i := range parameters {
+		p := &parameters[i]
 		if p.GetName() == name {
-			return p, nil
+			return *p, nil
 		}
 	}
 	return v1.Parameter{}, errors.New("parameter not found in cluster")

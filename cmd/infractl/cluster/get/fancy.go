@@ -15,7 +15,7 @@ import (
 )
 
 type prettyCluster struct {
-	v1.Cluster
+	*v1.Cluster
 }
 
 func (p prettyCluster) PrettyPrint(cmd *cobra.Command) {
@@ -47,7 +47,7 @@ func (p prettyCluster) PrettyJSONPrint(cmd *cobra.Command) error {
 	b := new(bytes.Buffer)
 	m := jsonpb.Marshaler{EnumsAsInts: false, EmitDefaults: true, Indent: "  "}
 
-	if err := m.Marshal(b, &p.Cluster); err != nil {
+	if err := m.Marshal(b, p.Cluster); err != nil {
 		return err
 	}
 

@@ -90,5 +90,5 @@ func token(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, args []
 		return nil, err
 	}
 
-	return prettyTokenResponse(*resp), nil
+	return prettyTokenResponse{resp}, nil
 }

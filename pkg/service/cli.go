@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/logging"
 	"github.com/stackrox/infra/pkg/platform"
@@ -17,6 +17,7 @@ import (
 const bufferSize = 1000 * 1024
 
 type cliImpl struct {
+	v1.UnimplementedCliServiceServer
 	staticDir string
 }
 

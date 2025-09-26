@@ -66,7 +66,7 @@ func isClusterOneOfAllowedStatuses(workflow *v1alpha1.Workflow, allowedStatuses 
 }
 
 type metaCluster struct {
-	v1.Cluster
+	*v1.Cluster
 
 	EventID       string
 	Expired       bool
@@ -95,7 +95,7 @@ func (s *clusterImpl) metaClusterFromWorkflow(workflow v1alpha1.Workflow) (*meta
 	}
 
 	return &metaCluster{
-		Cluster:       *cluster,
+		Cluster:       cluster,
 		Slack:         slack.Status(GetSlack(&workflow)),
 		SlackDM:       GetSlackDM(&workflow),
 		Expired:       expired,

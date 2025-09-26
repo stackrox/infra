@@ -9,12 +9,13 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/pkg/errors"
 	"github.com/stackrox/infra/pkg/auth"
 	"github.com/stackrox/infra/pkg/config"
@@ -24,6 +25,8 @@ import (
 	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/keepalive"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var log = logging.CreateProductionLogger()
@@ -59,6 +62,15 @@ func (s *server) RunServer() (<-chan error, error) {
 
 	// Create the server.
 	server := grpc.NewServer(
+		// Add server-side keepalive to prevent connection drops
+		grpc.KeepaliveParams(keepalive.ServerParameters{
+			Time:    10 * time.Second,
+			Timeout: 3 * time.Second,
+		}),
+		grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
+			MinTime:             5 * time.Second,
+			PermitWithoutStream: true,
+		}),
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			// Extract user from JWT token stored in HTTP cookie.
 			middleware.ContextInterceptor(middleware.UserEnricher(s.oidc)),
@@ -131,13 +143,17 @@ func (s *server) RunServer() (<-chan error, error) {
 	}
 
 	log.Log(logging.INFO, "starting gRPC-Gateway client", "connect-address", connectAddress)
-	conn, err := grpc.Dial(connectAddress, dialOption)
+	conn, err := grpc.NewClient(connectAddress, dialOption)
 	if err != nil {
 		return nil, errors.Wrap(err, "dialing gRPC")
 	}
 
 	gwMux := runtime.NewServeMux(
-		runtime.WithMarshalerOption("*", &runtime.JSONPb{Indent: "  "}),
+		runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{
+			MarshalOptions: protojson.MarshalOptions{
+				Indent: "  ",
+			},
+		}),
 	)
 
 	// Register each service
@@ -321,6 +337,8 @@ func grpcLocalCredentials(certFile string) (grpc.DialOption, error) {
 		credentials.NewTLS(&tls.Config{
 			RootCAs:    rootCAs,
 			ServerName: "localhost",
+			// Add ALPN support for gRPC v1.67+ compatibility
+			NextProtos: []string{"h2", "http/1.1"},
 		}),
 	), nil
 }
