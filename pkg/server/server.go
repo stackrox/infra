@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -24,6 +25,7 @@ import (
 	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/keepalive"
 )
 
 var log = logging.CreateProductionLogger()
@@ -59,6 +61,15 @@ func (s *server) RunServer() (<-chan error, error) {
 
 	// Create the server.
 	server := grpc.NewServer(
+		// Add server-side keepalive to prevent connection drops
+		grpc.KeepaliveParams(keepalive.ServerParameters{
+			Time:    10 * time.Second,
+			Timeout: 3 * time.Second,
+		}),
+		grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
+			MinTime:             5 * time.Second,
+			PermitWithoutStream: true,
+		}),
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			// Extract user from JWT token stored in HTTP cookie.
 			middleware.ContextInterceptor(middleware.UserEnricher(s.oidc)),
@@ -96,11 +107,15 @@ func (s *server) RunServer() (<-chan error, error) {
 		mux := http.NewServeMux()
 		mux.Handle("/metrics", promhttp.Handler())
 
-		if err := http.ListenAndServeTLS(
-			listenAddress,
-			s.cfg.Server.CertFile, s.cfg.Server.KeyFile,
-			mux,
-		); err != nil {
+		// Create TLS server for metrics with ALPN support
+		metricsServer := &http.Server{
+			Addr:    listenAddress,
+			Handler: mux,
+			TLSConfig: &tls.Config{
+				NextProtos: []string{"h2", "http/1.1"},
+			},
+		}
+		if err := metricsServer.ListenAndServeTLS(s.cfg.Server.CertFile, s.cfg.Server.KeyFile); err != nil {
 			errCh <- err
 		}
 	}()
@@ -120,7 +135,15 @@ func (s *server) RunServer() (<-chan error, error) {
 
 	log.Log(logging.INFO, "starting gRPC server", "listen-address", listenAddress)
 	go func() {
-		if err := http.ListenAndServeTLS(listenAddress, s.cfg.Server.CertFile, s.cfg.Server.KeyFile, h2c.NewHandler(muxHandler, &http2.Server{})); err != nil {
+		// Create TLS server with ALPN support for HTTP/2 and gRPC
+		server := &http.Server{
+			Addr:    listenAddress,
+			Handler: h2c.NewHandler(muxHandler, &http2.Server{}),
+			TLSConfig: &tls.Config{
+				NextProtos: []string{"h2", "http/1.1"},
+			},
+		}
+		if err := server.ListenAndServeTLS(s.cfg.Server.CertFile, s.cfg.Server.KeyFile); err != nil {
 			errCh <- err
 		}
 	}()
@@ -131,7 +154,7 @@ func (s *server) RunServer() (<-chan error, error) {
 	}
 
 	log.Log(logging.INFO, "starting gRPC-Gateway client", "connect-address", connectAddress)
-	conn, err := grpc.Dial(connectAddress, dialOption)
+	conn, err := grpc.NewClient(connectAddress, dialOption)
 	if err != nil {
 		return nil, errors.Wrap(err, "dialing gRPC")
 	}
@@ -321,6 +344,7 @@ func grpcLocalCredentials(certFile string) (grpc.DialOption, error) {
 		credentials.NewTLS(&tls.Config{
 			RootCAs:    rootCAs,
 			ServerName: "localhost",
+			NextProtos: []string{"h2", "http/1.1"},
 		}),
 	), nil
 }
