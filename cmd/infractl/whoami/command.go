@@ -34,11 +34,11 @@ func run(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, _ []strin
 	if err != nil {
 		if serr, ok := status.FromError(err); ok {
 			if serr.Code() == codes.PermissionDenied {
-				return &prettyWhoamiResp{}, nil
+				return &prettyWhoamiResp{&v1.WhoamiResponse{}}, nil
 			}
 		}
 		return nil, err
 	}
 
-	return prettyWhoamiResp(*resp), nil
+	return prettyWhoamiResp{resp}, nil
 }

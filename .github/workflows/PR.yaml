@@ -45,7 +45,7 @@ jobs:
       - create-dev-cluster
     runs-on: ubuntu-latest
     container:
-      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.4.4
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.4.9
 
     steps:
       - name: Checkout
@@ -65,7 +65,7 @@ jobs:
       - create-dev-cluster
     runs-on: ubuntu-latest
     container:
-      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.4.4
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.4.9
     env:
       KUBECONFIG: /github/home/artifacts/kubeconfig
       INFRA_TOKEN: ${{ secrets.INFRA_TOKEN }}
@@ -83,7 +83,6 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go/src/github.com/stackrox/infra/go.mod
-
 
       - name: Authenticate to GCloud
         uses: google-github-actions/auth@v3

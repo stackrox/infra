@@ -6,9 +6,12 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/backoff"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/keepalive"
 )
 
 // GetGRPCConnection gets a grpc connection to the infra-server with the correct auth.
@@ -16,6 +19,22 @@ func GetGRPCConnection() (*grpc.ClientConn, context.Context, func(), error) {
 	ctx, cancel := ContextWithTimeout()
 	allDialOpts := []grpc.DialOption{
 		grpc.WithPerRPCCredentials(bearerToken(token())),
+		// Add connection timeout to prevent hanging on handshake
+		grpc.WithConnectParams(grpc.ConnectParams{
+			Backoff: backoff.Config{
+				BaseDelay:  100 * time.Millisecond,
+				Multiplier: 1.6,
+				Jitter:     0.2,
+				MaxDelay:   5 * time.Second,
+			},
+			MinConnectTimeout: 3 * time.Second,
+		}),
+		// Add keepalive to prevent connection drops
+		grpc.WithKeepaliveParams(keepalive.ClientParameters{
+			Time:                10 * time.Second,
+			Timeout:             3 * time.Second,
+			PermitWithoutStream: true,
+		}),
 	}
 
 	// The insecure flag (--insecure) was given.
@@ -23,14 +42,19 @@ func GetGRPCConnection() (*grpc.ClientConn, context.Context, func(), error) {
 		allDialOpts = append(allDialOpts,
 			grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
 				InsecureSkipVerify: true,
+				// Add ALPN support for gRPC v1.67+ compatibility
+				NextProtos: []string{"h2", "http/1.1"},
 			})),
 		)
 	} else {
-		allDialOpts = append(allDialOpts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{})))
+		allDialOpts = append(allDialOpts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
+			// Add ALPN support for gRPC v1.67+ compatibility
+			NextProtos: []string{"h2", "http/1.1"},
+		})))
 	}
 
 	// Dial our specified endpoint.
-	conn, err := grpc.DialContext(ctx, endpoint(), allDialOpts...)
+	conn, err := grpc.NewClient(endpoint(), allDialOpts...)
 	if err != nil {
 		return nil, nil, cancel, err
 	}
