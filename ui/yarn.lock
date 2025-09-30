@@ -1340,10 +1340,10 @@
     react-dropzone "^14.3.5"
     tslib "^2.8.1"
 
-"@patternfly/react-icons@^6.0.0", "@patternfly/react-icons@^6.1.0":
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/@patternfly/react-icons/-/react-icons-6.1.0.tgz#4f982f2b8dc0b9366acca1170fcd52fa8c16b85f"
-  integrity sha512-V1w/j19YmOgvh72IRRf1p07k+u4M5+9P+o/IxunlF0fWzLDX4Hf+utBI11A8cRfUzpQN7eLw/vZIS3BLM8Ge3Q==
+"@patternfly/react-icons@^6.1.0", "@patternfly/react-icons@^6.3.1":
+  version "6.3.1"
+  resolved "https://registry.yarnpkg.com/@patternfly/react-icons/-/react-icons-6.3.1.tgz#e28ee532a94746d588e38d1133e2705935a1844c"
+  integrity sha512-uiMounSIww1iZLM4pq+X8c3upzwl9iowXRPjR5CA8entb70lwgAXg3PqvypnuTAcilTq1Y3k5sFTqkhz7rgKcQ==
 
 "@patternfly/react-styles@^6.1.0":
   version "6.1.0"
