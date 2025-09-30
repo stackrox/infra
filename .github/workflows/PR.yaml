@@ -80,7 +80,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           path: go/src/github.com/stackrox/infra
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go/src/github.com/stackrox/infra/go.mod
 
