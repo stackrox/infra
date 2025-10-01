@@ -10,7 +10,7 @@ spec:
     interval: 30s
     rules:
     - alert: Workflow Error
-      expr: increase(argo_workflows_count{status="Error"}[5m]) > 0
+      expr: increase(argo_workflows_gauge{status="Error"}[5m]) > 0
       for: 1m
       annotations:
         summary: A workflow has errored
@@ -20,7 +20,7 @@ spec:
         namespace: monitoring
         environment: {{ .Values.environment }}
     - alert: Workflow Failure
-      expr: increase(argo_workflows_count{status="Failed"}[5m]) > 0
+      expr: increase(argo_workflows_gauge{status="Failed"}[5m]) > 0
       for: 1m
       annotations:
         summary: A workflow has failed.

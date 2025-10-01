@@ -4,6 +4,6 @@ dependencies:
   version: 0.45.9
 - name: kube-prometheus
   repository: https://charts.bitnami.com/bitnami
-  version: 11.1.1
-digest: sha256:46322f064751933585c0985dad77996ed8ee216df0fed19ea9c40f7935f67ae7
-generated: "2025-03-05T10:30:52.962223+01:00"
+  version: 11.3.10
+digest: sha256:59c5c412a14a5ce69cdc7745be5d37603ee0e7748608a586a2b812da4457e60a
+generated: "2025-10-01T13:00:11.143106+02:00"

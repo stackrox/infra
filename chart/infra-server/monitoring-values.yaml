@@ -1,6 +1,8 @@
 kube-prometheus:
   namespaceOverride: monitoring
   operator:
+    image:
+      repository: bitnamilegacy/prometheus-operator
     resources:
       limits:
         cpu: 100m
@@ -14,6 +16,8 @@ kube-prometheus:
       enabled: false
 
   prometheus:
+    image:
+      repository: bitnamilegacy/prometheus
     persistence:
       enabled: true
     resources:
@@ -45,6 +49,8 @@ kube-prometheus:
     enabled: false
 
   alertmanager:
+    image:
+      repository: bitnamilegacy/alertmanager
     resources:
       limits:
         cpu: 100m
