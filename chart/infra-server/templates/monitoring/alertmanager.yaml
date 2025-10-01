@@ -11,8 +11,15 @@ spec:
   route:
     receiver: 'slack-notifications'
     groupBy: [alertname, job, app]
+    routes:
+    - matchers:
+      - name: alertname
+        value: InfoInhibitor
+      receiver: 'null'
+      continue: false
 
   receivers:
+  - name: 'null'
   - name: 'slack-notifications'
     slackConfigs:
     - apiURL:
