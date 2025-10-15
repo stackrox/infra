@@ -576,6 +576,11 @@
       value: false
       kind: optional
 
+    - name: install-hypershift
+      description: should Hypershift be installed
+      value: false
+      kind: optional
+
     - name: trusted-certs-enabled
       description: Should trusted certificates be created
       value: false

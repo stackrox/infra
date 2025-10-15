@@ -8,7 +8,6 @@ spec:
   arguments:
     parameters:
       - name: name
-        value: ""
       - name: create-delay-seconds
         value: ""
       - name: create-outcome

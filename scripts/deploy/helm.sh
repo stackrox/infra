@@ -14,7 +14,8 @@ TEST_MODE="${TEST_MODE:-false}"
 SECRETS_PROJECT="acs-team-automation"
 RELEASE_NAMESPACE="infra"
 RELEASE_NAME="infra-server"
-ARGO_WORKFLOWS_APP_VERSION="v3.6.5"
+# TODO: This should be synced with the version in the charts/infra-server/Chart.yaml dependency.
+ARGO_WORKFLOWS_APP_VERSION="v3.6.4"
 
 check_not_empty() {
     for V in "$@"; do
