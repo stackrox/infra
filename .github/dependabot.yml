@@ -10,36 +10,36 @@ updates:
     schedule:
       interval: weekly
       day: wednesday
-    assignees:
-      - stackrox/ui-dep-updaters
-      - stackrox/infra
 
   - package-ecosystem: gomod
     directory: /
     schedule:
       interval: weekly
       day: wednesday
-    assignees:
-      - stackrox/infra
+    # Overriding the default labels plus auto-merge
     labels:
       - auto-merge
+      - dependencies
+      - go
 
   - package-ecosystem: docker
     directory: image/
     schedule:
       interval: weekly
       day: wednesday
-    assignees:
-      - stackrox/infra
+    # Overriding the default labels plus auto-merge
     labels:
       - auto-merge
+      - dependencies
+      - docker
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
       day: wednesday
-    assignees:
-      - stackrox/infra
+    # Overriding the default labels plus auto-merge
     labels:
       - auto-merge
+      - dependencies
+      - github-actions
