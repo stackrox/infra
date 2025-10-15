@@ -8,10 +8,22 @@ spec:
   arguments:
     parameters:
       - name: name
+        value: ""
       - name: create-delay-seconds
+        value: ""
       - name: create-outcome
+        value: ""
       - name: destroy-delay-seconds
+        value: ""
       - name: destroy-outcome
+        value: ""
+      - name: test-gcs
+        value: ""
+
+  volumes:
+    - name: credentials
+      secret:
+        secretName: google-credentials
 
   templates:
     - name: start
@@ -27,6 +39,8 @@ spec:
                 value: '{{ "{{" }}workflow.parameters.create-delay-seconds{{ "}}" }}'
               - name: outcome
                 value: '{{ "{{" }}workflow.parameters.create-outcome{{ "}}" }}'
+              - name: test-gcs
+                value: '{{ "{{"}}workflow.parameters.test-gcs{{ "}}" }}'
 
           - name: wait
             dependencies: [create]
@@ -47,3 +61,5 @@ spec:
                 value: '{{ "{{" }}workflow.parameters.destroy-delay-seconds{{ "}}" }}'
               - name: outcome
                 value: '{{ "{{" }}workflow.parameters.destroy-outcome{{ "}}" }}'
+              - name: test-gcs
+                value: '{{ "{{"}}workflow.parameters.test-gcs{{ "}}" }}'

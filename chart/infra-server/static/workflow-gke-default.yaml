@@ -4,6 +4,7 @@ metadata:
   generateName: gke-default-
 spec:
   entrypoint: start
+  onExit: stop
   arguments:
     parameters:
       - name: name
@@ -16,6 +17,8 @@ spec:
       - name: gcp-image-type
         value: ""
       - name: gcp-zone
+        value: ""
+      - name: set-ssd-storage-default
         value: ""
 
   volumes:
@@ -30,12 +33,15 @@ spec:
             template: create
         - - name: wait
             template: wait
+
+    - name: stop
+      steps:
         - - name: destroy
             template: destroy
             arguments:
               parameters:
                 - name: name
-                  value: '{{ "{{" }}steps.create.outputs.parameters.cluster_name{{ "}}" }}'
+                  value: '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
 
     - name: create
       activeDeadlineSeconds: 3600
@@ -75,6 +81,7 @@ spec:
           - --pod-security-policy={{ "{{" }}workflow.parameters.pod-security-policy{{ "}}" }}
           - --gcp-image-type={{ "{{" }}workflow.parameters.gcp-image-type{{ "}}" }}
           - --gcp-zone={{ "{{" }}workflow.parameters.gcp-zone{{ "}}" }}
+          - --set-ssd-storage-default={{ "{{" }}workflow.parameters.set-ssd-storage-default{{ "}}" }}
         volumeMounts:
           - name: credentials
             mountPath: /tmp

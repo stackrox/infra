@@ -13,12 +13,28 @@
   "paths": {
     "/v1/cli/{os}/{arch}/upgrade": {
       "get": {
-        "operationId": "Upgrade",
+        "summary": "Upgrade - gets an updated binary if it exists.",
+        "operationId": "CliService_Upgrade",
         "responses": {
           "200": {
             "description": "A successful response.(streaming responses)",
             "schema": {
-              "$ref": "#/x-stream-definitions/v1CliUpgradeResponse"
+              "type": "object",
+              "properties": {
+                "result": {
+                  "$ref": "#/definitions/v1CliUpgradeResponse"
+                },
+                "error": {
+                  "$ref": "#/definitions/runtimeStreamError"
+                }
+              },
+              "title": "Stream result of v1CliUpgradeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
@@ -43,13 +59,19 @@
     },
     "/v1/cluster": {
       "get": {
-        "summary": "CreateToken generates an arbitrary service account token",
-        "operationId": "List",
+        "summary": "List provides information about the available clusters.",
+        "operationId": "ClusterService_List",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1ClusterListResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
@@ -59,16 +81,14 @@
             "description": "all indicates that all clusters should be returned, not just the ones\nowned by the user.",
             "in": "query",
             "required": false,
-            "type": "boolean",
-            "format": "boolean"
+            "type": "boolean"
           },
           {
             "name": "expired",
             "description": "expired indicates that expired clusters should be returned, not just the\nones that are launching/ready.",
             "in": "query",
             "required": false,
-            "type": "boolean",
-            "format": "boolean"
+            "type": "boolean"
           },
           {
             "name": "prefix",
@@ -113,12 +133,18 @@
       },
       "post": {
         "summary": "Create launches a new cluster.",
-        "operationId": "Create",
+        "operationId": "ClusterService_Create",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1ResourceByID"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
@@ -139,12 +165,19 @@
     },
     "/v1/cluster/{id}": {
       "get": {
-        "operationId": "Info",
+        "summary": "Info provides information about a specific cluster.",
+        "operationId": "ClusterService_Info",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1Cluster"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
@@ -162,12 +195,18 @@
       },
       "delete": {
         "summary": "Delete deletes an existing cluster.",
-        "operationId": "Delete",
+        "operationId": "ClusterService_Delete",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
@@ -187,12 +226,18 @@
     "/v1/cluster/{id}/artifacts": {
       "get": {
         "summary": "Artifacts returns the artifacts for a specific cluster.",
-        "operationId": "Artifacts",
+        "operationId": "ClusterService_Artifacts",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1ClusterArtifacts"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
@@ -211,13 +256,19 @@
     },
     "/v1/cluster/{id}/lifespan": {
       "post": {
-        "summary": "Token generates a service account token for the current user.",
-        "operationId": "Lifespan",
+        "summary": "Lifespan updates the lifespan for a specific cluster.",
+        "operationId": "ClusterService_Lifespan",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "type": "string"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
@@ -246,12 +297,18 @@
     "/v1/cluster/{id}/logs": {
       "get": {
         "summary": "Logs returns the logs for a specific cluster.",
-        "operationId": "Logs",
+        "operationId": "ClusterService_Logs",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1LogsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
@@ -270,12 +327,19 @@
     },
     "/v1/flavor": {
       "get": {
-        "operationId": "List",
+        "summary": "List provides information about the available flavors.",
+        "operationId": "FlavorService_List",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1FlavorListResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
@@ -285,8 +349,7 @@
             "description": "all indicates that all flavors should be returned, by default\navailability alpha clusters are excluded.",
             "in": "query",
             "required": false,
-            "type": "boolean",
-            "format": "boolean"
+            "type": "boolean"
           }
         ],
         "tags": [
@@ -296,13 +359,19 @@
     },
     "/v1/flavor/{id}": {
       "get": {
-        "summary": "CreateToken generates an arbitrary service account token",
-        "operationId": "Info",
+        "summary": "Info provides information about a specific flavor.",
+        "operationId": "FlavorService_Info",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1Flavor"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
@@ -321,12 +390,19 @@
     },
     "/v1/status": {
       "get": {
-        "operationId": "GetStatus",
+        "summary": "GetStatus gets the maintenance",
+        "operationId": "InfraStatusService_GetStatus",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1InfraStatus"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
@@ -335,13 +411,19 @@
         ]
       },
       "delete": {
-        "summary": "CreateToken generates an arbitrary service account token",
-        "operationId": "ResetStatus",
+        "summary": "ResetStatus resets the maintenance",
+        "operationId": "InfraStatusService_ResetStatus",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1InfraStatus"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
@@ -350,13 +432,19 @@
         ]
       },
       "put": {
-        "summary": "Token generates a service account token for the current user.",
-        "operationId": "SetStatus",
+        "summary": "SetStatus sets the maintenance",
+        "operationId": "InfraStatusService_SetStatus",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1InfraStatus"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
@@ -368,12 +456,18 @@
     "/v1/token": {
       "post": {
         "summary": "Token generates a service account token for the current user.",
-        "operationId": "Token",
+        "operationId": "UserService_Token",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1TokenResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
@@ -395,12 +489,18 @@
     "/v1/token-create": {
       "post": {
         "summary": "CreateToken generates an arbitrary service account token",
-        "operationId": "CreateToken",
+        "operationId": "UserService_CreateToken",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1TokenResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
@@ -421,12 +521,18 @@
     },
     "/v1/version": {
       "get": {
-        "operationId": "GetVersion",
+        "operationId": "VersionService_GetVersion",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1Version"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
@@ -437,12 +543,19 @@
     },
     "/v1/whoami": {
       "get": {
-        "operationId": "Whoami",
+        "summary": "Whoami provides information about the currently authenticated principal.",
+        "operationId": "UserService_Whoami",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1WhoamiResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
@@ -461,10 +574,11 @@
         "stable",
         "default",
         "test",
-        "janitorDelete"
+        "janitorDelete",
+        "deprecated"
       ],
       "default": "alpha",
-      "description": "availability represents the availability classification levels.\n\n - alpha: alpha is completely experemental, and is not expected to work in any way.\n - beta: beta is being tested, and is expected to work with minor issues.\n - stable: stable is available for public consumption, and works without issue.\n - default: default is stable, and available for customer demo consumption.\nExactly 1 flavor should be configured as default.\n - test: test are flavors for e2e and unit testing\n - janitorDelete: janitorDelete is for deleting clusters with the Infra Janitor."
+      "description": "availability represents the availability classification levels.\n\n - alpha: alpha is completely experemental, and is not expected to work in any way.\n - beta: beta is being tested, and is expected to work with minor issues.\n - stable: stable is available for public consumption, and works without issue.\n - default: default is stable, and available for customer demo consumption.\nExactly 1 flavor should be configured as default.\n - test: test are flavors for e2e and unit testing\n - janitorDelete: janitorDelete is for deleting clusters with the Infra Janitor.\n - deprecated: deprecated is a flavor that is no longer supported and will be removed in the future."
     },
     "LifespanRequestMethod": {
       "type": "string",
@@ -485,6 +599,27 @@
         "value": {
           "type": "string",
           "format": "byte"
+        }
+      }
+    },
+    "runtimeError": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
         }
       }
     },
@@ -643,12 +778,10 @@
         },
         "NoSlack": {
           "type": "boolean",
-          "format": "boolean",
           "description": "NoSlack is used to skip sending Slack messages for cluster lifecycle\nevents."
         },
         "SlackDM": {
           "type": "boolean",
-          "format": "boolean",
           "description": "SlackDM is used to choose direct messages for cluster lifecycle\nevents."
         }
       },
@@ -740,7 +873,6 @@
       "properties": {
         "MaintenanceActive": {
           "type": "boolean",
-          "format": "boolean",
           "description": "MaintenanceActive is an indicator whether a maintenance is ongoing."
         },
         "Maintainer": {
@@ -819,12 +951,10 @@
         },
         "Optional": {
           "type": "boolean",
-          "format": "boolean",
           "description": "Optional indicates that this parameter can be optionally provided by a\nuser. If the user does not provide a value, then Value serves as a\ndefault."
         },
         "Internal": {
           "type": "boolean",
-          "format": "boolean",
           "description": "Internal indicates that this parameter should not be provided by a user,\nbut rather treats Value as a hardcoded constant."
         },
         "Order": {
@@ -837,7 +967,6 @@
         },
         "FromFile": {
           "type": "boolean",
-          "format": "boolean",
           "description": "Indicates that the value for this parameter can be provided from the\ncontents of a file."
         }
       },
@@ -970,20 +1099,6 @@
         }
       },
       "description": "WhoamiResponse represents details about the current authenticated principal."
-    }
-  },
-  "x-stream-definitions": {
-    "v1CliUpgradeResponse": {
-      "type": "object",
-      "properties": {
-        "result": {
-          "$ref": "#/definitions/v1CliUpgradeResponse"
-        },
-        "error": {
-          "$ref": "#/definitions/runtimeStreamError"
-        }
-      },
-      "title": "Stream result of v1CliUpgradeResponse"
     }
   }
 }

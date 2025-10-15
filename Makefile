@@ -33,15 +33,17 @@ image-name:
 ##############
 ## Protobuf ##
 ##############
-# Tool versions.
-protoc-version = 3.11.2
-protoc-gen-go-version = 1.3.2
-protoc-gen-grpc-gateway-version = 1.12.1
-protoc-gen-swagger-version = 1.12.1
+# Tool versions - updated to latest versions (September 2025)
+protoc-version = 32.0
+protoc-gen-go-version = 1.36.9
+protoc-gen-go-grpc-version = 1.5.1
+protoc-gen-grpc-gateway-version = 2.27.2
+protoc-gen-swagger-version = 1.16.0
 
 # Tool binary paths
 protoc = $(GOPATH)/bin/protoc
 protoc-gen-go = $(GOPATH)/bin/protoc-gen-go
+protoc-gen-go-grpc = $(GOPATH)/bin/protoc-gen-go-grpc
 protoc-gen-grpc-gateway = $(GOPATH)/bin/protoc-gen-grpc-gateway
 protoc-gen-swagger = $(GOPATH)/bin/protoc-gen-swagger
 
@@ -66,13 +68,19 @@ $(protoc):
 $(protoc-gen-go):
 	@echo "+ $@"
 	@echo "Installing protoc-gen-go $(protoc-gen-go-version) to $(protoc-gen-go)"
-	@cd /tmp; go install github.com/golang/protobuf/protoc-gen-go@v$(protoc-gen-go-version)
+	@cd /tmp; go install google.golang.org/protobuf/cmd/protoc-gen-go@v$(protoc-gen-go-version)
+
+# This target installs the protoc-gen-go-grpc binary.
+$(protoc-gen-go-grpc):
+	@echo "+ $@"
+	@echo "Installing protoc-gen-go-grpc $(protoc-gen-go-grpc-version) to $(protoc-gen-go-grpc)"
+	@cd /tmp; go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v$(protoc-gen-go-grpc-version)
 
 # This target installs the protoc-gen-grpc-gateway binary.
 $(protoc-gen-grpc-gateway):
 	@echo "+ $@"
 	@echo "Installing protoc-gen-grpc-gateway $(protoc-gen-grpc-gateway-version) to $(protoc-gen-grpc-gateway)"
-	@cd /tmp; go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway@v$(protoc-gen-grpc-gateway-version)
+	@cd /tmp; go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v$(protoc-gen-grpc-gateway-version)
 
 # This target installs the protoc-gen-swagger binary.
 $(protoc-gen-swagger):
@@ -82,7 +90,7 @@ $(protoc-gen-swagger):
 
 # This target installs all of the protoc related binaries.
 .PHONY: protoc-tools
-protoc-tools: $(protoc) $(protoc-gen-go) $(protoc-gen-grpc-gateway) $(protoc-gen-swagger)
+protoc-tools: $(protoc) $(protoc-gen-go) $(protoc-gen-go-grpc) $(protoc-gen-grpc-gateway) $(protoc-gen-swagger)
 
 PROTO_INPUT_DIR   = proto/api/v1
 PROTO_THIRD_PARTY = proto/third_party
@@ -100,13 +108,18 @@ proto-generated-srcs: protoc-tools
 	# Generate gRPC bindings
 	$(protoc) -I$(PROTO_INPUT_DIR) \
 		-I$(PROTO_THIRD_PARTY) \
-		--go_out=plugins=grpc:$(PROTO_OUTPUT_DIR) \
+		--go_out=$(PROTO_OUTPUT_DIR) \
+		--go_opt=paths=source_relative \
+		--go-grpc_out=$(PROTO_OUTPUT_DIR) \
+		--go-grpc_opt=paths=source_relative \
 		$(PROTO_FILES)
 
 	# Generate gRPC-Gateway bindings
 	$(protoc) -I$(PROTO_INPUT_DIR) \
 		-I$(PROTO_THIRD_PARTY) \
-		--grpc-gateway_out=logtostderr=true:$(PROTO_OUTPUT_DIR) \
+		--grpc-gateway_out=$(PROTO_OUTPUT_DIR) \
+		--grpc-gateway_opt=paths=source_relative \
+		--grpc-gateway_opt=logtostderr=true \
 		$(PROTO_FILES)
 
 	# Generate JSON Swagger manifest
@@ -282,3 +295,15 @@ secrets-revert:
 .PHONY: prepare-local-server-debugging
 prepare-local-server-debugging:
 	@./scripts/local-dev/prepare.sh
+
+######################
+## Go Version Sync  ##
+######################
+
+.PHONY: sync-go-version
+sync-go-version:
+	@./scripts/ci/sync-go-version.sh sync
+
+.PHONY: check-needs-sync-go-version
+check-needs-sync-go-version:
+	@./scripts/ci/sync-go-version.sh check

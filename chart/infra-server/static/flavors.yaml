@@ -189,6 +189,11 @@
       value: us-central1-a
       kind: optional
 
+    - name: set-ssd-storage-default
+      description: Ensure an SSD StorageClass is the default StorageClass for the cluster
+      value: false
+      kind: optional
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
@@ -266,7 +271,7 @@
 
     - name: worker-node-count
       description: number of worker nodes
-      value: 2
+      value: 3
       kind: optional
 
     - name: region
@@ -276,6 +281,11 @@
 
     - name: fips-enabled
       description: should fips be enabled
+      value: false
+      kind: optional
+
+    - name: install-hypershift
+      description: should Hypershift be installed
       value: false
       kind: optional
 
@@ -301,7 +311,7 @@
 
     - name: ssd-storage-class
       description: Ensure an SSD StorageClass is the default StorageClass for the cluster
-      value: false
+      value: true
       kind: optional
 
   artifacts:
@@ -452,7 +462,7 @@
 
     - name: ssd-storage-class
       description: Ensure an SSD StorageClass is the default StorageClass for the cluster
-      value: false
+      value: true
       kind: optional
 
   artifacts:
@@ -588,7 +598,7 @@
 
     - name: ssd-storage-class
       description: Ensure an SSD StorageClass is the default StorageClass for the cluster
-      value: false
+      value: true
       kind: optional
 
   artifacts:
@@ -1250,7 +1260,7 @@
       value: ""
     - name: create-delay-seconds
       description: how long to spend in create
-      value: "10"
+      value: "0"
       kind: optional
     - name: create-outcome
       description: success or fail
@@ -1258,11 +1268,15 @@
       kind: optional
     - name: destroy-delay-seconds
       description: how long to spend in destroy
-      value: "10"
+      value: "0"
       kind: optional
     - name: destroy-outcome
       description: success or fail
       value: success
+      kind: optional
+    - name: test-gcs
+      description: whether to upload or delete a test artifact in GCS
+      value: "false"
       kind: optional
 
 ################
@@ -1277,4 +1291,16 @@
     - name: name
       description: cluster name
       help: Name of the cluster that was leaked and should be destroyed.
+
+####################
+#  Test Deprecated #
+####################
+- id: test-deprecated
+  name: Test Deprecated Flavor
+  description: A deprecated test flavor that should not be listed by default
+  availability: deprecated
+  workflow: configuration/test-url-artifact.yaml
+  parameters:
+    - name: name
+      description: cluster name
 {{ end }}

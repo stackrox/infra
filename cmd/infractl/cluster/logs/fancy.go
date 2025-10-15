@@ -9,7 +9,9 @@ import (
 	v1 "github.com/stackrox/infra/generated/api/v1"
 )
 
-type prettyLogsResponse v1.LogsResponse
+type prettyLogsResponse struct {
+	*v1.LogsResponse
+}
 
 func (p prettyLogsResponse) PrettyPrint(cmd *cobra.Command) {
 	for _, log := range p.Logs {
@@ -21,7 +23,7 @@ func (p prettyLogsResponse) PrettyPrint(cmd *cobra.Command) {
 }
 
 func (p prettyLogsResponse) PrettyJSONPrint(cmd *cobra.Command) error {
-	data, err := json.MarshalIndent(p, "", "  ")
+	data, err := json.MarshalIndent(p.LogsResponse, "", "  ")
 	if err != nil {
 		return err
 	}
