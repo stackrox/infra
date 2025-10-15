@@ -61,7 +61,18 @@ jobs:
           INFRA_TOKEN: ${{ secrets.INFRA_TOKEN }}
         run: |
           /home/runner/.local/bin/infractl artifacts "${{ steps.determine-cluster-name.outputs.cluster-name }}" -d /home/runner/artifacts >> "$GITHUB_STEP_SUMMARY"
-          kubectl get nodes -o wide
+
+      - name: Determine tag
+        id: tag
+        run: |
+          echo "tag=$(make tag)" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for image
+        uses: stackrox/actions/release/wait-for-image@v1
+        with:
+          token: ${{ secrets.QUAY_RHACS_ENG_BEARER_TOKEN }}
+          image: rhacs-eng/infra-server:${{ steps.tag.outputs.tag }}
+          limit: 1800
 
       - name: Deploy infra to smoke test cluster
         run: |
