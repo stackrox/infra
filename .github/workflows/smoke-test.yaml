@@ -61,7 +61,7 @@ jobs:
 
       - name: Deploy infra to smoke test cluster
         run: |
-          ENVIRONMENT=development TEST_MODE=true make install-argo clean-argo-config install-monitoring helm-deploy
+          ENVIRONMENT=development TEST_MODE=true make helm-deploy
 
   smoke-test:
     runs-on: ubuntu-latest
