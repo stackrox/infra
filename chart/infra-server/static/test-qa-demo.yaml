@@ -23,8 +23,8 @@ spec:
 
     - name: whalesay
       container:
-        image: docker/whalesay:latest
-        command: [cowsay]
+        image: busybox:latest
+        command: [echo]
         args:
           - "hello world to: "
           - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
