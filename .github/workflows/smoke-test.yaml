@@ -1,32 +1,21 @@
 name: Smoke test infra flavors
 run-name: >-
   ${{
-    format('Smoke testing flavors on infra cluster {0} (prefix {1})',
-      inputs.cluster,
-      inputs.prefix
+    format('Smoke testing flavors: prefix {0}, triggered by {1}',
+      inputs.prefix,
+      github.actor
     )
   }}
 
 on:
   workflow_dispatch:
     inputs:
-      cluster:
-        description: Infra cluster to run smoke test on (in acs-team-temp-dev project)
-        required: true
       prefix:
         description: Prefix added to the clusters created for the smoke test (maximum 7 chars)
         default: ist
         required: true
 
 jobs:
-  debug:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Show inputs
-      run: |
-        echo "Cluster: ${{ inputs.cluster }}"
-        echo "Prefix: ${{ inputs.prefix }}"
-
   create-cluster:
     runs-on: ubuntu-latest
     outputs:
@@ -35,7 +24,7 @@ jobs:
       - name: Determine cluster name
         id: determine-cluster-name
         run: |
-          echo "cluster-name=daily-smoke-test-$(date +%s)" >> ${GITHUB_OUTPUT}
+          echo "cluster-name=infra-smoke-test-$(date +%s)" >> "${GITHUB_OUTPUT}"
 
       - uses: stackrox/actions/infra/create-cluster@v1
         with:
@@ -49,7 +38,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.ref }}
 
       - name: Authenticate to GCloud
         uses: google-github-actions/auth@v2
@@ -85,20 +74,20 @@ jobs:
     strategy:
       matrix:
         flavors: [
-          {name: "demo", "args": "", "uniqueness": "a"},
-          {name: "aks", "args": "", "uniqueness": "b"},
-          {name: "aro", "args": "", "uniqueness": "c"},
-          {name: "eks", "args": "user-arns=arn:aws:iam::393282794030:user/joey@stackrox.com", "uniqueness": "d"},
+          # {name: "demo", "args": "", "uniqueness": "a"},
+          # {name: "aks", "args": "", "uniqueness": "b"},
+          # {name: "aro", "args": "", "uniqueness": "c"},
+          # {name: "eks", "args": "user-arns=arn:aws:iam::393282794030:user/joey@stackrox.com", "uniqueness": "d"},
           {name: "gke", "args": "", "uniqueness": "e"},
-          {name: "ibmroks", "args": "", "uniqueness": "f"},
-          {name: "ocp-4", "args": "", "uniqueness": "g"},
-          {name: "ocp-4-demo", "args": "", "uniqueness": "h"},
-          {name: "ocp-4-perf-scale", "args": "", "uniqueness": "i"},
-          {name: "osd-on-aws", "args": "", "uniqueness": "k"},
-          {name: "osd-on-gcp", "args": "", "uniqueness": "l"},
-          {name: "qa-demo", "args": "main-image=quay.io/rhacs-eng/main:4.7.0", "uniqueness": "m"},
-          {name: "rosa", "args": "", "uniqueness": "n"},
-          {name: "rosahcp", "args": "", "uniqueness": "o"},
+          # {name: "ibmroks", "args": "", "uniqueness": "f"},
+          # {name: "ocp-4", "args": "", "uniqueness": "g"},
+          # {name: "ocp-4-demo", "args": "", "uniqueness": "h"},
+          # {name: "ocp-4-perf-scale", "args": "", "uniqueness": "i"},
+          # {name: "osd-on-aws", "args": "", "uniqueness": "k"},
+          # {name: "osd-on-gcp", "args": "", "uniqueness": "l"},
+          # {name: "qa-demo", "args": "main-image=quay.io/rhacs-eng/main:4.7.0", "uniqueness": "m"},
+          # {name: "rosa", "args": "", "uniqueness": "n"},
+          # {name: "rosahcp", "args": "", "uniqueness": "o"},
         ]
       fail-fast: false
     steps:
@@ -136,3 +125,5 @@ jobs:
           insecure: true
           args: ${{ matrix.flavors.args }}
           no-slack: true
+
+      # TODO: Destroy infra cluster for ${{ matrix.flavors.name }}
