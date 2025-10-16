@@ -14,8 +14,6 @@ TEST_MODE="${TEST_MODE:-false}"
 SECRETS_PROJECT="acs-team-automation"
 RELEASE_NAMESPACE="infra"
 RELEASE_NAME="infra-server"
-# TODO: This should be synced with the version in the charts/infra-server/Chart.yaml dependency.
-ARGO_WORKFLOWS_APP_VERSION="v3.6.4"
 
 check_not_empty() {
     for V in "$@"; do
@@ -28,8 +26,11 @@ check_not_empty() {
 }
 
 install_crds() {
+    argo_chart_file=$(find "chart/infra-server/charts" -name "argo-workflows-*.tgz" 2>/dev/null | head -1)
+    ARGO_WORKFLOWS_APP_VERSION="$(tar -xzOf "${argo_chart_file}" argo-workflows/Chart.yaml | yq '.appVersion')"
+    echo "Using argo-workflows app version: ${ARGO_WORKFLOWS_APP_VERSION}" >&2
     kubectl apply --kustomize \
-        "https://github.com/argoproj/argo-workflows/manifests/base/crds/minimal?ref=${ARGO_WORKFLOWS_APP_VERSION}"
+        "https://github.com/argoproj/argo-workflows/manifests/base/crds/minimal?ref=${ARGO_WORKFLOWS_APP_VERSION}" >&2
 }
 
 template() {
