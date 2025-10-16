@@ -3,7 +3,7 @@ argo-workflows:
   server:
     authModes:
       - server
-  # We do this separately, because they cannot be installed from the dependant chart.
+  # We install the CRDs separately, because they cannot be upgraded with Helm through the dependant chart.
   crds:
     install: false
 
