@@ -232,11 +232,11 @@ endif
 
 .PHONY: helm-dependency-update
 helm-dependency-update:
-	@helm dependency update chart/infra-server
+	@helm dependency update chart/infra-server >&2
 
 create-namespaces:
-	@kubectl create namespace argo >/dev/null 2>&1 || echo "namespace/argo already exists"; exit 0
-	@kubectl create namespace monitoring >/dev/null 2>&1 || echo "namespace/monitoring already exists"; exit 0
+	@kubectl create namespace argo >/dev/null 2>&1 || echo "namespace/argo already exists" >&2; exit 0
+	@kubectl create namespace monitoring >/dev/null 2>&1 || echo "namespace/monitoring already exists" >&2; exit 0
 
 ## Render template
 .PHONY: helm-template

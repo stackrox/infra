@@ -3,6 +3,9 @@ argo-workflows:
   server:
     authModes:
       - server
+  # We install the CRDs separately, because they cannot be upgraded with Helm through the dependant chart.
+  crds:
+    install: false
 
   controller:
     # Default values that will apply to all Workflows from this controller, unless overridden on the Workflow-level
