@@ -745,7 +745,7 @@
 
     - name: machine-type
       description: node machine type
-      value: Standard_D4s_v3
+      value: ""
       kind: optional
 
   artifacts:

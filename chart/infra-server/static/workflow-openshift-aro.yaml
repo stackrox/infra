@@ -9,9 +9,9 @@ spec:
     parameters:
       - name: name
       - name: nodes
-        value: "4"
+        value: ""
       - name: machine-type
-        value: "Standard_D4s_v3"
+        value: ""
   volumeClaimTemplates:
     - metadata:
         name: data
