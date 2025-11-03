@@ -15,6 +15,7 @@ import (
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/config"
 	"github.com/stackrox/infra/pkg/logging"
+	"google.golang.org/protobuf/proto"
 )
 
 var log = logging.CreateProductionLogger()
@@ -34,10 +35,12 @@ type Registry struct {
 }
 
 // Flavors returns a sorted list of all registered flavors.
+// Returns deep copies of the flavors to prevent external modifications from
+// affecting the registry's internal state.
 func (r *Registry) Flavors() []*v1.Flavor {
 	results := make([]*v1.Flavor, 0, len(r.flavors))
 	for _, pair := range r.flavors {
-		results = append(results, pair.flavor)
+		results = append(results, proto.Clone(pair.flavor).(*v1.Flavor))
 	}
 
 	sort.Slice(results, func(i, j int) bool {
@@ -94,13 +97,15 @@ func (r *Registry) Default() string {
 }
 
 // Get returns the named flavor if it exists along with a paired workflow.
+// Returns a deep copy of the flavor to prevent external modifications from
+// affecting the registry's internal state.
 func (r *Registry) Get(id string) (*v1.Flavor, v1alpha1.Workflow, bool) {
 	if pair, found := r.flavors[id]; found {
-		return pair.flavor, pair.workflow, true
+		return proto.Clone(pair.flavor).(*v1.Flavor), pair.workflow, true
 	}
 
 	if pair, found := r.getFlavorFromAlias(id); found {
-		return pair.flavor, pair.workflow, true
+		return proto.Clone(pair.flavor).(*v1.Flavor), pair.workflow, true
 	}
 
 	return nil, v1alpha1.Workflow{}, false
@@ -208,7 +213,7 @@ func NewFromConfig(filename string) (*Registry, error) {
 			Aliases:      flavorCfg.Aliases,
 		}
 
-		// Parse the references Argo workflow file.
+		// Parse the referenced Argo workflow file.
 		data, err := os.ReadFile(flavorCfg.WorkflowFile)
 		if err != nil {
 			return nil, err
