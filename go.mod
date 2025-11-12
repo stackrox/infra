@@ -14,7 +14,7 @@ require (
 	github.com/golang/protobuf v1.5.4
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.3
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3
 	github.com/jeremywohl/flatten/v2 v2.0.0-20211013061545-07e4a09fb8e4
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.22.0
@@ -26,7 +26,7 @@ require (
 	golang.org/x/net v0.46.0
 	golang.org/x/oauth2 v0.32.0
 	google.golang.org/api v0.252.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20250818200422-3122310a409c
+	google.golang.org/genproto/googleapis/api v0.0.0-20250929231259-57b25ae835d4
 	google.golang.org/grpc v1.76.0
 	google.golang.org/protobuf v1.36.10
 	gopkg.in/yaml.v2 v2.4.0
