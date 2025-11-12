@@ -47,7 +47,7 @@ spec:
               containerPort: 8443
             - name: metrics
               containerPort: 9101
-          imagePullPolicy: Always
+          imagePullPolicy: {{ .Values.imagePullPolicy | default "Always" }}
           volumeMounts:
             - mountPath: /configuration
               name: configuration

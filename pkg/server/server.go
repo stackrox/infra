@@ -35,6 +35,7 @@ type server struct {
 	services []middleware.APIService
 	cfg      config.Config
 	oidc     auth.OidcAuth
+	testMode bool
 }
 
 // New creates a new server that is ready to be launched.
@@ -43,6 +44,7 @@ func New(serverCfg config.Config, oidc auth.OidcAuth, services ...middleware.API
 		services: services,
 		cfg:      serverCfg,
 		oidc:     oidc,
+		testMode: serverCfg.TestMode,
 	}
 }
 
@@ -79,7 +81,7 @@ func (s *server) RunServer() (<-chan error, error) {
 
 			middleware.ContextInterceptor(middleware.AdminEnricher(s.cfg.Password)),
 			// Enforce authenticated user access on resources that declare it.
-			middleware.ContextInterceptor(middleware.EnforceAccess),
+			middleware.ContextInterceptor(middleware.EnforceAccessWithTestMode(s.testMode)),
 
 			// Collect and expose Prometheus metrics
 			grpc_prometheus.UnaryServerInterceptor,
