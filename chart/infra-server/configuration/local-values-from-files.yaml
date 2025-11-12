@@ -1,0 +1,10 @@
+# Override OIDC configuration with minimal dummy values for local development
+# The flavor endpoints are marked as Anonymous in the code, so this won't actually be used
+# Base64 encoding of a minimal valid OIDC config (using Google as a dummy issuer that won't be called)
+# issuer: "https://accounts.google.com"
+# clientID: "dummy"
+# clientSecret: "dummy"
+# sessionSecret: "dummy-session-secret-for-local-dev"
+# endpoint: "localhost:8443"
+# tokenLifetime: "1h"
+oidc_yaml: aXNzdWVyOiAiaHR0cHM6Ly9hY2NvdW50cy5nb29nbGUuY29tIgpjbGllbnRJRDogImR1bW15IgpjbGllbnRTZWNyZXQ6ICJkdW1teSIKc2Vzc2lvblNlY3JldDogImR1bW15LXNlc3Npb24tc2VjcmV0LWZvci1sb2NhbC1kZXYiCmVuZHBvaW50OiAibG9jYWxob3N0Ojg0NDMiCnRva2VuTGlmZXRpbWU6ICIxaCIK

@@ -266,7 +266,7 @@ install-argo-crds: helm-dependency-update
 ## Deploy to local cluster (e.g., Colima) without GCP Secret Manager
 .PHONY: deploy-local
 deploy-local: helm-dependency-update create-namespaces install-argo-crds
-	@TEST_MODE=true ./scripts/deploy/helm.sh deploy-local $(shell make tag) development
+	@TEST_MODE=true ./scripts/deploy/helm.sh deploy-local $(shell make tag) local
 
 ## Bounce pods
 .PHONY: bounce-infra-pods

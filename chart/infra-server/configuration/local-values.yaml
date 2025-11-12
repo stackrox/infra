@@ -1,0 +1,12 @@
+environment: local
+
+# Disable Auth0 for local development - allow anonymous access
+auth0:
+  clientID: ""
+  tenant: ""
+
+# Set test mode to true for local development
+testMode: true
+
+# Use local Docker images instead of pulling from registry
+imagePullPolicy: Never

@@ -8,7 +8,6 @@ ENVIRONMENT="$3"
 SECRET_VERSION="${4:-latest}"
 
 # Enables TEST_MODE in chart.
-# Cannot use CI, because then CD with GHA would not be possible.
 TEST_MODE="${TEST_MODE:-false}"
 
 SECRETS_PROJECT="acs-team-automation"
@@ -105,7 +104,7 @@ diff() {
     | kubectl diff -R -f -
 }
 
-# deploy-local deploys to local cluster using local configuration files (no GCP Secret Manager)
+# deploy-local deploys to local cluster using local configuration files
 deploy-local() {
     echo "Deploying infra-server to local cluster..." >&2
     echo "  Tag: ${TAG}" >&2
@@ -124,9 +123,7 @@ deploy-local() {
         "${HELM_COMMON_ARGS[@]}" \
         --timeout 5m \
         --values "chart/infra-server/configuration/${ENVIRONMENT}-values.yaml" \
-        --values "chart/infra-server/configuration/${ENVIRONMENT}-values-from-files.yaml" \
-        --values chart/infra-server/configuration/local-values.yaml \
-        --values chart/infra-server/configuration/local-values-from-files.yaml >&2
+        --values "chart/infra-server/configuration/${ENVIRONMENT}-values-from-files.yaml" >&2
 
     echo "" >&2
     echo "Deployment complete!" >&2
