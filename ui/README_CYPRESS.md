@@ -9,10 +9,10 @@ This directory contains Cypress E2E tests for the StackRox Infra UI.
 1. **Deploy the local backend** (with authentication disabled):
    ```bash
    # From the repository root
-   ./scripts/deploy-local.sh
+   make deploy-local
    ```
 
-   This deploys the infra-server to your local Colima Kubernetes cluster with `TEST_MODE=true`, which disables authentication for local development.
+   This deploys the infra-server to your local Kubernetes cluster with `TEST_MODE=true`, which disables authentication for local development.
 
 2. **Start port-forwarding** to access the backend:
    ```bash

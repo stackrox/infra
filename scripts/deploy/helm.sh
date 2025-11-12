@@ -57,21 +57,26 @@ template() {
     )
 }
 
-# deploy upgrades the Helm release with
+# Common helm upgrade arguments
+HELM_COMMON_ARGS=(
+    "${RELEASE_NAME}"
+    chart/infra-server
+    --install
+    --create-namespace
+    --namespace "${RELEASE_NAMESPACE}"
+    --values chart/infra-server/argo-values.yaml
+    --values chart/infra-server/monitoring-values.yaml
+    --set tag="${TAG}"
+    --set environment="${ENVIRONMENT}"
+    --set testMode="${TEST_MODE}"
+)
+
+# deploy upgrades the Helm release with secrets from GCP Secret Manager
 deploy() {
     helm upgrade \
-        "${RELEASE_NAME}" \
-        chart/infra-server \
-        --install \
-        --create-namespace \
+        "${HELM_COMMON_ARGS[@]}" \
         --timeout 5m \
         --wait \
-        --namespace "${RELEASE_NAMESPACE}" \
-        --values chart/infra-server/argo-values.yaml \
-        --values chart/infra-server/monitoring-values.yaml \
-        --set tag="${TAG}" \
-        --set environment="${ENVIRONMENT}" \
-        --set testMode="${TEST_MODE}" \
         --values - \
     < <(gcloud secrets versions access "${SECRET_VERSION}" \
         --secret "infra-values-${ENVIRONMENT}" \
@@ -86,17 +91,8 @@ deploy() {
 diff() {
     # Need to use helm upgrade --dry-run to have .Capabilities context available
     helm upgrade \
-        "${RELEASE_NAME}" \
-        chart/infra-server \
-        --install \
-        --create-namespace \
+        "${HELM_COMMON_ARGS[@]}" \
         --dry-run \
-        --namespace "${RELEASE_NAMESPACE}" \
-        --values chart/infra-server/argo-values.yaml \
-        --values chart/infra-server/monitoring-values.yaml \
-        --set tag="${TAG}" \
-        --set environment="${ENVIRONMENT}" \
-        --set testMode="${TEST_MODE}" \
         --values - \
     < <(gcloud secrets versions access "${SECRET_VERSION}" \
         --secret "infra-values-${ENVIRONMENT}" \
@@ -107,6 +103,38 @@ diff() {
     ) \
     | sed -n '/---/,$p' \
     | kubectl diff -R -f -
+}
+
+# deploy-local deploys to local cluster using local configuration files (no GCP Secret Manager)
+deploy-local() {
+    echo "Deploying infra-server to local cluster..." >&2
+    echo "  Tag: ${TAG}" >&2
+    echo "  Environment: ${ENVIRONMENT}" >&2
+    echo "  Test Mode: ${TEST_MODE}" >&2
+    echo "" >&2
+
+    # Check for required configuration files
+    if [ ! -f "chart/infra-server/configuration/${ENVIRONMENT}-values.yaml" ]; then
+        echo "ERROR: Configuration files not found for environment: ${ENVIRONMENT}" >&2
+        echo "Please run: ENVIRONMENT=${ENVIRONMENT} SECRET_VERSION=latest make secrets-download" >&2
+        exit 1
+    fi
+
+    helm upgrade \
+        "${HELM_COMMON_ARGS[@]}" \
+        --timeout 5m \
+        --values "chart/infra-server/configuration/${ENVIRONMENT}-values.yaml" \
+        --values "chart/infra-server/configuration/${ENVIRONMENT}-values-from-files.yaml" \
+        --values chart/infra-server/configuration/local-values.yaml \
+        --values chart/infra-server/configuration/local-values-from-files.yaml >&2
+
+    echo "" >&2
+    echo "Deployment complete!" >&2
+    echo "" >&2
+    echo "To access the infra-server, run:" >&2
+    echo "  kubectl port-forward -n infra svc/infra-server-service 8443:8443" >&2
+    echo "" >&2
+    echo "Then access at: https://localhost:8443" >&2
 }
 
 check_not_empty TASK TAG ENVIRONMENT
