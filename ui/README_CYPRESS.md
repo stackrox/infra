@@ -7,14 +7,17 @@ This directory contains Cypress E2E tests for the StackRox Infra UI.
 ### Prerequisites
 
 1. **Deploy the local backend** (with authentication disabled):
+
    ```bash
    # From the repository root
    make deploy-local
    ```
 
-   This deploys the infra-server to your local Kubernetes cluster with `TEST_MODE=true`, which disables authentication for local development.
+   This deploys the infra-server to your local Kubernetes cluster with
+   `TEST_MODE=true`, which disables authentication for local development.
 
 2. **Start port-forwarding** to access the backend:
+
    ```bash
    kubectl port-forward -n infra svc/infra-server-service 8443:8443
    ```
@@ -22,19 +25,22 @@ This directory contains Cypress E2E tests for the StackRox Infra UI.
    Keep this running in a separate terminal.
 
 3. **Configure the UI to connect to local backend**:
+
    ```bash
    cd ui
    cp .env.example .env.local
    ```
 
-   This creates a `.env.local` file that tells the UI dev server to proxy API requests to your local backend at `https://localhost:8443`.
+   This creates a `.env.local` file that tells the UI dev server to proxy API
+   requests to your local backend at `https://localhost:8443`.
 
 4. **Run the E2E tests**:
    ```bash
    npm run cypress:run:e2e
    ```
 
-That's it! The tests will run against the local backend at `https://localhost:8443`.
+That's it! The tests will run against the local backend at
+`https://localhost:8443`.
 
 ## Interactive Mode
 
@@ -55,6 +61,7 @@ Then select "E2E Testing" and choose which tests to run.
 ## Configuration
 
 Tests are configured in `cypress.config.ts` to:
+
 - Run against the local backend at `https://localhost:8443`
 - Accept self-signed certificates
 - Capture videos and screenshots on failures

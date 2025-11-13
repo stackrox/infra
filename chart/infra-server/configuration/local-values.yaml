@@ -10,3 +10,21 @@ testMode: true
 
 # Use local Docker images instead of pulling from registry
 imagePullPolicy: Never
+
+# Pull secrets for container registries - dummy values for local development
+pullSecrets:
+  docker:
+    registry: "docker.io"
+    username: "dummy"
+    password: "dummy"
+  quay:
+    registry: "quay.io"
+    username: "dummy"
+    password: "dummy"
+  stackrox:
+    registry: "stackrox.io"
+    username: "dummy"
+    password: "dummy"
+
+# Alertmanager configuration
+alertmanagerSlackTeam: "dummy-team"
