@@ -177,6 +177,17 @@ func Load(filename string) (*Config, error) {
 	if os.Getenv("TEST_MODE") == "true" {
 		cfg.TestMode = true
 		log.Printf("TEST_MODE enabled - authentication will be bypassed")
+
+		// Set default values for test mode if not configured
+		if cfg.Server.Port == 0 {
+			cfg.Server.Port = 8443
+		}
+		if cfg.Server.MetricsPort == 0 {
+			cfg.Server.MetricsPort = 9101
+		}
+		if cfg.Server.StaticDir == "" {
+			cfg.Server.StaticDir = "/etc/infra/static"
+		}
 	}
 
 	return &cfg, nil

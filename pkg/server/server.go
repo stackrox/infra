@@ -25,6 +25,7 @@ import (
 	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/protobuf/encoding/protojson"
 )
@@ -100,7 +101,7 @@ func (s *server) RunServer() (<-chan error, error) {
 	// Metrics server
 	go func() {
 		listenAddress := fmt.Sprintf("0.0.0.0:%d", s.cfg.Server.MetricsPort)
-		log.Infow("starting metrics server", "listenAddress", listenAddress)
+		log.Infow("starting metrics server", "listenAddress", listenAddress, "testMode", s.testMode)
 
 		if s.cfg.Server.MetricsIncludeHistogram {
 			grpc_prometheus.EnableHandlingTimeHistogram()
@@ -110,12 +111,19 @@ func (s *server) RunServer() (<-chan error, error) {
 		mux := http.NewServeMux()
 		mux.Handle("/metrics", promhttp.Handler())
 
-		if err := http.ListenAndServeTLS(
-			listenAddress,
-			s.cfg.Server.CertFile, s.cfg.Server.KeyFile,
-			mux,
-		); err != nil {
-			errCh <- err
+		if s.testMode {
+			// In test mode, use HTTP instead of HTTPS
+			if err := http.ListenAndServe(listenAddress, mux); err != nil {
+				errCh <- err
+			}
+		} else {
+			if err := http.ListenAndServeTLS(
+				listenAddress,
+				s.cfg.Server.CertFile, s.cfg.Server.KeyFile,
+				mux,
+			); err != nil {
+				errCh <- err
+			}
 		}
 	}()
 
@@ -132,19 +140,35 @@ func (s *server) RunServer() (<-chan error, error) {
 		mux.ServeHTTP(w, r)
 	})
 
-	log.Log(logging.INFO, "starting gRPC server", "listen-address", listenAddress)
+	log.Log(logging.INFO, "starting gRPC server", "listen-address", listenAddress, "testMode", s.testMode)
 	go func() {
-		if err := http.ListenAndServeTLS(listenAddress, s.cfg.Server.CertFile, s.cfg.Server.KeyFile, h2c.NewHandler(muxHandler, &http2.Server{})); err != nil {
-			errCh <- err
+		if s.testMode {
+			// In test mode, use HTTP instead of HTTPS
+			log.Infow("TEST_MODE: Starting HTTP server (no TLS)", "listenAddress", listenAddress)
+			if err := http.ListenAndServe(listenAddress, h2c.NewHandler(muxHandler, &http2.Server{})); err != nil {
+				errCh <- err
+			}
+		} else {
+			if err := http.ListenAndServeTLS(listenAddress, s.cfg.Server.CertFile, s.cfg.Server.KeyFile, h2c.NewHandler(muxHandler, &http2.Server{})); err != nil {
+				errCh <- err
+			}
 		}
 	}()
 
-	dialOption, err := grpcLocalCredentials(s.cfg.Server.CertFile)
-	if err != nil {
-		return nil, err
+	var dialOption grpc.DialOption
+	if s.testMode {
+		// In test mode, use insecure connection (no TLS)
+		log.Infow("TEST_MODE: Using insecure gRPC connection")
+		dialOption = grpc.WithTransportCredentials(insecure.NewCredentials())
+	} else {
+		var err error
+		dialOption, err = grpcLocalCredentials(s.cfg.Server.CertFile)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	log.Log(logging.INFO, "starting gRPC-Gateway client", "connect-address", connectAddress)
+	log.Log(logging.INFO, "starting gRPC-Gateway client", "connect-address", connectAddress, "testMode", s.testMode)
 	conn, err := grpc.NewClient(connectAddress, dialOption)
 	if err != nil {
 		return nil, errors.Wrap(err, "dialing gRPC")
@@ -169,7 +193,7 @@ func (s *server) RunServer() (<-chan error, error) {
 
 	// Updates http handler routes. This included "web-only" routes, like
 	// login/logout/static, and also gRPC-Gateway routes.
-	routeMux.Handle("/", serveApplicationResources(s.cfg.Server.StaticDir, s.oidc))
+	routeMux.Handle("/", serveApplicationResources(s.cfg.Server.StaticDir, s.oidc, s.testMode))
 	routeMux.Handle("/v1/", gwMux)
 	s.oidc.Handle(routeMux)
 
@@ -187,7 +211,7 @@ func (s *server) RunServer() (<-chan error, error) {
 
 // serveApplicationResources handles requests for SPA endpoints as well as
 // regular resources.
-func serveApplicationResources(dir string, oidc auth.OidcAuth) http.Handler {
+func serveApplicationResources(dir string, oidc auth.OidcAuth, testMode bool) http.Handler {
 	type rule struct {
 		path      string
 		spa       bool
@@ -251,8 +275,12 @@ func serveApplicationResources(dir string, oidc auth.OidcAuth) http.Handler {
 				r.URL.Path = "/"
 			}
 
-			if rule.anonymous {
+			if rule.anonymous || testMode {
 				// Serve this path anonymously (without any authentication).
+				// In test mode, bypass all authentication.
+				if testMode && !rule.anonymous {
+					log.Infow("TEST_MODE: Bypassing HTTP auth", "path", requestPath)
+				}
 				fs.ServeHTTP(w, r)
 			} else {
 				// Serve this path with authentication.
@@ -262,7 +290,13 @@ func serveApplicationResources(dir string, oidc auth.OidcAuth) http.Handler {
 			return
 		}
 		// No rules matched, so serve this path with authentication by default.
-		oidc.Authorized(fs).ServeHTTP(w, r)
+		// In test mode, bypass authentication.
+		if testMode {
+			log.Infow("TEST_MODE: Bypassing HTTP auth (default rule)", "path", requestPath)
+			fs.ServeHTTP(w, r)
+		} else {
+			oidc.Authorized(fs).ServeHTTP(w, r)
+		}
 	})
 }
 
