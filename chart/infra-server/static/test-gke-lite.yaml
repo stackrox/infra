@@ -63,10 +63,10 @@ spec:
             valueFrom:
               path: /outputs/cluster_name
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-gke-default-0.10.43
+        image: quay.io/stackrox-io/ci:automation-flavors-gke-default-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
         command:
-          - /usr/bin/entrypoint
+          - /usr/bin/entrypoint.sh
         args:
           - create
           - --name={{ "{{" }}workflow.parameters.name{{ "}}" }}
@@ -88,10 +88,10 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-gke-default-0.10.43
+        image: quay.io/stackrox-io/ci:automation-flavors-gke-default-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
         command:
-          - /usr/bin/entrypoint
+          - /usr/bin/entrypoint.sh
         args:
           - destroy
           - --name={{ "{{" }}workflow.parameters.name{{ "}}" }}

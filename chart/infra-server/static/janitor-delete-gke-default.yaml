@@ -27,7 +27,7 @@ spec:
         image: quay.io/stackrox-io/ci:automation-flavors-gke-default-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
         command:
-          - /usr/bin/entrypoint
+          - /usr/bin/entrypoint.sh
         args:
           - destroy
           - --name={{ "{{" }}workflow.parameters.name{{ "}}" }}
