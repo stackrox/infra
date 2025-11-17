@@ -51,7 +51,7 @@ bin/infractl -k -e localhost:8443 whoami
 :rocket: If you only modify configuration (chart/infra-server/configuration) or templates (chart/infra-server/{static,templates}), you can get a faster update with:
 
 \`\`\`
-make install-local
+make helm-deploy
 \`\`\`
 
 ### Logs

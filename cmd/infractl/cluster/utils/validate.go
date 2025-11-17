@@ -1,3 +1,4 @@
+// Package utils contains methods to validate user input for cluster operations.
 package utils
 
 import (
@@ -24,9 +25,9 @@ func ValidateClusterName(name string) error {
 	}
 	if !match {
 		return errors.New(
-			"The name does not match the requirements. " +
+			"the name does not match the requirements. " +
 				"Only lowercase letters, numbers, and '-' allowed, must start with a letter and end with a letter or number. " +
-				"A minimum length of 3 characters and a maximum length of 28 is allowed.")
+				"A minimum length of 3 characters and a maximum length of 28 is allowed")
 	}
 
 	return nil

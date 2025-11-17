@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: test-qa-demo-
+spec:
+  entrypoint: start
+  onExit: stop
+  arguments:
+    parameters:
+      - name: name
+      - name: main-image
+  templates:
+    - name: start
+      steps:
+        - - name: create
+            template: whalesay
+        - - name: wait
+            template: wait
+    - name: stop
+      steps:
+        - - name: destroy
+            template: whalesay
+
+    - name: whalesay
+      container:
+        image: busybox:latest
+        command: [echo]
+        args:
+          - "hello world to: "
+          - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
+
+    - name: wait
+      suspend: {}

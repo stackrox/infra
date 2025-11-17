@@ -5,14 +5,14 @@ package buildinfo
 import (
 	"runtime"
 
-	"github.com/golang/protobuf/ptypes"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/buildinfo/internal"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // All returns all of the various pieces of version information.
 func All() *v1.Version {
-	ts, _ := ptypes.TimestampProto(internal.BuildTimestamp)
+	ts := timestamppb.New(internal.BuildTimestamp)
 	return &v1.Version{
 		BuildDate: ts,
 		GitCommit: internal.GitShortSha,

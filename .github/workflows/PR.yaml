@@ -34,7 +34,7 @@ jobs:
         with:
           flavor: gke-default
           name: infra-pr-${{ github.event.pull_request.number }}
-          args: machine-type=e2-medium,nodes=3,gcp-image-type=ubuntu_containerd
+          args: machine-type=e2-standard-4,nodes=3,gcp-image-type=ubuntu_containerd
           lifespan: ${{ github.actor == 'dependabot[bot]' && '1h' || '24h' }}
           wait: true
           token: ${{ secrets.INFRA_TOKEN }}
@@ -45,14 +45,12 @@ jobs:
       - create-dev-cluster
     runs-on: ubuntu-latest
     container:
-      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.4.4
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.4.9
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
           path: go/src/github.com/stackrox/infra
 
       - name: Add PR comment for deploy to dev
@@ -67,7 +65,7 @@ jobs:
       - create-dev-cluster
     runs-on: ubuntu-latest
     container:
-      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.4.4
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.4.9
     env:
       KUBECONFIG: /github/home/artifacts/kubeconfig
       INFRA_TOKEN: ${{ secrets.INFRA_TOKEN }}
@@ -76,19 +74,23 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
           path: go/src/github.com/stackrox/infra
 
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go/src/github.com/stackrox/infra/go.mod
+
       - name: Authenticate to GCloud
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v3
         with:
           credentials_json: ${{ secrets.INFRA_CI_AUTOMATION_GCP_SA }}
 
       - name: Set up Cloud SDK
-        uses: "google-github-actions/setup-gcloud@v2"
+        uses: "google-github-actions/setup-gcloud@v3"
         with:
           install_components: "gke-gcloud-auth-plugin"
 
@@ -102,9 +104,9 @@ jobs:
 
       - name: Deploy infra to dev cluster
         run: |
-          ENVIRONMENT=development TEST_MODE=true make install-argo clean-argo-config install-monitoring helm-deploy
+          ENVIRONMENT=development TEST_MODE=true make helm-deploy
           sleep 10 # wait for old pods to disappear so the svc port-forward doesn't connect to them
-          kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
+          kubectl -n infra port-forward svc/infra-server-service 8443:8443 > /dev/null 2>&1 &
           sleep 10
 
           kubectl -n infra logs -l app=infra-server --tail=-1
@@ -115,7 +117,7 @@ jobs:
 
       - name: Check the deployment
         run: |
-          kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
+          kubectl -n infra port-forward svc/infra-server-service 8443:8443 > /dev/null 2>&1 &
           sleep 10
 
           version="$($INFRACTL version --json)"
@@ -153,26 +155,10 @@ jobs:
         run: |
           make argo-workflow-lint
 
-      - name: Run BATS e2e tests
-        env:
-          INFRA_TOKEN: ${{ secrets.INFRA_TOKEN_DEV }}
-        run: |
-          kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
-          sleep 5
-
-          $INFRACTL whoami || true
-          $INFRACTL version || true
-
-          make bats-e2e-tests || touch FAIL
-          kubectl -n infra logs -l app=infra-server --tail=-1
-          kill %1
-
-          [[ ! -f FAIL ]]
-
       - name: Run Go e2e tests
         env:
           INFRA_TOKEN: ${{ secrets.INFRA_TOKEN_DEV }}
         run: |
-          kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
+          kubectl -n infra port-forward svc/infra-server-service 8443:8443 > /dev/null 2>&1 &
           sleep 5
           make go-e2e-tests

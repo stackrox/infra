@@ -6,23 +6,22 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/golang/protobuf/ptypes"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 )
 
 type prettyClusterListResponse struct {
-	v1.ClusterListResponse
+	*v1.ClusterListResponse
 	QuietMode bool
 }
 
 func (p prettyClusterListResponse) PrettyPrint(cmd *cobra.Command) {
 	for _, cluster := range p.Clusters {
 		var (
-			createdOn, _   = ptypes.Timestamp(cluster.GetCreatedOn())
-			lifespan, _    = ptypes.Duration(cluster.GetLifespan())
-			destroyedOn, _ = ptypes.Timestamp(cluster.GetDestroyedOn())
-			remaining      = time.Until(createdOn.Add(lifespan))
+			createdOn   = cluster.GetCreatedOn().AsTime()
+			lifespan    = cluster.GetLifespan().AsDuration()
+			destroyedOn = cluster.GetDestroyedOn().AsTime()
+			remaining   = time.Until(createdOn.Add(lifespan))
 		)
 
 		cmd.Printf("%s \n", cluster.GetID())
@@ -41,7 +40,7 @@ func (p prettyClusterListResponse) PrettyPrint(cmd *cobra.Command) {
 }
 
 func (p prettyClusterListResponse) PrettyJSONPrint(cmd *cobra.Command) error {
-	data, err := json.MarshalIndent(p, "", "  ")
+	data, err := json.MarshalIndent(p.ClusterListResponse, "", "  ")
 	if err != nil {
 		return err
 	}

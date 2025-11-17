@@ -18,8 +18,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
-	durationpb "github.com/golang/protobuf/ptypes/duration"
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/cluster/get"
 	"github.com/stackrox/infra/cmd/infractl/common"
@@ -28,10 +26,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type FakeClusterServiceClient struct {
+	v1.UnimplementedClusterServiceServer
 	infoFn      func(ctx context.Context, clusterID *v1.ResourceByID) (*v1.Cluster, error)
 	listFn      func(ctx context.Context, req *v1.ClusterListRequest) (*v1.ClusterListResponse, error)
 	lifespanFn  func(ctx context.Context, req *v1.LifespanRequest) (*durationpb.Duration, error)
@@ -140,8 +141,7 @@ func generateTLSCertification() (tls.Certificate, error) {
 }
 
 func TestGetClusterJSONOutput(t *testing.T) {
-	testTime, err := ptypes.TimestampProto(time.Date(2022, time.April, 1, 1, 0, 0, 0, time.UTC))
-	assert.NoError(t, err)
+	testTime := timestamppb.New(time.Date(2022, time.April, 1, 1, 0, 0, 0, time.UTC))
 	csc := &FakeClusterServiceClient{
 		infoFn: func(_ context.Context, _ *v1.ResourceByID) (*v1.Cluster, error) {
 			return &v1.Cluster{
@@ -151,7 +151,7 @@ func TestGetClusterJSONOutput(t *testing.T) {
 				Owner:       "me@redhat.com",
 				CreatedOn:   testTime,
 				DestroyedOn: nil,
-				Lifespan:    ptypes.DurationProto(10800 * time.Second),
+				Lifespan:    durationpb.New(10800 * time.Second),
 				Description: "My test cluster",
 				Parameters: []*v1.Parameter{
 					{

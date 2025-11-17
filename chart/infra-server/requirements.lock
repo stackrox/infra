@@ -1,0 +1,9 @@
+dependencies:
+- name: argo-workflows
+  repository: https://argoproj.github.io/argo-helm
+  version: 0.45.9
+- name: kube-prometheus
+  repository: https://charts.bitnami.com/bitnami
+  version: 11.3.10
+digest: sha256:59c5c412a14a5ce69cdc7745be5d37603ee0e7748608a586a2b812da4457e60a
+generated: "2025-10-01T13:00:11.143106+02:00"

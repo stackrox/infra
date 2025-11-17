@@ -8,40 +8,90 @@ import (
 	"testing"
 	"time"
 
-	utils "github.com/stackrox/infra/test/e2e"
+	"github.com/stackrox/infra/test/utils"
+	"github.com/stackrox/infra/test/utils/mock"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestListCreated(t *testing.T) {
 	utils.CheckContext()
-	clusterID, err := infractlCreateCluster(
-		"simulate", utils.GetUniqueClusterName("list-created"),
-		"--lifespan=30s",
-		"--arg=create-delay-seconds=5",
-		"--arg=destroy-delay-seconds=5",
+	clusterID, err := mock.InfractlCreateCluster(
+		"test-simulate", utils.GetUniqueClusterName("list-created"),
+		"--lifespan=10s",
 	)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, clusterID)
-	listedClusters, err := infractlList("--prefix=list-created")
+	listedClusters, err := mock.InfractlList(fmt.Sprintf("--prefix=%s", clusterID))
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(listedClusters.Clusters))
 }
 
 func TestListExpired(t *testing.T) {
 	utils.CheckContext()
-	clusterID, err := infractlCreateCluster(
-		"simulate", utils.GetUniqueClusterName("list-created"),
-		"--lifespan=20s",
-		"--arg=create-delay-seconds=5",
-		"--arg=destroy-delay-seconds=5",
+	clusterID, err := mock.InfractlCreateCluster(
+		"test-simulate", utils.GetUniqueClusterName("list-expired"),
+		"--lifespan=5s",
 	)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, clusterID)
-	assertStatusBecomesWithin(t, clusterID, "FINISHED", 60*time.Second)
-	listedClusters, err := infractlList(fmt.Sprintf("--prefix=%s", clusterID))
+	utils.AssertStatusBecomesWithin(t, clusterID, "FINISHED", 90*time.Second)
+	listedClusters, err := mock.InfractlList(fmt.Sprintf("--prefix=%s", clusterID))
 	assert.NoError(t, err)
 	assert.Equal(t, 0, len(listedClusters.Clusters))
-	listedClusters, err = infractlList(fmt.Sprintf("--prefix=%s", clusterID), "--expired")
+	listedClusters, err = mock.InfractlList(fmt.Sprintf("--prefix=%s", clusterID), "--expired")
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(listedClusters.Clusters))
+}
+
+func TestListOfAFlavor(t *testing.T) {
+	utils.CheckContext()
+
+	commonPrefix := utils.GetUniqueClusterName("ls-flavor")
+
+	_, err := mock.InfractlCreateCluster(
+		"test-simulate", fmt.Sprintf("%s%d", commonPrefix, 1),
+		"--lifespan=10s",
+	)
+	assert.NoError(t, err)
+	_, err = mock.InfractlCreateCluster(
+		"test-connect-artifact", fmt.Sprintf("%s%d", commonPrefix, 2),
+		"--lifespan=10s",
+	)
+	assert.NoError(t, err)
+
+	listAllClusters, err := mock.InfractlList(fmt.Sprintf("--prefix=%s", commonPrefix), "--expired")
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(listAllClusters.Clusters))
+
+	listOnlySimulateClusters, err := mock.InfractlList(fmt.Sprintf("--prefix=%s", commonPrefix), "--flavor=test-simulate", "--expired")
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(listOnlySimulateClusters.Clusters))
+}
+
+func TestListOfAStatus(t *testing.T) {
+	utils.CheckContext()
+
+	commonPrefix := utils.GetUniqueClusterName("ls-status")
+
+	_, err := mock.InfractlCreateCluster(
+		"test-simulate", fmt.Sprintf("%s%d", commonPrefix, 1),
+		"--lifespan=10s",
+	)
+	assert.NoError(t, err)
+
+	failedCluster, err := mock.InfractlCreateCluster(
+		"test-simulate", fmt.Sprintf("%s%d", commonPrefix, 2),
+		"--lifespan=10s",
+		"--arg=create-outcome=fail",
+	)
+	utils.AssertStatusBecomes(t, failedCluster, "FAILED")
+	assert.NoError(t, err)
+
+	listAllClusters, err := mock.InfractlList(fmt.Sprintf("--prefix=%s", commonPrefix), "--expired")
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(listAllClusters.Clusters))
+
+	listOnlyFailedClusters, err := mock.InfractlList(fmt.Sprintf("--prefix=%s", commonPrefix), "--status=FAILED", "--expired")
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(listOnlyFailedClusters.Clusters))
 }

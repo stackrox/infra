@@ -25,6 +25,14 @@ check_not_empty() {
     done
 }
 
+install_crds() {
+    argo_chart_file=$(find "chart/infra-server/charts" -name "argo-workflows-*.tgz" 2>/dev/null | head -1)
+    ARGO_WORKFLOWS_APP_VERSION="$(tar -xzOf "${argo_chart_file}" argo-workflows/Chart.yaml | yq eval '.appVersion' -)"
+    echo "Using argo-workflows app version: ${ARGO_WORKFLOWS_APP_VERSION}" >&2
+    kubectl apply --kustomize \
+        "https://github.com/argoproj/argo-workflows/manifests/base/crds/minimal?ref=${ARGO_WORKFLOWS_APP_VERSION}" >&2
+}
+
 template() {
     # Need to use helm upgrade --dry-run to have .Capabilities context available
     helm upgrade \
@@ -34,6 +42,8 @@ template() {
         --create-namespace \
         --dry-run \
         --namespace "${RELEASE_NAMESPACE}" \
+        --values chart/infra-server/argo-values.yaml \
+        --values chart/infra-server/monitoring-values.yaml \
         --set tag="${TAG}" \
         --set environment="${ENVIRONMENT}" \
         --set testMode="${TEST_MODE}" \
@@ -57,6 +67,8 @@ deploy() {
         --timeout 5m \
         --wait \
         --namespace "${RELEASE_NAMESPACE}" \
+        --values chart/infra-server/argo-values.yaml \
+        --values chart/infra-server/monitoring-values.yaml \
         --set tag="${TAG}" \
         --set environment="${ENVIRONMENT}" \
         --set testMode="${TEST_MODE}" \
@@ -80,6 +92,8 @@ diff() {
         --create-namespace \
         --dry-run \
         --namespace "${RELEASE_NAMESPACE}" \
+        --values chart/infra-server/argo-values.yaml \
+        --values chart/infra-server/monitoring-values.yaml \
         --set tag="${TAG}" \
         --set environment="${ENVIRONMENT}" \
         --set testMode="${TEST_MODE}" \
@@ -96,4 +110,5 @@ diff() {
 }
 
 check_not_empty TASK TAG ENVIRONMENT
+install_crds
 eval "$TASK"

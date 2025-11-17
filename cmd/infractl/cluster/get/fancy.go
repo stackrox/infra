@@ -6,8 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
-
 	"github.com/spf13/cobra"
 
 	"github.com/buger/jsonparser"
@@ -17,15 +15,15 @@ import (
 )
 
 type prettyCluster struct {
-	v1.Cluster
+	*v1.Cluster
 }
 
 func (p prettyCluster) PrettyPrint(cmd *cobra.Command) {
 	var (
-		createdOn, _   = ptypes.Timestamp(p.CreatedOn)
-		lifespan, _    = ptypes.Duration(p.Lifespan)
-		destroyedOn, _ = ptypes.Timestamp(p.DestroyedOn)
-		remaining      = time.Until(createdOn.Add(lifespan))
+		createdOn   = p.CreatedOn.AsTime()
+		lifespan    = p.Lifespan.AsDuration()
+		destroyedOn = p.DestroyedOn.AsTime()
+		remaining   = time.Until(createdOn.Add(lifespan))
 	)
 
 	cmd.Printf("ID:          %s\n", p.ID)
@@ -49,7 +47,7 @@ func (p prettyCluster) PrettyJSONPrint(cmd *cobra.Command) error {
 	b := new(bytes.Buffer)
 	m := jsonpb.Marshaler{EnumsAsInts: false, EmitDefaults: true, Indent: "  "}
 
-	if err := m.Marshal(b, &p.Cluster); err != nil {
+	if err := m.Marshal(b, p.Cluster); err != nil {
 		return err
 	}
 

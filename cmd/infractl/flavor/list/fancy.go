@@ -1,19 +1,22 @@
 package list
 
 import (
-	"encoding/json"
+	"bytes"
 
+	"github.com/gogo/protobuf/jsonpb"
 	"github.com/spf13/cobra"
 
 	v1 "github.com/stackrox/infra/generated/api/v1"
 )
 
-type prettyFlavorListResponse v1.FlavorListResponse
+type prettyFlavorListResponse struct {
+	*v1.FlavorListResponse
+}
 
 func (p prettyFlavorListResponse) PrettyPrint(cmd *cobra.Command) {
-	for _, flavor := range p.Flavors {
+	for _, flavor := range p.GetFlavors() {
 		cmd.Printf("%s ", flavor.GetID())
-		if flavor.GetID() == p.Default {
+		if flavor.GetID() == p.GetDefault() {
 			cmd.Printf("(default)")
 		}
 		cmd.Println()
@@ -24,10 +27,12 @@ func (p prettyFlavorListResponse) PrettyPrint(cmd *cobra.Command) {
 }
 
 func (p prettyFlavorListResponse) PrettyJSONPrint(cmd *cobra.Command) error {
-	data, err := json.MarshalIndent(p, "", "  ")
-	if err != nil {
+	b := new(bytes.Buffer)
+	m := jsonpb.Marshaler{EnumsAsInts: false, EmitDefaults: true, Indent: "  "}
+	if err := m.Marshal(b, p.FlavorListResponse); err != nil {
 		return err
 	}
+	data := b.Bytes()
 
 	cmd.Printf("%s\n", string(data))
 	return nil

@@ -1,4 +1,4 @@
-import namor from 'namor';
+import { generate } from 'random-words';
 
 // eslint-disable-next-line import/prefer-default-export
 export function generateClusterName(username = ''): string {
@@ -14,7 +14,7 @@ export function generateClusterName(username = ''): string {
   const datePart = today.toISOString().slice(5, 10);
 
   // finally, get a random 3-part string of real words
-  const randomPart = namor.generate({ words: 3, saltLength: 0 });
+  const randomPart = generate({ exactly: 3, join: '-', maxLength: 8 });
 
   // prepare to combine, but filter any empty part (only one that should ever be empty is user string)
   const nameArray = [userPart, datePart, randomPart].filter(Boolean);

@@ -49,18 +49,18 @@ jobs:
           echo "Version: ${{ inputs.version }}"
 
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           ref: ${{ inputs.version }}
 
       - name: Authenticate to GCloud
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v3
         with:
           credentials_json: ${{ secrets.INFRA_DEPLOY_AUTOMATION_GCP_SA }}
 
       - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v2'
+        uses: 'google-github-actions/setup-gcloud@v3'
         with:
           install_components: "gke-gcloud-auth-plugin"
 
@@ -71,23 +71,18 @@ jobs:
           gcloud container clusters get-credentials infra-${{ inputs.environment }} \
             --project "${PROJECT}" \
             --region us-west2
-          ENVIRONMENT=${{ inputs.environment }} make install-argo clean-argo-config install-monitoring helm-deploy
+          ENVIRONMENT=${{ inputs.environment }} make helm-deploy
 
       - name: Notify infra channel about new version
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-        uses: slackapi/slack-github-action@v1.27.0
+        uses: slackapi/slack-github-action@v2.1.1
         with:
-          channel-id: CVANK5K5W #acs-infra
-          payload: >-
-            {
-                "blocks": [
-                  {
-                    "type": "section",
-                    "text": {
-                      "type": "mrkdwn",
-                      "text": ":ship::tada:*Infra (${{ inputs.environment }}) was updated to <${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ inputs.version }}|${{ inputs.version }}>."
-                    }
-                  }
-                ]
-              }
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: "CVANK5K5W"
+            text: "Infra (${{ inputs.environment }}) was updated."
+            blocks:
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: ":ship::tada:*Infra (${{ inputs.environment }}) was updated to <${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ inputs.version }}|${{ inputs.version }}>."

@@ -94,17 +94,6 @@ correct tooling installed with:
 
 Use the `deploy` Github action to update development or production environments with a new release.
 
-### Argo Deployment
-
-To install Argo workflow server, run:
-
-`ENVIRONMENT=<development,production> make install-argo`
-
-NOTE: This is a separate step and not a dependant chart for example to avoid too frequent Argo deployments.
-
-Also note that if you plan to deploy `infra-server` to this cluster, you will need to remove the default Argo workflow controller ConfigMap with the `clean-argo-config` Make target.
-This is required until [ROX-20269](https://issues.redhat.com/browse/ROX-20269) is resolved.
-
 ### Manual deployment
 
 To render a copy of the charts (for inspection), run:
@@ -156,3 +145,13 @@ The infra server logs are captured automatically by GCP.
 - [Logs Explorer: Production](https://cloudlogging.app.goo.gl/KqgSyE2mSq83M5Xs9)
 
 Adding `jsonPayload."log-type"="audit"` to the query will filter for audit logs.
+
+## Inspecting live workflows
+
+You can view the UI of the Argo server by forwarding its port:
+
+```bash
+kubectl port-forward -n argo svc/infra-server-argo-workflows-server 2746
+```
+
+and access [http://localhost:2746](http://localhost:2746).

@@ -4,6 +4,7 @@ metadata:
   generateName: aks-
 spec:
   entrypoint: start
+  onExit: stop
   arguments:
     parameters:
       - name: name
@@ -27,6 +28,8 @@ spec:
         - - name: wait
             template: wait
 
+    - name: stop
+      steps:
         - - name: destroy
             template: destroy
 
@@ -72,6 +75,11 @@ spec:
               secretKeyRef:
                 name: azure-secrets
                 key: AZURE_SP_TENANT
+          - name: ACR_TO_ATTACH
+            valueFrom:
+              secretKeyRef:
+                name: azure-secrets
+                key: ACR_TO_ATTACH
           - name: NODE_COUNT
             value: '{{ "{{" }}workflow.parameters.nodes{{ "}}" }}'
           - name: INSTANCE_TYPE
@@ -120,3 +128,9 @@ spec:
               secretKeyRef:
                 name: azure-secrets
                 key: AZURE_SP_TENANT
+        volumeMounts:
+          - name: data
+            mountPath: /data
+      volumes:
+        - name: data
+          emptyDir: {}

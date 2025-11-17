@@ -1,3 +1,4 @@
+// Package platform handles os and arch combinations.
 package platform
 
 import "github.com/pkg/errors"

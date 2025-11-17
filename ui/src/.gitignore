@@ -2,6 +2,3 @@
 
 # include generated sources 
 !/generated
-
-# exclude tailwind generated styles
-/index.css

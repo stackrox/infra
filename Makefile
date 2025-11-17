@@ -33,15 +33,17 @@ image-name:
 ##############
 ## Protobuf ##
 ##############
-# Tool versions.
-protoc-version = 3.11.2
-protoc-gen-go-version = 1.3.2
-protoc-gen-grpc-gateway-version = 1.12.1
-protoc-gen-swagger-version = 1.12.1
+# Tool versions - updated to latest versions (September 2025)
+protoc-version = 32.0
+protoc-gen-go-version = 1.36.9
+protoc-gen-go-grpc-version = 1.5.1
+protoc-gen-grpc-gateway-version = 2.27.2
+protoc-gen-swagger-version = 1.16.0
 
 # Tool binary paths
 protoc = $(GOPATH)/bin/protoc
 protoc-gen-go = $(GOPATH)/bin/protoc-gen-go
+protoc-gen-go-grpc = $(GOPATH)/bin/protoc-gen-go-grpc
 protoc-gen-grpc-gateway = $(GOPATH)/bin/protoc-gen-grpc-gateway
 protoc-gen-swagger = $(GOPATH)/bin/protoc-gen-swagger
 
@@ -66,13 +68,19 @@ $(protoc):
 $(protoc-gen-go):
 	@echo "+ $@"
 	@echo "Installing protoc-gen-go $(protoc-gen-go-version) to $(protoc-gen-go)"
-	@cd /tmp; go install github.com/golang/protobuf/protoc-gen-go@v$(protoc-gen-go-version)
+	@cd /tmp; go install google.golang.org/protobuf/cmd/protoc-gen-go@v$(protoc-gen-go-version)
+
+# This target installs the protoc-gen-go-grpc binary.
+$(protoc-gen-go-grpc):
+	@echo "+ $@"
+	@echo "Installing protoc-gen-go-grpc $(protoc-gen-go-grpc-version) to $(protoc-gen-go-grpc)"
+	@cd /tmp; go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v$(protoc-gen-go-grpc-version)
 
 # This target installs the protoc-gen-grpc-gateway binary.
 $(protoc-gen-grpc-gateway):
 	@echo "+ $@"
 	@echo "Installing protoc-gen-grpc-gateway $(protoc-gen-grpc-gateway-version) to $(protoc-gen-grpc-gateway)"
-	@cd /tmp; go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway@v$(protoc-gen-grpc-gateway-version)
+	@cd /tmp; go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v$(protoc-gen-grpc-gateway-version)
 
 # This target installs the protoc-gen-swagger binary.
 $(protoc-gen-swagger):
@@ -82,7 +90,7 @@ $(protoc-gen-swagger):
 
 # This target installs all of the protoc related binaries.
 .PHONY: protoc-tools
-protoc-tools: $(protoc) $(protoc-gen-go) $(protoc-gen-grpc-gateway) $(protoc-gen-swagger)
+protoc-tools: $(protoc) $(protoc-gen-go) $(protoc-gen-go-grpc) $(protoc-gen-grpc-gateway) $(protoc-gen-swagger)
 
 PROTO_INPUT_DIR   = proto/api/v1
 PROTO_THIRD_PARTY = proto/third_party
@@ -100,13 +108,18 @@ proto-generated-srcs: protoc-tools
 	# Generate gRPC bindings
 	$(protoc) -I$(PROTO_INPUT_DIR) \
 		-I$(PROTO_THIRD_PARTY) \
-		--go_out=plugins=grpc:$(PROTO_OUTPUT_DIR) \
+		--go_out=$(PROTO_OUTPUT_DIR) \
+		--go_opt=paths=source_relative \
+		--go-grpc_out=$(PROTO_OUTPUT_DIR) \
+		--go-grpc_opt=paths=source_relative \
 		$(PROTO_FILES)
 
 	# Generate gRPC-Gateway bindings
 	$(protoc) -I$(PROTO_INPUT_DIR) \
 		-I$(PROTO_THIRD_PARTY) \
-		--grpc-gateway_out=logtostderr=true:$(PROTO_OUTPUT_DIR) \
+		--grpc-gateway_out=$(PROTO_OUTPUT_DIR) \
+		--grpc-gateway_opt=paths=source_relative \
+		--grpc-gateway_opt=logtostderr=true \
 		$(PROTO_FILES)
 
 	# Generate JSON Swagger manifest
@@ -150,7 +163,7 @@ ui:
 
 .PHONY: image
 image:
-	docker build . -t $(IMAGE) -f image/Dockerfile --secret id=npmrc,src=${HOME}/.npmrc
+	docker build . -t $(IMAGE) -f image/Dockerfile
 
 .PHONY: push
 push:
@@ -166,7 +179,7 @@ argo-workflow-lint:
 
 .PHONY: shellcheck
 shellcheck:
-	@shellcheck -x -- **/*.{bats,sh}
+	@shellcheck -x -- **/**/*.sh
 
 #############
 ## Testing ##
@@ -177,15 +190,9 @@ unit-test: proto-generated-srcs
 	@echo "+ $@"
 	@go test -v ./...
 
-.PHONY: bats-e2e-tests
-bats-e2e-tests:
-	@kubectl apply -f "workflows/*.yaml"
-	@bats --recursive .
-
 .PHONY: go-e2e-tests
 go-e2e-tests: proto-generated-srcs
-	@kubectl apply -f workflows/
-	@go test ./test/e2e/... -tags=e2e -v -parallel 5 -count 1 -cover -timeout 1h
+	@go test ./test/e2e/... -tags=e2e -v -parallel=5 -timeout 1h
 
 # Assuming a local dev infra server is running and accessible via a port-forward
 # i.e. nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
@@ -223,21 +230,27 @@ endif
 		exit 1; \
 	fi
 
+.PHONY: helm-dependency-update
+helm-dependency-update:
+	@helm dependency update chart/infra-server >&2
+
+create-namespaces:
+	@kubectl create namespace argo >/dev/null 2>&1 || echo "namespace/argo already exists" >&2; exit 0
+	@kubectl create namespace monitoring >/dev/null 2>&1 || echo "namespace/monitoring already exists" >&2; exit 0
+
 ## Render template
 .PHONY: helm-template
-helm-template: pre-check
+helm-template: pre-check helm-dependency-update create-namespaces
 	@./scripts/deploy/helm.sh template $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
 
 ## Deploy
 .PHONY: helm-deploy
-helm-deploy: pre-check
+helm-deploy: pre-check helm-dependency-update create-namespaces
 	@./scripts/deploy/helm.sh deploy $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
-	# Pick up any eventual changes to the workflow controller configmap
-	@make bounce-argo-pods
 
 ## Diff
 .PHONY: helm-diff
-helm-diff: pre-check
+helm-diff: pre-check helm-dependency-update create-namespaces
 	@./scripts/deploy/helm.sh diff $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
 
 ## Bounce pods
@@ -276,37 +289,21 @@ secrets-edit:
 secrets-revert:
 	@./scripts/deploy/secrets.sh revert $(ENVIRONMENT) $(SECRET_VERSION)
 
-##################
-## Dependencies ##
-##################
-.PHONY: install-argo
-install-argo: pre-check
-	helm repo add argo https://argoproj.github.io/argo-helm
-	helm upgrade \
-		argo-workflows \
-		argo/argo-workflows \
-		--version 0.16.9 \
-		--install \
-		--create-namespace \
-		--namespace argo
-
-.PHONY: clean-argo-config
-clean-argo-config: pre-check
-	kubectl delete configmap argo-workflows-workflow-controller-configmap -n argo || true
-
-.PHONY: install-monitoring
-install-monitoring: pre-check
-	helm dependency update chart/infra-monitoring
-	helm upgrade prometheus-stack chart/infra-monitoring \
-		--install \
-		--namespace monitoring \
-		--create-namespace \
-		--values chart/infra-monitoring/values.yaml \
-		--wait
-
 ###############
 ## Debugging ##
 ###############
 .PHONY: prepare-local-server-debugging
 prepare-local-server-debugging:
 	@./scripts/local-dev/prepare.sh
+
+######################
+## Go Version Sync  ##
+######################
+
+.PHONY: sync-go-version
+sync-go-version:
+	@./scripts/ci/sync-go-version.sh sync
+
+.PHONY: check-needs-sync-go-version
+check-needs-sync-go-version:
+	@./scripts/ci/sync-go-version.sh check

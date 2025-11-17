@@ -7,7 +7,7 @@ jobs:
   actionlint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: docker://rhysd/actionlint:1.6.21
         with:
           args: -color
@@ -15,18 +15,24 @@ jobs:
   golint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "1.21"
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
+      - uses: actions/setup-go@v6
         with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
+          go-version-file: go.mod
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v6
-        with:
-          version: v1.58
+        uses: golangci/golangci-lint-action@v9
+
+  go-version-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Check Go version synchronization
+        run: |
+          make check-needs-sync-go-version
 
   shellcheck:
     runs-on: ubuntu-latest
@@ -34,10 +40,8 @@ jobs:
       image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.4.4
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
+        uses: actions/checkout@v5
+
       - name: Ignore dubious repository ownership
         run: |
           # Prevent fatal error "detected dubious ownership in repository" from

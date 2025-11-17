@@ -1,19 +1,18 @@
 import React, { ReactElement } from 'react';
-import { AlertCircle, Icon } from 'react-feather';
+import { EmptyState, EmptyStateBody } from '@patternfly/react-core';
 
 type Props = {
-  message: string;
-  IconComponent?: Icon;
+  title?: string;
+  message?: string;
 };
 
 export default function FullPageError({
-  message,
-  IconComponent = AlertCircle,
+  title = 'There was an unexpected error!',
+  message = '',
 }: Props): ReactElement {
   return (
-    <div className="pf-u-display-flex pf-u-align-items-center pf-u-justify-content-center pf-u-h-100">
-      <IconComponent className="pf-u-mr-md" size={64} />
-      <span className="pf-u-font-size-4xl">{message}</span>
-    </div>
+    <EmptyState status="danger" variant="lg" titleText={title} headingLevel="h4">
+      <EmptyStateBody>{message}</EmptyStateBody>
+    </EmptyState>
   );
 }

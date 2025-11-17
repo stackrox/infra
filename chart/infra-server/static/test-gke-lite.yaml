@@ -1,0 +1,102 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: gke-lite-
+spec:
+  entrypoint: start
+  onExit: stop
+  arguments:
+    parameters:
+      - name: name
+      - name: nodes
+      - name: machine-type
+      - name: k8s-version
+        value: ""
+      - name: pod-security-policy
+        value: ""
+      - name: gcp-image-type
+        value: ""
+      - name: gcp-zone
+        value: ""
+
+  volumes:
+    - name: credentials
+      secret:
+        secretName: google-credentials
+
+  templates:
+    - name: start
+      steps:
+        - - name: create
+            template: create
+        - - name: wait
+            template: wait
+    - name: stop
+      steps:
+        - - name: destroy
+            template: destroy
+            arguments:
+              parameters:
+                - name: name
+                  value: '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
+
+    - name: create
+      activeDeadlineSeconds: 3600
+      outputs:
+        artifacts:
+          - name: kubeconfig
+            path: /outputs/kubeconfig
+            mode: 0644
+            archive:
+              none: {}
+          - name: connect
+            path: /outputs/connect.sh
+            mode: 0755
+            archive:
+              none: {}
+          - name: SSH_ACCESS
+            path: /outputs/SSH_ACCESS.md
+            archive:
+              none: {}
+        parameters:
+          - name: cluster_name
+            valueFrom:
+              path: /outputs/cluster_name
+      container:
+        image: quay.io/stackrox-io/ci:automation-flavors-gke-default-0.10.43
+        imagePullPolicy: Always
+        command:
+          - /usr/bin/entrypoint
+        args:
+          - create
+          - --name={{ "{{" }}workflow.parameters.name{{ "}}" }}
+          - --nodes={{ "{{" }}workflow.parameters.nodes{{ "}}" }}
+          - --machine-type={{ "{{" }}workflow.parameters.machine-type{{ "}}" }}
+          - --gcp-project=acs-team-temp-dev
+          - --creation-source=infra
+          - --k8s-version={{ "{{" }}workflow.parameters.k8s-version{{ "}}" }}
+          - --pod-security-policy={{ "{{" }}workflow.parameters.pod-security-policy{{ "}}" }}
+          - --gcp-image-type={{ "{{" }}workflow.parameters.gcp-image-type{{ "}}" }}
+          - --gcp-zone={{ "{{" }}workflow.parameters.gcp-zone{{ "}}" }}
+        volumeMounts:
+          - name: credentials
+            mountPath: /tmp
+
+    - name: wait
+      suspend: {}
+
+    - name: destroy
+      activeDeadlineSeconds: 3600
+      container:
+        image: quay.io/stackrox-io/ci:automation-flavors-gke-default-0.10.43
+        imagePullPolicy: Always
+        command:
+          - /usr/bin/entrypoint
+        args:
+          - destroy
+          - --name={{ "{{" }}workflow.parameters.name{{ "}}" }}
+          - --gcp-project=acs-team-temp-dev
+          - --gcp-zone={{ "{{" }}workflow.parameters.gcp-zone{{ "}}" }}
+        volumeMounts:
+          - name: credentials
+            mountPath: /tmp

@@ -1,0 +1,64 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: simulate-
+spec:
+  entrypoint: start
+  onExit: stop
+  arguments:
+    parameters:
+      - name: name
+      - name: create-delay-seconds
+        value: ""
+      - name: create-outcome
+        value: ""
+      - name: destroy-delay-seconds
+        value: ""
+      - name: destroy-outcome
+        value: ""
+      - name: test-gcs
+        value: ""
+
+  volumes:
+    - name: credentials
+      secret:
+        secretName: google-credentials
+
+  templates:
+    - name: start
+      dag:
+        tasks:
+          - name: create
+            templateRef:
+              name: test-simulate
+              template: simulate
+            arguments:
+              parameters:
+              - name: delay-seconds
+                value: '{{ "{{" }}workflow.parameters.create-delay-seconds{{ "}}" }}'
+              - name: outcome
+                value: '{{ "{{" }}workflow.parameters.create-outcome{{ "}}" }}'
+              - name: test-gcs
+                value: '{{ "{{"}}workflow.parameters.test-gcs{{ "}}" }}'
+
+          - name: wait
+            dependencies: [create]
+            templateRef:
+              name: common
+              template: wait
+
+    - name: stop
+      dag:
+        tasks:
+          - name: destroy
+            templateRef:
+              name: test-simulate
+              template: simulate
+            arguments:
+              parameters:
+              - name: delay-seconds
+                value: '{{ "{{" }}workflow.parameters.destroy-delay-seconds{{ "}}" }}'
+              - name: outcome
+                value: '{{ "{{" }}workflow.parameters.destroy-outcome{{ "}}" }}'
+              - name: test-gcs
+                value: '{{ "{{"}}workflow.parameters.test-gcs{{ "}}" }}'

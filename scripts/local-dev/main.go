@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -105,7 +106,7 @@ func renderFile(path, content string, decodeString bool) error {
 	// Use a simple template engine to render the template
 	tmpl, err := template.New("template").Parse(content)
 	if err != nil {
-		return fmt.Errorf("error while parsing the template: %v", err)
+		return fmt.Errorf("error while parsing the template at %s: %v", path, err)
 	}
 
 	outputFile, err := os.Create(configPath)
@@ -116,11 +117,11 @@ func renderFile(path, content string, decodeString bool) error {
 
 	values, err := determineValues()
 	if err != nil {
-		return fmt.Errorf("An error occurred while determining values: %v", err)
+		return fmt.Errorf("error occurred while determining values: %v", err)
 	}
 	err = tmpl.Execute(outputFile, values)
 	if err != nil {
-		return fmt.Errorf("An error occurred while rendering the template: %v", err)
+		return fmt.Errorf("error occurred while rendering the template: %v", err)
 	}
 
 	return nil
@@ -142,7 +143,7 @@ func renderWorkflows() error {
 	}
 	for _, file := range files {
 		fileName := file.Name()
-		if (strings.HasPrefix(fileName, "test-") || strings.HasPrefix(fileName, "workflow-")) && strings.HasSuffix(fileName, ".yaml") {
+		if (strings.HasPrefix(fileName, "test-") || strings.HasPrefix(fileName, "workflow-") || strings.HasPrefix(fileName, "janitor")) && strings.HasSuffix(fileName, ".yaml") {
 			fileContent, err := os.ReadFile(fmt.Sprintf("%s/%s", staticPath, fileName))
 			if err != nil {
 				return err
@@ -157,38 +158,30 @@ func renderWorkflows() error {
 
 func main() {
 	if err := createLocalConfigurationDir(); err != nil {
-		fmt.Printf("Error: %v\n", err)
-		return
+		log.Fatalf("error: %v\n", err)
 	}
 
 	data, err := readFileToMap(valuesPath)
 	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-		return
+		log.Fatalf("error: %v\n", err)
 	}
 
 	for key, content := range data {
 		filepath := getPathFromKey(key)
 		err := renderFile(filepath, content, true)
 		if err != nil {
-			fmt.Printf("Error creating file %s: %v\n", filepath, err)
-			return
-		} else {
-			fmt.Println("Created", filepath)
+			log.Fatalf("error creating file %s: %v\n", filepath, err)
 		}
+		log.Println("Created", filepath)
 	}
 
 	if err := renderFlavorList(); err != nil {
-		fmt.Printf("Error: %v\n", err)
-		return
-	} else {
-		fmt.Println("Created flavors.yaml")
+		log.Fatalf("Error: %v\n", err)
 	}
+	log.Println("Created flavors.yaml")
 
 	if err := renderWorkflows(); err != nil {
-		fmt.Printf("Error: %v\n", err)
-		return
-	} else {
-		fmt.Println("Rendered workflows")
+		log.Fatalf("Error: %v\n", err)
 	}
+	log.Println("Rendered workflows")
 }

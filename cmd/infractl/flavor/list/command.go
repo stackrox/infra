@@ -44,5 +44,5 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []str
 		return nil, err
 	}
 
-	return prettyFlavorListResponse(*resp), nil
+	return prettyFlavorListResponse{FlavorListResponse: resp}, nil
 }

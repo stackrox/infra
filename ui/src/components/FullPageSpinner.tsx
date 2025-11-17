@@ -1,11 +1,14 @@
 import React, { ReactElement } from 'react';
-import { RingLoader } from 'react-spinners';
+import { Bullseye, EmptyState, Spinner } from '@patternfly/react-core';
 
-export default function FullPageSpinner(): ReactElement {
+export type FullPageSpinnerProps = {
+  title?: string;
+};
+
+export default function FullPageSpinner({ title = 'Loading' }: FullPageSpinnerProps): ReactElement {
   return (
-    <div className="pf-u-display-flex pf-u-flex-direction-column pf-u-align-items-center pf-u-justify-content-center pf-u-h-100">
-      <RingLoader loading size={128} color="currentColor" />
-      <span className="pf-u-font-size-4xl">Loading...</span>
-    </div>
+    <Bullseye>
+      <EmptyState titleText={title} headingLevel="h4" icon={Spinner} />
+    </Bullseye>
   );
 }
