@@ -265,8 +265,28 @@ install-argo-crds: helm-dependency-update
 
 ## Deploy to local cluster (e.g., Colima) without GCP Secret Manager
 .PHONY: deploy-local
-deploy-local: helm-dependency-update create-namespaces install-argo-crds
+deploy-local: helm-dependency-update create-namespaces
 	@TEST_MODE=true ./scripts/deploy/helm.sh deploy-local $(shell make tag) local
+
+## Run UI E2E tests against local deployment
+.PHONY: test-e2e
+test-e2e: image deploy-local
+	@echo "Waiting for infra-server to be ready..." >&2
+	@kubectl wait --for=condition=ready pod -l app=infra-server -n infra --timeout=3m >&2 || \
+		(echo "ERROR: infra-server pods did not become ready" >&2 && exit 1)
+	@echo "" >&2
+	@echo "Starting port-forward and running E2E tests..." >&2
+	@kubectl port-forward -n infra svc/infra-server-service 8443:8443 >/dev/null 2>&1 & \
+	PF_PID=$$!; \
+	cleanup() { \
+		echo "" >&2; \
+		echo "Cleaning up port-forward (PID: $$PF_PID)..." >&2; \
+		kill $$PF_PID 2>/dev/null || true; \
+	}; \
+	trap cleanup EXIT; \
+	sleep 3; \
+	echo "Running Cypress E2E tests..." >&2; \
+	cd ui && INFRA_API_ENDPOINT=http://localhost:8443 npm run test:e2e
 
 ## Bounce pods
 .PHONY: bounce-infra-pods

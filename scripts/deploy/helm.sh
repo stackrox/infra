@@ -119,6 +119,9 @@ deploy-local() {
         exit 1
     fi
 
+    # Install CRDs for local deployment
+    install_crds
+
     helm upgrade \
         "${HELM_COMMON_ARGS[@]}" \
         --timeout 5m \
@@ -135,5 +138,4 @@ deploy-local() {
 }
 
 check_not_empty TASK TAG ENVIRONMENT
-install_crds
 eval "$TASK"

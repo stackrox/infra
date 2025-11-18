@@ -1,3 +1,6 @@
+{{- if and .Values.testMode (eq .Values.environment "production") }}
+{{- fail "ERROR: TEST_MODE cannot be enabled in production environment. This would disable authentication and security features." }}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 

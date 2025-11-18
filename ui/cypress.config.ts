@@ -3,6 +3,9 @@ import { defineConfig } from 'cypress';
 
 export default defineConfig({
   e2e: {
+    // UI dev server runs on :3001
+    // API calls are proxied to backend at :8443 (configured via INFRA_API_ENDPOINT in setupProxy.js)
+    // Routes proxied: /v1, /login, /callback, /logout, /downloads/infractl-*
     baseUrl: 'http://localhost:3001',
     specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
     supportFile: 'cypress/support/e2e.ts',
