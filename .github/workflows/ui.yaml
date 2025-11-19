@@ -1,6 +1,6 @@
 name: UI tests
 
-on: pull_request
+on: [push]
 
 jobs:
   create-cluster-with-registry:
