@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Login to GitHub Container Registry
-        uses: docker/login-action
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -23,7 +23,7 @@ jobs:
           registry_enable_delete: true
 
       - name: Set up Buildx
-        uses: docker/setup-buildx-action
+        uses: docker/setup-buildx-action@v3
         with:
           platforms: linux/amd64
           buildkitd-config-inline: |
@@ -40,7 +40,7 @@ jobs:
           echo "LOCAL_DOCKER_CACHE_TAG=${LOCAL_DOCKER_REPO}:cache" >> $GITHUB_ENV
 
       - name: Build container image
-        uses: docker/build-push-action
+        uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64
           push: true
