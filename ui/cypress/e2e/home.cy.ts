@@ -1,6 +1,6 @@
 describe('Home Page', () => {
   beforeEach(() => {
-    cy.visit('/').wait();
+    cy.visit('/');
   });
 
   it('should load the home page', () => {

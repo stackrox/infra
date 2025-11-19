@@ -1,6 +1,6 @@
 describe('Flavor Selection', () => {
   beforeEach(() => {
-    cy.visit('/').wait();
+    cy.visit('/');
   });
 
   it('should load the page without authentication errors', () => {
@@ -23,13 +23,15 @@ describe('Flavor Selection', () => {
     cy.contains('h2', /My Flavors|All Flavors/).should('be.visible');
 
     // Get the first flavor card and verify it has required elements
-    cy.get('.pf-v6-c-card').first().within(() => {
-      // Each flavor card should have a name (header text)
-      cy.get('.pf-v6-c-card__title').should('exist').and('not.be.empty');
+    cy.get('.pf-v6-c-card')
+      .first()
+      .within(() => {
+        // Each flavor card should have a name (header text)
+        cy.get('.pf-v6-c-card__title').should('exist').and('not.be.empty');
 
-      // Each flavor card should have an availability label
-      cy.get('.pf-v6-c-label').should('exist');
-    });
+        // Each flavor card should have an availability label
+        cy.get('.pf-v6-c-label').should('exist');
+      });
   });
 
   it('should have clickable flavor cards that navigate to launch page', () => {
