@@ -1,0 +1,62 @@
+name: UI tests
+
+on: pull_request
+
+jobs:
+  create-cluster-with-registry:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create KinD Cluster
+        id: kind
+        uses: helm/kind-action@v1
+        with:
+          registry: true
+          registry_name: local-registry
+          registry_port: 5001
+          registry_enable_delete: true
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action
+        with:
+          platforms: linux/amd64
+          buildkitd-config-inline: |
+            [registry."${{ steps.kind.outputs.LOCAL_REGISTRY }}"]
+              http = true
+              insecure = true
+          driver-opts: network=host
+
+      - name: Calculate lables
+        run: |
+          LOCAL_DOCKER_REPO="${{ steps.kind.outputs.LOCAL_REGISTRY }}/${{ github.repository }}"
+          echo "LOCAL_DOCKER_REPO=${LOCAL_DOCKER_REPO}" >> $GITHUB_ENV
+          echo "LOCAL_DOCKER_TAG=${LOCAL_DOCKER_REPO}:${{ steps.version.outputs.docker_version }}" >> $GITHUB_ENV
+          echo "LOCAL_DOCKER_CACHE_TAG=${LOCAL_DOCKER_REPO}:cache" >> $GITHUB_ENV
+
+      - name: Build container image
+        uses: docker/build-push-action
+        with:
+          platforms: linux/amd64
+          push: true
+          load: true
+          tags: |
+            ${{ env.LOCAL_DOCKER_TAG }}
+          cache-from: |
+            type=gha
+            type=registry,ref="ghcr.io/${{ github.repository }}"
+          cache-to: |
+            type=gha,mode=max
+            type=registry,ref=${{ env.LOCAL_DOCKER_CACHE_TAG }}
+
+      - name: Test run image
+        run: |
+          set -x
+          set +e
+          kubectl config current-context
+          make test-e2e
