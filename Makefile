@@ -28,7 +28,7 @@ tag:
 ifeq '$(REGISTRY)' ''
 REGISTRY := quay.io/rhacs-eng/infra-server
 endif
-IMAGE=$(REGISTRY):$(VERSION)
+IMAGE=$(REGISTRY)/$(VERSION)
 .PHONY: image-name
 image-name:
 	@echo $(IMAGE)

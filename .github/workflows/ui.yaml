@@ -53,5 +53,4 @@ jobs:
           set -x
           set +e
           kubectl config current-context
-          docker run --rm ${{ steps.kind.outputs.LOCAL_REGISTRY }}/${{ env.TAG }}
           make test-e2e
