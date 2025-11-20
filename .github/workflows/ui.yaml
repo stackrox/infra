@@ -50,8 +50,13 @@ jobs:
 
       - name: Deploy
         run: |
+          set -x
+          set +e
           kubectl config current-context
           make deploy-local
+          kubectl wait --for=condition=ready pod -l app=infra-server -n infra --timeout=5m || true
+          kubectl describe deploy/infra-server -n infra || true
+          kubectl get pods -n infra || true
           kubectl port-forward -n infra svc/infra-server-service 8443:8443 >/dev/null 2>&1 &
           echo "PF_PID=$!" | tee -a $GITHUB_ENV
 
