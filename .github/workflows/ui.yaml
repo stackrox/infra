@@ -44,5 +44,5 @@ jobs:
           set -x
           set +e
           kubectl config current-context
-          docker run --rm infra-pr
+          docker run --rm ${{ steps.kind.outputs.LOCAL_REGISTRY }}/infra-pr
           make test-e2e
