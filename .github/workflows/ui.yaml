@@ -32,17 +32,21 @@ jobs:
               insecure = true
           driver-opts: network=host
 
+      - name: tags
+        run: |
+          echo "TAG=$(make tag)" | tee -a $GITHUB_ENV
+
       - name: Build
         uses: docker/build-push-action@v6
         with:
           file: image/Dockerfile
           push: true
-          tags: ${{ steps.kind.outputs.LOCAL_REGISTRY }}/infra-pr
+          tags: ${{ env.TAG }}
 
       - name: Test
         run: |
           set -x
           set +e
           kubectl config current-context
-          docker run --rm ${{ steps.kind.outputs.LOCAL_REGISTRY }}/infra-pr
+          docker run --rm ${{ env.TAG }}
           make test-e2e
