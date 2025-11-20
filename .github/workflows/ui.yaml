@@ -24,26 +24,25 @@ jobs:
         run: |
           echo "TAG=$(make tag)" | tee -a $GITHUB_ENV
 
-      - name: Build
-        uses: docker/build-push-action@v6
-        with:
-          file: image/Dockerfile
-          push: false
-          load: true
-          tags: quay.io/rhacs-eng/infra-server:${{ env.TAG }}
-
-      - name: Load image into KinD
+      - name: Build and load into KinD
         run: |
+          docker build -t quay.io/rhacs-eng/infra-server:${{ env.TAG }} -f image/Dockerfile .
           kind load docker-image quay.io/rhacs-eng/infra-server:${{ env.TAG }}
+          docker images | grep infra-server
 
       - name: Deploy
         run: |
           set -x
           set +e
           kubectl config current-context
+
+          # Verify image is available in KinD
+          docker exec kind-control-plane crictl images | grep infra-server || echo "Image not found in KinD!"
+
           make deploy-local
           kubectl wait --for=condition=ready pod -l app=infra-server -n infra --timeout=5m || true
-          kubectl describe deploy/infra-server -n infra || true
+          kubectl describe deploy/infra-server-deployment -n infra || true
+          kubectl describe pod -l app=infra-server -n infra || true
           kubectl get pods -n infra || true
           kubectl port-forward -n infra svc/infra-server-service 8443:8443 >/dev/null 2>&1 &
           echo "PF_PID=$!" | tee -a $GITHUB_ENV
