@@ -32,22 +32,17 @@ jobs:
               insecure = true
           driver-opts: network=host
 
-      - name: Tag
-        run: |
-          LOCAL_DOCKER_REPO="${{ steps.kind.outputs.LOCAL_REGISTRY }}/${{ github.repository }}"
-          echo "LOCAL_DOCKER_REPO=${LOCAL_DOCKER_REPO}" >> $GITHUB_ENV
-          echo "LOCAL_DOCKER_TAG=${LOCAL_DOCKER_REPO}:${{ steps.version.outputs.docker_version }}" >> $GITHUB_ENV
-
       - name: Build
         uses: docker/build-push-action@v6
         with:
-          load: true
-          tags: ${{ env.LOCAL_DOCKER_TAG }}
+          file: image/Dockerfile
+          push: true
+          tags: ${{ steps.kind.outputs.LOCAL_REGISTRY }}/infra-pr
 
       - name: Test
         run: |
           set -x
           set +e
           kubectl config current-context
-          docker run --rm ${{ env.LOCAL_DOCKER_TAG }}
+          docker run --rm infra-pr
           make test-e2e
