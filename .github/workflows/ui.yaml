@@ -50,12 +50,15 @@ jobs:
           kubectl get pods -n infra || true
           kubectl port-forward -n infra svc/infra-server-service 8443:8443 >/dev/null 2>&1 &
           echo "PF_PID=$!" | tee -a "$GITHUB_ENV"
+          echo "INFRA_API_ENDPOINT=http://localhost:8443 | tee -a "$GITHUB_ENV"
 
       - name: Cypress
         uses: cypress-io/github-action@v6
         with:
-          start: npm run test:e2e
           working-directory: ui
+          wait-on: 'http://localhost:8443'
+          wait-on-timeout: 30
+          command: npm run test:e2e
 
       - name: cleanup
         if: always()
