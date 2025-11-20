@@ -45,12 +45,12 @@ jobs:
         with:
           file: image/Dockerfile
           push: true
-          tags: ${{ env.TAG }}
+          tags: ${{ steps.kind.outputs.LOCAL_REGISTRY }}/${{ env.TAG }}
 
       - name: Test
         run: |
           set -x
           set +e
           kubectl config current-context
-          docker run --rm ${{ env.TAG }}
+          docker run --rm ${{ steps.kind.outputs.LOCAL_REGISTRY }}/${{ env.TAG }}
           make test-e2e
