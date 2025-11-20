@@ -24,7 +24,7 @@ jobs:
 
       - name: tags
         run: |
-          echo "TAG=$(make tag)" | tee -a $GITHUB_ENV
+          echo "TAG=$(make tag)" | tee -a "$GITHUB_ENV"
 
       - name: Build and load into KinD
         run: |
