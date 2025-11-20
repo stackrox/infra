@@ -256,16 +256,6 @@ helm-deploy: pre-check helm-dependency-update create-namespaces
 helm-diff: pre-check helm-dependency-update create-namespaces
 	@./scripts/deploy/helm.sh diff $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
 
-## Install Argo CRDs (required for local deployment)
-.PHONY: install-argo-crds
-install-argo-crds: helm-dependency-update
-	@echo "Installing Argo Workflows CRDs..." >&2
-	@argo_chart_file=$$(find "chart/infra-server/charts" -name "argo-workflows-*.tgz" 2>/dev/null | head -1); \
-	ARGO_WORKFLOWS_APP_VERSION="$$(tar -xzOf "$${argo_chart_file}" argo-workflows/Chart.yaml | yq eval '.appVersion' -)"; \
-	echo "Using argo-workflows app version: $${ARGO_WORKFLOWS_APP_VERSION}" >&2; \
-	kubectl apply --validate=false --kustomize \
-		"https://github.com/argoproj/argo-workflows/manifests/base/crds/minimal?ref=$${ARGO_WORKFLOWS_APP_VERSION}" >&2
-
 ## Deploy to local cluster (e.g., Colima) without GCP Secret Manager
 .PHONY: deploy-local
 deploy-local: helm-dependency-update create-namespaces
