@@ -48,9 +48,21 @@ jobs:
           push: true
           tags: ${{ steps.kind.outputs.LOCAL_REGISTRY }}/${{ env.TAG }}
 
-      - name: Test
+      - name: Deploy
+        run: |
+          kubectl config current-context
+          make deploy-local
+          kubectl port-forward -n infra svc/infra-server-service 8443:8443 >/dev/null 2>&1 &
+          echo "PF_PID=$!" | tee -a $GITHUB_ENV
+
+      - name: Cypress
+        uses: cypress-io/github-action@v6
+        with:
+          start: npm run test:e2e
+
+      - name: cleanup
+        if: always()
         run: |
           set -x
-          set +e
-          kubectl config current-context
-          make test-e2e
+          echo "Killing port-forward process ${PF_PID}"
+          kill "$PF_PID" || true
