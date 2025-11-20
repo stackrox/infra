@@ -32,7 +32,7 @@ jobs:
               insecure = true
           driver-opts: network=host
 
-      - name: Calculate lables
+      - name: Tag
         run: |
           LOCAL_DOCKER_REPO="${{ steps.kind.outputs.LOCAL_REGISTRY }}/${{ github.repository }}"
           echo "LOCAL_DOCKER_REPO=${LOCAL_DOCKER_REPO}" >> $GITHUB_ENV
@@ -49,7 +49,7 @@ jobs:
             ${{ env.LOCAL_DOCKER_TAG }}
           cache-from: |
             type=gha
-            type=registry,ref="ghcr.io/${{ github.repository }}"
+            type=registry,ref=ghcr.io/${{ github.repository }}
           cache-to: |
             type=gha,mode=max
             type=registry,ref=${{ env.LOCAL_DOCKER_CACHE_TAG }}
