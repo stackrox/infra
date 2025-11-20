@@ -18,35 +18,23 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create KinD Cluster
-        id: kind
         uses: helm/kind-action@v1
-        with:
-          registry: true
-          registry_name: local-registry
-          registry_port: 5001
-          registry_enable_delete: true
-
-      - name: Set up Buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          platforms: linux/amd64
-          buildkitd-config-inline: |
-            [registry."${{ steps.kind.outputs.LOCAL_REGISTRY }}"]
-              http = true
-              insecure = true
-          driver-opts: network=host
 
       - name: tags
         run: |
           echo "TAG=$(make tag)" | tee -a $GITHUB_ENV
-          echo "REGISTRY=${{ steps.kind.outputs.LOCAL_REGISTRY }}" | tee -a $GITHUB_ENV
 
       - name: Build
         uses: docker/build-push-action@v6
         with:
           file: image/Dockerfile
-          push: true
-          tags: ${{ steps.kind.outputs.LOCAL_REGISTRY }}/${{ env.TAG }}
+          push: false
+          load: true
+          tags: quay.io/rhacs-eng/infra-server:${{ env.TAG }}
+
+      - name: Load image into KinD
+        run: |
+          kind load docker-image quay.io/rhacs-eng/infra-server:${{ env.TAG }}
 
       - name: Deploy
         run: |
