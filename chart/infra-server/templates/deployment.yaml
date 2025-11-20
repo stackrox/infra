@@ -1,3 +1,6 @@
+{{- if and .Values.testMode (eq .Values.environment "production") }}
+{{- fail "ERROR: TEST_MODE cannot be enabled in production environment. This would disable authentication and security features." }}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 
@@ -35,7 +38,7 @@ spec:
             httpGet:
               path: /
               port: 8443
-              scheme: HTTPS
+              scheme: {{ if .Values.testMode }}HTTP{{ else }}HTTPS{{ end }}
             initialDelaySeconds: 5
             periodSeconds: 5
           command:
@@ -47,7 +50,7 @@ spec:
               containerPort: 8443
             - name: metrics
               containerPort: 9101
-          imagePullPolicy: Always
+          imagePullPolicy: {{ .Values.imagePullPolicy | default "Always" }}
           volumeMounts:
             - mountPath: /configuration
               name: configuration
