@@ -39,6 +39,7 @@ jobs:
       - name: tags
         run: |
           echo "TAG=$(make tag)" | tee -a $GITHUB_ENV
+          echo "REGISTRY=${{ steps.kind.outputs.LOCAL_REGISTRY }}" | tee -a $GITHUB_ENV
 
       - name: Build
         uses: docker/build-push-action@v6
