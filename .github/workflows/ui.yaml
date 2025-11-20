@@ -19,6 +19,8 @@ jobs:
 
       - name: Create KinD Cluster
         uses: helm/kind-action@v1
+        with:
+          cluster_name: kind
 
       - name: tags
         run: |
@@ -26,8 +28,10 @@ jobs:
 
       - name: Build and load into KinD
         run: |
+          # Check cluster name
+          kind get clusters
           docker build -t quay.io/rhacs-eng/infra-server:${{ env.TAG }} -f image/Dockerfile .
-          kind load docker-image quay.io/rhacs-eng/infra-server:${{ env.TAG }}
+          kind load docker-image quay.io/rhacs-eng/infra-server:${{ env.TAG }} --name kind
           docker images | grep infra-server
 
       - name: Deploy
