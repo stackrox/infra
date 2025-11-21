@@ -153,7 +153,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/crypto v0.44.0 // indirect
+	golang.org/x/crypto v0.45.0 // indirect
 	golang.org/x/exp v0.0.0-20250531010427-b6e5de432a8b // indirect
 	golang.org/x/mod v0.29.0 // indirect
 	golang.org/x/sync v0.18.0 // indirect
