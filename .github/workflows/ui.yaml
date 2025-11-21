@@ -28,6 +28,7 @@ jobs:
           file: image/Dockerfile
           context: .
           push: false
+          load: true
           tags: quay.io/rhacs-eng/infra-server:${{ env.TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
