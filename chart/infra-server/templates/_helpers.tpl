@@ -1,3 +1,9 @@
+{{/*
+Validate that TEST_MODE is not enabled in production
+*/}}
+{{- if and .Values.testMode (eq .Values.environment "production") }}
+  {{- fail "ERROR: TEST_MODE cannot be enabled in production environment. This would disable authentication and security features." }}
+{{- end }}
 
 {{- define "docker-io-pull-secret" }}
   {{- printf "{\"auths\": {\"%s\": {\"auth\": \"%s\"}}}" .Values.pullSecrets.docker.registry (printf "%s:%s" .Values.pullSecrets.docker.username .Values.pullSecrets.docker.password | b64enc) | b64enc }}

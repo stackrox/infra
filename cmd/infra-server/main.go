@@ -67,19 +67,32 @@ func mainCmd() error {
 		return errors.Wrapf(err, "failed to load oidc config file %q", oidcConfigFile)
 	}
 
-	signer, err := signer.NewFromEnv()
-	if err != nil {
-		return errors.Wrapf(err, "failed to load GCS signing credentials")
-	}
+	var signerClient *signer.Signer
+	var slackClient slack.Slacker
+	var bqClient bqutil.BigQueryClient
 
-	slackClient, err := slack.New(cfg.Slack)
-	if err != nil {
-		return errors.Wrapf(err, "failed to create Slack client")
-	}
+	if cfg.TestMode {
+		// In test mode, skip loading external service credentials
+		log.Log(logging.INFO, "TEST_MODE: Skipping GCS, Slack, and BigQuery initialization")
+		signerClient = nil
+		slackClient = nil
+		bqClient = nil
+	} else {
+		var err error
+		signerClient, err = signer.NewFromEnv()
+		if err != nil {
+			return errors.Wrapf(err, "failed to load GCS signing credentials")
+		}
 
-	bqClient, err := bqutil.NewClient(cfg.BigQuery)
-	if err != nil {
-		return errors.Wrapf(err, "failed to create bqClient")
+		slackClient, err = slack.New(cfg.Slack)
+		if err != nil {
+			return errors.Wrapf(err, "failed to create Slack client")
+		}
+
+		bqClient, err = bqutil.NewClient(cfg.BigQuery)
+		if err != nil {
+			return errors.Wrapf(err, "failed to create bqClient")
+		}
 	}
 
 	// Construct each individual service.
@@ -96,7 +109,7 @@ func mainCmd() error {
 		service.NewStatusService,
 		service.NewVersionService,
 		func() (middleware.APIService, error) {
-			return cluster.NewClusterService(registry, signer, slackClient, bqClient)
+			return cluster.NewClusterService(registry, signerClient, slackClient, bqClient)
 		},
 	)
 	if err != nil {
