@@ -2,6 +2,7 @@
 package config
 
 import (
+	"log"
 	"os"
 
 	"github.com/ghodss/yaml"
@@ -22,6 +23,10 @@ type Config struct {
 
 	// Slack notification configuration.
 	Slack *SlackConfig `json:"slack"`
+
+	// LocalDeploy disables authentication and uses HTTP instead of HTTPS when set to true.
+	// This should only be set for local development deployments.
+	LocalDeploy bool `json:"localDeploy"`
 }
 
 // BigQueryConfig represents the configuration for integrating with Google BigQuery
@@ -167,6 +172,23 @@ func Load(filename string) (*Config, error) {
 	var cfg Config
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
 		return nil, err
+	}
+
+	// Override with LOCAL_DEPLOY environment variable if set
+	if os.Getenv("LOCAL_DEPLOY") == "true" {
+		cfg.LocalDeploy = true
+		log.Printf("LOCAL_DEPLOY enabled - authentication will be bypassed and HTTP will be used")
+
+		// Set default values for local deploy if not configured
+		if cfg.Server.Port == 0 {
+			cfg.Server.Port = 8443
+		}
+		if cfg.Server.MetricsPort == 0 {
+			cfg.Server.MetricsPort = 9101
+		}
+		if cfg.Server.StaticDir == "" {
+			cfg.Server.StaticDir = "/etc/infra/static"
+		}
 	}
 
 	return &cfg, nil

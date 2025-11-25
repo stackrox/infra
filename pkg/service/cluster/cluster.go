@@ -110,8 +110,8 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer, slackCl
 	}
 	argoWorkflowsClient := argoClient.NewWorkflowServiceClient()
 
-	if os.Getenv("TEST_MODE") == "true" {
-		log.Log(logging.INFO, "server is running in test mode")
+	if os.Getenv("LOCAL_DEPLOY") == "true" {
+		log.Log(logging.INFO, "server is running in local deploy mode")
 		resumeExpiredClusterInterval = 5 * time.Second
 	}
 

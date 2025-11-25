@@ -108,13 +108,13 @@ To then apply that chart to the cluster, run:
 
 `ENVIRONMENT=<development,production> SECRET_VERSION=<latest,1,2,3, ...> make helm-deploy`
 
-#### Test Mode
+#### Local Deploy Mode
 
-Use the environment variable `TEST_MODE` to disable certain infra service behavior, like:
+Use the environment variable `LOCAL_DEPLOY` to disable authentication and use HTTP instead of HTTPS for local deployments:
 
-`TEST_MODE=true ENVIRONMENT=development SECRET_VERSION=latest make helm-deploy`
+`LOCAL_DEPLOY=true make deploy-local`
 
-This is used in the infra PR clusters to set the login referer and disable telemetry.
+This is only intended for local development deployments using `make deploy-local`. For remote dev clusters, use the standard deployment method without LOCAL_DEPLOY.
 
 ### Rollback
 

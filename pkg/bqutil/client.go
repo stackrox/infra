@@ -64,8 +64,8 @@ type clusterDeletionRecord struct {
 
 // NewClient returns a new BigQuery client
 func NewClient(cfg *config.BigQueryConfig) (BigQueryClient, error) {
-	if os.Getenv("TEST_MODE") == "true" {
-		log.Log(logging.INFO, "disabling BigQuery integration because we are in TEST_MODE")
+	if os.Getenv("LOCAL_DEPLOY") == "true" {
+		log.Log(logging.INFO, "disabling BigQuery integration because we are in LOCAL_DEPLOY mode")
 		return &disabledClient{}, nil
 	}
 
