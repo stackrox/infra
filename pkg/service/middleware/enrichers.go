@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/pkg/errors"
+	v1 "github.com/stackrox/infra/generated/api/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -45,10 +46,15 @@ func EnforceAccessWithLocalDeploy(localDeploy bool) contextFunc {
 }
 
 func enforceAccessImpl(ctx context.Context, info *grpc.UnaryServerInfo, localDeploy bool) (context.Context, error) {
-	// In test mode, bypass all access checks
+	// In local deploy mode, bypass all access checks and inject a dummy user
 	if localDeploy {
-		log.Printf("TEST_MODE: Bypassing auth check for %s", info.FullMethod)
-		return ctx, nil
+		log.Printf("LOCAL_DEPLOY: Bypassing auth check for %s", info.FullMethod)
+		// Inject a dummy user so that OwnerFromContext() works
+		dummyUser := &v1.User{
+			Name:  "Local Dev User",
+			Email: "local-dev@example.com",
+		}
+		return contextWithUser(ctx, dummyUser), nil
 	}
 
 	// Convert to a service.

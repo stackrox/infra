@@ -277,9 +277,9 @@ func serveApplicationResources(dir string, oidc auth.OidcAuth, localDeploy bool)
 
 			if rule.anonymous || localDeploy {
 				// Serve this path anonymously (without any authentication).
-				// In test mode, bypass all authentication.
+				// In local deploy mode, bypass all authentication.
 				if localDeploy && !rule.anonymous {
-					log.Infow("TEST_MODE: Bypassing HTTP auth", "path", requestPath)
+					log.Infow("LOCAL_DEPLOY: Bypassing HTTP auth", "path", requestPath)
 				}
 				fs.ServeHTTP(w, r)
 			} else {
@@ -290,9 +290,9 @@ func serveApplicationResources(dir string, oidc auth.OidcAuth, localDeploy bool)
 			return
 		}
 		// No rules matched, so serve this path with authentication by default.
-		// In test mode, bypass authentication.
+		// In local deploy mode, bypass authentication.
 		if localDeploy {
-			log.Infow("TEST_MODE: Bypassing HTTP auth (default rule)", "path", requestPath)
+			log.Infow("LOCAL_DEPLOY: Bypassing HTTP auth (default rule)", "path", requestPath)
 			fs.ServeHTTP(w, r)
 		} else {
 			oidc.Authorized(fs).ServeHTTP(w, r)

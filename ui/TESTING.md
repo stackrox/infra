@@ -14,7 +14,7 @@ This directory contains Cypress E2E tests for the StackRox Infra UI.
    ```
 
    This deploys the infra-server to your local Kubernetes cluster with
-   `TEST_MODE=true`, which disables authentication for local development.
+   `LOCAL_DEPLOY=true`, which disables authentication for local development.
 
 2. **Start port-forwarding** to access the backend:
 
@@ -135,16 +135,16 @@ BROWSER=none PORT=3001 npm start
 
 **Solution:** Verify that:
 
-1. The backend was deployed with `TEST_MODE=true` (via `make deploy-local`)
+1. The backend was deployed with `LOCAL_DEPLOY=true` (via `make deploy-local`)
 2. Port-forwarding is active:
    `kubectl port-forward -n infra svc/infra-server-service 8443:8443`
 3. The `.env.local` file points to the correct backend:
    `INFRA_API_ENDPOINT=https://localhost:8443`
 
-You can check if TEST_MODE is enabled:
+You can check if LOCAL_DEPLOY is enabled:
 
 ```bash
-kubectl get deployment -n infra infra-server-deployment -o jsonpath='{.spec.template.spec.containers[0].env}' | grep TEST_MODE
+kubectl get deployment -n infra infra-server-deployment -o jsonpath='{.spec.template.spec.containers[0].env}' | grep LOCAL_DEPLOY
 ```
 
 ### Port 3001 or 8443 already in use

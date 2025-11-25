@@ -71,9 +71,9 @@ func mainCmd() error {
 	var slackClient slack.Slacker
 	var bqClient bqutil.BigQueryClient
 
-	if cfg.TestMode {
-		// In test mode, skip loading external service credentials
-		log.Log(logging.INFO, "TEST_MODE: Skipping GCS, Slack, and BigQuery initialization")
+	if cfg.LocalDeploy {
+		// In local deploy mode, skip loading external service credentials
+		log.Log(logging.INFO, "LOCAL_DEPLOY: Skipping GCS, Slack, and BigQuery initialization")
 		signerClient = nil
 		slackClient = nil
 		bqClient = nil

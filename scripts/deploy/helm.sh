@@ -7,8 +7,8 @@ TAG="$2"
 ENVIRONMENT="$3"
 SECRET_VERSION="${4:-latest}"
 
-# Enables TEST_MODE in chart.
-TEST_MODE="${TEST_MODE:-false}"
+# Enables LOCAL_DEPLOY mode in chart.
+LOCAL_DEPLOY="${LOCAL_DEPLOY:-false}"
 
 SECRETS_PROJECT="acs-team-automation"
 RELEASE_NAMESPACE="infra"
@@ -45,7 +45,7 @@ template() {
         --values chart/infra-server/monitoring-values.yaml \
         --set tag="${TAG}" \
         --set environment="${ENVIRONMENT}" \
-        --set testMode="${TEST_MODE}" \
+        --set localDeploy="${LOCAL_DEPLOY}" \
         --values - \
     < <(gcloud secrets versions access "${SECRET_VERSION}" \
         --secret "infra-values-${ENVIRONMENT}" \
@@ -67,7 +67,7 @@ HELM_COMMON_ARGS=(
     --values chart/infra-server/monitoring-values.yaml
     --set tag="${TAG}"
     --set environment="${ENVIRONMENT}"
-    --set testMode="${TEST_MODE}"
+    --set localDeploy="${LOCAL_DEPLOY}"
 )
 
 # deploy upgrades the Helm release with secrets from GCP Secret Manager
@@ -109,7 +109,7 @@ deploy-local() {
     echo "Deploying infra-server to local cluster..." >&2
     echo "  Tag: ${TAG}" >&2
     echo "  Environment: ${ENVIRONMENT}" >&2
-    echo "  Test Mode: ${TEST_MODE}" >&2
+    echo "  Local Deploy: ${LOCAL_DEPLOY}" >&2
     echo "" >&2
 
     # Check for required configuration files
