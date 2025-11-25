@@ -5,8 +5,8 @@ auth0:
   clientID: ""
   tenant: ""
 
-# Set test mode to true for local development
-testMode: true
+# Set local deploy mode to true for local development
+localDeploy: true
 
 # Use local Docker images instead of pulling from registry
 imagePullPolicy: Never

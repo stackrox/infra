@@ -36,17 +36,17 @@ func EnforceAccess(ctx context.Context, info *grpc.UnaryServerInfo) (context.Con
 	return enforceAccessImpl(ctx, info, false)
 }
 
-// EnforceAccessWithTestMode returns a contextFunc that enforces access with optional test mode.
-// When testMode is true, all access checks are bypassed.
-func EnforceAccessWithTestMode(testMode bool) contextFunc {
+// EnforceAccessWithLocalDeploy returns a contextFunc that enforces access with optional test mode.
+// When localDeploy is true, all access checks are bypassed.
+func EnforceAccessWithLocalDeploy(localDeploy bool) contextFunc {
 	return func(ctx context.Context, info *grpc.UnaryServerInfo) (context.Context, error) {
-		return enforceAccessImpl(ctx, info, testMode)
+		return enforceAccessImpl(ctx, info, localDeploy)
 	}
 }
 
-func enforceAccessImpl(ctx context.Context, info *grpc.UnaryServerInfo, testMode bool) (context.Context, error) {
+func enforceAccessImpl(ctx context.Context, info *grpc.UnaryServerInfo, localDeploy bool) (context.Context, error) {
 	// In test mode, bypass all access checks
-	if testMode {
+	if localDeploy {
 		log.Printf("TEST_MODE: Bypassing auth check for %s", info.FullMethod)
 		return ctx, nil
 	}
@@ -64,7 +64,7 @@ func enforceAccessImpl(ctx context.Context, info *grpc.UnaryServerInfo, testMode
 	}
 
 	// There is no authenticated principal, deny access!
-	log.Printf("Access denied for %s (access level: %v, testMode: %v)", info.FullMethod, access, testMode)
+	log.Printf("Access denied for %s (access level: %v, localDeploy: %v)", info.FullMethod, access, localDeploy)
 	return nil, status.Error(codes.PermissionDenied, "access denied")
 }
 

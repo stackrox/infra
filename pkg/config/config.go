@@ -24,8 +24,9 @@ type Config struct {
 	// Slack notification configuration.
 	Slack *SlackConfig `json:"slack"`
 
-	// TestMode disables authentication when set to true.
-	TestMode bool `json:"testMode"`
+	// LocalDeploy disables authentication and uses HTTP instead of HTTPS when set to true.
+	// This should only be set for local development deployments.
+	LocalDeploy bool `json:"localDeploy"`
 }
 
 // BigQueryConfig represents the configuration for integrating with Google BigQuery
@@ -173,12 +174,12 @@ func Load(filename string) (*Config, error) {
 		return nil, err
 	}
 
-	// Override with TEST_MODE environment variable if set
-	if os.Getenv("TEST_MODE") == "true" {
-		cfg.TestMode = true
-		log.Printf("TEST_MODE enabled - authentication will be bypassed")
+	// Override with LOCAL_DEPLOY environment variable if set
+	if os.Getenv("LOCAL_DEPLOY") == "true" {
+		cfg.LocalDeploy = true
+		log.Printf("LOCAL_DEPLOY enabled - authentication will be bypassed and HTTP will be used")
 
-		// Set default values for test mode if not configured
+		// Set default values for local deploy if not configured
 		if cfg.Server.Port == 0 {
 			cfg.Server.Port = 8443
 		}

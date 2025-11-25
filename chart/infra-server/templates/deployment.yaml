@@ -1,4 +1,4 @@
-{{- if and .Values.testMode (eq .Values.environment "production") }}
+{{- if and .Values.localDeploy (eq .Values.environment "production") }}
 {{- fail "ERROR: TEST_MODE cannot be enabled in production environment. This would disable authentication and security features." }}
 {{- end }}
 apiVersion: apps/v1
@@ -32,13 +32,13 @@ spec:
           env:
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /configuration/google-credentials.json
-            - name: TEST_MODE
-              value: "{{ .Values.testMode }}"
+            - name: LOCAL_DEPLOY
+              value: "{{ .Values.localDeploy }}"
           readinessProbe:
             httpGet:
               path: /
               port: 8443
-              scheme: {{ if .Values.testMode }}HTTP{{ else }}HTTPS{{ end }}
+              scheme: {{ if eq .Values.environment "local" }}HTTP{{ else }}HTTPS{{ end }}
             initialDelaySeconds: 5
             periodSeconds: 5
           command:

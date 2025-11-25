@@ -1,8 +1,8 @@
 {{/*
-Validate that TEST_MODE is not enabled in production
+Validate that LOCAL_DEPLOY is not enabled in production
 */}}
-{{- if and .Values.testMode (eq .Values.environment "production") }}
-  {{- fail "ERROR: TEST_MODE cannot be enabled in production environment. This would disable authentication and security features." }}
+{{- if and .Values.localDeploy (eq .Values.environment "production") }}
+  {{- fail "ERROR: LOCAL_DEPLOY cannot be enabled in production environment. This would disable authentication and security features." }}
 {{- end }}
 
 {{- define "docker-io-pull-secret" }}
