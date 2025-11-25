@@ -2,6 +2,7 @@
 package config
 
 import (
+	"log"
 	"os"
 
 	"github.com/ghodss/yaml"
@@ -22,6 +23,9 @@ type Config struct {
 
 	// Slack notification configuration.
 	Slack *SlackConfig `json:"slack"`
+
+	// TestMode disables authentication when set to true.
+	TestMode bool `json:"testMode"`
 }
 
 // BigQueryConfig represents the configuration for integrating with Google BigQuery
@@ -167,6 +171,23 @@ func Load(filename string) (*Config, error) {
 	var cfg Config
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
 		return nil, err
+	}
+
+	// Override with TEST_MODE environment variable if set
+	if os.Getenv("TEST_MODE") == "true" {
+		cfg.TestMode = true
+		log.Printf("TEST_MODE enabled - authentication will be bypassed")
+
+		// Set default values for test mode if not configured
+		if cfg.Server.Port == 0 {
+			cfg.Server.Port = 8443
+		}
+		if cfg.Server.MetricsPort == 0 {
+			cfg.Server.MetricsPort = 9101
+		}
+		if cfg.Server.StaticDir == "" {
+			cfg.Server.StaticDir = "/etc/infra/static"
+		}
 	}
 
 	return &cfg, nil

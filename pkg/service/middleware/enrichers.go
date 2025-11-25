@@ -4,6 +4,7 @@ package middleware
 
 import (
 	"context"
+	"log"
 
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
@@ -32,6 +33,24 @@ func ContextInterceptor(ctxFunc contextFunc) grpc.UnaryServerInterceptor {
 // is allowed always. If the service does not permit anonymous access, a
 // v1.User must exist in the given context for access to be allowed.
 func EnforceAccess(ctx context.Context, info *grpc.UnaryServerInfo) (context.Context, error) {
+	return enforceAccessImpl(ctx, info, false)
+}
+
+// EnforceAccessWithTestMode returns a contextFunc that enforces access with optional test mode.
+// When testMode is true, all access checks are bypassed.
+func EnforceAccessWithTestMode(testMode bool) contextFunc {
+	return func(ctx context.Context, info *grpc.UnaryServerInfo) (context.Context, error) {
+		return enforceAccessImpl(ctx, info, testMode)
+	}
+}
+
+func enforceAccessImpl(ctx context.Context, info *grpc.UnaryServerInfo, testMode bool) (context.Context, error) {
+	// In test mode, bypass all access checks
+	if testMode {
+		log.Printf("TEST_MODE: Bypassing auth check for %s", info.FullMethod)
+		return ctx, nil
+	}
+
 	// Convert to a service.
 	svc, ok := info.Server.(APIService)
 	if !ok {
@@ -45,6 +64,7 @@ func EnforceAccess(ctx context.Context, info *grpc.UnaryServerInfo) (context.Con
 	}
 
 	// There is no authenticated principal, deny access!
+	log.Printf("Access denied for %s (access level: %v, testMode: %v)", info.FullMethod, access, testMode)
 	return nil, status.Error(codes.PermissionDenied, "access denied")
 }
 
