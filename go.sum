@@ -51,8 +51,8 @@ github.com/apache/arrow/go/v15 v15.0.2 h1:60IliRbiyTWCWjERBCkO1W4Qun9svcYoZrSLcy
 github.com/apache/arrow/go/v15 v15.0.2/go.mod h1:DGXsR3ajT524njufqf95822i+KTh+yea1jass9YXgjA=
 github.com/argoproj/argo-events v1.9.6 h1:tQTyUmMt0/4UI+9fbXrmK1/h9oalV7KBCC3YgPI7qz0=
 github.com/argoproj/argo-events v1.9.6/go.mod h1:MkJI9UXTLnLOFX6LKo0rC1tnvWfLFzKkGigsdfu58SA=
-github.com/argoproj/argo-workflows/v3 v3.7.3 h1:b0o03RTLXIL7lQunDEvLoDTeI5TbfXe2obGaItvvifk=
-github.com/argoproj/argo-workflows/v3 v3.7.3/go.mod h1:beyGAfZUKfTetics0/Ek55PYcl4ZJ4w4+vQB/wxN4qI=
+github.com/argoproj/argo-workflows/v3 v3.7.4 h1:oA/DxaSsjb6fMYaygf7JVQgnsF+ZzlfUPy5kIfLsCic=
+github.com/argoproj/argo-workflows/v3 v3.7.4/go.mod h1:magZx49kuH3RHLpkKf3HUCtUDVjFIEHV/cUn5G6D1QE=
 github.com/argoproj/pkg v0.13.7-0.20250123033407-65f2d4777bfd h1:lGvauSky5XrqNhzzL078KqR/I+65/KNP5IcXqTEIZ5c=
 github.com/argoproj/pkg v0.13.7-0.20250123033407-65f2d4777bfd/go.mod h1:UzNnTJT+8Fv5oc1LB2pcgXiUF+n9n+tulbaON2EBgJo=
 github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5 h1:0CwZNZbxp69SHPdPJAN/hZIm0C4OItdklCFmMRWYpio=
