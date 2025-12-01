@@ -34,6 +34,8 @@ spec:
               value: /configuration/google-credentials.json
             - name: LOCAL_DEPLOY
               value: "{{ .Values.localDeploy }}"
+            - name: TEST_MODE
+              value: "{{ .Values.testMode }}"
           readinessProbe:
             httpGet:
               path: /

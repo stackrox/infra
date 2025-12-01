@@ -108,6 +108,14 @@ To then apply that chart to the cluster, run:
 
 `ENVIRONMENT=<development,production> SECRET_VERSION=<latest,1,2,3, ...> make helm-deploy`
 
+#### Test Mode
+
+Use the environment variable `TEST_MODE` to enable testing features such as faster cluster resume intervals:
+
+`TEST_MODE=true make helm-deploy`
+
+This can be used in any environment (local or remote) to speed up testing workflows.
+
 #### Local Deploy Mode
 
 Use the environment variable `LOCAL_DEPLOY` to disable authentication and use HTTP instead of HTTPS for local deployments:

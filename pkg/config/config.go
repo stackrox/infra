@@ -27,6 +27,10 @@ type Config struct {
 	// LocalDeploy disables authentication and uses HTTP instead of HTTPS when set to true.
 	// This should only be set for local development deployments.
 	LocalDeploy bool `json:"localDeploy"`
+
+	// TestMode enables testing features such as faster cluster resume intervals.
+	// This can be used in any environment to speed up testing workflows.
+	TestMode bool `json:"testMode"`
 }
 
 // BigQueryConfig represents the configuration for integrating with Google BigQuery
@@ -189,6 +193,12 @@ func Load(filename string) (*Config, error) {
 		if cfg.Server.StaticDir == "" {
 			cfg.Server.StaticDir = "/etc/infra/static"
 		}
+	}
+
+	// Override with TEST_MODE environment variable if set
+	if os.Getenv("TEST_MODE") == "true" {
+		cfg.TestMode = true
+		log.Printf("TEST_MODE enabled - testing features activated (e.g., faster cluster resume intervals)")
 	}
 
 	return &cfg, nil
