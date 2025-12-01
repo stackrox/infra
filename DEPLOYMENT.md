@@ -110,11 +110,11 @@ To then apply that chart to the cluster, run:
 
 #### Test Mode
 
-Use the environment variable `TEST_MODE` to enable testing features such as faster cluster resume intervals:
+Use the environment variable `TEST_MODE` to disable certain infra service behavior, like:
 
-`TEST_MODE=true make helm-deploy`
+`TEST_MODE=true ENVIRONMENT=development SECRET_VERSION=latest make helm-deploy`
 
-This can be used in any environment (local or remote) to speed up testing workflows.
+This is used in the infra PR clusters to set the login referer and disable telemetry.
 
 #### Local Deploy Mode
 
