@@ -118,7 +118,7 @@ This is used in the infra PR clusters to set the login referer and disable telem
 
 #### Local Deploy Mode
 
-Use the environment variable `LOCAL_DEPLOY` to disable authentication and use HTTP instead of HTTPS for local deployments:
+Use the environment variable `LOCAL_DEPLOY` to disable authentication, skip loading secrets, and use HTTP instead of HTTPS for local deployments:
 
 `LOCAL_DEPLOY=true make deploy-local`
 
