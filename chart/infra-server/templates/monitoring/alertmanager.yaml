@@ -1,5 +1,5 @@
 ---
-{{- if eq .Values.localDeploy false -}}
+{{- if eq .Values.testMode false -}}
 apiVersion: monitoring.coreos.com/v1alpha1
 kind: AlertmanagerConfig
 metadata:

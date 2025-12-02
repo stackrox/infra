@@ -40,11 +40,7 @@ type ArtifactsProps = {
 };
 
 function Artifacts({ clusterId }: ArtifactsProps): ReactElement {
-  const {
-    isLoading: loading,
-    error,
-    data: rawData,
-  } = useQuery({
+  const { isLoading: loading, error, data: rawData } = useQuery({
     queryKey: ['clusterArtifacts', clusterId],
     queryFn: () => clusterService.artifacts(clusterId || ''),
   });
