@@ -25,10 +25,7 @@ endif
 tag:
 	@echo $(VERSION)
 
-ifeq '$(REGISTRY)' ''
-REGISTRY := quay.io/rhacs-eng/infra-server
-endif
-IMAGE=$(REGISTRY):$(VERSION)
+IMAGE=quay.io/rhacs-eng/infra-server:$(VERSION)
 .PHONY: image-name
 image-name:
 	@echo $(IMAGE)
