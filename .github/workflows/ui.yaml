@@ -41,31 +41,8 @@ jobs:
           kind load docker-image quay.io/rhacs-eng/infra-server:${{ env.TAG }} --name kind
           docker images | grep infra-server
 
-      - name: Deploy
-        run: |
-          set -x
-          set +e
-          kubectl config current-context
-
-          # Verify image is available in KinD
-          docker exec kind-control-plane crictl images | grep infra-server || echo "Image not found in KinD!"
-
-          make deploy-local
-          kubectl wait --for=condition=ready pod -l app=infra-server -n infra --timeout=5m || true
-          kubectl describe deploy/infra-server-deployment -n infra || true
-          kubectl describe pod -l app=infra-server -n infra || true
-          kubectl get pods -n infra || true
-          kubectl port-forward -n infra svc/infra-server-service 8443:8443 >/dev/null 2>&1 &
-          echo "PF_PID=$!" | tee -a "$GITHUB_ENV"
-          echo "INFRA_API_ENDPOINT=http://localhost:8443" | tee -a "$GITHUB_ENV"
-
-      - name: Cypress
-        uses: cypress-io/github-action@v6
-        with:
-          working-directory: ui
-          wait-on: 'http://localhost:8443'
-          wait-on-timeout: 30
-          command: npm run test:e2e
+      - name: Deploy and run E2E tests
+        run: make test-e2e
 
       - uses: actions/upload-artifact@v4
         if: failure()
@@ -80,10 +57,3 @@ jobs:
           name: cypress-videos
           path: ui/cypress/videos
           if-no-files-found: ignore
-
-      - name: cleanup
-        if: always()
-        run: |
-          set -x
-          echo "Killing port-forward process ${PF_PID}"
-          kill "$PF_PID" || true
