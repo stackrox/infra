@@ -41,8 +41,24 @@ jobs:
           kind load docker-image quay.io/rhacs-eng/infra-server:${{ env.TAG }} --name kind
           docker images | grep infra-server
 
-      - name: Deploy and run E2E tests
-        run: make test-e2e
+      - name: Deploy
+        run: make deploy-local
+
+      - name: Wait for pods
+        run: kubectl wait --for=condition=ready pod -l app=infra-server -n infra --timeout=3m
+
+      - name: Run E2E tests
+        run: |
+          kubectl port-forward -n infra svc/infra-server-service 8443:8443 >/dev/null 2>&1 &
+          PF_PID=$!
+          cleanup() {
+            echo "Cleaning up port-forward (PID: $PF_PID)..."
+            kill $PF_PID 2>/dev/null || true
+          }
+          trap cleanup EXIT
+          sleep 3
+          cd ui
+          BROWSER=none PORT=3001 INFRA_API_ENDPOINT=http://localhost:8443 npm run test:e2e
 
       - uses: actions/upload-artifact@v4
         if: failure()

@@ -10,6 +10,7 @@ import (
 	"syscall"
 
 	"github.com/pkg/errors"
+	"github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/auth"
 	"github.com/stackrox/infra/pkg/bqutil"
 	"github.com/stackrox/infra/pkg/buildinfo"
@@ -61,24 +62,32 @@ func mainCmd() error {
 		return errors.Wrapf(err, "failed to load flavor config file %q", flavorConfigFile)
 	}
 
-	oidcConfigFile := filepath.Join(*flagConfigDir, "oidc.yaml")
-	oidc, err := auth.NewFromConfig(oidcConfigFile)
-	if err != nil {
-		return errors.Wrapf(err, "failed to load oidc config file %q", oidcConfigFile)
-	}
-
+	var oidc auth.OidcAuth
+	var tokenGenerator func(*v1.ServiceAccount) (string, error)
 	var signerClient *signer.Signer
 	var slackClient slack.Slacker
 	var bqClient bqutil.BigQueryClient
 
 	if cfg.LocalDeploy {
-		// In local deploy mode, skip loading external service credentials
-		log.Log(logging.INFO, "LOCAL_DEPLOY: Skipping GCS, Slack, and BigQuery initialization")
+		// In local deploy mode, skip loading external service credentials and OIDC
+		log.Log(logging.INFO, "LOCAL_DEPLOY: Skipping OIDC, GCS, Slack, and BigQuery initialization")
+		// Provide a dummy token generator for LOCAL_DEPLOY mode
+		tokenGenerator = func(sa *v1.ServiceAccount) (string, error) {
+			return "dummy-token-for-local-dev", nil
+		}
 		signerClient = nil
 		slackClient = nil
 		bqClient = nil
 	} else {
+		oidcConfigFile := filepath.Join(*flagConfigDir, "oidc.yaml")
 		var err error
+		oidcPtr, err := auth.NewFromConfig(oidcConfigFile)
+		if err != nil {
+			return errors.Wrapf(err, "failed to load oidc config file %q", oidcConfigFile)
+		}
+		oidc = *oidcPtr
+		tokenGenerator = oidc.GenerateServiceAccountToken
+
 		signerClient, err = signer.NewFromEnv()
 		if err != nil {
 			return errors.Wrapf(err, "failed to load GCS signing credentials")
@@ -101,7 +110,7 @@ func mainCmd() error {
 			return service.NewFlavorService(registry)
 		},
 		func() (middleware.APIService, error) {
-			return service.NewUserService(oidc.GenerateServiceAccountToken)
+			return service.NewUserService(tokenGenerator)
 		},
 		func() (middleware.APIService, error) {
 			return service.NewCliService(cfg.Server.StaticDir)
@@ -116,7 +125,7 @@ func mainCmd() error {
 		return err
 	}
 
-	srv := server.New(*cfg, *oidc, services...)
+	srv := server.New(*cfg, oidc, services...)
 	errCh, err := srv.RunServer()
 	if err != nil {
 		return err
