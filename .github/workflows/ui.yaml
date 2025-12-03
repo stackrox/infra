@@ -41,6 +41,11 @@ jobs:
           kind load docker-image quay.io/rhacs-eng/infra-server:${{ env.TAG }} --name kind
           docker images | grep infra-server
 
+      - name: Install UI dependencies
+        run: |
+          cd ui
+          yarn install --frozen-lockfile
+
       - name: Deploy
         run: make deploy-local
 
