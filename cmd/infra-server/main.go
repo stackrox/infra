@@ -10,7 +10,7 @@ import (
 	"syscall"
 
 	"github.com/pkg/errors"
-	"github.com/stackrox/infra/generated/api/v1"
+	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/auth"
 	"github.com/stackrox/infra/pkg/bqutil"
 	"github.com/stackrox/infra/pkg/buildinfo"
@@ -72,7 +72,7 @@ func mainCmd() error {
 		// In local deploy mode, skip loading external service credentials and OIDC
 		log.Log(logging.INFO, "LOCAL_DEPLOY: Skipping OIDC, GCS, Slack, and BigQuery initialization")
 		// Provide a dummy token generator for LOCAL_DEPLOY mode
-		tokenGenerator = func(sa *v1.ServiceAccount) (string, error) {
+		tokenGenerator = func(_ *v1.ServiceAccount) (string, error) {
 			return "dummy-token-for-local-dev", nil
 		}
 		signerClient = nil
