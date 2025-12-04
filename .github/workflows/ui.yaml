@@ -10,6 +10,33 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Free disk space (delete unused tools)
+        id: delete-unused-tools
+        continue-on-error: true
+        shell: bash
+        run: |
+          # delete preinstalled unused tools
+          cleanup=(
+            /usr/share/dotnet
+            /usr/share/miniconda
+            /usr/share/swift
+            /usr/share/kotlinc
+            /opt/ghc
+            /opt/hostedtoolcache/CodeQL
+            /opt/hostedtoolcache/Ruby
+            /opt/az
+            /usr/local/lib/android
+          )
+          for d in "${cleanup[@]}"; do
+            if [[ -d "$d" ]]; then
+              rm -rf -- "$d" && echo "deleted $d"
+            else
+              echo "$d not found"
+              continue
+            fi
+          done
+          df -h
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
