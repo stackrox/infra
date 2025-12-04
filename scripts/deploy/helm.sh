@@ -46,7 +46,6 @@ template() {
         --values chart/infra-server/monitoring-values.yaml \
         --set tag="${TAG}" \
         --set environment="${ENVIRONMENT}" \
-        --set localDeploy="${LOCAL_DEPLOY}" \
         --set testMode="${TEST_MODE}" \
         --values - \
     < <(gcloud secrets versions access "${SECRET_VERSION}" \
@@ -69,7 +68,6 @@ HELM_COMMON_ARGS=(
     --values chart/infra-server/monitoring-values.yaml
     --set tag="${TAG}"
     --set environment="${ENVIRONMENT}"
-    --set localDeploy="${LOCAL_DEPLOY}"
     --set testMode="${TEST_MODE}"
 )
 
@@ -125,6 +123,7 @@ deploy-local() {
 
     helm upgrade \
         "${HELM_COMMON_ARGS[@]}" \
+        --set localDeploy="${LOCAL_DEPLOY}" \
         --timeout 5m \
         --values "chart/infra-server/configuration/${ENVIRONMENT}-values.yaml" >&2
 
