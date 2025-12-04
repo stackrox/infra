@@ -255,12 +255,12 @@ helm-diff: pre-check helm-dependency-update create-namespaces
 
 ## Deploy to local cluster (e.g., Colima) without GCP Secret Manager
 .PHONY: deploy-local
-deploy-local: helm-dependency-update create-namespaces
-	@LOCAL_DEPLOY=true TEST_MODE=true ./scripts/deploy/helm.sh deploy-local $(shell make tag) local
+deploy-local: helm-dependency-update create-namespaces image
+	TEST_MODE=true ./scripts/deploy/helm.sh deploy-local $(shell make tag) local
 
 ## Run UI E2E tests against local deployment
 .PHONY: test-e2e
-test-e2e: image deploy-local
+test-e2e:
 	@echo "Waiting for infra-server to be ready..." >&2
 	@kubectl wait --for=condition=ready pod -l app=infra-server -n infra --timeout=3m >&2 || \
 		(echo "ERROR: infra-server pods did not become ready" >&2 && exit 1)

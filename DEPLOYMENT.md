@@ -118,11 +118,11 @@ This is used in the infra PR clusters to set the login referer and disable telem
 
 #### Local Deploy Mode
 
-Use the environment variable `LOCAL_DEPLOY` to disable authentication, skip loading secrets, and use HTTP instead of HTTPS for local deployments:
+For local test clusters (such as KinD/Colima), you can use the deploy-local make target to disable authentication, skip loading secrets, and use HTTP instead of HTTPS.
 
-`LOCAL_DEPLOY=true make deploy-local`
+`make deploy-local`
 
-This is only intended for local development deployments using `make deploy-local`. For remote dev clusters, use the standard deployment method without LOCAL_DEPLOY.
+This is only intended for local development deployments. For remote dev clusters, use the standard deployment method.
 
 ### Rollback
 

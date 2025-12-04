@@ -57,6 +57,9 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           working-directory: ui
+          start: npm run start
+          wait-on: 'http://localhost:3001'
+          wait-on-timeout: 60
           command: npm run cypress:run:e2e
         env:
           BROWSER: none

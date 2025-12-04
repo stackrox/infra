@@ -7,9 +7,6 @@ TAG="$2"
 ENVIRONMENT="$3"
 SECRET_VERSION="${4:-latest}"
 
-# Enables LOCAL_DEPLOY mode in chart.
-LOCAL_DEPLOY="${LOCAL_DEPLOY:-false}"
-
 # Enables TEST_MODE in chart.
 # Cannot use CI, because then CD with GHA would not be possible.
 TEST_MODE="${TEST_MODE:-false}"
@@ -115,9 +112,9 @@ deploy-local() {
     echo "Deploying infra-server to local cluster..." >&2
     echo "  Tag: ${TAG}" >&2
     echo "  Environment: ${ENVIRONMENT}" >&2
-    echo "  Local Deploy: ${LOCAL_DEPLOY}" >&2
     echo "  Test Mode: ${TEST_MODE}" >&2
     echo "" >&2
+    LOCAL_DEPLOY="true"
 
     # Check for required configuration files
     if [ ! -f "chart/infra-server/configuration/${ENVIRONMENT}-values.yaml" ]; then
