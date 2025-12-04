@@ -63,6 +63,28 @@ func (s *server) RunServer() (<-chan error, error) {
 	mux := http.NewServeMux()
 	errCh := make(chan error, 1)
 
+	// Build the interceptor chain based on deployment mode
+	var interceptors []grpc.UnaryServerInterceptor
+
+	// In production, add auth enrichers
+	if !s.localDeploy {
+		interceptors = append(interceptors,
+			// Extract user from JWT token stored in HTTP cookie.
+			middleware.ContextInterceptor(middleware.UserEnricher(s.oidc)),
+			// Extract service-account from token stored in Authorization header.
+			middleware.ContextInterceptor(middleware.ServiceAccountEnricher(s.oidc.ValidateServiceAccountToken)),
+		)
+	}
+
+	// Add remaining interceptors (common to all modes)
+	interceptors = append(interceptors,
+		middleware.ContextInterceptor(middleware.AdminEnricher(s.cfg.Password)),
+		// Enforce authenticated user access on resources that declare it.
+		middleware.ContextInterceptor(middleware.EnforceAccessWithLocalDeploy(s.localDeploy)),
+		// Collect and expose Prometheus metrics
+		grpc_prometheus.UnaryServerInterceptor,
+	)
+
 	// Create the server.
 	server := grpc.NewServer(
 		// Add server-side keepalive to prevent connection drops
@@ -74,19 +96,7 @@ func (s *server) RunServer() (<-chan error, error) {
 			MinTime:             5 * time.Second,
 			PermitWithoutStream: true,
 		}),
-		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
-			// Extract user from JWT token stored in HTTP cookie.
-			middleware.ContextInterceptor(middleware.UserEnricher(s.oidc)),
-			// Extract service-account from token stored in Authorization header.
-			middleware.ContextInterceptor(middleware.ServiceAccountEnricher(s.oidc.ValidateServiceAccountToken)),
-
-			middleware.ContextInterceptor(middleware.AdminEnricher(s.cfg.Password)),
-			// Enforce authenticated user access on resources that declare it.
-			middleware.ContextInterceptor(middleware.EnforceAccessWithLocalDeploy(s.localDeploy)),
-
-			// Collect and expose Prometheus metrics
-			grpc_prometheus.UnaryServerInterceptor,
-		)),
+		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(interceptors...)),
 		grpc.StreamInterceptor(
 			// Collect and expose Prometheus metrics
 			grpc_prometheus.StreamServerInterceptor,
@@ -195,16 +205,20 @@ func (s *server) RunServer() (<-chan error, error) {
 	// login/logout/static, and also gRPC-Gateway routes.
 	routeMux.Handle("/", serveApplicationResources(s.cfg.Server.StaticDir, s.oidc, s.localDeploy))
 	routeMux.Handle("/v1/", gwMux)
-	s.oidc.Handle(routeMux)
 
-	mux.Handle("/",
-		wrapHealthCheck(
-			wrapCanonicalRedirect(
-				s.oidc.Endpoint(),
-				routeMux,
-			),
-		),
-	)
+	if !s.localDeploy {
+		s.oidc.Handle(routeMux)
+	}
+
+	var handler http.Handler
+	if s.localDeploy {
+		// In LOCAL_DEPLOY mode, skip OIDC endpoint wrapper
+		handler = wrapHealthCheck(wrapCanonicalRedirect("", routeMux))
+	} else {
+		handler = wrapHealthCheck(wrapCanonicalRedirect(s.oidc.Endpoint(), routeMux))
+	}
+
+	mux.Handle("/", handler)
 
 	return errCh, nil
 }

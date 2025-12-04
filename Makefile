@@ -274,9 +274,9 @@ test-e2e: image deploy-local
 		kill $$PF_PID 2>/dev/null || true; \
 	}; \
 	trap cleanup EXIT; \
-	sleep 3; \
+	sleep 5; \
 	echo "Running Cypress E2E tests..." >&2; \
-	cd ui && INFRA_API_ENDPOINT=http://localhost:8443 npm run test:e2e
+	cd ui && BROWSER=none PORT=3001 INFRA_API_ENDPOINT=http://localhost:8443 npm run test:e2e
 
 ## Bounce pods
 .PHONY: bounce-infra-pods
