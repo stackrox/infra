@@ -41,40 +41,32 @@ jobs:
           kind load docker-image quay.io/rhacs-eng/infra-server:${{ env.TAG }} --name kind
           docker images | grep infra-server
 
-      - name: Install UI dependencies
-        run: |
-          cd ui
-          yarn install --frozen-lockfile
-
       - name: Deploy
         run: make deploy-local
 
       - name: Wait for pods
         run: kubectl wait --for=condition=ready pod -l app=infra-server -n infra --timeout=3m
 
-      - name: Run E2E tests
+      - name: Start port-forward
         run: |
           kubectl port-forward -n infra svc/infra-server-service 8443:8443 >/dev/null 2>&1 &
-          PF_PID=$!
-          cleanup() {
-            echo "Cleaning up port-forward (PID: $PF_PID)..."
-            kill $PF_PID 2>/dev/null || true
-          }
-          trap cleanup EXIT
+          echo "PORT_FORWARD_PID=$!" >> $GITHUB_ENV
           sleep 3
-          cd ui
-          BROWSER=none PORT=3001 INFRA_API_ENDPOINT=http://localhost:8443 npm run test:e2e
 
-      - uses: actions/upload-artifact@v4
-        if: failure()
+      - name: Run E2E tests
+        uses: cypress-io/github-action@v6
         with:
-          name: cypress-screenshots
-          path: ui/cypress/screenshots
-          if-no-files-found: ignore
+          working-directory: ui
+          command: npm run cypress:run:e2e
+        env:
+          BROWSER: none
+          PORT: 3001
+          INFRA_API_ENDPOINT: http://localhost:8443
 
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: cypress-videos
-          path: ui/cypress/videos
-          if-no-files-found: ignore
+      - name: Cleanup port-forward
+        if: always()
+        run: |
+          if [ ! -z "${{ env.PORT_FORWARD_PID }}" ]; then
+            echo "Cleaning up port-forward (PID: ${{ env.PORT_FORWARD_PID }})..."
+            kill ${{ env.PORT_FORWARD_PID }} 2>/dev/null || true
+          fi
