@@ -116,6 +116,14 @@ Use the environment variable `TEST_MODE` to disable certain infra service behavi
 
 This is used in the infra PR clusters to set the login referer and disable telemetry.
 
+#### Local Deploy Mode
+
+For local test clusters (such as KinD/Colima), you can use the deploy-local make target to disable authentication, skip loading secrets, and use HTTP instead of HTTPS.
+
+`make deploy-local`
+
+This is only intended for local development deployments. For remote dev clusters, use the standard deployment method.
+
 ### Rollback
 
 Use `helm rollback infra-server <REVISION>`.

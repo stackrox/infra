@@ -1,4 +1,3 @@
-
 {{- define "docker-io-pull-secret" }}
   {{- printf "{\"auths\": {\"%s\": {\"auth\": \"%s\"}}}" .Values.pullSecrets.docker.registry (printf "%s:%s" .Values.pullSecrets.docker.username .Values.pullSecrets.docker.password | b64enc) | b64enc }}
 {{- end }}

@@ -10,6 +10,7 @@ import (
 	"syscall"
 
 	"github.com/pkg/errors"
+	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/auth"
 	"github.com/stackrox/infra/pkg/bqutil"
 	"github.com/stackrox/infra/pkg/buildinfo"
@@ -61,25 +62,46 @@ func mainCmd() error {
 		return errors.Wrapf(err, "failed to load flavor config file %q", flavorConfigFile)
 	}
 
-	oidcConfigFile := filepath.Join(*flagConfigDir, "oidc.yaml")
-	oidc, err := auth.NewFromConfig(oidcConfigFile)
-	if err != nil {
-		return errors.Wrapf(err, "failed to load oidc config file %q", oidcConfigFile)
-	}
+	var oidc auth.OidcAuth
+	var tokenGenerator func(*v1.ServiceAccount) (string, error)
+	var signerClient *signer.Signer
+	var slackClient slack.Slacker
+	var bqClient bqutil.BigQueryClient
 
-	signer, err := signer.NewFromEnv()
-	if err != nil {
-		return errors.Wrapf(err, "failed to load GCS signing credentials")
-	}
+	if cfg.LocalDeploy {
+		// In local deploy mode, skip loading external service credentials and OIDC
+		log.Log(logging.INFO, "LOCAL_DEPLOY: Skipping OIDC, GCS, Slack, and BigQuery initialization")
+		// Provide a dummy token generator for LOCAL_DEPLOY mode
+		tokenGenerator = func(_ *v1.ServiceAccount) (string, error) {
+			return "dummy-token-for-local-dev", nil
+		}
+		signerClient = nil
+		slackClient = nil
+		bqClient = nil
+	} else {
+		oidcConfigFile := filepath.Join(*flagConfigDir, "oidc.yaml")
+		var err error
+		oidcPtr, err := auth.NewFromConfig(oidcConfigFile)
+		if err != nil {
+			return errors.Wrapf(err, "failed to load oidc config file %q", oidcConfigFile)
+		}
+		oidc = *oidcPtr
+		tokenGenerator = oidc.GenerateServiceAccountToken
 
-	slackClient, err := slack.New(cfg.Slack)
-	if err != nil {
-		return errors.Wrapf(err, "failed to create Slack client")
-	}
+		signerClient, err = signer.NewFromEnv()
+		if err != nil {
+			return errors.Wrapf(err, "failed to load GCS signing credentials")
+		}
 
-	bqClient, err := bqutil.NewClient(cfg.BigQuery)
-	if err != nil {
-		return errors.Wrapf(err, "failed to create bqClient")
+		slackClient, err = slack.New(cfg.Slack)
+		if err != nil {
+			return errors.Wrapf(err, "failed to create Slack client")
+		}
+
+		bqClient, err = bqutil.NewClient(cfg.BigQuery)
+		if err != nil {
+			return errors.Wrapf(err, "failed to create bqClient")
+		}
 	}
 
 	// Construct each individual service.
@@ -88,7 +110,7 @@ func mainCmd() error {
 			return service.NewFlavorService(registry)
 		},
 		func() (middleware.APIService, error) {
-			return service.NewUserService(oidc.GenerateServiceAccountToken)
+			return service.NewUserService(tokenGenerator)
 		},
 		func() (middleware.APIService, error) {
 			return service.NewCliService(cfg.Server.StaticDir)
@@ -96,14 +118,14 @@ func mainCmd() error {
 		service.NewStatusService,
 		service.NewVersionService,
 		func() (middleware.APIService, error) {
-			return cluster.NewClusterService(registry, signer, slackClient, bqClient)
+			return cluster.NewClusterService(registry, signerClient, slackClient, bqClient)
 		},
 	)
 	if err != nil {
 		return err
 	}
 
-	srv := server.New(*cfg, *oidc, services...)
+	srv := server.New(*cfg, oidc, services...)
 	errCh, err := srv.RunServer()
 	if err != nil {
 		return err

@@ -4,8 +4,10 @@ package middleware
 
 import (
 	"context"
+	"log"
 
 	"github.com/pkg/errors"
+	v1 "github.com/stackrox/infra/generated/api/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -32,6 +34,29 @@ func ContextInterceptor(ctxFunc contextFunc) grpc.UnaryServerInterceptor {
 // is allowed always. If the service does not permit anonymous access, a
 // v1.User must exist in the given context for access to be allowed.
 func EnforceAccess(ctx context.Context, info *grpc.UnaryServerInfo) (context.Context, error) {
+	return enforceAccessImpl(ctx, info, false)
+}
+
+// EnforceAccessWithLocalDeploy returns a contextFunc that enforces access with optional test mode.
+// When localDeploy is true, all access checks are bypassed.
+func EnforceAccessWithLocalDeploy(localDeploy bool) contextFunc {
+	return func(ctx context.Context, info *grpc.UnaryServerInfo) (context.Context, error) {
+		return enforceAccessImpl(ctx, info, localDeploy)
+	}
+}
+
+func enforceAccessImpl(ctx context.Context, info *grpc.UnaryServerInfo, localDeploy bool) (context.Context, error) {
+	// In local deploy mode, bypass all access checks and inject a dummy user
+	if localDeploy {
+		log.Printf("LOCAL_DEPLOY: Bypassing auth check for %s", info.FullMethod)
+		// Inject a dummy user so that OwnerFromContext() works
+		dummyUser := &v1.User{
+			Name:  "Local Dev User",
+			Email: "local-dev@example.com",
+		}
+		return contextWithUser(ctx, dummyUser), nil
+	}
+
 	// Convert to a service.
 	svc, ok := info.Server.(APIService)
 	if !ok {
@@ -45,6 +70,7 @@ func EnforceAccess(ctx context.Context, info *grpc.UnaryServerInfo) (context.Con
 	}
 
 	// There is no authenticated principal, deny access!
+	log.Printf("Access denied for %s (access level: %v, localDeploy: %v)", info.FullMethod, access, localDeploy)
 	return nil, status.Error(codes.PermissionDenied, "access denied")
 }
 

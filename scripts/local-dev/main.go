@@ -65,7 +65,8 @@ func getPathFromKey(key string) string {
 func determineValues() (map[string]interface{}, error) {
 	values := map[string]interface{}{
 		"Values": map[string]interface{}{
-			"testMode": true,
+			"testMode":    true,
+			"localDeploy": true,
 		},
 	}
 

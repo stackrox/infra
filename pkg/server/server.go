@@ -25,6 +25,7 @@ import (
 	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/protobuf/encoding/protojson"
 )
@@ -32,17 +33,19 @@ import (
 var log = logging.CreateProductionLogger()
 
 type server struct {
-	services []middleware.APIService
-	cfg      config.Config
-	oidc     auth.OidcAuth
+	services    []middleware.APIService
+	cfg         config.Config
+	oidc        auth.OidcAuth
+	localDeploy bool
 }
 
 // New creates a new server that is ready to be launched.
 func New(serverCfg config.Config, oidc auth.OidcAuth, services ...middleware.APIService) *server {
 	return &server{
-		services: services,
-		cfg:      serverCfg,
-		oidc:     oidc,
+		services:    services,
+		cfg:         serverCfg,
+		oidc:        oidc,
+		localDeploy: serverCfg.LocalDeploy,
 	}
 }
 
@@ -60,6 +63,28 @@ func (s *server) RunServer() (<-chan error, error) {
 	mux := http.NewServeMux()
 	errCh := make(chan error, 1)
 
+	// Build the interceptor chain based on deployment mode
+	var interceptors []grpc.UnaryServerInterceptor
+
+	// In production, add auth enrichers
+	if !s.localDeploy {
+		interceptors = append(interceptors,
+			// Extract user from JWT token stored in HTTP cookie.
+			middleware.ContextInterceptor(middleware.UserEnricher(s.oidc)),
+			// Extract service-account from token stored in Authorization header.
+			middleware.ContextInterceptor(middleware.ServiceAccountEnricher(s.oidc.ValidateServiceAccountToken)),
+		)
+	}
+
+	// Add remaining interceptors (common to all modes)
+	interceptors = append(interceptors,
+		middleware.ContextInterceptor(middleware.AdminEnricher(s.cfg.Password)),
+		// Enforce authenticated user access on resources that declare it.
+		middleware.ContextInterceptor(middleware.EnforceAccessWithLocalDeploy(s.localDeploy)),
+		// Collect and expose Prometheus metrics
+		grpc_prometheus.UnaryServerInterceptor,
+	)
+
 	// Create the server.
 	server := grpc.NewServer(
 		// Add server-side keepalive to prevent connection drops
@@ -71,19 +96,7 @@ func (s *server) RunServer() (<-chan error, error) {
 			MinTime:             5 * time.Second,
 			PermitWithoutStream: true,
 		}),
-		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
-			// Extract user from JWT token stored in HTTP cookie.
-			middleware.ContextInterceptor(middleware.UserEnricher(s.oidc)),
-			// Extract service-account from token stored in Authorization header.
-			middleware.ContextInterceptor(middleware.ServiceAccountEnricher(s.oidc.ValidateServiceAccountToken)),
-
-			middleware.ContextInterceptor(middleware.AdminEnricher(s.cfg.Password)),
-			// Enforce authenticated user access on resources that declare it.
-			middleware.ContextInterceptor(middleware.EnforceAccess),
-
-			// Collect and expose Prometheus metrics
-			grpc_prometheus.UnaryServerInterceptor,
-		)),
+		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(interceptors...)),
 		grpc.StreamInterceptor(
 			// Collect and expose Prometheus metrics
 			grpc_prometheus.StreamServerInterceptor,
@@ -98,7 +111,7 @@ func (s *server) RunServer() (<-chan error, error) {
 	// Metrics server
 	go func() {
 		listenAddress := fmt.Sprintf("0.0.0.0:%d", s.cfg.Server.MetricsPort)
-		log.Infow("starting metrics server", "listenAddress", listenAddress)
+		log.Infow("starting metrics server", "listenAddress", listenAddress, "localDeploy", s.localDeploy)
 
 		if s.cfg.Server.MetricsIncludeHistogram {
 			grpc_prometheus.EnableHandlingTimeHistogram()
@@ -108,12 +121,19 @@ func (s *server) RunServer() (<-chan error, error) {
 		mux := http.NewServeMux()
 		mux.Handle("/metrics", promhttp.Handler())
 
-		if err := http.ListenAndServeTLS(
-			listenAddress,
-			s.cfg.Server.CertFile, s.cfg.Server.KeyFile,
-			mux,
-		); err != nil {
-			errCh <- err
+		if s.localDeploy {
+			// For local deployments, use HTTP instead of HTTPS
+			if err := http.ListenAndServe(listenAddress, mux); err != nil {
+				errCh <- err
+			}
+		} else {
+			if err := http.ListenAndServeTLS(
+				listenAddress,
+				s.cfg.Server.CertFile, s.cfg.Server.KeyFile,
+				mux,
+			); err != nil {
+				errCh <- err
+			}
 		}
 	}()
 
@@ -130,19 +150,35 @@ func (s *server) RunServer() (<-chan error, error) {
 		mux.ServeHTTP(w, r)
 	})
 
-	log.Log(logging.INFO, "starting gRPC server", "listen-address", listenAddress)
+	log.Log(logging.INFO, "starting gRPC server", "listen-address", listenAddress, "localDeploy", s.localDeploy)
 	go func() {
-		if err := http.ListenAndServeTLS(listenAddress, s.cfg.Server.CertFile, s.cfg.Server.KeyFile, h2c.NewHandler(muxHandler, &http2.Server{})); err != nil {
-			errCh <- err
+		if s.localDeploy {
+			// For local deployments, use HTTP instead of HTTPS
+			log.Infow("LOCAL_DEPLOY: Starting HTTP server (no TLS)", "listenAddress", listenAddress)
+			if err := http.ListenAndServe(listenAddress, h2c.NewHandler(muxHandler, &http2.Server{})); err != nil {
+				errCh <- err
+			}
+		} else {
+			if err := http.ListenAndServeTLS(listenAddress, s.cfg.Server.CertFile, s.cfg.Server.KeyFile, h2c.NewHandler(muxHandler, &http2.Server{})); err != nil {
+				errCh <- err
+			}
 		}
 	}()
 
-	dialOption, err := grpcLocalCredentials(s.cfg.Server.CertFile)
-	if err != nil {
-		return nil, err
+	var dialOption grpc.DialOption
+	if s.localDeploy {
+		// For local deployments, use insecure connection (no TLS)
+		log.Infow("LOCAL_DEPLOY: Using insecure gRPC connection")
+		dialOption = grpc.WithTransportCredentials(insecure.NewCredentials())
+	} else {
+		var err error
+		dialOption, err = grpcLocalCredentials(s.cfg.Server.CertFile)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	log.Log(logging.INFO, "starting gRPC-Gateway client", "connect-address", connectAddress)
+	log.Log(logging.INFO, "starting gRPC-Gateway client", "connect-address", connectAddress, "localDeploy", s.localDeploy)
 	conn, err := grpc.NewClient(connectAddress, dialOption)
 	if err != nil {
 		return nil, errors.Wrap(err, "dialing gRPC")
@@ -167,25 +203,29 @@ func (s *server) RunServer() (<-chan error, error) {
 
 	// Updates http handler routes. This included "web-only" routes, like
 	// login/logout/static, and also gRPC-Gateway routes.
-	routeMux.Handle("/", serveApplicationResources(s.cfg.Server.StaticDir, s.oidc))
+	routeMux.Handle("/", serveApplicationResources(s.cfg.Server.StaticDir, s.oidc, s.localDeploy))
 	routeMux.Handle("/v1/", gwMux)
-	s.oidc.Handle(routeMux)
 
-	mux.Handle("/",
-		wrapHealthCheck(
-			wrapCanonicalRedirect(
-				s.oidc.Endpoint(),
-				routeMux,
-			),
-		),
-	)
+	if !s.localDeploy {
+		s.oidc.Handle(routeMux)
+	}
+
+	var handler http.Handler
+	if s.localDeploy {
+		// In LOCAL_DEPLOY mode, skip OIDC endpoint wrapper
+		handler = wrapHealthCheck(wrapCanonicalRedirect("", routeMux))
+	} else {
+		handler = wrapHealthCheck(wrapCanonicalRedirect(s.oidc.Endpoint(), routeMux))
+	}
+
+	mux.Handle("/", handler)
 
 	return errCh, nil
 }
 
 // serveApplicationResources handles requests for SPA endpoints as well as
 // regular resources.
-func serveApplicationResources(dir string, oidc auth.OidcAuth) http.Handler {
+func serveApplicationResources(dir string, oidc auth.OidcAuth, localDeploy bool) http.Handler {
 	type rule struct {
 		path      string
 		spa       bool
@@ -249,8 +289,12 @@ func serveApplicationResources(dir string, oidc auth.OidcAuth) http.Handler {
 				r.URL.Path = "/"
 			}
 
-			if rule.anonymous {
+			if rule.anonymous || localDeploy {
 				// Serve this path anonymously (without any authentication).
+				// In local deploy mode, bypass all authentication.
+				if localDeploy && !rule.anonymous {
+					log.Infow("LOCAL_DEPLOY: Bypassing HTTP auth", "path", requestPath)
+				}
 				fs.ServeHTTP(w, r)
 			} else {
 				// Serve this path with authentication.
@@ -260,7 +304,13 @@ func serveApplicationResources(dir string, oidc auth.OidcAuth) http.Handler {
 			return
 		}
 		// No rules matched, so serve this path with authentication by default.
-		oidc.Authorized(fs).ServeHTTP(w, r)
+		// In local deploy mode, bypass authentication.
+		if localDeploy {
+			log.Infow("LOCAL_DEPLOY: Bypassing HTTP auth (default rule)", "path", requestPath)
+			fs.ServeHTTP(w, r)
+		} else {
+			oidc.Authorized(fs).ServeHTTP(w, r)
+		}
 	})
 }
 
