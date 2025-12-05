@@ -255,7 +255,7 @@ helm-diff: pre-check helm-dependency-update create-namespaces
 
 ## Deploy to local cluster (e.g., Colima) without GCP Secret Manager
 .PHONY: deploy-local
-deploy-local: helm-dependency-update create-namespaces image
+deploy-local: helm-dependency-update create-namespaces
 	TEST_MODE=true ./scripts/deploy/helm.sh deploy-local $(shell make tag) local
 
 ## Run UI E2E tests against local deployment
