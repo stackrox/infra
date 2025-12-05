@@ -15,17 +15,18 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
+          free_disk_space=22
           # delete preinstalled unused tools
           cleanup=(
             /usr/share/dotnet
             /usr/share/miniconda
             /usr/share/swift
             /usr/share/kotlinc
-            /opt/ghc
-            /opt/hostedtoolcache/CodeQL
-            /opt/hostedtoolcache/Ruby
-            /opt/az
-            /usr/local/lib/android
+            #/opt/ghc
+            #/opt/hostedtoolcache/CodeQL
+            #/opt/hostedtoolcache/Ruby
+            #/opt/az
+            #/usr/local/lib/android
           )
           for d in "${cleanup[@]}"; do
             if [[ -d "$d" ]]; then
@@ -33,6 +34,11 @@ jobs:
             else
               echo "$d not found"
               continue
+            fi
+            free=$(df -BGB --output=avail / | tail -1)
+            if [[ ${free%GB} -ge "${free_disk_space}" ]]; then
+              echo "Reached requested free disk space ${free_disk_space} [${free} free]."
+              exit 0
             fi
           done
           df -h
