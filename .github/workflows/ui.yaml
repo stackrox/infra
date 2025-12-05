@@ -77,7 +77,7 @@ jobs:
       - name: Start port-forward
         run: |
           kubectl port-forward -n infra svc/infra-server-service 8443:8443 >/dev/null 2>&1 &
-          echo "PORT_FORWARD_PID=$!" >> $GITHUB_ENV
+          echo "PORT_FORWARD_PID=$!" >> "$GITHUB_ENV"
           sleep 3
 
       - name: Run E2E tests
@@ -96,7 +96,7 @@ jobs:
       - name: Cleanup port-forward
         if: always()
         run: |
-          if [ ! -z "${{ env.PORT_FORWARD_PID }}" ]; then
+          if [ -n "${{ env.PORT_FORWARD_PID }}" ]; then
             echo "Cleaning up port-forward (PID: ${{ env.PORT_FORWARD_PID }})..."
             kill ${{ env.PORT_FORWARD_PID }} 2>/dev/null || true
           fi
