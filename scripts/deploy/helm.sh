@@ -134,11 +134,32 @@ deploy-local() {
 
     if [[ ! -f "${cert_file}" ]] || [[ ! -f "${key_file}" ]]; then
         echo "Generating self-signed certificate for local development..." >&2
+        # Create a temporary config file for SAN extension
+        local san_config=$(mktemp)
+        cat > "${san_config}" <<EOF
+[req]
+distinguished_name = req_distinguished_name
+x509_extensions = v3_req
+prompt = no
+
+[req_distinguished_name]
+CN = localhost
+
+[v3_req]
+keyUsage = keyEncipherment, dataEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = localhost
+IP.1 = 127.0.0.1
+EOF
         openssl req -x509 -newkey rsa:2048 -nodes \
             -keyout "${key_file}" \
             -out "${cert_file}" \
             -days 36500 \
-            -subj "/CN=localhost" >&2
+            -config "${san_config}" >&2
+        rm -f "${san_config}"
         echo "Certificate generated: ${cert_file}" >&2
     else
         echo "Using existing self-signed certificate: ${cert_file}" >&2

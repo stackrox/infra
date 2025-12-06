@@ -1,10 +1,5 @@
 environment: local
 
-# Disable Auth0 for local development - allow anonymous access
-auth0:
-  clientID: ""
-  tenant: ""
-
 # Set local deploy mode to true for local development
 localDeploy: true
 
