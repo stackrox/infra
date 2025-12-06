@@ -59,6 +59,13 @@ template() {
 
 # deploy upgrades the Helm release with
 deploy() {
+    echo "Deploy.." >&2
+    echo "  RELEASE_NAME: ${RELEASE_NAME}" >&2
+    echo "  Tag: ${TAG}" >&2
+    echo "  Environment: ${ENVIRONMENT}" >&2
+    echo "  Test Mode: ${TEST_MODE}" >&2
+    echo "  Local Values: ${local_values:-false}" >&2
+    set -x
     helm upgrade \
         "${RELEASE_NAME}" \
         chart/infra-server \
@@ -72,14 +79,21 @@ deploy() {
         --set tag="${TAG}" \
         --set environment="${ENVIRONMENT}" \
         --set testMode="${TEST_MODE}" \
+        ${HELM_DEBUG:+--debug} \
         --values - \
-    < <(gcloud secrets versions access "${SECRET_VERSION}" \
+    < <(
+    if [[ ${local_values:-} != 'true' ]]; then
+      gcloud secrets versions access "${SECRET_VERSION}" \
         --secret "infra-values-${ENVIRONMENT}" \
         --project "${SECRETS_PROJECT}" \
-    && gcloud secrets versions access "${SECRET_VERSION}" \
+      && gcloud secrets versions access "${SECRET_VERSION}" \
         --secret "infra-values-from-files-${ENVIRONMENT}" \
-        --project "${SECRETS_PROJECT}" \
+        --project "${SECRETS_PROJECT}";
+    else
+      cat 'chart/infra-server/configuration/local-values.yaml'
+    fi
     )
+    set +x
 }
 
 # diff renders the Helm chart and compares the deployed resources to show what would change on next deployment.
@@ -107,6 +121,33 @@ diff() {
     ) \
     | sed -n '/---/,$p' \
     | kubectl diff -R -f -
+}
+
+# deploy-local deploys without secrets
+deploy-local() {
+    echo 'Deploying for testing without secrets...' >&2
+
+    # Generate self-signed cert for local development if it doesn't exist
+    local cert_dir='chart/infra-server/configuration'
+    local cert_file="${cert_dir}/local-cert.pem"
+    local key_file="${cert_dir}/local-key.pem"
+
+    if [[ ! -f "${cert_file}" ]] || [[ ! -f "${key_file}" ]]; then
+        echo "Generating self-signed certificate for local development..." >&2
+        openssl req -x509 -newkey rsa:2048 -nodes \
+            -keyout "${key_file}" \
+            -out "${cert_file}" \
+            -days 36500 \
+            -subj "/CN=localhost" >&2
+        echo "Certificate generated: ${cert_file}" >&2
+    else
+        echo "Using existing self-signed certificate: ${cert_file}" >&2
+    fi
+
+    ENVIRONMENT='local'
+    local_values='true'
+    deploy
+    echo -e '\nDeployment complete!' >&2
 }
 
 check_not_empty TASK TAG ENVIRONMENT

@@ -253,6 +253,10 @@ helm-deploy: pre-check helm-dependency-update create-namespaces
 helm-diff: pre-check helm-dependency-update create-namespaces
 	@./scripts/deploy/helm.sh diff $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
 
+## Deploy to local cluster (e.g., Colima) without GCP Secret Manager
+.PHONY: deploy-local
+deploy-local: helm-dependency-update create-namespaces
+	TEST_MODE=true ./scripts/deploy/helm.sh deploy-local $(shell make tag) local
 ## Bounce pods
 .PHONY: bounce-infra-pods
 bounce-infra-pods:

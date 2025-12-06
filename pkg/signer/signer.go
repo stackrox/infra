@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
+	"github.com/stackrox/infra/pkg/logging"
 	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2/jwt"
 )
@@ -27,6 +28,10 @@ const (
 	gcsSignedURLLifespan = 10 * time.Minute
 )
 
+var (
+	log = logging.CreateProductionLogger()
+)
+
 // Signer facilitates the generation of signed GCS URLS.
 type Signer struct {
 	cfg    jwt.Config
@@ -34,11 +39,12 @@ type Signer struct {
 }
 
 // NewFromEnv constructs a Signer from the GOOGLE_APPLICATION_CREDENTIALS set
-// in the working environment.
+// in the working environment. Returns an empty Signer if not configured.
 func NewFromEnv() (*Signer, error) {
 	credentialsFilename, found := os.LookupEnv(googleCredentialsEnvVar)
 	if !found {
-		return nil, fmt.Errorf("environment variable %q was not set", googleCredentialsEnvVar)
+		log.Log(logging.WARN, "GCS signing disabled", "reason", "GOOGLE_APPLICATION_CREDENTIALS not set")
+		return &Signer{}, nil
 	}
 
 	data, err := os.ReadFile(credentialsFilename)
