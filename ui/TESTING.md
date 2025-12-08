@@ -30,44 +30,22 @@ This directory contains Cypress E2E tests for the StackRox Infra UI.
 
    Keep this running in a separate terminal.
 
-3. **Configure the UI to connect to local backend**:
+3. **Run the E2E tests**:
 
    ```bash
    cd ui
-   cp .env.example .env.local
+   INFRA_API_ENDPOINT=https://localhost:8443 npm run test:e2e
    ```
 
-   This creates a `.env.local` file. Note: The file contains
-   `INFRA_API_ENDPOINT` but the environment variable must also be set when
-   starting the dev server (see next step).
+That's it! The `test:e2e` command will:
 
-4. **Start the UI dev server** (in a separate terminal):
+- Automatically start the UI dev server on http://localhost:3001
+- Proxy API requests to your local backend at https://localhost:8443
+- Run all Cypress E2E tests
+- Shut down the dev server when tests complete
 
-   ```bash
-   cd ui
-   BROWSER=none PORT=3001 INFRA_API_ENDPOINT=http://localhost:8443 npm start
-   ```
-
-   **Important:** The `INFRA_API_ENDPOINT` environment variable must be set when
-   starting the dev server (not just in `.env.local`) because the proxy
-   middleware reads it at startup.
-
-   Keep this running. The dev server will:
-
-   - Run on http://localhost:3001
-   - Proxy API requests to http://localhost:8443 (your local backend)
-   - Hot-reload when you make changes to the UI code
-
-5. **Run the E2E tests** (in another terminal):
-
-   ```bash
-   cd ui
-   npm run cypress:run:e2e
-   ```
-
-That's it! The tests will run against the UI dev server at
-http://localhost:3001, which proxies API requests to your local backend at
-`https://localhost:8443`.
+The tests run against the UI dev server at http://localhost:3001, which proxies
+API requests to your local backend at `https://localhost:8443`.
 
 ### Test Results
 
@@ -82,7 +60,14 @@ Review the videos to verify the tests are properly accessing the backend.
 
 To run tests interactively with the Cypress UI (useful for debugging):
 
-**Prerequisites:** Make sure the UI dev server is running (step 4 above).
+**Prerequisites:** Start the UI dev server with the backend endpoint configured:
+
+```bash
+cd ui
+INFRA_API_ENDPOINT=https://localhost:8443 npm start
+```
+
+Keep this running, then in another terminal:
 
 ```bash
 cd ui
@@ -114,8 +99,8 @@ Tests are configured in `cypress.config.ts` to:
 - Capture screenshots on failures only
 - Retry failed tests 2 times in CI mode (run mode), 0 times in interactive mode
 
-The UI dev server (configured via `ui/.env.local`) proxies API requests to your
-local backend at `https://localhost:8443`.
+The UI dev server (configured via `INFRA_API_ENDPOINT` environment variable)
+proxies API requests to your local backend at `https://localhost:8443`.
 
 ## Adding More Tests
 
@@ -129,12 +114,12 @@ To add new E2E tests:
 
 ### Tests fail with "Cypress failed to verify that your server is running"
 
-**Solution:** Make sure the UI dev server is running on port 3001 before running
-tests. If not using the make target, you can manually run the dev server:
+**Solution:** Make sure you're using `npm run test:e2e` which automatically
+starts the dev server. If you want to run the dev server manually, use:
 
 ```bash
 cd ui
-BROWSER=none PORT=3001 npm start
+INFRA_API_ENDPOINT=https://localhost:8443 npm start
 ```
 
 ### Port 3001 or 8443 already in use
@@ -142,7 +127,8 @@ BROWSER=none PORT=3001 npm start
 **Solution:**
 
 - Find and kill the process using the port: `lsof -i :3001` or `lsof -i :8443`
-- Or use different ports by modifying `cypress.config.ts` and `.env.local`
+- Or use different ports by modifying `cypress.config.ts` and the
+  `INFRA_API_ENDPOINT` environment variable
 
 ## Documentation
 
