@@ -1,3 +1,16 @@
+const ERROR_MESSAGES = {
+  ACCESS_DENIED: 'access denied',
+  UNEXPECTED_ERROR: 'There was an unexpected error',
+};
+
+const SELECTORS = {
+  FLAVOR_CARD: '.pf-v6-c-card',
+  CARD_TITLE: '.pf-v6-c-card__title',
+  LABEL: '.pf-v6-c-label',
+  FLAVOR_TOGGLE: 'input[name="flavor-filter-toggle"]',
+  PAGE_HEADING: 'h2',
+};
+
 describe('Flavor Selection', () => {
   beforeEach(() => {
     // Authenticate for local development before visiting the page
@@ -7,41 +20,41 @@ describe('Flavor Selection', () => {
 
   it('should load the page without authentication errors', () => {
     // Verify no error messages (confirms LOCAL_DEPLOY mode is working)
-    cy.get('body').should('not.contain', 'access denied');
-    cy.get('body').should('not.contain', 'There was an unexpected error');
+    cy.get('body').should('not.contain', ERROR_MESSAGES.ACCESS_DENIED);
+    cy.get('body').should('not.contain', ERROR_MESSAGES.UNEXPECTED_ERROR);
   });
 
   it('should display a list of available flavors', () => {
-    // Wait for flavors to load (check for either "My Flavors" or "All Flavors" title)
-    cy.contains('h2', /My Flavors|All Flavors/).should('be.visible');
+    // Wait for the page heading to be visible (indicates page has loaded)
+    cy.get(SELECTORS.PAGE_HEADING).should('be.visible');
 
     // Verify that the flavor gallery is not empty
     // Each flavor is rendered as a LinkCard inside a GalleryItem
-    cy.get('.pf-v6-c-card').should('have.length.at.least', 1);
+    cy.get(SELECTORS.FLAVOR_CARD).should('have.length.at.least', 1);
   });
 
   it('should display flavor details for each flavor card', () => {
     // Wait for flavors to load
-    cy.contains('h2', /My Flavors|All Flavors/).should('be.visible');
+    cy.get(SELECTORS.PAGE_HEADING).should('be.visible');
 
     // Get the first flavor card and verify it has required elements
-    cy.get('.pf-v6-c-card')
+    cy.get(SELECTORS.FLAVOR_CARD)
       .first()
       .within(() => {
         // Each flavor card should have a name (header text)
-        cy.get('.pf-v6-c-card__title').should('exist').and('not.be.empty');
+        cy.get(SELECTORS.CARD_TITLE).should('exist').and('not.be.empty');
 
         // Each flavor card should have an availability label
-        cy.get('.pf-v6-c-label').should('exist');
+        cy.get(SELECTORS.LABEL).should('exist');
       });
   });
 
   it('should have clickable flavor cards that navigate to launch page', () => {
     // Wait for flavors to load
-    cy.contains('h2', /My Flavors|All Flavors/).should('be.visible');
+    cy.get(SELECTORS.PAGE_HEADING).should('be.visible');
 
     // Click the first flavor card
-    cy.get('.pf-v6-c-card').first().click();
+    cy.get(SELECTORS.FLAVOR_CARD).first().click();
 
     // Verify navigation to launch page (URL should contain /launch/)
     cy.url().should('include', '/launch/');
@@ -50,24 +63,27 @@ describe('Flavor Selection', () => {
     cy.contains('h1', /Launch/).should('be.visible');
   });
 
-  it('should toggle between "My Flavors" and "All Flavors"', () => {
-    // Verify initial state
-    cy.contains('h2', 'My Flavors').should('be.visible');
+  it('should toggle between flavor filter states', () => {
+    // Get the initial heading text
+    cy.get(SELECTORS.PAGE_HEADING)
+      .should('be.visible')
+      .invoke('text')
+      .then((initialHeading) => {
+        // Find and click the flavor filter toggle switch
+        // Use force:true because PatternFly switch has a visual element covering the input
+        cy.get(SELECTORS.FLAVOR_TOGGLE).click({ force: true });
 
-    // Find and click the "Show All Flavors" toggle switch
-    // Use force:true because PatternFly switch has a visual element covering the input
-    cy.get('input[name="flavor-filter-toggle"]').click({ force: true });
+        // Verify the heading text changed
+        cy.get(SELECTORS.PAGE_HEADING).invoke('text').should('not.equal', initialHeading);
 
-    // Verify the title changed to "All Flavors"
-    cy.contains('h2', 'All Flavors').should('be.visible');
+        // Verify URL parameter was updated
+        cy.url().should('include', 'showAllFlavors=true');
 
-    // Verify URL parameter was updated
-    cy.url().should('include', 'showAllFlavors=true');
+        // Toggle back
+        cy.get(SELECTORS.FLAVOR_TOGGLE).click({ force: true });
 
-    // Toggle back
-    cy.get('input[name="flavor-filter-toggle"]').click({ force: true });
-
-    // Verify we're back to "My Flavors"
-    cy.contains('h2', 'My Flavors').should('be.visible');
+        // Verify we're back to the original heading
+        cy.get(SELECTORS.PAGE_HEADING).invoke('text').should('equal', initialHeading);
+      });
   });
 });

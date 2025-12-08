@@ -6,6 +6,15 @@ This directory contains Cypress E2E tests for the StackRox Infra UI.
 
 ### Prerequisites
 
+0. **Build** images:
+
+   ```bash
+   make image
+   ```
+
+   In your clone of the repository, you must build the infra-server into the
+   image for it to be deployed in the next step.
+
 1. **Deploy the local backend** (with authentication disabled):
 
    ```bash

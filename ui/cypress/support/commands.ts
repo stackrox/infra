@@ -5,14 +5,16 @@
  * This uses the known session secret from local-deploy oidc.yaml.
  */
 Cypress.Commands.add('loginForLocalDev', () => {
-  // The session secret from chart/infra-server/templates/secrets.yaml for local deploy
+  // IMPORTANT: This secret is ONLY for local development (LOCAL_DEPLOY=true).
+  // It matches chart/infra-server/configuration/local-values.yaml
+  // Production deployments use different secrets from GCP Secret Manager.
   const sessionSecret = 'local-dev-secret-min-32-chars-long';
 
   // Create a test user matching the backend's expected structure
   // Note: Fields are capitalized to match Go's JSON serialization of protobuf structs
   const testUser = {
     Name: 'Test User',
-    Email: 'test@redhat.com',
+    Email: 'test@redhat.com', // Backend requires @redhat.com domain (see pkg/auth/tokenizer.go:128)
     Picture: '',
     Expiry: {
       seconds: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now

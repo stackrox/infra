@@ -2,6 +2,20 @@
 import { defineConfig } from 'cypress';
 import * as crypto from 'crypto';
 
+interface JWTPayload {
+  user: {
+    Name: string;
+    Email: string;
+    Picture: string;
+    Expiry: {
+      seconds: number;
+    };
+  };
+  exp: number;
+  nbf: number;
+  iat: number;
+}
+
 export default defineConfig({
   e2e: {
     // UI dev server runs on :3001
@@ -21,7 +35,7 @@ export default defineConfig({
     setupNodeEvents(on, config) {
       // Task to generate JWT tokens for local dev authentication
       on('task', {
-        generateJWT({ payload, secret }: { payload: any; secret: string }) {
+        generateJWT({ payload, secret }: { payload: JWTPayload; secret: string }): string {
           // Create JWT header
           const header = {
             alg: 'HS256',
@@ -29,7 +43,7 @@ export default defineConfig({
           };
 
           // Base64url encode header and payload
-          const base64UrlEncode = (obj: any) =>
+          const base64UrlEncode = (obj: object) =>
             Buffer.from(JSON.stringify(obj))
               .toString('base64')
               .replace(/\+/g, '-')

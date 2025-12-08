@@ -135,7 +135,10 @@ deploy-local() {
     if [[ ! -f "${cert_file}" ]] || [[ ! -f "${key_file}" ]]; then
         echo "Generating self-signed certificate for local development..." >&2
         # Create a temporary config file for SAN extension
-        local san_config=$(mktemp)
+        # SAN (Subject Alternative Name) is required for gRPC-Gateway TLS validation in modern Go versions
+        # Without SAN, you'll get: "x509: certificate relies on legacy Common Name field"
+        local san_config
+        san_config=$(mktemp) || { echo "Failed to create temporary config file" >&2; return 1; }
         cat > "${san_config}" <<EOF
 [req]
 distinguished_name = req_distinguished_name

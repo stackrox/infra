@@ -1,3 +1,8 @@
+const ERROR_MESSAGES = {
+  ACCESS_DENIED: 'access denied',
+  UNEXPECTED_ERROR: 'There was an unexpected error',
+};
+
 describe('Home Page', () => {
   beforeEach(() => {
     // Authenticate for local development before visiting the page
@@ -10,7 +15,7 @@ describe('Home Page', () => {
   });
 
   it('should not show error messages', () => {
-    cy.get('body').should('not.contain', 'access denied');
-    cy.get('body').should('not.contain', 'There was an unexpected error');
+    cy.get('body').should('not.contain', ERROR_MESSAGES.ACCESS_DENIED);
+    cy.get('body').should('not.contain', ERROR_MESSAGES.UNEXPECTED_ERROR);
   });
 });
