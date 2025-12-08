@@ -19,7 +19,7 @@ describe('Flavor Selection', () => {
   });
 
   it('should load the page without authentication errors', () => {
-    // Verify no error messages (confirms LOCAL_DEPLOY mode is working)
+    // Verify no error messages
     cy.get('body').should('not.contain', ERROR_MESSAGES.ACCESS_DENIED);
     cy.get('body').should('not.contain', ERROR_MESSAGES.UNEXPECTED_ERROR);
   });

@@ -15,15 +15,12 @@ This directory contains Cypress E2E tests for the StackRox Infra UI.
    In your clone of the repository, you must build the infra-server into the
    image for it to be deployed in the next step.
 
-1. **Deploy the local backend** (with authentication disabled):
+1. **Deploy the local backend**:
 
    ```bash
    # From the repository root
    make deploy-local
    ```
-
-   This deploys the infra-server to your local Kubernetes cluster with
-   `LOCAL_DEPLOY=true`, which disables authentication for local development.
 
 2. **Start port-forwarding** to access the backend:
 
@@ -133,27 +130,11 @@ To add new E2E tests:
 ### Tests fail with "Cypress failed to verify that your server is running"
 
 **Solution:** Make sure the UI dev server is running on port 3001 before running
-tests:
+tests. If not using the make target, you can manually run the dev server:
 
 ```bash
 cd ui
 BROWSER=none PORT=3001 npm start
-```
-
-### Tests show "access denied" or authentication errors
-
-**Solution:** Verify that:
-
-1. The backend was deployed with `LOCAL_DEPLOY=true` (via `make deploy-local`)
-2. Port-forwarding is active:
-   `kubectl port-forward -n infra svc/infra-server-service 8443:8443`
-3. The `.env.local` file points to the correct backend:
-   `INFRA_API_ENDPOINT=https://localhost:8443`
-
-You can check if LOCAL_DEPLOY is enabled:
-
-```bash
-kubectl get deployment -n infra infra-server-deployment -o jsonpath='{.spec.template.spec.containers[0].env}' | grep LOCAL_DEPLOY
 ```
 
 ### Port 3001 or 8443 already in use

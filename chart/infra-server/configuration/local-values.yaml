@@ -6,8 +6,10 @@ localDeploy: true
 # Enable test mode for faster cluster resume intervals
 testMode: true
 
-# Use local Docker images instead of pulling from registry
-imagePullPolicy: Never
+# Use local Docker images when available, pull from registry if not present
+# Works with Colima (shared Docker daemon) and kind (after kind load docker-image)
+# IfNotPresent provides flexibility: uses local images when available, pulls when needed
+imagePullPolicy: IfNotPresent
 
 # Pull secrets for container registries - dummy values for local development
 pullSecrets:

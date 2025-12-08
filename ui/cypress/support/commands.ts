@@ -5,7 +5,7 @@
  * This uses the known session secret from local-deploy oidc.yaml.
  */
 Cypress.Commands.add('loginForLocalDev', () => {
-  // IMPORTANT: This secret is ONLY for local development (LOCAL_DEPLOY=true).
+  // IMPORTANT: This secret is ONLY for local development.
   // It matches chart/infra-server/configuration/local-values.yaml
   // Production deployments use different secrets from GCP Secret Manager.
   const sessionSecret = 'local-dev-secret-min-32-chars-long';

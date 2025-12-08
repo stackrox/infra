@@ -31,8 +31,6 @@ spec:
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /configuration/google-credentials.json
 {{- end }}
-            - name: LOCAL_DEPLOY
-              value: "{{ .Values.localDeploy }}"
             - name: TEST_MODE
               value: "{{ .Values.testMode }}"
           readinessProbe:
