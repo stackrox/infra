@@ -57,7 +57,6 @@ template() {
     )
 }
 
-# deploy upgrades the Helm release with
 deploy() {
     echo "Deploy.." >&2
     echo "  RELEASE_NAME: ${RELEASE_NAME}" >&2
@@ -65,7 +64,6 @@ deploy() {
     echo "  Environment: ${ENVIRONMENT}" >&2
     echo "  Test Mode: ${TEST_MODE}" >&2
     echo "  Local Values: ${local_values:-false}" >&2
-    set -x
     helm upgrade \
         "${RELEASE_NAME}" \
         chart/infra-server \
@@ -93,7 +91,6 @@ deploy() {
       cat 'chart/infra-server/configuration/local-values.yaml'
     fi
     )
-    set +x
 }
 
 # diff renders the Helm chart and compares the deployed resources to show what would change on next deployment.
