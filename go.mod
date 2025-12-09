@@ -5,7 +5,7 @@ go 1.24.10
 require (
 	cloud.google.com/go/bigquery v1.72.0
 	cloud.google.com/go/storage v1.57.2
-	github.com/argoproj/argo-workflows/v3 v3.7.4
+	github.com/argoproj/argo-workflows/v3 v3.7.6
 	github.com/buger/jsonparser v1.1.1
 	github.com/coreos/go-oidc/v3 v3.17.0
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
@@ -144,6 +144,7 @@ require (
 	go.opentelemetry.io/contrib/instrumentation/runtime v0.61.0 // indirect
 	go.opentelemetry.io/otel v1.38.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.36.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp v1.36.0 // indirect
 	go.opentelemetry.io/otel/exporters/prometheus v0.58.0 // indirect
 	go.opentelemetry.io/otel/metric v1.38.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.38.0 // indirect
