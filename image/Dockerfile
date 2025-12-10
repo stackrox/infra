@@ -12,7 +12,7 @@ COPY ui ui
 
 RUN make -C ui all
 
-FROM alpine:3.22.2 as app
+FROM alpine:3.23.0 as app
 
 COPY --from=golang-builder /go/src/github.com/stackrox/infra/bin/infra-server-linux-amd64 /infra-server
 
