@@ -7,7 +7,7 @@ home: https://github.com/stackrox/infra
 sources:
   - https://github.com/stackrox/infra
 annotations:
-  acsDemoVersion: 4.9.1
+  acsDemoVersion: 4.9.2
   automationFlavorsVersion: 0.12.10
   ocpCredentialsMode: Passthrough
 dependencies:
