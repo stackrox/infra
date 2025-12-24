@@ -27,8 +27,10 @@ spec:
         - name: infra-server
           image: quay.io/rhacs-eng/infra-server:{{ required "A valid .Values.tag entry is required!" .Values.tag }}
           env:
+{{- if not .Values.localDeploy }}
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /configuration/google-credentials.json
+{{- end }}
             - name: TEST_MODE
               value: "{{ .Values.testMode }}"
           readinessProbe:
@@ -47,7 +49,7 @@ spec:
               containerPort: 8443
             - name: metrics
               containerPort: 9101
-          imagePullPolicy: Always
+          imagePullPolicy: {{ .Values.imagePullPolicy | default "Always" }}
           volumeMounts:
             - mountPath: /configuration
               name: configuration

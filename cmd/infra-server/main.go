@@ -67,9 +67,19 @@ func mainCmd() error {
 		return errors.Wrapf(err, "failed to load oidc config file %q", oidcConfigFile)
 	}
 
-	signer, err := signer.NewFromEnv()
-	if err != nil {
-		return errors.Wrapf(err, "failed to load GCS signing credentials")
+	// Initialize GCS signer for signed URLs and artifact downloads.
+	// Only create signer if GOOGLE_APPLICATION_CREDENTIALS is set (production/development).
+	// Local deployments skip GCS signing entirely.
+	var gcsSigner *signer.Signer
+	if _, hasGCSCredentials := os.LookupEnv("GOOGLE_APPLICATION_CREDENTIALS"); hasGCSCredentials {
+		var err error
+		gcsSigner, err = signer.NewFromEnv()
+		if err != nil {
+			return errors.Wrapf(err, "failed to load GCS signing credentials")
+		}
+	} else {
+		log.Log(logging.INFO, "GCS signing disabled: GOOGLE_APPLICATION_CREDENTIALS not set")
+		gcsSigner = &signer.Signer{} // Empty signer for local deployments
 	}
 
 	slackClient, err := slack.New(cfg.Slack)
@@ -96,7 +106,7 @@ func mainCmd() error {
 		service.NewStatusService,
 		service.NewVersionService,
 		func() (middleware.APIService, error) {
-			return cluster.NewClusterService(registry, signer, slackClient, bqClient)
+			return cluster.NewClusterService(registry, gcsSigner, slackClient, bqClient)
 		},
 	)
 	if err != nil {
