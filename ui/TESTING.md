@@ -4,23 +4,27 @@ This directory contains Cypress E2E tests for the StackRox Infra UI.
 
 ## Testing Approach
 
-The UI E2E tests require a local deployment because they use custom JWT authentication
-that only works in `LOCAL_DEPLOY=true` mode. The tests cannot share cookies from your
-browser session, so they generate test JWTs using a hardcoded local development secret.
+The UI E2E tests require a local deployment because they use custom JWT
+authentication that only works in `LOCAL_DEPLOY=true` mode. The tests cannot
+share cookies from your browser session, so they generate test JWTs using a
+hardcoded local development secret.
 
 **Requirements:**
+
 - Docker/Podman
 - Local Kubernetes cluster (Colima, kind, minikube, Docker Desktop, etc.)
 - Helm 3
 
 **Why local deployment?**
+
 - Tests need controlled authentication (can't use real OIDC in Cypress)
 - Tests run in isolated browser context (can't share browser cookies)
 - Enables offline testing and testing of local UI changes
 
 ## Quick Start
 
-**Note:** All commands should be run from the repository root unless otherwise specified.
+**Note:** All commands should be run from the repository root unless otherwise
+specified.
 
 ### Steps
 
