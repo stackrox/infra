@@ -162,3 +162,59 @@ jobs:
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 > /dev/null 2>&1 &
           sleep 5
           make go-e2e-tests
+          kill %1
+
+      - name: Setup Node.js for UI tests
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: go/src/github.com/stackrox/infra/ui/package-lock.json
+
+      - name: Install UI dependencies
+        run: |
+          cd ui
+          npm ci
+
+      - name: Start port-forward for UI tests
+        run: |
+          kubectl -n infra port-forward svc/infra-server-service 8443:8443 >/dev/null 2>&1 &
+          echo "PORT_FORWARD_PID=$!" >> "$GITHUB_ENV"
+          sleep 5
+          # Verify port-forward is working
+          timeout 10 sh -c 'until curl -k -f https://localhost:8443/v1/whoami 2>/dev/null; do sleep 1; done' || echo "Warning: Backend may not be ready"
+
+      - name: Run UI E2E tests
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: go/src/github.com/stackrox/infra/ui
+          start: npm run start
+          wait-on: 'http://localhost:3001'
+          wait-on-timeout: 60
+          command: npm run cypress:run:e2e
+        env:
+          BROWSER: none
+          PORT: 3001
+          # Backend uses HTTPS with self-signed cert
+          INFRA_API_ENDPOINT: https://localhost:8443
+
+      - name: Upload UI test artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-artifacts-pr-${{ github.event.pull_request.number }}
+          path: |
+            go/src/github.com/stackrox/infra/ui/cypress/videos
+            go/src/github.com/stackrox/infra/ui/cypress/screenshots
+          retention-days: 7
+
+      - name: Cleanup port-forward
+        if: always()
+        run: |
+          # Kill by PID if available
+          if [ -n "${{ env.PORT_FORWARD_PID }}" ]; then
+            echo "Cleaning up port-forward (PID: ${{ env.PORT_FORWARD_PID }})..."
+            kill ${{ env.PORT_FORWARD_PID }} 2>/dev/null || true
+          fi
+          # Fallback: kill any remaining port-forward processes
+          pkill -f "kubectl port-forward.*8443:8443" 2>/dev/null || true

@@ -2,33 +2,25 @@
 
 This directory contains Cypress E2E tests for the StackRox Infra UI.
 
-## Testing Approaches
+## Testing Approach
 
-There are two ways to run the UI E2E tests:
+The UI E2E tests require a local deployment because they use custom JWT authentication
+that only works in `LOCAL_DEPLOY=true` mode. The tests cannot share cookies from your
+browser session, so they generate test JWTs using a hardcoded local development secret.
 
-1. **Against the Development Server** (Recommended - simplest option)
-   - Extremely simple: just run `npm run test:e2e` (from the `ui/` directory)
-   - Tests against real infrastructure at `dev.infra.rox.systems`
-   - No local deployment needed
-   - Requires access to the `team-automation` GCP project
-
-2. **Against a Local Backend** (For offline work or testing local changes)
-   - Self-contained, no external dependencies
-   - Works offline
-   - Tests your local code changes
-   - Requires Docker/Podman and local Kubernetes (Colima, kind, etc.)
-
-Choose the approach that best fits your development environment.
-
-## Quick Start - Running E2E Tests Against Local Backend
-
-**Note:** All commands in this section should be run from the repository root unless otherwise specified.
-
-### Prerequisites
-
-- Docker or Podman
+**Requirements:**
+- Docker/Podman
 - Local Kubernetes cluster (Colima, kind, minikube, Docker Desktop, etc.)
 - Helm 3
+
+**Why local deployment?**
+- Tests need controlled authentication (can't use real OIDC in Cypress)
+- Tests run in isolated browser context (can't share browser cookies)
+- Enables offline testing and testing of local UI changes
+
+## Quick Start
+
+**Note:** All commands should be run from the repository root unless otherwise specified.
 
 ### Steps
 
@@ -80,83 +72,9 @@ After the tests complete:
 
 Review the videos to verify the tests are properly accessing the backend.
 
-## Alternative: Running E2E Tests Against Remote Server
-
-If you have access to the development infra server at `dev.infra.rox.systems`,
-you can run the UI tests against it instead of deploying locally. This approach is
-simpler and mirrors how the Go e2e tests work.
-
-### Prerequisites
-
-- Access to the `team-automation` GCP project (or be added as a project owner)
-- Valid authentication token (obtained by logging into https://dev.infra.rox.systems)
-
-### Option 1: Using the Public Development Server (Simplest)
-
-No kubectl or cluster access needed - just point to the public dev server:
-
-```bash
-cd ui
-INFRA_API_ENDPOINT=https://dev.infra.rox.systems npm run test:e2e
-```
-
-**Note:** The UI dev server defaults to `https://dev.infra.rox.systems`, so you can
-also omit the environment variable:
-
-```bash
-cd ui
-npm run test:e2e
-```
-
-### Option 2: Using Port-Forward to Development Cluster
-
-If you want to test against the actual cluster (e.g., to test pre-release changes):
-
-1. **Connect to the development cluster**:
-
-   ```bash
-   gcloud container clusters get-credentials infra-development \
-     --project acs-team-automation \
-     --region us-west2
-   ```
-
-2. **Start port-forwarding**:
-
-   ```bash
-   kubectl -n infra port-forward svc/infra-server-service 8443:8443
-   ```
-
-   Keep this running in a separate terminal.
-
-3. **Run the E2E tests**:
-
-   ```bash
-   cd ui
-   INFRA_API_ENDPOINT=https://localhost:8443 npm run test:e2e
-   ```
-
-### Advantages of Remote Server Testing
-
-- **Extremely simple** - Option 1 requires only `npm run test:e2e` (no setup!)
-- **No local deployment needed** - Skip the `make image` and `make deploy-local` steps
-- **Tests against real infrastructure** - Uses actual Argo Workflows and cloud resources
-- **Consistent with Go e2e tests** - Same approach as existing test suite
-- **Faster iteration** - No need to rebuild Docker images locally
-- **Public endpoint available** - dev.infra.rox.systems is accessible without VPN
-
-### Disadvantages
-
-- **Requires team-automation access** - Need to be added to the GCP project
-- **External dependencies** - Tests rely on remote services being available
-- **Shared environment** - Other developers may be using the same dev server
-- **May test older code** - Development server might not have your latest changes
-
 ## Interactive Mode
 
 To run tests interactively with the Cypress UI (useful for debugging):
-
-**Note:** This works with both local and remote backends. Just make sure you have
-port-forwarding running to either your local deployment or remote server.
 
 **Prerequisites:** Start the UI dev server with the backend endpoint configured:
 
