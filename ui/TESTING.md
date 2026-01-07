@@ -6,15 +6,17 @@ This directory contains Cypress E2E tests for the StackRox Infra UI.
 
 There are two ways to run the UI E2E tests:
 
-1. **Against a Local Backend** (Recommended for most developers)
+1. **Against the Development Server** (Recommended - simplest option)
+   - Extremely simple: just run `npm run test:e2e` (from the `ui/` directory)
+   - Tests against real infrastructure at `dev.infra.rox.systems`
+   - No local deployment needed
+   - Requires access to the `team-automation` GCP project
+
+2. **Against a Local Backend** (For offline work or testing local changes)
    - Self-contained, no external dependencies
    - Works offline
+   - Tests your local code changes
    - Requires Docker/Podman and local Kubernetes (Colima, kind, etc.)
-
-2. **Against a Remote Server** (Recommended for developers with cluster access)
-   - Simpler setup - no local deployment needed
-   - Tests against real infrastructure
-   - Requires cluster credentials and network connectivity
 
 Choose the approach that best fits your development environment.
 
@@ -80,34 +82,45 @@ Review the videos to verify the tests are properly accessing the backend.
 
 ## Alternative: Running E2E Tests Against Remote Server
 
-If you have access to a deployed infra-server (such as a development or PR cluster),
+If you have access to the development infra server at `dev.infra.rox.systems`,
 you can run the UI tests against it instead of deploying locally. This approach is
 simpler and mirrors how the Go e2e tests work.
 
 ### Prerequisites
 
-- Access to a Kubernetes cluster with infra-server deployed
-- Cluster credentials configured in your kubeconfig
-- (Optional) INFRA_TOKEN environment variable if using service account authentication
+- Access to the `team-automation` GCP project (or be added as a project owner)
+- Valid authentication token (obtained by logging into https://dev.infra.rox.systems)
 
-### Steps
+### Option 1: Using the Public Development Server (Simplest)
 
-1. **Connect to the cluster**:
+No kubectl or cluster access needed - just point to the public dev server:
 
-   For GKE clusters (like PR clusters):
+```bash
+cd ui
+INFRA_API_ENDPOINT=https://dev.infra.rox.systems npm run test:e2e
+```
+
+**Note:** The UI dev server defaults to `https://dev.infra.rox.systems`, so you can
+also omit the environment variable:
+
+```bash
+cd ui
+npm run test:e2e
+```
+
+### Option 2: Using Port-Forward to Development Cluster
+
+If you want to test against the actual cluster (e.g., to test pre-release changes):
+
+1. **Connect to the development cluster**:
 
    ```bash
-   gcloud container clusters get-credentials infra-pr-XXXX \
-     --zone us-central1-a --project acs-team-temp-dev
+   gcloud container clusters get-credentials infra-development \
+     --project acs-team-automation \
+     --region us-west2
    ```
 
-   Or use your existing cluster context:
-
-   ```bash
-   kubectl config use-context <your-context>
-   ```
-
-2. **Start port-forwarding** to the remote server:
+2. **Start port-forwarding**:
 
    ```bash
    kubectl -n infra port-forward svc/infra-server-service 8443:8443
@@ -124,16 +137,19 @@ simpler and mirrors how the Go e2e tests work.
 
 ### Advantages of Remote Server Testing
 
+- **Extremely simple** - Option 1 requires only `npm run test:e2e` (no setup!)
 - **No local deployment needed** - Skip the `make image` and `make deploy-local` steps
 - **Tests against real infrastructure** - Uses actual Argo Workflows and cloud resources
 - **Consistent with Go e2e tests** - Same approach as existing test suite
 - **Faster iteration** - No need to rebuild Docker images locally
+- **Public endpoint available** - dev.infra.rox.systems is accessible without VPN
 
 ### Disadvantages
 
-- **Requires cluster access** - Need credentials and network connectivity
+- **Requires team-automation access** - Need to be added to the GCP project
 - **External dependencies** - Tests rely on remote services being available
-- **Shared environment** - Other developers may be using the same cluster
+- **Shared environment** - Other developers may be using the same dev server
+- **May test older code** - Development server might not have your latest changes
 
 ## Interactive Mode
 
