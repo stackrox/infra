@@ -213,8 +213,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: go/src/github.com/stackrox/infra/ui/package-lock.json
 
       - name: Install UI dependencies
         run: |
