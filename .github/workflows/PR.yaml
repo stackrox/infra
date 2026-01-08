@@ -217,7 +217,7 @@ jobs:
       - name: Install UI dependencies
         run: |
           cd ui
-          npm install
+          npm install --legacy-peer-deps
 
       - name: Start port-forward to PR cluster
         run: |
