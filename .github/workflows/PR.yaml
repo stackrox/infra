@@ -243,6 +243,7 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           working-directory: go/src/github.com/stackrox/infra/ui
+          install: false
           start: npm run start
           wait-on: 'http://localhost:3001'
           wait-on-timeout: 60
