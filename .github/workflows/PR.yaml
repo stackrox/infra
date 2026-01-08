@@ -217,7 +217,7 @@ jobs:
       - name: Install UI dependencies
         run: |
           cd ui
-          npm ci
+          npm install
 
       - name: Start port-forward to PR cluster
         run: |
