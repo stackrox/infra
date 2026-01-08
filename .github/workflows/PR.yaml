@@ -239,6 +239,22 @@ jobs:
           }
           echo "Port-forward is working"
 
+      - name: Debug - Check flavors API
+        run: |
+          echo "Checking if flavors are available..."
+          RESPONSE=$(curl -k -s https://localhost:8443/v1/flavor/list || echo "API call failed")
+          echo "Flavors API response:"
+          echo "$RESPONSE" | jq . || echo "$RESPONSE"
+
+          # Count flavors
+          FLAVOR_COUNT=$(echo "$RESPONSE" | jq '.flavors | length' 2>/dev/null || echo "0")
+          echo "Number of flavors available: $FLAVOR_COUNT"
+
+          if [ "$FLAVOR_COUNT" = "0" ]; then
+            echo "WARNING: No flavors available in PR cluster deployment"
+            echo "This may indicate a deployment configuration issue"
+          fi
+
       - name: Run UI E2E tests
         uses: cypress-io/github-action@v6
         with:
