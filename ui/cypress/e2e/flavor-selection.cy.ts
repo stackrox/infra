@@ -75,7 +75,9 @@ describe('Flavor Selection', () => {
         cy.get(SELECTORS.FLAVOR_TOGGLE, { timeout: 30000 }).click({ force: true });
 
         // Verify the heading text changed
-        cy.get(SELECTORS.PAGE_HEADING, { timeout: 30000 }).invoke('text').should('not.equal', initialHeading);
+        cy.get(SELECTORS.PAGE_HEADING, { timeout: 30000 })
+          .invoke('text')
+          .should('not.equal', initialHeading);
 
         // Verify URL parameter was updated
         cy.url().should('include', 'showAllFlavors=true');
@@ -84,7 +86,9 @@ describe('Flavor Selection', () => {
         cy.get(SELECTORS.FLAVOR_TOGGLE, { timeout: 30000 }).click({ force: true });
 
         // Verify we're back to the original heading
-        cy.get(SELECTORS.PAGE_HEADING, { timeout: 30000 }).invoke('text').should('equal', initialHeading);
+        cy.get(SELECTORS.PAGE_HEADING, { timeout: 30000 })
+          .invoke('text')
+          .should('equal', initialHeading);
       });
   });
 });
