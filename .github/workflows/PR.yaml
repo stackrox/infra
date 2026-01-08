@@ -198,7 +198,7 @@ jobs:
         run: |
           echo "Downloading kubeconfig for $CLUSTER_NAME..."
           /home/runner/.local/bin/infractl artifacts "$CLUSTER_NAME" -d /tmp/artifacts
-          cp /tmp/artifacts/kubeconfig $KUBECONFIG
+          cp /tmp/artifacts/kubeconfig "$KUBECONFIG"
 
           echo "Verifying cluster access..."
           kubectl get nodes -o wide
@@ -234,7 +234,7 @@ jobs:
             sleep 2
           done' || {
             echo "Port-forward verification failed"
-            ps aux | grep port-forward
+            pgrep -a port-forward || true
             exit 1
           }
           echo "Port-forward is working"
