@@ -26,19 +26,20 @@ describe('Flavor Selection', () => {
 
   it('should display a list of available flavors', () => {
     // Wait for the page heading to be visible (indicates page has loaded)
-    cy.get(SELECTORS.PAGE_HEADING).should('be.visible');
+    // Increase timeout for slower environments like PR clusters
+    cy.get(SELECTORS.PAGE_HEADING, { timeout: 30000 }).should('be.visible');
 
     // Verify that the flavor gallery is not empty
     // Each flavor is rendered as a LinkCard inside a GalleryItem
-    cy.get(SELECTORS.FLAVOR_CARD).should('have.length.at.least', 1);
+    cy.get(SELECTORS.FLAVOR_CARD, { timeout: 30000 }).should('have.length.at.least', 1);
   });
 
   it('should display flavor details for each flavor card', () => {
     // Wait for flavors to load
-    cy.get(SELECTORS.PAGE_HEADING).should('be.visible');
+    cy.get(SELECTORS.PAGE_HEADING, { timeout: 30000 }).should('be.visible');
 
     // Get the first flavor card and verify it has required elements
-    cy.get(SELECTORS.FLAVOR_CARD)
+    cy.get(SELECTORS.FLAVOR_CARD, { timeout: 30000 })
       .first()
       .within(() => {
         // Each flavor card should have a name (header text)
@@ -51,39 +52,39 @@ describe('Flavor Selection', () => {
 
   it('should have clickable flavor cards that navigate to launch page', () => {
     // Wait for flavors to load
-    cy.get(SELECTORS.PAGE_HEADING).should('be.visible');
+    cy.get(SELECTORS.PAGE_HEADING, { timeout: 30000 }).should('be.visible');
 
     // Click the first flavor card
-    cy.get(SELECTORS.FLAVOR_CARD).first().click();
+    cy.get(SELECTORS.FLAVOR_CARD, { timeout: 30000 }).first().click();
 
     // Verify navigation to launch page (URL should contain /launch/)
     cy.url().should('include', '/launch/');
 
     // Verify the launch page loaded with a cluster launch form
-    cy.contains('h1', /Launch/).should('be.visible');
+    cy.contains('h1', /Launch/, { timeout: 30000 }).should('be.visible');
   });
 
   it('should toggle between flavor filter states', () => {
     // Get the initial heading text
-    cy.get(SELECTORS.PAGE_HEADING)
+    cy.get(SELECTORS.PAGE_HEADING, { timeout: 30000 })
       .should('be.visible')
       .invoke('text')
       .then((initialHeading) => {
         // Find and click the flavor filter toggle switch
         // Use force:true because PatternFly switch has a visual element covering the input
-        cy.get(SELECTORS.FLAVOR_TOGGLE).click({ force: true });
+        cy.get(SELECTORS.FLAVOR_TOGGLE, { timeout: 30000 }).click({ force: true });
 
         // Verify the heading text changed
-        cy.get(SELECTORS.PAGE_HEADING).invoke('text').should('not.equal', initialHeading);
+        cy.get(SELECTORS.PAGE_HEADING, { timeout: 30000 }).invoke('text').should('not.equal', initialHeading);
 
         // Verify URL parameter was updated
         cy.url().should('include', 'showAllFlavors=true');
 
         // Toggle back
-        cy.get(SELECTORS.FLAVOR_TOGGLE).click({ force: true });
+        cy.get(SELECTORS.FLAVOR_TOGGLE, { timeout: 30000 }).click({ force: true });
 
         // Verify we're back to the original heading
-        cy.get(SELECTORS.PAGE_HEADING).invoke('text').should('equal', initialHeading);
+        cy.get(SELECTORS.PAGE_HEADING, { timeout: 30000 }).invoke('text').should('equal', initialHeading);
       });
   });
 });
