@@ -168,6 +168,10 @@ jobs:
       - deploy-and-test
     runs-on: ubuntu-latest
     # Note: This job does NOT use the apollo-ci container to avoid path issues
+    env:
+      KUBECONFIG: /tmp/kubeconfig
+      INFRA_TOKEN: ${{ secrets.INFRA_TOKEN }}
+      USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
 
     steps:
       - name: Checkout
@@ -175,6 +179,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
+          path: go/src/github.com/stackrox/infra
 
       - name: Authenticate to GCloud
         uses: google-github-actions/auth@v3
@@ -190,13 +195,10 @@ jobs:
         uses: stackrox/actions/infra/install-infractl@v1
 
       - name: Get kubeconfig for PR cluster
-        env:
-          USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
         run: |
           echo "Downloading kubeconfig for $CLUSTER_NAME..."
           /home/runner/.local/bin/infractl artifacts "$CLUSTER_NAME" -d /tmp/artifacts
-          cp /tmp/artifacts/kubeconfig /tmp/kubeconfig
-          echo "KUBECONFIG=/tmp/kubeconfig" >> "$GITHUB_ENV"
+          cp /tmp/artifacts/kubeconfig $KUBECONFIG
 
           echo "Verifying cluster access..."
           kubectl get nodes -o wide
