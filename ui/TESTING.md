@@ -4,10 +4,10 @@ This directory contains Cypress E2E tests for the StackRox Infra UI.
 
 ## Testing Approach
 
-The UI E2E tests require a local deployment because they use custom JWT
-authentication that only works in `LOCAL_DEPLOY=true` mode. The tests cannot
-share cookies from your browser session, so they generate test JWTs using a
-hardcoded local development secret.
+The UI E2E tests use custom JWT authentication that works with deployments using
+`TEST_MODE=true`. The tests cannot share cookies from your browser session, so
+they generate test JWTs using a hardcoded local development secret
+(`local-dev-secret-min-32-chars-long`).
 
 **Requirements:**
 
@@ -20,6 +20,14 @@ hardcoded local development secret.
 - Tests need controlled authentication (can't use real OIDC in Cypress)
 - Tests run in isolated browser context (can't share browser cookies)
 - Enables offline testing and testing of local UI changes
+
+**Note on PR Cluster Testing:**
+
+The UI E2E tests can also run against PR cluster deployments because they use
+`TEST_MODE=true`, which configures the backend to accept JWTs signed with the
+hardcoded local-dev secret. However, PR clusters may have different data/flavors
+configured, so tests may need longer timeouts or may fail if expected data is
+not present.
 
 ## Quick Start
 
