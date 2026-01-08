@@ -162,3 +162,113 @@ jobs:
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 > /dev/null 2>&1 &
           sleep 5
           make go-e2e-tests
+
+  ui-e2e-test-pr-cluster:
+    needs:
+      - deploy-and-test
+    runs-on: ubuntu-latest
+    # Note: This job does NOT use the apollo-ci container to avoid path issues
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Authenticate to GCloud
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.INFRA_CI_AUTOMATION_GCP_SA }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v3
+        with:
+          install_components: "gke-gcloud-auth-plugin"
+
+      - name: Download production infractl
+        uses: stackrox/actions/infra/install-infractl@v1
+
+      - name: Get kubeconfig for PR cluster
+        env:
+          USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
+        run: |
+          echo "Downloading kubeconfig for $CLUSTER_NAME..."
+          /home/runner/.local/bin/infractl artifacts "$CLUSTER_NAME" -d /tmp/artifacts
+          cp /tmp/artifacts/kubeconfig /tmp/kubeconfig
+          echo "KUBECONFIG=/tmp/kubeconfig" >> "$GITHUB_ENV"
+
+          echo "Verifying cluster access..."
+          kubectl get nodes -o wide
+
+      - name: Wait for infra-server deployment
+        run: |
+          echo "Checking infra-server pods..."
+          kubectl get pods -n infra
+          kubectl wait --for=condition=ready pod -l app=infra-server -n infra --timeout=5m
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: ui/package-lock.json
+
+      - name: Install UI dependencies
+        run: |
+          cd ui
+          npm ci
+
+      - name: Start port-forward to PR cluster
+        run: |
+          kubectl -n infra port-forward svc/infra-server-service 8443:8443 >/dev/null 2>&1 &
+          PORT_FORWARD_PID=$!
+          echo "PORT_FORWARD_PID=$PORT_FORWARD_PID" >> "$GITHUB_ENV"
+          echo "Started port-forward with PID: $PORT_FORWARD_PID"
+          sleep 10
+
+          # Verify port-forward is working
+          echo "Verifying port-forward connectivity..."
+          timeout 30 sh -c 'until curl -k -f https://localhost:8443/v1/whoami 2>/dev/null; do
+            echo "Waiting for port-forward..."
+            sleep 2
+          done' || {
+            echo "Port-forward verification failed"
+            ps aux | grep port-forward
+            exit 1
+          }
+          echo "Port-forward is working"
+
+      - name: Run UI E2E tests
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: ui
+          start: npm run start
+          wait-on: 'http://localhost:3001'
+          wait-on-timeout: 60
+          command: npm run cypress:run:e2e
+        env:
+          BROWSER: none
+          PORT: 3001
+          # Backend is the PR cluster deployment accessed via port-forward
+          # This deployment uses ENVIRONMENT=development with real OIDC (NOT localDeploy=true)
+          INFRA_API_ENDPOINT: https://localhost:8443
+
+      - name: Upload test artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-artifacts-pr-cluster-${{ github.event.pull_request.number }}
+          path: |
+            ui/cypress/videos
+            ui/cypress/screenshots
+          retention-days: 7
+
+      - name: Cleanup port-forward
+        if: always()
+        run: |
+          if [ -n "${{ env.PORT_FORWARD_PID }}" ]; then
+            echo "Cleaning up port-forward (PID: ${{ env.PORT_FORWARD_PID }})..."
+            kill ${{ env.PORT_FORWARD_PID }} 2>/dev/null || true
+          fi
+          pkill -f "kubectl port-forward.*8443:8443" 2>/dev/null || true
