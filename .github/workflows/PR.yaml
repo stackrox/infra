@@ -169,9 +169,48 @@ jobs:
         run: |
           make argo-workflow-lint
 
+  go-e2e-test:
+    needs:
+      - deploy-and-test
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.4.9
+    env:
+      KUBECONFIG: /github/home/artifacts/kubeconfig
+      INFRA_TOKEN: ${{ secrets.INFRA_TOKEN_DEV }}
+      INFRACTL: bin/infractl -k -e localhost:8443
+      USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: go/src/github.com/stackrox/infra
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go/src/github.com/stackrox/infra/go.mod
+
+      - name: Authenticate to GCloud
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.INFRA_CI_AUTOMATION_GCP_SA }}
+
+      - name: Set up Cloud SDK
+        uses: "google-github-actions/setup-gcloud@v3"
+        with:
+          install_components: "gke-gcloud-auth-plugin"
+
+      - name: Download production infractl
+        uses: stackrox/actions/infra/install-infractl@v1
+
+      - name: Download artifacts
+        run: |
+          /github/home/.local/bin/infractl artifacts "$CLUSTER_NAME" -d /github/home/artifacts >> "$GITHUB_STEP_SUMMARY"
+
       - name: Run Go e2e tests
-        env:
-          INFRA_TOKEN: ${{ secrets.INFRA_TOKEN_DEV }}
         run: |
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 > /dev/null 2>&1 &
           sleep 5
