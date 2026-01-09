@@ -66,6 +66,8 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.4.9
+    outputs:
+      session-secret: ${{ steps.deploy.outputs.session-secret }}
     env:
       KUBECONFIG: /github/home/artifacts/kubeconfig
       INFRA_TOKEN: ${{ secrets.INFRA_TOKEN }}
@@ -103,7 +105,14 @@ jobs:
           kubectl get nodes -o wide || true
 
       - name: Deploy infra to dev cluster
+        id: deploy
         run: |
+          # Generate random session secret for JWT signing
+          # This secret is used by both the server (for verification) and Cypress (for JWT generation)
+          SESSION_SECRET=$(openssl rand -base64 32 | tr -d '\n')
+          export SESSION_SECRET
+          echo "Generated random session secret for this PR cluster deployment"
+
           ENVIRONMENT=development TEST_MODE=true make helm-deploy
           sleep 10 # wait for old pods to disappear so the svc port-forward doesn't connect to them
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 > /dev/null 2>&1 &
@@ -114,6 +123,11 @@ jobs:
           make pull-infractl-from-dev-server
 
           kill %1
+
+          # Save session secret for UI E2E tests (job output for next job)
+          echo "session-secret=$SESSION_SECRET" >> "$GITHUB_OUTPUT"
+          # Also set as env var for steps in this job
+          echo "SESSION_SECRET=$SESSION_SECRET" >> "$GITHUB_ENV"
 
       - name: Check the deployment
         run: |
@@ -155,10 +169,190 @@ jobs:
         run: |
           make argo-workflow-lint
 
+  go-e2e-test:
+    needs:
+      - deploy-and-test
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.4.9
+    env:
+      KUBECONFIG: /github/home/artifacts/kubeconfig
+      INFRA_TOKEN: ${{ secrets.INFRA_TOKEN_DEV }}
+      INFRACTL: bin/infractl -k -e localhost:8443
+      USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: go/src/github.com/stackrox/infra
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go/src/github.com/stackrox/infra/go.mod
+
+      - name: Authenticate to GCloud
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.INFRA_CI_AUTOMATION_GCP_SA }}
+
+      - name: Set up Cloud SDK
+        uses: "google-github-actions/setup-gcloud@v3"
+        with:
+          install_components: "gke-gcloud-auth-plugin"
+
+      - name: Download production infractl
+        uses: stackrox/actions/infra/install-infractl@v1
+
+      - name: Download artifacts
+        run: |
+          /github/home/.local/bin/infractl artifacts "$CLUSTER_NAME" -d /github/home/artifacts >> "$GITHUB_STEP_SUMMARY"
+
       - name: Run Go e2e tests
-        env:
-          INFRA_TOKEN: ${{ secrets.INFRA_TOKEN_DEV }}
         run: |
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 > /dev/null 2>&1 &
           sleep 5
           make go-e2e-tests
+
+  ui-e2e-test-pr-cluster:
+    needs:
+      - deploy-and-test
+    runs-on: ubuntu-latest
+    # Note: This job does NOT use the apollo-ci container to avoid path issues
+    env:
+      KUBECONFIG: /tmp/kubeconfig
+      INFRA_TOKEN: ${{ secrets.INFRA_TOKEN }}
+      USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: go/src/github.com/stackrox/infra
+
+      - name: Authenticate to GCloud
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.INFRA_CI_AUTOMATION_GCP_SA }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v3
+        with:
+          install_components: "gke-gcloud-auth-plugin"
+
+      - name: Download production infractl
+        uses: stackrox/actions/infra/install-infractl@v1
+
+      - name: Get kubeconfig for PR cluster
+        run: |
+          echo "Downloading kubeconfig for $CLUSTER_NAME..."
+          /home/runner/.local/bin/infractl artifacts "$CLUSTER_NAME" -d /tmp/artifacts
+          cp /tmp/artifacts/kubeconfig "$KUBECONFIG"
+
+          echo "Verifying cluster access..."
+          kubectl get nodes -o wide
+
+      - name: Wait for infra-server deployment
+        run: |
+          echo "Checking infra-server pods..."
+          kubectl get pods -n infra
+          kubectl wait --for=condition=ready pod -l app=infra-server -n infra --timeout=5m
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install UI dependencies
+        run: |
+          cd ui
+          npm install --legacy-peer-deps
+
+      - name: Start port-forward to PR cluster
+        run: |
+          kubectl -n infra port-forward svc/infra-server-service 8443:8443 >/dev/null 2>&1 &
+          PORT_FORWARD_PID=$!
+          echo "PORT_FORWARD_PID=$PORT_FORWARD_PID" >> "$GITHUB_ENV"
+          echo "Started port-forward with PID: $PORT_FORWARD_PID"
+          sleep 10
+
+          # Verify port-forward is working
+          echo "Verifying port-forward connectivity..."
+          timeout 30 sh -c 'until curl -k -f https://localhost:8443/v1/whoami 2>/dev/null; do
+            echo "Waiting for port-forward..."
+            sleep 2
+          done' || {
+            echo "Port-forward verification failed"
+            pgrep -a port-forward || true
+            exit 1
+          }
+          echo "Port-forward is working"
+
+      - name: Debug - Check flavors API
+        run: |
+          echo "Checking if flavors are available..."
+
+          # First try without auth (should fail with access denied)
+          echo "1. Testing without authentication:"
+          UNAUTH_RESPONSE=$(curl -k -s https://localhost:8443/v1/flavor/list || echo "API call failed")
+          echo "$UNAUTH_RESPONSE" | jq . || echo "$UNAUTH_RESPONSE"
+
+          # Check whoami endpoint
+          echo ""
+          echo "2. Testing /v1/whoami:"
+          WHOAMI=$(curl -k -s https://localhost:8443/v1/whoami || echo "whoami failed")
+          echo "$WHOAMI" | jq . || echo "$WHOAMI"
+
+          # The real issue is the UI itself - let's check if the flavors endpoint
+          # works at all. The UI must be getting an error from somewhere.
+          echo ""
+          echo "3. Checking flavors API (unauthenticated count):"
+          FLAVOR_COUNT=$(echo "$UNAUTH_RESPONSE" | jq '.flavors | length' 2>/dev/null || echo "0")
+          echo "Number of flavors available: $FLAVOR_COUNT"
+
+          if [ "$FLAVOR_COUNT" = "0" ]; then
+            echo "NOTE: Flavors API requires authentication"
+            echo "This is expected - Cypress tests use JWT authentication with randomly generated secret"
+          fi
+
+      - name: Run UI E2E tests
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: go/src/github.com/stackrox/infra/ui
+          install: false
+          start: npm run start
+          wait-on: 'http://localhost:3001'
+          wait-on-timeout: 60
+          command: npm run cypress:run:e2e
+        env:
+          BROWSER: none
+          PORT: 3001
+          # Backend is the PR cluster deployment accessed via port-forward
+          # This deployment uses ENVIRONMENT=development with real OIDC (NOT localDeploy=true)
+          INFRA_API_ENDPOINT: https://localhost:8443
+          # Session secret for JWT generation (matches what the server uses)
+          # Retrieved from deploy-and-test job output
+          CYPRESS_SESSION_SECRET: ${{ needs.deploy-and-test.outputs.session-secret }}
+
+      - name: Upload test artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-artifacts-pr-cluster-${{ github.event.pull_request.number }}
+          path: |
+            go/src/github.com/stackrox/infra/ui/cypress/videos
+            go/src/github.com/stackrox/infra/ui/cypress/screenshots
+          retention-days: 7
+
+      - name: Cleanup port-forward
+        if: always()
+        run: |
+          if [ -n "${{ env.PORT_FORWARD_PID }}" ]; then
+            echo "Cleaning up port-forward (PID: ${{ env.PORT_FORWARD_PID }})..."
+            kill ${{ env.PORT_FORWARD_PID }} 2>/dev/null || true
+          fi
+          pkill -f "kubectl port-forward.*8443:8443" 2>/dev/null || true

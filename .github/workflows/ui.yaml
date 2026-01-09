@@ -1,0 +1,128 @@
+name: UI tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  ui-e2e-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Free disk space (delete unused tools)
+        id: delete-unused-tools
+        continue-on-error: true
+        shell: bash
+        run: |
+          free_disk_space=22
+          # delete preinstalled unused tools
+          cleanup=(
+            /usr/share/dotnet
+            /usr/share/miniconda
+            /usr/share/swift
+            /usr/share/kotlinc
+            /opt/ghc
+            /opt/hostedtoolcache/CodeQL
+            /opt/hostedtoolcache/Ruby
+            /opt/az
+            /usr/local/lib/android
+          )
+          for d in "${cleanup[@]}"; do
+            if [[ -d "$d" ]]; then
+              rm -rf -- "$d" && echo "deleted $d"
+            else
+              echo "$d not found"
+              continue
+            fi
+            free=$(df -BGB --output=avail / | tail -1)
+            if [[ ${free%GB} -ge "${free_disk_space}" ]]; then
+              echo "Reached requested free disk space ${free_disk_space} [${free} free]."
+              exit 0
+            fi
+          done
+          df -h
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Create KinD Cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: kind
+
+      - name: tags
+        run: |
+          echo "TAG=$(make tag)" | tee -a "$GITHUB_ENV"
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          file: image/Dockerfile
+          context: .
+          push: false
+          load: true
+          tags: quay.io/rhacs-eng/infra-server:${{ env.TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Load into KinD
+        run: |
+          # Check cluster name
+          kind get clusters
+          #docker build -t quay.io/rhacs-eng/infra-server:${{ env.TAG }} -f image/Dockerfile .
+          kind load docker-image quay.io/rhacs-eng/infra-server:${{ env.TAG }} --name kind
+          docker images | grep infra-server
+
+      - name: Deploy
+        run: make deploy-local
+
+      - name: Wait for pods
+        run: kubectl wait --for=condition=ready pod -l app=infra-server -n infra --timeout=3m
+
+      - name: Start port-forward
+        run: |
+          kubectl port-forward -n infra svc/infra-server-service 8443:8443 >/dev/null 2>&1 &
+          echo "PORT_FORWARD_PID=$!" >> "$GITHUB_ENV"
+          sleep 5
+          # Verify port-forward is working
+          timeout 10 sh -c 'until curl -k -f https://localhost:8443/v1/whoami 2>/dev/null; do sleep 1; done' || echo "Warning: Backend may not be ready"
+
+      - name: Run E2E tests
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: ui
+          start: npm run start
+          wait-on: 'http://localhost:3001'
+          wait-on-timeout: 60
+          command: npm run cypress:run:e2e
+        env:
+          BROWSER: none
+          PORT: 3001
+          # Backend uses HTTPS with self-signed cert (see scripts/deploy/helm.sh)
+          INFRA_API_ENDPOINT: https://localhost:8443
+
+      - name: Upload test artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-artifacts
+          path: |
+            ui/cypress/videos
+            ui/cypress/screenshots
+          retention-days: 7
+
+      - name: Cleanup port-forward
+        if: always()
+        run: |
+          # Kill by PID if available, otherwise kill by process name
+          if [ -n "${{ env.PORT_FORWARD_PID }}" ]; then
+            echo "Cleaning up port-forward (PID: ${{ env.PORT_FORWARD_PID }})..."
+            kill ${{ env.PORT_FORWARD_PID }} 2>/dev/null || true
+          fi
+          # Fallback: kill any remaining port-forward processes
+          pkill -f "kubectl port-forward.*8443:8443" 2>/dev/null || true

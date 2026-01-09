@@ -253,6 +253,43 @@ helm-deploy: pre-check helm-dependency-update create-namespaces
 helm-diff: pre-check helm-dependency-update create-namespaces
 	@./scripts/deploy/helm.sh diff $(VERSION) $(ENVIRONMENT) $(SECRET_VERSION)
 
+## Deploy to local cluster (e.g., Colima) without GCP Secret Manager
+.PHONY: deploy-local
+deploy-local: helm-dependency-update create-namespaces
+	@echo "Generating random session secret for local deployment..."
+	$(eval SESSION_SECRET := $(shell openssl rand -base64 32 | tr -d '\n'))
+	@echo "SESSION_SECRET generated (use 'export SESSION_SECRET=<value>' for Cypress tests)"
+	@SESSION_SECRET="$(SESSION_SECRET)" TEST_MODE=true ./scripts/deploy/helm.sh deploy-local $(shell make tag) local
+	@echo ""
+	@echo "Deployment complete!"
+	@echo "To run E2E tests, export the session secret:"
+	@echo "  export SESSION_SECRET='$(SESSION_SECRET)'"
+	@echo "  make test-e2e"
+
+## Run UI E2E tests against local deployment
+.PHONY: test-e2e
+test-e2e:
+	@echo "test-e2e starting..." >&2
+	@echo "Waiting for infra-server to be ready..." >&2
+	@kubectl wait --for=condition=ready pod -l app=infra-server -n infra --timeout=3m >&2 || \
+		(echo "ERROR: infra-server pods did not become ready" >&2 && exit 1)
+	@echo "Starting port-forward and running E2E tests..." >&2
+	@kubectl port-forward -n infra svc/infra-server-service 8443:8443 >/dev/null 2>&1 & \
+	PF_PID=$$!; \
+	cleanup() { \
+		echo "" >&2; \
+		echo "Cleaning up port-forward (PID: $$PF_PID)..." >&2; \
+		kill $$PF_PID 2>/dev/null || true; \
+	}; \
+	trap cleanup EXIT; \
+	sleep 5; \
+	echo "Running Cypress E2E tests..." >&2; \
+	if [ -z "$$SESSION_SECRET" ]; then \
+		echo "WARNING: SESSION_SECRET not set. Using default for local laptop development." >&2; \
+		echo "If tests fail, make sure you exported SESSION_SECRET from deploy-local output." >&2; \
+	fi; \
+	cd ui && BROWSER=none PORT=3001 INFRA_API_ENDPOINT=http://localhost:8443 CYPRESS_SESSION_SECRET="$$SESSION_SECRET" npm run test:e2e
+
 ## Bounce pods
 .PHONY: bounce-infra-pods
 bounce-infra-pods:
