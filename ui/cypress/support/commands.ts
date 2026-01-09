@@ -2,13 +2,16 @@
 
 /**
  * Logs in by setting a valid JWT token cookie for local development.
- * This uses the known session secret from local-deploy oidc.yaml.
+ * Reads the session secret from CYPRESS_SESSION_SECRET env var if available,
+ * otherwise uses a default for true local laptop development.
  */
 Cypress.Commands.add('loginForLocalDev', () => {
-  // IMPORTANT: This secret is ONLY for local development.
-  // It matches chart/infra-server/configuration/local-values.yaml
-  // Production deployments use different secrets from GCP Secret Manager.
-  const sessionSecret = 'local-dev-secret-min-32-chars-long';
+  // Read session secret from environment variable (set by CI/PR workflows)
+  // Fall back to default for true local development on laptop
+  // IMPORTANT: The default is ONLY for local laptop development.
+  // PR clusters and test environments use randomly generated secrets.
+  const sessionSecret =
+    Cypress.env('SESSION_SECRET') || 'local-dev-secret-min-32-chars-long';
 
   // Create a test user matching the backend's expected structure
   // Note: Fields are capitalized to match Go's JSON serialization of protobuf structs

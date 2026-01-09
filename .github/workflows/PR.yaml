@@ -104,6 +104,11 @@ jobs:
 
       - name: Deploy infra to dev cluster
         run: |
+          # Generate random session secret for JWT signing
+          # This secret is used by both the server (for verification) and Cypress (for JWT generation)
+          export SESSION_SECRET=$(openssl rand -base64 32 | tr -d '\n')
+          echo "Generated random session secret for this PR cluster deployment"
+
           ENVIRONMENT=development TEST_MODE=true make helm-deploy
           sleep 10 # wait for old pods to disappear so the svc port-forward doesn't connect to them
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 > /dev/null 2>&1 &
@@ -114,6 +119,9 @@ jobs:
           make pull-infractl-from-dev-server
 
           kill %1
+
+          # Save session secret for UI E2E tests
+          echo "SESSION_SECRET=$SESSION_SECRET" >> "$GITHUB_ENV"
 
       - name: Check the deployment
         run: |
@@ -248,30 +256,9 @@ jobs:
           UNAUTH_RESPONSE=$(curl -k -s https://localhost:8443/v1/flavor/list || echo "API call failed")
           echo "$UNAUTH_RESPONSE" | jq . || echo "$UNAUTH_RESPONSE"
 
-          # Now create a JWT token using the same secret as Cypress tests
+          # Check whoami endpoint
           echo ""
-          echo "2. Testing with JWT authentication (same as Cypress tests):"
-
-          # Generate JWT payload for admin user
-          PAYLOAD=$(cat <<EOF
-{
-  "sub": "admin",
-  "name": "Admin User",
-  "email": "admin@localhost",
-          "exp": $(($(date +%s) + 3600))
-}
-EOF
-)
-
-          # Create JWT (header.payload.signature) using HS256 with local-dev-secret
-          # This matches what Cypress does in cy.loginForLocalDev()
-          SECRET="local-dev-secret-min-32-chars-long"
-
-          # For simplicity, use a pre-signed JWT that matches what Cypress generates
-          # (In a real implementation, we'd use `jq` and `openssl` to sign it properly)
-          # For now, just try to call whoami to verify the API is working
-
-          echo "Testing /v1/whoami first:"
+          echo "2. Testing /v1/whoami:"
           WHOAMI=$(curl -k -s https://localhost:8443/v1/whoami || echo "whoami failed")
           echo "$WHOAMI" | jq . || echo "$WHOAMI"
 
@@ -284,7 +271,7 @@ EOF
 
           if [ "$FLAVOR_COUNT" = "0" ]; then
             echo "NOTE: Flavors API requires authentication"
-            echo "This is expected - Cypress tests use JWT authentication"
+            echo "This is expected - Cypress tests use JWT authentication with randomly generated secret"
           fi
 
       - name: Run UI E2E tests
@@ -302,6 +289,8 @@ EOF
           # Backend is the PR cluster deployment accessed via port-forward
           # This deployment uses ENVIRONMENT=development with real OIDC (NOT localDeploy=true)
           INFRA_API_ENDPOINT: https://localhost:8443
+          # Session secret for JWT generation (matches what the server uses)
+          CYPRESS_SESSION_SECRET: ${{ env.SESSION_SECRET }}
 
       - name: Upload test artifacts
         if: failure()

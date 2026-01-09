@@ -11,6 +11,10 @@ SECRET_VERSION="${4:-latest}"
 # Cannot use CI, because then CD with GHA would not be possible.
 TEST_MODE="${TEST_MODE:-false}"
 
+# Session secret for JWT signing (used in local and test deployments)
+# Randomly generated at deployment time for security
+SESSION_SECRET="${SESSION_SECRET:-}"
+
 SECRETS_PROJECT="acs-team-automation"
 RELEASE_NAMESPACE="infra"
 RELEASE_NAME="infra-server"
@@ -64,22 +68,37 @@ deploy() {
     echo "  Environment: ${ENVIRONMENT}" >&2
     echo "  Test Mode: ${TEST_MODE}" >&2
     echo "  Local Values: ${local_values:-false}" >&2
-    helm upgrade \
-        "${RELEASE_NAME}" \
-        chart/infra-server \
-        --install \
-        --create-namespace \
-        --timeout 5m \
-        --wait \
-        --namespace "${RELEASE_NAMESPACE}" \
-        --values chart/infra-server/argo-values.yaml \
-        --values chart/infra-server/monitoring-values.yaml \
-        --set tag="${TAG}" \
-        --set environment="${ENVIRONMENT}" \
-        --set testMode="${TEST_MODE}" \
-        ${HELM_DEBUG:+--debug} \
-        --values - \
-    < <(
+    echo "  Session Secret: ${SESSION_SECRET:+<set>}" >&2
+
+    # Build helm command with conditional sessionSecret
+    local helm_cmd=(
+        helm upgrade
+        "${RELEASE_NAME}"
+        chart/infra-server
+        --install
+        --create-namespace
+        --timeout 5m
+        --wait
+        --namespace "${RELEASE_NAMESPACE}"
+        --values chart/infra-server/argo-values.yaml
+        --values chart/infra-server/monitoring-values.yaml
+        --set tag="${TAG}"
+        --set environment="${ENVIRONMENT}"
+        --set testMode="${TEST_MODE}"
+    )
+
+    # Add sessionSecret if provided (for local and test deployments)
+    if [[ -n "${SESSION_SECRET}" ]]; then
+        helm_cmd+=(--set sessionSecret="${SESSION_SECRET}")
+    fi
+
+    if [[ -n "${HELM_DEBUG}" ]]; then
+        helm_cmd+=(--debug)
+    fi
+
+    helm_cmd+=(--values -)
+
+    "${helm_cmd[@]}" < <(
     if [[ ${local_values:-} != 'true' ]]; then
       gcloud secrets versions access "${SECRET_VERSION}" \
         --secret "infra-values-${ENVIRONMENT}" \
@@ -123,6 +142,13 @@ diff() {
 # deploy-local deploys without secrets
 deploy-local() {
     echo 'Deploying for testing without secrets...' >&2
+
+    # Generate random session secret for JWT signing
+    # This is used by both the server and Cypress tests
+    if [[ -z "${SESSION_SECRET}" ]]; then
+        SESSION_SECRET=$(openssl rand -base64 32 | tr -d '\n')
+        echo "Generated random session secret for this deployment" >&2
+    fi
 
     # Generate self-signed cert for local development if it doesn't exist
     local cert_dir='chart/infra-server/configuration'
