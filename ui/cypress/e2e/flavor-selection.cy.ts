@@ -13,6 +13,16 @@ const SELECTORS = {
 
 describe('Flavor Selection', () => {
   beforeEach(() => {
+    // Intercept all API calls to log failures
+    cy.intercept('**/v1/**', (req) => {
+      req.continue((res) => {
+        if (res.statusCode >= 400) {
+          cy.log(`API Error: ${req.method} ${req.url} -> ${res.statusCode}`);
+          cy.log(`Response: ${JSON.stringify(res.body)}`);
+        }
+      });
+    });
+
     // Authenticate for local development before visiting the page
     cy.loginForLocalDev();
     cy.visit('/');
