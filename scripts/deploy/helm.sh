@@ -15,6 +15,9 @@ TEST_MODE="${TEST_MODE:-false}"
 # Randomly generated at deployment time for security
 SESSION_SECRET="${SESSION_SECRET:-}"
 
+# Helm debug mode (optional)
+HELM_DEBUG="${HELM_DEBUG:-}"
+
 SECRETS_PROJECT="acs-team-automation"
 RELEASE_NAMESPACE="infra"
 RELEASE_NAME="infra-server"
