@@ -106,7 +106,8 @@ jobs:
         run: |
           # Generate random session secret for JWT signing
           # This secret is used by both the server (for verification) and Cypress (for JWT generation)
-          export SESSION_SECRET=$(openssl rand -base64 32 | tr -d '\n')
+          SESSION_SECRET=$(openssl rand -base64 32 | tr -d '\n')
+          export SESSION_SECRET
           echo "Generated random session secret for this PR cluster deployment"
 
           ENVIRONMENT=development TEST_MODE=true make helm-deploy
