@@ -66,6 +66,8 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.4.9
+    outputs:
+      session-secret: ${{ steps.deploy.outputs.session-secret }}
     env:
       KUBECONFIG: /github/home/artifacts/kubeconfig
       INFRA_TOKEN: ${{ secrets.INFRA_TOKEN }}
@@ -103,6 +105,7 @@ jobs:
           kubectl get nodes -o wide || true
 
       - name: Deploy infra to dev cluster
+        id: deploy
         run: |
           # Generate random session secret for JWT signing
           # This secret is used by both the server (for verification) and Cypress (for JWT generation)
@@ -121,7 +124,9 @@ jobs:
 
           kill %1
 
-          # Save session secret for UI E2E tests
+          # Save session secret for UI E2E tests (job output for next job)
+          echo "session-secret=$SESSION_SECRET" >> "$GITHUB_OUTPUT"
+          # Also set as env var for steps in this job
           echo "SESSION_SECRET=$SESSION_SECRET" >> "$GITHUB_ENV"
 
       - name: Check the deployment
@@ -291,7 +296,8 @@ jobs:
           # This deployment uses ENVIRONMENT=development with real OIDC (NOT localDeploy=true)
           INFRA_API_ENDPOINT: https://localhost:8443
           # Session secret for JWT generation (matches what the server uses)
-          CYPRESS_SESSION_SECRET: ${{ env.SESSION_SECRET }}
+          # Retrieved from deploy-and-test job output
+          CYPRESS_SESSION_SECRET: ${{ needs.deploy-and-test.outputs.session-secret }}
 
       - name: Upload test artifacts
         if: failure()
