@@ -10,8 +10,8 @@ Cypress.Commands.add('loginForLocalDev', () => {
   // Fall back to default for true local development on laptop
   // IMPORTANT: The default is ONLY for local laptop development.
   // PR clusters and test environments use randomly generated secrets.
-  const sessionSecret =
-    Cypress.env('SESSION_SECRET') || 'local-dev-secret-min-32-chars-long';
+  const sessionSecret: string =
+    (Cypress.env('SESSION_SECRET') as string) || 'local-dev-secret-min-32-chars-long';
 
   // Create a test user matching the backend's expected structure
   // Note: Fields are capitalized to match Go's JSON serialization of protobuf structs
@@ -34,7 +34,7 @@ Cypress.Commands.add('loginForLocalDev', () => {
   };
 
   // Generate JWT token using HS256
-  cy.task('generateJWT', { payload, secret: sessionSecret }).then((token) =>
+  cy.task('generateJWT', { payload, secret: sessionSecret }).then((token: unknown) =>
     // Set the token cookie
     cy.setCookie('token', token as string, {
       path: '/',
