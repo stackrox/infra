@@ -69,13 +69,19 @@ func mainCmd() error {
 
 	// Initialize GCS signer for signed URLs and artifact downloads.
 	// Only create signer if GOOGLE_APPLICATION_CREDENTIALS is set (production/development).
-	// Local deployments skip GCS signing entirely.
+	// Local deployments and test mode skip GCS signing entirely.
 	var gcsSigner *signer.Signer
+	testMode := os.Getenv("TEST_MODE") == "true"
 	if _, hasGCSCredentials := os.LookupEnv("GOOGLE_APPLICATION_CREDENTIALS"); hasGCSCredentials {
 		var err error
 		gcsSigner, err = signer.NewFromEnv()
 		if err != nil {
-			return errors.Wrapf(err, "failed to load GCS signing credentials")
+			if testMode {
+				log.Log(logging.WARN, "GCS signing disabled in TEST_MODE: invalid credentials", "error", err.Error())
+				gcsSigner = &signer.Signer{} // Empty signer for test mode with invalid credentials
+			} else {
+				return errors.Wrapf(err, "failed to load GCS signing credentials")
+			}
 		}
 	} else {
 		log.Log(logging.INFO, "GCS signing disabled: GOOGLE_APPLICATION_CREDENTIALS not set")
