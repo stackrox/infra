@@ -189,6 +189,7 @@ jobs:
   ui-e2e-test-pr-cluster:
     needs:
       - deploy-and-test
+    if: success() || failure()
     runs-on: ubuntu-latest
     # Note: This job does NOT use the apollo-ci container to avoid path issues
     env:
