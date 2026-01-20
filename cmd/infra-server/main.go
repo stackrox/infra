@@ -72,20 +72,18 @@ func mainCmd() error {
 	// Local deployments and test mode skip GCS signing entirely.
 	var gcsSigner *signer.Signer
 	testMode := os.Getenv("TEST_MODE") == "true"
-	if _, hasGCSCredentials := os.LookupEnv("GOOGLE_APPLICATION_CREDENTIALS"); hasGCSCredentials {
-		var err error
-		gcsSigner, err = signer.NewFromEnv()
-		if err != nil {
-			if testMode {
-				log.Log(logging.WARN, "GCS signing disabled in TEST_MODE: invalid credentials", "error", err.Error())
-				gcsSigner = &signer.Signer{} // Empty signer for test mode with invalid credentials
-			} else {
+	if !testMode {
+		if _, hasGCSCredentials := os.LookupEnv("GOOGLE_APPLICATION_CREDENTIALS"); hasGCSCredentials {
+			var err error
+			gcsSigner, err = signer.NewFromEnv()
+			if err != nil {
 				return errors.Wrapf(err, "failed to load GCS signing credentials")
 			}
+		} else {
+			log.Log(logging.INFO, "GCS signing disabled: GOOGLE_APPLICATION_CREDENTIALS not set")
 		}
 	} else {
-		log.Log(logging.INFO, "GCS signing disabled: GOOGLE_APPLICATION_CREDENTIALS not set")
-		gcsSigner = &signer.Signer{} // Empty signer for local deployments
+		log.Log(logging.INFO, "GCS signing disabled in TEST_MODE")
 	}
 
 	slackClient, err := slack.New(cfg.Slack)
