@@ -10,6 +10,7 @@ import (
 	infraClusterLifespan "github.com/stackrox/infra/cmd/infractl/cluster/lifespan"
 	infraClusterList "github.com/stackrox/infra/cmd/infractl/cluster/list"
 	infraClusterLogs "github.com/stackrox/infra/cmd/infractl/cluster/logs"
+	infraClusterWait "github.com/stackrox/infra/cmd/infractl/cluster/wait"
 	infraFlavorGet "github.com/stackrox/infra/cmd/infractl/flavor/get"
 	infraFlavorList "github.com/stackrox/infra/cmd/infractl/flavor/list"
 	infraJanitorFind "github.com/stackrox/infra/cmd/infractl/janitor/find"
@@ -105,6 +106,13 @@ func InfractlLogs(clusterID string) (*v1.LogsResponse, error) {
 		return nil, err
 	}
 	return jsonData, nil
+}
+
+// InfractlWait is a warpper for 'infractl wait <clusterID>'.
+func InfractlWait(clusterID string) error {
+	infraWaitCmd := infraClusterWait.Command()
+	PrepareCommand(infraWaitCmd, false, clusterID)
+	return infraWaitCmd.Execute()
 }
 
 // InfractlWhoami is a wrapper for 'infractl whoami'.
