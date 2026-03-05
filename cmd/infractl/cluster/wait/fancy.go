@@ -1,27 +1,17 @@
-package create
+package wait
 
 import (
-	"encoding/json"
-
 	"github.com/spf13/cobra"
-
-	v1 "github.com/stackrox/infra/generated/api/v1"
 )
 
-type prettyResourceByID struct {
-	*v1.ResourceByID
+type prettyNoop struct {
 }
 
-func (p prettyResourceByID) PrettyPrint(cmd *cobra.Command) {
-	cmd.Printf("ID: %s\n", p.Id)
+func (p prettyNoop) PrettyPrint(cmd *cobra.Command) {
+	cmd.Printf("\n")
 }
 
-func (p prettyResourceByID) PrettyJSONPrint(cmd *cobra.Command) error {
-	data, err := json.MarshalIndent(p.ResourceByID, "", "  ")
-	if err != nil {
-		return err
-	}
-
-	cmd.Printf("%s\n", string(data))
+func (p prettyNoop) PrettyJSONPrint(cmd *cobra.Command) error {
+	cmd.Printf("{}\n")
 	return nil
 }

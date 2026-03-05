@@ -1,5 +1,5 @@
-// Package get implements the infractl get command.
-package get
+// Package wait implements the infractl wait command.
+package wait
 
 import (
 	"context"
@@ -12,20 +12,24 @@ import (
 	"google.golang.org/grpc"
 )
 
-const examples = `Lookup info for the "example-s3maj" cluster.
-$ infractl get example-s3maj`
+const examples = `Wait for the "example-s3maj" cluster to become ready.
+$ infractl wait example-s3maj`
 
-// Command defines the handler for infractl get.
+// Command defines the handler for infractl wait.
 func Command() *cobra.Command {
-	// $ infractl get
-	return &cobra.Command{
-		Use:     "get CLUSTER",
-		Short:   "Get info for a specific cluster",
-		Long:    "Displays info for a single cluster",
+	// $ infractl wait
+	cmd := &cobra.Command{
+		Use:     "wait CLUSTER",
+		Short:   "Wait for a specific cluster",
+		Long:    "Wait for the the specific cluster to become ready.",
 		Example: examples,
 		Args:    common.ArgsWithHelp(cobra.ExactArgs(1), args),
 		RunE:    common.WithGRPCHandler(run),
 	}
+
+	common.AddMaxWaitErrorsFlag(cmd)
+
+	return cmd
 }
 
 func args(_ *cobra.Command, args []string) error {
@@ -35,11 +39,11 @@ func args(_ *cobra.Command, args []string) error {
 	return utils.ValidateClusterName(args[0])
 }
 
-func run(ctx context.Context, conn *grpc.ClientConn, _ *cobra.Command, args []string) (common.PrettyPrinter, error) {
-	resp, err := v1.NewClusterServiceClient(conn).Info(ctx, &v1.ResourceByID{Id: args[0]})
-	if err != nil {
-		return nil, err
-	}
+func run(_ context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []string) (common.PrettyPrinter, error) {
+	maxWaitErrors := common.GetMaxWaitErrorsFlagValue(cmd)
 
-	return &prettyCluster{resp}, nil
+	client := v1.NewClusterServiceClient(conn)
+	err := common.WaitForCluster(client, &v1.ResourceByID{Id: args[0]}, maxWaitErrors)
+
+	return prettyNoop{}, err
 }
