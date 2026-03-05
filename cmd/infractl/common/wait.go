@@ -14,7 +14,6 @@ func WaitForCluster(client v1.ClusterServiceClient, clusterID *v1.ResourceByID) 
 
 	fmt.Fprintf(os.Stderr, "...waiting for %s\n", clusterID.Id)
 	for {
-		time.Sleep(timeoutSleep)
 		ctx, cancel := ContextWithTimeout()
 		cluster, err := client.Info(ctx, clusterID)
 		cancel()
@@ -26,7 +25,6 @@ func WaitForCluster(client v1.ClusterServiceClient, clusterID *v1.ResourceByID) 
 		switch cluster.Status {
 		case v1.Status_CREATING:
 			fmt.Fprintln(os.Stderr, "...creating")
-			continue
 		case v1.Status_READY:
 			fmt.Fprintln(os.Stderr, "...ready")
 			return nil
@@ -34,5 +32,7 @@ func WaitForCluster(client v1.ClusterServiceClient, clusterID *v1.ResourceByID) 
 			fmt.Fprintln(os.Stderr, "...failed")
 			return errors.New("cluster failed provisioning")
 		}
+
+		time.Sleep(timeoutSleep)
 	}
 }
