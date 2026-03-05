@@ -63,6 +63,7 @@ func Command() *cobra.Command {
 	cmd.Flags().String("description", "", "description for this cluster")
 	cmd.Flags().Duration("lifespan", 3*time.Hour, "initial lifespan of the cluster")
 	cmd.Flags().Bool("wait", false, "wait for cluster to be ready")
+	cmd.Flags().Int("wait-max-errors", common.DefaultMaxConsecutiveWaitErrors, "maximum number of consecutive errors before giving up waiting")
 	cmd.Flags().Bool("no-slack", false, "skip sending Slack messages for lifecycle events")
 	cmd.Flags().Bool("slack-me", false, "send slack messages directly and not to the #infra_notifications channel")
 	cmd.Flags().StringP("download-dir", "d", "", "wait for readiness and download artifacts to this dir")
@@ -80,6 +81,7 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 	description, _ := cmd.Flags().GetString("description")
 	lifespan, _ := cmd.Flags().GetDuration("lifespan")
 	wait, _ := cmd.Flags().GetBool("wait")
+	maxWaitErrors, _ := cmd.Flags().GetInt("wait-max-errors")
 	noSlack, _ := cmd.Flags().GetBool("no-slack")
 	slackDM, _ := cmd.Flags().GetBool("slack-me")
 	downloadDir, _ := cmd.Flags().GetString("download-dir")
@@ -127,7 +129,7 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 	}
 
 	if wait {
-		if err := common.WaitForCluster(client, clusterID); err != nil {
+		if err := common.WaitForCluster(client, clusterID, maxWaitErrors); err != nil {
 			return nil, err
 		}
 		if downloadDir != "" {
