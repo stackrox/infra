@@ -4,11 +4,9 @@ package create
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/stackrox/infra/cmd/infractl/cluster/artifacts"
 	"github.com/stackrox/infra/cmd/infractl/cluster/utils"
@@ -129,7 +127,7 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, args []
 	}
 
 	if wait {
-		if err := waitForCluster(client, clusterID); err != nil {
+		if err := common.WaitForCluster(client, clusterID); err != nil {
 			return nil, err
 		}
 		if downloadDir != "" {
@@ -159,36 +157,6 @@ func assignDefaults(cmd *cobra.Command, req *v1.CreateClusterRequest, cwe *curre
 	}
 
 	req.Parameters["main-image"] = registry + "/main:" + getCleaned(cwe.tag)
-}
-
-func waitForCluster(client v1.ClusterServiceClient, clusterID *v1.ResourceByID) error {
-	const timeoutSleep = 30 * time.Second
-	const timeoutAPI = 15 * time.Second
-
-	fmt.Fprintf(os.Stderr, "...creating %s\n", clusterID.Id)
-	for {
-		time.Sleep(timeoutSleep)
-		ctx, cancel := context.WithTimeout(context.Background(), timeoutAPI)
-
-		cluster, err := client.Info(ctx, clusterID)
-		cancel()
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "...error")
-			continue
-		}
-
-		switch cluster.Status {
-		case v1.Status_CREATING:
-			fmt.Fprintln(os.Stderr, "...creating")
-			continue
-		case v1.Status_READY:
-			fmt.Fprintln(os.Stderr, "...ready")
-			return nil
-		default:
-			fmt.Fprintln(os.Stderr, "...failed")
-			return errors.New("failed to provision cluster")
-		}
-	}
 }
 
 func displayUserNotes(cmd *cobra.Command, args []string, req *v1.CreateClusterRequest, cwe *currentWorkingEnvironment) {
