@@ -11,22 +11,22 @@ import (
 )
 
 const (
-	flagName                        = "wait-max-errors"
+	maxWaitErrorsFlagName           = "wait-max-errors"
 	defaultMaxConsecutiveWaitErrors = 10
 )
 
 // AddMaxWaitErrorsFlag adds a flag definition to cmd.
 func AddMaxWaitErrorsFlag(cmd *cobra.Command) {
-	cmd.Flags().Int(flagName, defaultMaxConsecutiveWaitErrors, "maximum number of consecutive errors before giving up waiting")
+	cmd.Flags().Int(maxWaitErrorsFlagName, defaultMaxConsecutiveWaitErrors, "maximum number of consecutive errors before giving up waiting")
 }
 
 // GetMaxWaitErrorsFlagValue gets effective value of the flag after arguments are parsed.
 func GetMaxWaitErrorsFlagValue(cmd *cobra.Command) int {
-	maxWaitErrors, err := cmd.Flags().GetInt(flagName)
+	value, err := cmd.Flags().GetInt(maxWaitErrorsFlagName)
 	if err != nil {
 		panic(err)
 	}
-	return maxWaitErrors
+	return value
 }
 
 // WaitForCluster waits for a created cluster to be in a ready state.

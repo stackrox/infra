@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// prettyNoop does not output anything because 'wait' command does not need output.
 type prettyNoop struct {
 }
 
