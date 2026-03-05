@@ -1,7 +1,6 @@
 package common
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -12,13 +11,11 @@ import (
 
 func WaitForCluster(client v1.ClusterServiceClient, clusterID *v1.ResourceByID) error {
 	const timeoutSleep = 30 * time.Second
-	const timeoutAPI = 15 * time.Second
 
 	fmt.Fprintf(os.Stderr, "...waiting for %s\n", clusterID.Id)
 	for {
 		time.Sleep(timeoutSleep)
-		ctx, cancel := context.WithTimeout(context.Background(), timeoutAPI)
-
+		ctx, cancel := ContextWithTimeout()
 		cluster, err := client.Info(ctx, clusterID)
 		cancel()
 		if err != nil {
