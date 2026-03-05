@@ -62,6 +62,7 @@ func Command() *cobra.Command {
 	}
 
 	cmd.Flags().StringArray("arg", []string{}, "repeated key=value parameter pairs")
+
 	cmd.Flags().String("description", "", "description for this cluster")
 	cmd.Flags().Duration("lifespan", 3*time.Hour, "initial lifespan of the cluster")
 	cmd.Flags().Bool("wait", false, "wait for cluster to be ready")
