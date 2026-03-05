@@ -15,10 +15,12 @@ const (
 	defaultMaxConsecutiveWaitErrors = 10
 )
 
+// AddMaxWaitErrorsFlag adds a flag definition to cmd.
 func AddMaxWaitErrorsFlag(cmd *cobra.Command) {
 	cmd.Flags().Int(flagName, defaultMaxConsecutiveWaitErrors, "maximum number of consecutive errors before giving up waiting")
 }
 
+// GetMaxWaitErrorsFlagValue gets effective value of the flag after arguments are parsed.
 func GetMaxWaitErrorsFlagValue(cmd *cobra.Command) int {
 	maxWaitErrors, err := cmd.Flags().GetInt(flagName)
 	if err != nil {
@@ -27,6 +29,7 @@ func GetMaxWaitErrorsFlagValue(cmd *cobra.Command) int {
 	return maxWaitErrors
 }
 
+// WaitForCluster waits for a created cluster to be in a ready state.
 func WaitForCluster(client v1.ClusterServiceClient, clusterID *v1.ResourceByID, maxWaitErrors int) error {
 	const timeoutSleep = 30 * time.Second
 
@@ -40,7 +43,7 @@ func WaitForCluster(client v1.ClusterServiceClient, clusterID *v1.ResourceByID, 
 
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "...error %s\n", err)
-			nErrors += 1
+			nErrors++
 			if nErrors >= maxWaitErrors {
 				return errors.New("too many errors while waiting")
 			}
