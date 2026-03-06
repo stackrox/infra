@@ -12,6 +12,7 @@ import (
 	"github.com/stackrox/infra/cmd/infractl/cluster/lifespan"
 	"github.com/stackrox/infra/cmd/infractl/cluster/list"
 	"github.com/stackrox/infra/cmd/infractl/cluster/logs"
+	"github.com/stackrox/infra/cmd/infractl/cluster/wait"
 	"github.com/stackrox/infra/cmd/infractl/common"
 	"github.com/stackrox/infra/cmd/infractl/flavor"
 	janitorFind "github.com/stackrox/infra/cmd/infractl/janitor/find"
@@ -97,6 +98,9 @@ func main() {
 
 		// $ infractl version
 		version.Command(),
+
+		// $ infractl wait
+		wait.Command(),
 
 		// $ infractl whoami
 		whoami.Command(),

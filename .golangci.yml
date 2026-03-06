@@ -92,6 +92,13 @@ linters:
       - linters:
           - revive
         text: avoid meaningless package names
+      - linters:
+          - revive
+        text: avoid package names that conflict with Go standard library package names
+        paths:
+          - cmd/infractl/flavor/list/
+          - pkg/buildinfo/
+          - pkg/service/metrics/
     paths:
       - third_party$
       - builtin$
