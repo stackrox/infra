@@ -1,0 +1,4 @@
+# Values for TEST_MODE deployments (PR clusters, CI testing)
+# This file explicitly sets testMode to true, overriding any values from GCloud secrets
+
+testMode: true

@@ -8,6 +8,12 @@
 # testing
 /coverage
 
+# cypress
+cypress/videos
+cypress/screenshots
+cypress/downloads
+cypress.env.json
+
 # production
 /build
 
