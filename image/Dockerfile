@@ -1,4 +1,4 @@
-FROM golang:1.26.1 as golang-builder
+FROM golang:1.26.0 as golang-builder
 
 WORKDIR /go/src/github.com/stackrox/infra
 
