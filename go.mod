@@ -1,6 +1,6 @@
 module github.com/stackrox/infra
 
-go 1.24.10
+go 1.25.0
 
 require (
 	cloud.google.com/go/bigquery v1.72.0
@@ -24,7 +24,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.27.1
 	golang.org/x/net v0.48.0
-	golang.org/x/oauth2 v0.34.0
+	golang.org/x/oauth2 v0.36.0
 	google.golang.org/api v0.257.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20251111163417-95abcf5c77ba
 	google.golang.org/grpc v1.78.0
