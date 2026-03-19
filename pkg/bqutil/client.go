@@ -80,7 +80,7 @@ func NewClient(cfg *config.BigQueryConfig) (BigQueryClient, error) {
 		return nil, errors.Errorf("malformed BigQuery config: all of credentialsFile, environment, project, dataset, tables must be defined")
 	}
 
-	client, err := bigquery.NewClient(context.Background(), cfg.Project, option.WithCredentialsFile(cfg.CredentialsFile))
+	client, err := bigquery.NewClient(context.Background(), cfg.Project, option.WithAuthCredentialsFile(option.ServiceAccount, cfg.CredentialsFile))
 	if err != nil {
 		return nil, errors.Wrap(err, "creating BigQuery client")
 	}
