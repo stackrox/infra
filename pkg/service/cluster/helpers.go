@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
+	"github.com/argoproj/argo-workflows/v4/pkg/apis/workflow/v1alpha1"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 	"github.com/stackrox/infra/pkg/logging"
 	"github.com/stackrox/infra/pkg/slack"
@@ -206,7 +206,7 @@ func handleArtifactMigration(workflow v1alpha1.Workflow, artifact v1alpha1.Artif
 }
 
 func workflowStatus(workflowStatus v1alpha1.WorkflowStatus) v1.Status {
-	// https://godoc.org/github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1#WorkflowStatus
+	// https://godoc.org/github.com/argoproj/argo-workflows/v4/pkg/apis/workflow/v1alpha1#WorkflowStatus
 	switch workflowStatus.Phase {
 	case v1alpha1.WorkflowFailed, v1alpha1.WorkflowError:
 		return v1.Status_FAILED
@@ -218,9 +218,9 @@ func workflowStatus(workflowStatus v1alpha1.WorkflowStatus) v1.Status {
 		return v1.Status_CREATING
 
 	case v1alpha1.WorkflowRunning:
-		// https://godoc.org/github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1#Nodes
+		// https://godoc.org/github.com/argoproj/argo-workflows/v4/pkg/apis/workflow/v1alpha1#Nodes
 		for _, node := range workflowStatus.Nodes {
-			// https://godoc.org/github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1#NodeType
+			// https://godoc.org/github.com/argoproj/argo-workflows/v4/pkg/apis/workflow/v1alpha1#NodeType
 			switch nodeType := node.Type; nodeType {
 			case v1alpha1.NodeTypePod:
 				if strings.Contains(node.Message, "ImagePullBackOff") {

@@ -12,11 +12,11 @@ import (
 	"sync"
 	"time"
 
-	argov3client "github.com/argoproj/argo-workflows/v3/cmd/argo/commands/client"
-	"github.com/argoproj/argo-workflows/v3/pkg/apiclient"
-	workflowpkg "github.com/argoproj/argo-workflows/v3/pkg/apiclient/workflow"
-	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
-	workflowv1 "github.com/argoproj/argo-workflows/v3/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
+	argov4client "github.com/argoproj/argo-workflows/v4/cmd/argo/commands/client"
+	"github.com/argoproj/argo-workflows/v4/pkg/apiclient"
+	workflowpkg "github.com/argoproj/argo-workflows/v4/pkg/apiclient/workflow"
+	"github.com/argoproj/argo-workflows/v4/pkg/apis/workflow/v1alpha1"
+	workflowv1 "github.com/argoproj/argo-workflows/v4/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
 	"github.com/golang/protobuf/ptypes/duration"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -104,11 +104,11 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer, slackCl
 		return nil, err
 	}
 
-	ctx, argoClient, err := argov3client.NewAPIClient(context.Background())
+	ctx, argoClient, err := argov4client.NewAPIClient(context.Background())
 	if err != nil {
 		return nil, err
 	}
-	argoWorkflowsClient := argoClient.NewWorkflowServiceClient()
+	argoWorkflowsClient := argoClient.NewWorkflowServiceClient(ctx)
 
 	if os.Getenv("TEST_MODE") == "true" {
 		log.Log(logging.INFO, "server is running in test mode")
