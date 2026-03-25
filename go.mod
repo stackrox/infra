@@ -5,7 +5,7 @@ go 1.26.0
 require (
 	cloud.google.com/go/bigquery v1.74.0
 	cloud.google.com/go/storage v1.59.2
-	github.com/argoproj/argo-workflows/v3 v3.7.11
+	github.com/argoproj/argo-workflows/v3 v3.7.12
 	github.com/buger/jsonparser v1.1.1
 	github.com/coreos/go-oidc/v3 v3.17.0
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
@@ -155,7 +155,7 @@ require (
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/crypto v0.49.0 // indirect
-	golang.org/x/exp v0.0.0-20260112195511-716be5621a96 // indirect
+	golang.org/x/exp v0.0.0-20260218203240-3dfff04db8fa // indirect
 	golang.org/x/mod v0.33.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.42.0 // indirect
