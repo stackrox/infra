@@ -3,8 +3,8 @@ module github.com/stackrox/infra
 go 1.26.0
 
 require (
-	cloud.google.com/go/bigquery v1.73.1
-	cloud.google.com/go/storage v1.59.0
+	cloud.google.com/go/bigquery v1.74.0
+	cloud.google.com/go/storage v1.59.2
 	github.com/argoproj/argo-workflows/v4 v4.0.2
 	github.com/buger/jsonparser v1.1.1
 	github.com/coreos/go-oidc/v3 v3.17.0
@@ -14,7 +14,7 @@ require (
 	github.com/golang/protobuf v1.5.4
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.28.0
 	github.com/jeremywohl/flatten/v2 v2.0.0-20211013061545-07e4a09fb8e4
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.23.2
