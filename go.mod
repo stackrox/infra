@@ -4,7 +4,7 @@ go 1.26.0
 
 require (
 	cloud.google.com/go/bigquery v1.74.0
-	cloud.google.com/go/storage v1.59.2
+	cloud.google.com/go/storage v1.61.3
 	github.com/argoproj/argo-workflows/v4 v4.0.2
 	github.com/buger/jsonparser v1.1.2
 	github.com/coreos/go-oidc/v3 v3.17.0
@@ -46,8 +46,8 @@ require (
 	dario.cat/mergo v1.0.2 // indirect
 	filippo.io/edwards25519 v1.1.1 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.30.0 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.54.0 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.54.0 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.55.0 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.55.0 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.3.1 // indirect
 	github.com/Masterminds/sprig/v3 v3.3.0 // indirect
