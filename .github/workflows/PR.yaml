@@ -143,7 +143,7 @@ jobs:
 
       - name: Install Argo CLI
         run: |
-          ARGO_VERSION=$(grep "github.com/argoproj/argo-workflows/v3" go.mod | awk '{ print $2 }')
+          ARGO_VERSION=$(grep "github.com/argoproj/argo-workflows/v4" go.mod | awk '{ print $2 }')
           curl -sLO "https://github.com/argoproj/argo-workflows/releases/download/${ARGO_VERSION}/argo-linux-amd64.gz"
           gunzip argo-linux-amd64.gz
           chmod +x argo-linux-amd64

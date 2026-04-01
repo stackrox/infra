@@ -5,7 +5,7 @@ go 1.26.0
 require (
 	cloud.google.com/go/bigquery v1.74.0
 	cloud.google.com/go/storage v1.59.2
-	github.com/argoproj/argo-workflows/v3 v3.7.12
+	github.com/argoproj/argo-workflows/v4 v4.0.2
 	github.com/buger/jsonparser v1.1.2
 	github.com/coreos/go-oidc/v3 v3.17.0
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
@@ -172,7 +172,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20250910181357-589584f1c912 // indirect
-	k8s.io/utils v0.0.0-20260108192941-914a6e750570 // indirect
+	k8s.io/utils v0.0.0-20260210185600-b8788abfbbc2 // indirect
 	modernc.org/libc v1.65.8 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect

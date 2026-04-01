@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/argoproj/argo-workflows/v3/pkg/client/clientset/versioned"
-	workflowv1 "github.com/argoproj/argo-workflows/v3/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
+	"github.com/argoproj/argo-workflows/v4/pkg/client/clientset/versioned"
+	workflowv1 "github.com/argoproj/argo-workflows/v4/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
 	"k8s.io/client-go/kubernetes"
 	k8sv1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
