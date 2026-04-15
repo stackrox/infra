@@ -30,9 +30,9 @@ require (
 	google.golang.org/grpc v1.80.0
 	google.golang.org/protobuf v1.36.11
 	gopkg.in/yaml.v2 v2.4.0
-	k8s.io/api v0.34.3
+	k8s.io/api v0.35.3
 	k8s.io/apimachinery v0.35.3
-	k8s.io/client-go v0.34.3
+	k8s.io/client-go v0.35.3
 )
 
 require (
@@ -49,7 +49,7 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.55.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.55.0 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
-	github.com/Masterminds/semver/v3 v3.3.1 // indirect
+	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/Masterminds/sprig/v3 v3.3.0 // indirect
 	github.com/apache/arrow/go/v15 v15.0.2 // indirect
 	github.com/argoproj/argo-events v1.9.6 // indirect
