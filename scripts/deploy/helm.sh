@@ -11,6 +11,13 @@ SECRET_VERSION="${4:-latest}"
 # Cannot use CI, because then CD with GHA would not be possible.
 TEST_MODE="${TEST_MODE:-false}"
 
+# When NO_MONITORING is true, skip kube-prometheus and chart monitoring resources.
+# monitoring.enabled is applied after --values - so merged secrets cannot re-enable it.
+HELM_MONITORING_FINAL_SET=()
+if [[ "${NO_MONITORING}" == "true" ]]; then
+    HELM_MONITORING_FINAL_SET=(--set monitoring.enabled=false)
+fi
+
 SECRETS_PROJECT="acs-team-automation"
 RELEASE_NAMESPACE="infra"
 RELEASE_NAME="infra-server"
@@ -48,6 +55,7 @@ template() {
         --set environment="${ENVIRONMENT}" \
         --set testMode="${TEST_MODE}" \
         --values - \
+        "${HELM_MONITORING_FINAL_SET[@]}" \
     < <(gcloud secrets versions access "${SECRET_VERSION}" \
         --secret "infra-values-${ENVIRONMENT}" \
         --project "${SECRETS_PROJECT}" \
@@ -73,6 +81,7 @@ deploy() {
         --set environment="${ENVIRONMENT}" \
         --set testMode="${TEST_MODE}" \
         --values - \
+        "${HELM_MONITORING_FINAL_SET[@]}" \
     < <(gcloud secrets versions access "${SECRET_VERSION}" \
         --secret "infra-values-${ENVIRONMENT}" \
         --project "${SECRETS_PROJECT}" \
@@ -98,6 +107,7 @@ diff() {
         --set environment="${ENVIRONMENT}" \
         --set testMode="${TEST_MODE}" \
         --values - \
+        "${HELM_MONITORING_FINAL_SET[@]}" \
     < <(gcloud secrets versions access "${SECRET_VERSION}" \
         --secret "infra-values-${ENVIRONMENT}" \
         --project "${SECRETS_PROJECT}" \

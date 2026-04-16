@@ -1,5 +1,5 @@
 ---
-{{- if eq .Values.testMode false -}}
+{{- if and (eq .Values.testMode false) .Values.monitoring.enabled }}
 apiVersion: monitoring.coreos.com/v1alpha1
 kind: AlertmanagerConfig
 metadata:

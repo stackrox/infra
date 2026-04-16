@@ -1,0 +1,3 @@
+# Default chart values. Override via --set or additional values files.
+monitoring:
+  enabled: true
