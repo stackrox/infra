@@ -17,3 +17,4 @@ dependencies:
   - name: kube-prometheus
     version: 11.3.10
     repository: https://charts.bitnami.com/bitnami
+    condition: monitoring.enabled

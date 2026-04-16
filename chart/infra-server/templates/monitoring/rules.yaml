@@ -1,3 +1,4 @@
+{{- if .Values.monitoring.enabled }}
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
@@ -29,3 +30,4 @@ spec:
         severity: 'info'
         namespace: monitoring
         environment: {{ .Values.environment }}
+{{- end }}
