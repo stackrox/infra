@@ -14,7 +14,7 @@ TEST_MODE="${TEST_MODE:-false}"
 # When NO_MONITORING is true, skip kube-prometheus-stack and chart monitoring resources.
 # monitoring.enabled is applied after --values - so merged secrets cannot re-enable it.
 HELM_MONITORING_FINAL_SET=()
-if [[ "${NO_MONITORING}" == "true" ]]; then
+if [[ "${NO_MONITORING:-false}" == "true" ]]; then
     HELM_MONITORING_FINAL_SET=(--set monitoring.enabled=false)
 fi
 

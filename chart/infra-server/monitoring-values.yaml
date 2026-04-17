@@ -1,6 +1,9 @@
 kube-prometheus-stack:
   namespaceOverride: monitoring
 
+  grafana:
+    enabled: false
+
   defaultRules:
     rules:
       kubeApiserverAvailability: false
