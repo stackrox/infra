@@ -14,7 +14,7 @@ dependencies:
   - name: argo-workflows
     version: "1.0.4"
     repository: "https://argoproj.github.io/argo-helm"
-  - name: kube-prometheus
-    version: 11.3.10
-    repository: https://charts.bitnami.com/bitnami
+  - name: kube-prometheus-stack
+    version: "83.5.1"
+    repository: https://prometheus-community.github.io/helm-charts
     condition: monitoring.enabled

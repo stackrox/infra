@@ -1,8 +1,29 @@
-kube-prometheus:
+kube-prometheus-stack:
   namespaceOverride: monitoring
-  operator:
-    image:
-      repository: bitnamilegacy/prometheus-operator
+
+  grafana:
+    enabled: false
+
+  defaultRules:
+    rules:
+      kubeApiserverAvailability: false
+      kubeApiserverBurnrate: false
+      kubeApiserverHistogram: false
+      kubeApiserverSlos: false
+      kubeControllerManager: false
+      kubelet: false
+      kubeProxy: false
+      kubeSchedulerAlerting: false
+      kubeSchedulerRecording: false
+      kubeStateMetrics: false
+      # Disables kubernetes-system{,-apiserver,-kubelet} rules; the kubelet group
+      # still matched without kube-state-metrics scrape targets.
+      kubernetesSystem: false
+      node: false
+      nodeExporterAlerting: false
+      nodeExporterRecording: false
+
+  prometheusOperator:
     resources:
       limits:
         cpu: 100m
@@ -16,53 +37,60 @@ kube-prometheus:
       enabled: false
 
   prometheus:
-    image:
-      repository: bitnamilegacy/prometheus
-    persistence:
-      enabled: true
-    resources:
-      limits:
-        cpu: 100m
-        ephemeral-storage: 1Gi
-        memory: 256Mi
-      requests:
-        cpu: 100m
-        ephemeral-storage: 1Gi
-        memory: 256Mi
+    prometheusSpec:
+      resources:
+        limits:
+          cpu: 100m
+          ephemeral-storage: 1Gi
+          memory: 256Mi
+        requests:
+          cpu: 100m
+          ephemeral-storage: 1Gi
+          memory: 256Mi
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 8Gi
 
-  exporters:
-    node-exporter:
-      enabled: false
-    kube-state-metrics:
-      enabled: false
+  kubeStateMetrics:
+    enabled: false
+
+  nodeExporter:
+    enabled: false
+
   kubelet:
     enabled: false
+
   kubeApiServer:
     enabled: false
+
   kubeControllerManager:
     enabled: false
+
   kubeScheduler:
     enabled: false
+
   coreDns:
     enabled: false
+
   kubeProxy:
     enabled: false
 
   alertmanager:
-    image:
-      repository: bitnamilegacy/alertmanager
-    resources:
-      limits:
-        cpu: 100m
-        ephemeral-storage: 1Gi
-        memory: 256Mi
-      requests:
-        cpu: 100m
-        ephemeral-storage: 1Gi
-        memory: 256Mi
-    configSelector:
-      matchLabels:
-        alertmanagerConfig: slack
-
-  blackboxExporter:
-    enabled: false
+    alertmanagerSpec:
+      resources:
+        limits:
+          cpu: 100m
+          ephemeral-storage: 1Gi
+          memory: 256Mi
+        requests:
+          cpu: 100m
+          ephemeral-storage: 1Gi
+          memory: 256Mi
+      alertmanagerConfigSelector:
+        matchLabels:
+          alertmanagerConfig: slack
