@@ -49,26 +49,26 @@ spec:
           - create
           - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
         env:
-          - name: AZURE_SUBSCRIPTION_ID
-            valueFrom:
-              secretKeyRef:
-                name: aro-cluster-manager
-                key: AZURE_SUBSCRIPTION_ID
-          - name: AZURE_SP_CLIENT_ID
-            valueFrom:
-              secretKeyRef:
-                name: aro-cluster-manager
-                key: AZURE_SP_CLIENT_ID
           - name: AZURE_SP_TENANT_ID
             valueFrom:
               secretKeyRef:
                 name: aro-cluster-manager
                 key: AZURE_SP_TENANT_ID
-          - name: AZURE_SP_SECRET_VAL
+          - name: AZURE_SP_ARO_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: aro-cluster-manager
-                key: AZURE_SP_SECRET_VAL
+                key: AZURE_SP_ARO_PASSWORD
+          - name: AZURE_SP_ARO_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: aro-cluster-manager
+                key: AZURE_SP_ARO_USERNAME
+          - name: AZURE_SUBSCRIPTION_ID
+            valueFrom:
+              secretKeyRef:
+                name: aro-cluster-manager
+                key: AZURE_SUBSCRIPTION_ID
           - name: REDHAT_PULL_SECRET_BASE64
             valueFrom:
               secretKeyRef:
@@ -138,26 +138,26 @@ spec:
           - destroy
           - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
         env:
-          - name: AZURE_SUBSCRIPTION_ID
-            valueFrom:
-              secretKeyRef:
-                name: aro-cluster-manager
-                key: AZURE_SUBSCRIPTION_ID
-          - name: AZURE_SP_CLIENT_ID
-            valueFrom:
-              secretKeyRef:
-                name: aro-cluster-manager
-                key: AZURE_SP_CLIENT_ID
           - name: AZURE_SP_TENANT_ID
             valueFrom:
               secretKeyRef:
                 name: aro-cluster-manager
                 key: AZURE_SP_TENANT_ID
-          - name: AZURE_SP_SECRET_VAL
+          - name: AZURE_SP_ARO_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: aro-cluster-manager
-                key: AZURE_SP_SECRET_VAL
+                key: AZURE_SP_ARO_PASSWORD
+          - name: AZURE_SP_ARO_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: aro-cluster-manager
+                key: AZURE_SP_ARO_USERNAME
+          - name: AZURE_SUBSCRIPTION_ID
+            valueFrom:
+              secretKeyRef:
+                name: aro-cluster-manager
+                key: AZURE_SUBSCRIPTION_ID
           - name: REDHAT_PULL_SECRET_BASE64
             valueFrom:
               secretKeyRef:
