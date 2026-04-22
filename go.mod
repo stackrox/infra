@@ -4,7 +4,7 @@ go 1.26.2
 
 require (
 	cloud.google.com/go/bigquery v1.76.0
-	cloud.google.com/go/storage v1.62.0
+	cloud.google.com/go/storage v1.62.1
 	github.com/argoproj/argo-workflows/v4 v4.0.2
 	github.com/buger/jsonparser v1.1.2
 	github.com/coreos/go-oidc/v3 v3.17.0
