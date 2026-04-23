@@ -5,7 +5,7 @@ go 1.26.2
 require (
 	cloud.google.com/go/bigquery v1.76.0
 	cloud.google.com/go/storage v1.62.1
-	github.com/argoproj/argo-workflows/v4 v4.0.2
+	github.com/argoproj/argo-workflows/v4 v4.0.5
 	github.com/buger/jsonparser v1.1.2
 	github.com/coreos/go-oidc/v3 v3.17.0
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
@@ -103,8 +103,8 @@ require (
 	github.com/jcmturner/rpc/v2 v2.0.3 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/compress v1.18.0 // indirect
-	github.com/klauspost/cpuid/v2 v2.2.10 // indirect
+	github.com/klauspost/compress v1.18.2 // indirect
+	github.com/klauspost/cpuid/v2 v2.2.11 // indirect
 	github.com/klauspost/pgzip v1.2.6 // indirect
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/mailru/easyjson v0.9.0 // indirect
@@ -172,7 +172,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20250910181357-589584f1c912 // indirect
-	k8s.io/utils v0.0.0-20260210185600-b8788abfbbc2 // indirect
+	k8s.io/utils v0.0.0-20260319190234-28399d86e0b5 // indirect
 	modernc.org/libc v1.65.8 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
