@@ -14,6 +14,8 @@ spec:
         value: "m5.xlarge"
       - name: gcp-region
         value: us-east1
+      - name: enable-wif
+        value: "false"
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -42,7 +44,7 @@ spec:
     - name: create
       activeDeadlineSeconds: 7200
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-osd-{{ .Chart.Annotations.automationFlavorsVersion }}
+        image: quay.io/stackrox-io/ci:automation-flavors-osd-0.12.12-44-g11e818615a-snapshot
         imagePullPolicy: Always
         command:
           - ./entrypoint.sh
@@ -76,6 +78,8 @@ spec:
             value: "infra"
           - name: GCP_REGION
             value: '{{ "{{" }}workflow.parameters.gcp-region{{ "}}" }}'
+          - name: ENABLE_WIF
+            value: '{{ "{{" }}workflow.parameters.enable-wif{{ "}}" }}'
         volumeMounts:
           - name: data
             mountPath: /data
@@ -126,7 +130,7 @@ spec:
     - name: destroy
       activeDeadlineSeconds: 3600
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-osd-{{ .Chart.Annotations.automationFlavorsVersion }}
+        image: quay.io/stackrox-io/ci:automation-flavors-osd-0.12.12-44-g11e818615a-snapshot
         imagePullPolicy: Always
         command:
           - ./entrypoint.sh
@@ -152,6 +156,8 @@ spec:
                 key: GCP_SERVICE_ACCOUNT_KEY_BASE64
           - name: GCP_PROJECT
             value: "acs-team-temp-dev"
+          - name: ENABLE_WIF
+            value: '{{ "{{" }}workflow.parameters.enable-wif{{ "}}" }}'
         volumeMounts:
           - name: data
             mountPath: /data
