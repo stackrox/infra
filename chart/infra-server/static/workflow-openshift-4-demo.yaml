@@ -22,6 +22,10 @@ spec:
       - name: credentials-mode
       - name: region
       - name: ssd-storage-class
+      - name: baseline-capability-set
+        value: "vCurrent"
+      - name: additional-enabled-capabilities
+        value: ""
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -124,6 +128,10 @@ spec:
             value: '{{ "{{" }}workflow.parameters.credentials-mode{{ "}}" }}'
           - name: SSD_STORAGE_CLASS
             value: '{{ "{{" }}workflow.parameters.ssd-storage-class{{ "}}" }}'
+          - name: BASELINE_CAPABILITY_SET
+            value: '{{ "{{" }}workflow.parameters.baseline-capability-set{{ "}}" }}'
+          - name: ADDITIONAL_ENABLED_CAPABILITIES
+            value: '{{ "{{" }}workflow.parameters.additional-enabled-capabilities{{ "}}" }}'
 
     - name: pre-install
       script:

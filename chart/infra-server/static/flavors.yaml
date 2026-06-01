@@ -314,6 +314,21 @@
       value: true
       kind: optional
 
+    - name: baseline-capability-set
+      description: Baseline capability set
+      value: "vCurrent"
+      kind: optional
+      help: |
+        Defines a baseline set of capabilities to install. Valid values are `None`, `vCurrent` and `v4.x`. If you select `None`, all optional capabilities are disabled. The default value is `vCurrent`, which enables all optional capabilities.
+
+    - name: additional-enabled-capabilities
+      description: Additional capabilities to enable
+      value: ""
+      kind: optional
+      help: |
+        Defines a list of capabilities to explicitly enable. These capabilities are enabled in addition to the capabilities specified in the baseline capability set.
+        Example: `["DeploymentConfig", "ImageRegistry"]`
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
@@ -465,6 +480,21 @@
       value: true
       kind: optional
 
+    - name: baseline-capability-set
+      description: Baseline capability set
+      value: "vCurrent"
+      kind: optional
+      help: |
+        Defines a baseline set of capabilities to install. Valid values are `None`, `vCurrent` and `v4.x`. If you select `None`, all optional capabilities are disabled. The default value is `vCurrent`, which enables all optional capabilities.
+
+    - name: additional-enabled-capabilities
+      description: Additional capabilities to enable
+      value: ""
+      kind: optional
+      help: |
+        Defines a list of capabilities to explicitly enable. These capabilities are enabled in addition to the capabilities specified in the baseline capability set.
+        Example: `["DeploymentConfig", "ImageRegistry"]`
+
   artifacts:
     - name: admin-password
       description: Admin password for StackRox console
@@ -605,6 +635,21 @@
       description: Ensure an SSD StorageClass is the default StorageClass for the cluster
       value: true
       kind: optional
+
+    - name: baseline-capability-set
+      description: Baseline capability set
+      value: "vCurrent"
+      kind: optional
+      help: |
+        Defines a baseline set of capabilities to install. Valid values are `None`, `vCurrent` and `v4.x`. If you select `None`, all optional capabilities are disabled. The default value is `vCurrent`, which enables all optional capabilities.
+
+    - name: additional-enabled-capabilities
+      description: Additional capabilities to enable
+      value: ""
+      kind: optional
+      help: |
+        Defines a list of capabilities to explicitly enable. These capabilities are enabled in addition to the capabilities specified in the baseline capability set.
+        Example: `["DeploymentConfig", "ImageRegistry"]`
 
   artifacts:
     - name: kubeconfig
