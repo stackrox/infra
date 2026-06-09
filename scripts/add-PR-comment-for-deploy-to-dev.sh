@@ -37,6 +37,8 @@ nohup kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
 make pull-infractl-from-dev-server
 \`\`\`
 
+:unlock: You must go to `https://localhost:8443/downloads` to export an `INFRA_TOKEN`. Your token from the prod infra instance will not work with dev environments. 
+
 :bike: You can then **use** the dev infra instance e.g.:
 \`\`\`
 bin/infractl -k -e localhost:8443 whoami
