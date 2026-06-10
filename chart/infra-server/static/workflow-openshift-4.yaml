@@ -275,7 +275,7 @@ spec:
           timeout=600
           elapsed=0
           while true; do
-            READY_NODES=$(oc get nodes -l node-role.kubernetes.io/virt -o jsonpath='{.items[?(@.status.conditions[?(@.type=="Ready")].status=="True")].metadata.name}' 2>/dev/null || echo "")
+            READY_NODES=$(oc get nodes -l node-role.kubernetes.io/virt -o json 2>/dev/null | jq -r '[.items[] | select(.status.conditions[]? | select(.type=="Ready" and .status=="True")) | .metadata.name] | join(" ")' 2>/dev/null || echo "")
             if [ -n "$READY_NODES" ]; then
               echo "Virt node is Ready: $READY_NODES"
               break
@@ -516,10 +516,6 @@ spec:
           if oc get vm "$VM_NAME" -n "$NAMESPACE" &>/dev/null; then
             STATUS=$(oc get vm "$VM_NAME" -n "$NAMESPACE" -o jsonpath='{.status.printableStatus}' 2>/dev/null || echo "Unknown")
             echo "VM $VM_NAME already exists (status: $STATUS)"
-            if [ "$STATUS" = "Running" ]; then
-              echo "VM is already running"
-              exit 0
-            fi
           fi
 
           # Build node placement YAML fragment conditionally
