@@ -649,9 +649,20 @@ spec:
               ;;
           esac
 
-          VM_PASSWORD=$(openssl rand -hex 10)
-
           echo "=== Creating VM: $VM_NAME (OS: $VM_OS, dedicated=$DEDICATED) ==="
+
+          # Check if VM already exists — skip creation to avoid publishing stale credentials
+          if oc get vm "$VM_NAME" -n "$NAMESPACE" &>/dev/null; then
+            STATUS=$(oc get vm "$VM_NAME" -n "$NAMESPACE" -o jsonpath='{.status.printableStatus}' 2>/dev/null || echo "Unknown")
+            echo "VM $VM_NAME already exists (status: $STATUS), skipping creation"
+            echo "# VM Access Information (pre-existing VM)" > /data/vm-access.md
+            echo "" >> /data/vm-access.md
+            echo "VM was already provisioned in a prior run. Password was set at first boot." >> /data/vm-access.md
+            echo "Check cluster secrets or prior workflow artifacts for credentials." >> /data/vm-access.md
+            exit 0
+          fi
+
+          VM_PASSWORD=$(openssl rand -hex 10)
 
           # Copy the already-provisioned Quay pull secret from the infra namespace into the target cluster
           echo "Creating pull secret for quay.io/rhacs-eng in namespace $NAMESPACE from mounted infra secret..."
@@ -670,12 +681,6 @@ spec:
             .dockerconfigjson: $(base64 < /infra-secrets/quay/.dockerconfigjson | tr -d '\n')
           EOFSECRET
           echo "Pull secret created"
-
-          # Check if VM already exists
-          if oc get vm "$VM_NAME" -n "$NAMESPACE" &>/dev/null; then
-            STATUS=$(oc get vm "$VM_NAME" -n "$NAMESPACE" -o jsonpath='{.status.printableStatus}' 2>/dev/null || echo "Unknown")
-            echo "VM $VM_NAME already exists (status: $STATUS)"
-          fi
 
           # Build node placement YAML fragment conditionally
           NODE_PLACEMENT=""
@@ -758,9 +763,12 @@ spec:
               break
             fi
             if [ $elapsed -ge $timeout ]; then
-              echo "WARNING: VMI did not reach Running phase after ${timeout}s (current: $PHASE)"
-              echo "VM was created but may still be starting"
-              break
+              echo "ERROR: VMI did not reach Running phase after ${timeout}s (current: $PHASE)"
+              echo "--- VMI details ---"
+              oc get vmi "$VM_NAME" -n "$NAMESPACE" -o yaml 2>&1 || true
+              echo "--- Recent events ---"
+              oc get events -n "$NAMESPACE" --sort-by='.lastTimestamp' 2>&1 | tail -20 || true
+              exit 1
             fi
             if [ $((elapsed % 30)) -eq 0 ] && [ $elapsed -gt 0 ]; then
               echo "Waiting for VMI (phase: ${PHASE:-Pending}, ${elapsed}s)..."
