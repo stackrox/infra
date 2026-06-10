@@ -32,6 +32,12 @@ spec:
         value: "vCurrent"
       - name: additional-enabled-capabilities
         value: ""
+      - name: install-virt
+        value: "false"
+      - name: vm-os
+        value: "rhel9"
+      - name: virt-node-dedicated
+        value: "false"
   volumeClaimTemplates:
     - metadata:
         name: data
