@@ -1024,6 +1024,11 @@
       value: us-east1
       kind: optional
 
+    - name: enable-wif
+      description: Use Workload Identity Federation instead of service account key
+      value: "false"
+      kind: optional
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
