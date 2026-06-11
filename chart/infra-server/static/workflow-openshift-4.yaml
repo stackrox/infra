@@ -228,163 +228,66 @@ spec:
             exit 0
           fi
 
-          WORKER_MS=$(oc get machinesets -n openshift-machine-api -o json 2>/dev/null | jq -r '
-            .items
-            | map(select(
-                .metadata.labels["machine.openshift.io/cluster-api-machine-role"] == "worker" or
-                .metadata.labels["machine.openshift.io/cluster-api-machine-type"] == "worker"
-              ))
-            | sort_by(.metadata.name)
-            | .[0].metadata.name // empty
-          ' 2>/dev/null || echo "")
-
-          CREATED_VIA=""
-
-          if [ -n "$WORKER_MS" ]; then
-            # ── Legacy path: clone MachineSet in openshift-machine-api ──
-            echo "Using legacy MachineSet path (source: $WORKER_MS)"
-            ZONE=$(oc get machineset "$WORKER_MS" -n openshift-machine-api \
-              -o jsonpath='{.spec.template.spec.providerSpec.value.zone}')
-            VIRT_MS_NAME="${INFRA_ID}-virt-worker-${ZONE}"
-            CREATED_VIA="legacy"
-
-            if oc get machineset "$VIRT_MS_NAME" -n openshift-machine-api &>/dev/null; then
-              echo "MachineSet $VIRT_MS_NAME already exists"
-            else
-              JQ_FILTER='
-                del(.metadata.uid, .metadata.resourceVersion, .metadata.creationTimestamp, .metadata.generation, .status) |
-                .metadata.name = $name |
-                .spec.replicas = 1 |
-                .spec.selector.matchLabels["machine.openshift.io/cluster-api-machineset"] = $name |
-                .spec.template.metadata.labels["machine.openshift.io/cluster-api-machineset"] = $name |
-                .spec.template.metadata.labels["node-role.kubernetes.io/virt"] = "" |
-                .spec.template.spec.providerSpec.value.machineType = $machineType |
-                .spec.template.spec.metadata.labels["node-role.kubernetes.io/virt"] = ""
-              '
-              if [ "$DEDICATED" = "true" ]; then
-                JQ_FILTER="${JQ_FILTER} | .spec.template.spec.taints = [{\"key\": \"node-role.kubernetes.io/virt\", \"effect\": \"NoSchedule\"}]"
-              fi
-
-              oc get machineset "$WORKER_MS" -n openshift-machine-api -o json | \
-                jq --arg name "$VIRT_MS_NAME" --arg machineType "n2-standard-8" "$JQ_FILTER" | \
-                oc apply -f -
-              echo "Created MachineSet $VIRT_MS_NAME"
+          # On OCP 4.19+, the installer uses CAPI via a local envtest to provision
+          # machines, but the running cluster uses legacy machine.openshift.io
+          # MachineSets. The Machine API operator may need time after cluster creation
+          # to reconcile MachineSets, so we retry instead of failing immediately.
+          echo "Waiting for worker MachineSets in openshift-machine-api..."
+          ms_timeout=300
+          ms_elapsed=0
+          WORKER_MS=""
+          while [ -z "$WORKER_MS" ]; do
+            WORKER_MS=$(oc get machinesets -n openshift-machine-api -o json 2>/dev/null | jq -r '
+              .items
+              | map(select(
+                  .metadata.labels["machine.openshift.io/cluster-api-machine-role"] == "worker" or
+                  .metadata.labels["machine.openshift.io/cluster-api-machine-type"] == "worker"
+                ))
+              | sort_by(.metadata.name)
+              | .[0].metadata.name // empty
+            ' 2>/dev/null || echo "")
+            if [ -n "$WORKER_MS" ]; then
+              break
             fi
+            if [ $ms_elapsed -ge $ms_timeout ]; then
+              echo "ERROR: No worker MachineSet found in openshift-machine-api after ${ms_timeout}s"
+              oc get machinesets -n openshift-machine-api --no-headers 2>/dev/null || true
+              oc get machines -n openshift-machine-api --no-headers 2>/dev/null || true
+              exit 1
+            fi
+            if [ $((ms_elapsed % 30)) -eq 0 ]; then
+              echo "No worker MachineSets yet, retrying... (${ms_elapsed}s)"
+            fi
+            sleep 15
+            ms_elapsed=$((ms_elapsed + 15))
+          done
+          echo "Using $WORKER_MS as template"
 
+          ZONE=$(oc get machineset "$WORKER_MS" -n openshift-machine-api \
+            -o jsonpath='{.spec.template.spec.providerSpec.value.zone}')
+          VIRT_MS_NAME="${INFRA_ID}-virt-worker-${ZONE}"
+
+          if oc get machineset "$VIRT_MS_NAME" -n openshift-machine-api &>/dev/null; then
+            echo "MachineSet $VIRT_MS_NAME already exists"
           else
-            # ── CAPI path: GCPMachineTemplate + MachineSet in openshift-cluster-api-guests ──
-            echo "No legacy MachineSets found, using Cluster API path"
-            CAPI_NS="openshift-cluster-api-guests"
-            CREATED_VIA="capi"
-
-            CLUSTER_NAME=$(oc get clusters.cluster.x-k8s.io -n "$CAPI_NS" \
-              -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
-            if [ -z "$CLUSTER_NAME" ]; then
-              echo "ERROR: No CAPI Cluster found in $CAPI_NS"
-              echo "Neither legacy MachineSets nor CAPI resources are available"
-              exit 1
-            fi
-            echo "CAPI Cluster: $CLUSTER_NAME"
-
-            WORKER_GCP_MACHINE=$(oc get gcpmachines.infrastructure.cluster.x-k8s.io \
-              -n "$CAPI_NS" -o json | jq -r '
-              [.items[] | select(.metadata.name | test("worker"))]
-              | sort_by(.metadata.name)
-              | .[0].metadata.name // empty
-            ')
-            if [ -z "$WORKER_GCP_MACHINE" ]; then
-              echo "ERROR: No worker GCPMachine found in $CAPI_NS"
-              oc get gcpmachines.infrastructure.cluster.x-k8s.io -n "$CAPI_NS" \
-                --no-headers 2>/dev/null || true
-              exit 1
-            fi
-            echo "Source GCPMachine: $WORKER_GCP_MACHINE"
-
-            GCP_SPEC=$(oc get gcpmachines.infrastructure.cluster.x-k8s.io \
-              "$WORKER_GCP_MACHINE" -n "$CAPI_NS" -o json | jq '.spec')
-            ZONE=$(echo "$GCP_SPEC" | jq -r '.zone // .failureDomain // empty')
-            echo "Zone: $ZONE"
-
-            VIRT_TEMPLATE_NAME="${INFRA_ID}-virt-worker"
-            VIRT_MS_NAME="${INFRA_ID}-virt-worker-${ZONE:-a}"
-
-            WORKER_MACHINE=$(oc get machines.cluster.x-k8s.io -n "$CAPI_NS" -o json | jq -r '
-              [.items[] | select(.metadata.name | test("worker"))]
-              | sort_by(.metadata.name)
-              | .[0].metadata.name // empty
-            ')
-            BOOTSTRAP_SECRET=$(oc get machines.cluster.x-k8s.io "$WORKER_MACHINE" \
-              -n "$CAPI_NS" -o jsonpath='{.spec.bootstrap.dataSecretName}' 2>/dev/null || echo "")
-            if [ -z "$BOOTSTRAP_SECRET" ]; then
-              BOOTSTRAP_SECRET="${INFRA_ID}-worker"
-              echo "Bootstrap secret not found on Machine, using convention: $BOOTSTRAP_SECRET"
-            else
-              echo "Bootstrap secret: $BOOTSTRAP_SECRET"
+            JQ_FILTER='
+              del(.metadata.uid, .metadata.resourceVersion, .metadata.creationTimestamp, .metadata.generation, .status) |
+              .metadata.name = $name |
+              .spec.replicas = 1 |
+              .spec.selector.matchLabels["machine.openshift.io/cluster-api-machineset"] = $name |
+              .spec.template.metadata.labels["machine.openshift.io/cluster-api-machineset"] = $name |
+              .spec.template.metadata.labels["node-role.kubernetes.io/virt"] = "" |
+              .spec.template.spec.providerSpec.value.machineType = $machineType |
+              .spec.template.spec.metadata.labels["node-role.kubernetes.io/virt"] = ""
+            '
+            if [ "$DEDICATED" = "true" ]; then
+              JQ_FILTER="${JQ_FILTER} | .spec.template.spec.taints = [{\"key\": \"node-role.kubernetes.io/virt\", \"effect\": \"NoSchedule\"}]"
             fi
 
-            if oc get machinesets.cluster.x-k8s.io "$VIRT_MS_NAME" -n "$CAPI_NS" &>/dev/null; then
-              echo "CAPI MachineSet $VIRT_MS_NAME already exists"
-            else
-              echo "$GCP_SPEC" | jq \
-                --arg name "$VIRT_TEMPLATE_NAME" --arg ns "$CAPI_NS" '{
-                apiVersion: "infrastructure.cluster.x-k8s.io/v1beta1",
-                kind: "GCPMachineTemplate",
-                metadata: { name: $name, namespace: $ns },
-                spec: { template: { spec: (. | del(.providerID, .providerStatus) |
-                  if has("instanceType") then .instanceType = "n2-standard-8"
-                  elif has("machineType") then .machineType = "n2-standard-8"
-                  else . + {instanceType: "n2-standard-8"}
-                  end
-                )}}
-              }' | oc apply -f -
-              echo "Created GCPMachineTemplate $VIRT_TEMPLATE_NAME"
-
-              jq -n \
-                --arg name "$VIRT_MS_NAME" \
-                --arg ns "$CAPI_NS" \
-                --arg cluster "$CLUSTER_NAME" \
-                --arg tmpl "$VIRT_TEMPLATE_NAME" \
-                --arg boot "$BOOTSTRAP_SECRET" \
-              '{
-                apiVersion: "cluster.x-k8s.io/v1beta1",
-                kind: "MachineSet",
-                metadata: {
-                  name: $name,
-                  namespace: $ns,
-                  labels: { "cluster.x-k8s.io/cluster-name": $cluster }
-                },
-                spec: {
-                  clusterName: $cluster,
-                  replicas: 1,
-                  selector: {
-                    matchLabels: {
-                      "cluster.x-k8s.io/cluster-name": $cluster,
-                      "cluster.x-k8s.io/set-name": $name
-                    }
-                  },
-                  template: {
-                    metadata: {
-                      labels: {
-                        "cluster.x-k8s.io/cluster-name": $cluster,
-                        "cluster.x-k8s.io/set-name": $name,
-                        "node-role.kubernetes.io/worker": "",
-                        "node-role.kubernetes.io/virt": ""
-                      }
-                    },
-                    spec: {
-                      clusterName: $cluster,
-                      bootstrap: { dataSecretName: $boot },
-                      infrastructureRef: {
-                        apiVersion: "infrastructure.cluster.x-k8s.io/v1beta1",
-                        kind: "GCPMachineTemplate",
-                        name: $tmpl
-                      }
-                    }
-                  }
-                }
-              }' | oc apply -f -
-              echo "Created CAPI MachineSet $VIRT_MS_NAME"
-            fi
+            oc get machineset "$WORKER_MS" -n openshift-machine-api -o json | \
+              jq --arg name "$VIRT_MS_NAME" --arg machineType "n2-standard-8" "$JQ_FILTER" | \
+              oc apply -f -
+            echo "Created MachineSet $VIRT_MS_NAME"
           fi
 
           echo "Waiting for virt node to become Ready..."
@@ -399,58 +302,22 @@ spec:
               echo "Virt node is Ready: $READY_NODES"
               break
             fi
-
-            if [ "$CREATED_VIA" = "capi" ] && [ $elapsed -ge 120 ]; then
-              CAPI_NODE=$(oc get machines.cluster.x-k8s.io -n "$CAPI_NS" \
-                -l "cluster.x-k8s.io/set-name=$VIRT_MS_NAME" \
-                -o jsonpath='{.items[0].status.nodeRef.name}' 2>/dev/null || echo "")
-              if [ -n "$CAPI_NODE" ]; then
-                NODE_READY=$(oc get node "$CAPI_NODE" \
-                  -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null || echo "")
-                if [ "$NODE_READY" = "True" ]; then
-                  echo "CAPI node $CAPI_NODE is Ready, applying virt label"
-                  oc label node "$CAPI_NODE" node-role.kubernetes.io/virt= --overwrite
-                  READY_NODES="$CAPI_NODE"
-                  break
-                fi
-              fi
-            fi
-
             if [ $elapsed -ge $timeout ]; then
               echo "ERROR: Timeout waiting for virt node after ${timeout}s"
-              if [ "$CREATED_VIA" = "legacy" ]; then
-                oc get machines -n openshift-machine-api \
-                  -l "machine.openshift.io/cluster-api-machineset=$VIRT_MS_NAME" \
-                  --no-headers 2>/dev/null || true
-              else
-                oc get machines.cluster.x-k8s.io -n "$CAPI_NS" \
-                  -l "cluster.x-k8s.io/set-name=$VIRT_MS_NAME" \
-                  --no-headers 2>/dev/null || true
-              fi
+              oc get machines -n openshift-machine-api \
+                -l "machine.openshift.io/cluster-api-machineset=$VIRT_MS_NAME" \
+                --no-headers 2>/dev/null || true
               exit 1
             fi
             if [ $((elapsed % 60)) -eq 0 ] && [ $elapsed -gt 0 ]; then
               echo "Still waiting... (${elapsed}s elapsed)"
-              if [ "$CREATED_VIA" = "legacy" ]; then
-                oc get machines -n openshift-machine-api \
-                  -l "machine.openshift.io/cluster-api-machineset=$VIRT_MS_NAME" \
-                  --no-headers 2>/dev/null || true
-              else
-                oc get machines.cluster.x-k8s.io -n "$CAPI_NS" \
-                  -l "cluster.x-k8s.io/set-name=$VIRT_MS_NAME" \
-                  --no-headers 2>/dev/null || true
-              fi
+              oc get machines -n openshift-machine-api \
+                -l "machine.openshift.io/cluster-api-machineset=$VIRT_MS_NAME" \
+                --no-headers 2>/dev/null || true
             fi
             sleep 15
             elapsed=$((elapsed + 15))
           done
-
-          if [ "$DEDICATED" = "true" ] && [ "$CREATED_VIA" = "capi" ]; then
-            VIRT_NODE=$(echo "$READY_NODES" | awk '{print $1}')
-            echo "Applying NoSchedule taint to $VIRT_NODE (CAPI path)"
-            oc adm taint nodes "$VIRT_NODE" \
-              node-role.kubernetes.io/virt=:NoSchedule --overwrite
-          fi
 
           echo "=== Virt worker node ready ==="
         volumeMounts:
