@@ -214,12 +214,11 @@ spec:
           export KUBECONFIG=/data/auth/kubeconfig
 
           DEDICATED='{{ "{{" }}workflow.parameters.virt-node-dedicated{{ "}}" }}'
-          INFRA_ID=$(oc get infrastructure cluster -o jsonpath='{.status.infrastructureName}')
 
-          echo "=== Creating dedicated virt worker node ==="
+          echo "=== Adding virt worker node ==="
           echo "Dedicated (tainted) mode: $DEDICATED"
-          echo "Infrastructure ID: $INFRA_ID"
 
+          # Idempotency: skip if a virt-labeled node already exists and is Ready
           READY_VIRT=$(oc get nodes -l node-role.kubernetes.io/virt -o json 2>/dev/null | \
             jq '[.items[] | select(.status.conditions[]? | select(.type=="Ready" and .status=="True"))] | length' || echo "0")
           if [ "${READY_VIRT:-0}" -gt 0 ]; then
@@ -228,98 +227,70 @@ spec:
             exit 0
           fi
 
-          # On OCP 4.19+, the installer uses CAPI via a local envtest to provision
-          # machines, but the running cluster uses legacy machine.openshift.io
-          # MachineSets. The Machine API operator may need time after cluster creation
-          # to reconcile MachineSets, so we retry instead of failing immediately.
-          echo "Waiting for worker MachineSets in openshift-machine-api..."
-          ms_timeout=300
-          ms_elapsed=0
-          WORKER_MS=""
-          while [ -z "$WORKER_MS" ]; do
-            WORKER_MS=$(oc get machinesets -n openshift-machine-api -o json 2>/dev/null | jq -r '
-              .items
-              | map(select(
-                  .metadata.labels["machine.openshift.io/cluster-api-machine-role"] == "worker" or
-                  .metadata.labels["machine.openshift.io/cluster-api-machine-type"] == "worker"
-                ))
-              | sort_by(.metadata.name)
-              | .[0].metadata.name // empty
-            ' 2>/dev/null || echo "")
-            if [ -n "$WORKER_MS" ]; then
-              break
-            fi
-            if [ $ms_elapsed -ge $ms_timeout ]; then
-              echo "ERROR: No worker MachineSet found in openshift-machine-api after ${ms_timeout}s"
-              oc get machinesets -n openshift-machine-api --no-headers 2>/dev/null || true
-              oc get machines -n openshift-machine-api --no-headers 2>/dev/null || true
-              exit 1
-            fi
-            if [ $((ms_elapsed % 30)) -eq 0 ]; then
-              echo "No worker MachineSets yet, retrying... (${ms_elapsed}s)"
-            fi
-            sleep 15
-            ms_elapsed=$((ms_elapsed + 15))
-          done
-          echo "Using $WORKER_MS as template"
+          # Snapshot existing worker node names before scaling
+          EXISTING_NODES=$(oc get nodes -l node-role.kubernetes.io/worker \
+            -o jsonpath='{.items[*].metadata.name}')
+          echo "Existing worker nodes: $EXISTING_NODES"
 
-          ZONE=$(oc get machineset "$WORKER_MS" -n openshift-machine-api \
-            -o jsonpath='{.spec.template.spec.providerSpec.value.zone}')
-          VIRT_MS_NAME="${INFRA_ID}-virt-worker-${ZONE}"
-
-          if oc get machineset "$VIRT_MS_NAME" -n openshift-machine-api &>/dev/null; then
-            echo "MachineSet $VIRT_MS_NAME already exists"
-          else
-            JQ_FILTER='
-              del(.metadata.uid, .metadata.resourceVersion, .metadata.creationTimestamp, .metadata.generation, .status) |
-              .metadata.name = $name |
-              .spec.replicas = 1 |
-              .spec.selector.matchLabels["machine.openshift.io/cluster-api-machineset"] = $name |
-              .spec.template.metadata.labels["machine.openshift.io/cluster-api-machineset"] = $name |
-              .spec.template.metadata.labels["node-role.kubernetes.io/virt"] = "" |
-              .spec.template.spec.providerSpec.value.machineType = $machineType |
-              .spec.template.spec.metadata.labels["node-role.kubernetes.io/virt"] = ""
-            '
-            if [ "$DEDICATED" = "true" ]; then
-              JQ_FILTER="${JQ_FILTER} | .spec.template.spec.taints = [{\"key\": \"node-role.kubernetes.io/virt\", \"effect\": \"NoSchedule\"}]"
-            fi
-
-            oc get machineset "$WORKER_MS" -n openshift-machine-api -o json | \
-              jq --arg name "$VIRT_MS_NAME" --arg machineType "n2-standard-8" "$JQ_FILTER" | \
-              oc apply -f -
-            echo "Created MachineSet $VIRT_MS_NAME"
+          # Pick the first worker MachineSet (by name) and scale it up by 1
+          WORKER_MS=$(oc get machinesets -n openshift-machine-api \
+            -o jsonpath='{.items[0].metadata.name}')
+          if [ -z "$WORKER_MS" ]; then
+            echo "ERROR: No MachineSets found in openshift-machine-api"
+            oc get machinesets -n openshift-machine-api --no-headers 2>/dev/null || true
+            exit 1
           fi
 
-          echo "Waiting for virt node to become Ready..."
+          CURRENT_REPLICAS=$(oc get machineset "$WORKER_MS" -n openshift-machine-api \
+            -o jsonpath='{.spec.replicas}')
+          NEW_REPLICAS=$((CURRENT_REPLICAS + 1))
+          echo "Scaling MachineSet $WORKER_MS from $CURRENT_REPLICAS to $NEW_REPLICAS"
+          oc scale machineset "$WORKER_MS" -n openshift-machine-api \
+            --replicas="$NEW_REPLICAS"
+
+          # Wait for the new node to join and become Ready
+          echo "Waiting for new worker node to become Ready..."
           timeout=600
           elapsed=0
+          NEW_NODE=""
           while true; do
-            READY_NODES=$(oc get nodes -l node-role.kubernetes.io/virt -o json 2>/dev/null | \
+            ALL_READY=$(oc get nodes -l node-role.kubernetes.io/worker -o json 2>/dev/null | \
               jq -r '[.items[] | select(.status.conditions[]? |
                 select(.type=="Ready" and .status=="True")) |
-                .metadata.name] | join(" ")' 2>/dev/null || echo "")
-            if [ -n "$READY_NODES" ]; then
-              echo "Virt node is Ready: $READY_NODES"
-              break
-            fi
+                .metadata.name] | .[]' 2>/dev/null || echo "")
+            for node in $ALL_READY; do
+              if ! echo "$EXISTING_NODES" | grep -qw "$node"; then
+                NEW_NODE="$node"
+                break 2
+              fi
+            done
             if [ $elapsed -ge $timeout ]; then
-              echo "ERROR: Timeout waiting for virt node after ${timeout}s"
-              oc get machines -n openshift-machine-api \
-                -l "machine.openshift.io/cluster-api-machineset=$VIRT_MS_NAME" \
-                --no-headers 2>/dev/null || true
+              echo "ERROR: Timeout waiting for new node after ${timeout}s"
+              oc get machines -n openshift-machine-api --no-headers 2>/dev/null || true
               exit 1
             fi
             if [ $((elapsed % 60)) -eq 0 ] && [ $elapsed -gt 0 ]; then
               echo "Still waiting... (${elapsed}s elapsed)"
-              oc get machines -n openshift-machine-api \
-                -l "machine.openshift.io/cluster-api-machineset=$VIRT_MS_NAME" \
-                --no-headers 2>/dev/null || true
+              oc get nodes -l node-role.kubernetes.io/worker --no-headers 2>/dev/null || true
             fi
             sleep 15
             elapsed=$((elapsed + 15))
           done
 
-          echo "=== Virt worker node ready ==="
+          echo "New node: $NEW_NODE"
+
+          # Label the new node for virt workloads
+          oc label node "$NEW_NODE" node-role.kubernetes.io/virt= --overwrite
+          echo "Labeled $NEW_NODE with node-role.kubernetes.io/virt"
+
+          # Optionally taint so only VM workloads run on it
+          if [ "$DEDICATED" = "true" ]; then
+            oc adm taint nodes "$NEW_NODE" \
+              node-role.kubernetes.io/virt=:NoSchedule --overwrite
+            echo "Tainted $NEW_NODE with NoSchedule"
+          fi
+
+          echo "=== Virt worker node ready: $NEW_NODE ==="
         volumeMounts:
           - name: data
             mountPath: /data

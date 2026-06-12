@@ -334,9 +334,13 @@
       value: false
       kind: optional
       help: |
-        When true, an additional n2-standard-8 worker node is added and configured
-        with OpenShift Virtualization (KubeVirt) including VSOCK support. A single
-        VM is created using the OS specified by the vm-os parameter.
+        When true, an extra worker node is added by scaling up an existing
+        MachineSet and configured with OpenShift Virtualization (KubeVirt)
+        including VSOCK support. A single VM is created using the OS
+        specified by the vm-os parameter.
+        For best VM performance, use n2 worker nodes
+        (worker-node-type=n2-standard-8). On e2 instances, KVM emulation
+        is used as a fallback (slower).
 
     - name: vm-os
       description: OS for the virtual machine (rhel9, rhel10)
@@ -688,9 +692,13 @@
       value: false
       kind: optional
       help: |
-        When true, an additional n2-standard-8 worker node is added and configured
-        with OpenShift Virtualization (KubeVirt) including VSOCK support. A single
-        VM is created using the OS specified by the vm-os parameter.
+        When true, an extra worker node is added by scaling up an existing
+        MachineSet and configured with OpenShift Virtualization (KubeVirt)
+        including VSOCK support. A single VM is created using the OS
+        specified by the vm-os parameter.
+        For best VM performance, use n2 worker nodes
+        (worker-node-type=n2-standard-8). On e2 instances, KVM emulation
+        is used as a fallback (slower).
 
     - name: vm-os
       description: OS for the virtual machine (rhel9, rhel10)
