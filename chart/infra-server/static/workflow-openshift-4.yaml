@@ -32,6 +32,12 @@ spec:
         value: "vCurrent"
       - name: additional-enabled-capabilities
         value: ""
+      - name: install-virt
+        value: "false"
+      - name: vm-os
+        value: "rhel9"
+      - name: virt-node-dedicated
+        value: "false"
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -44,12 +50,27 @@ spec:
     - name: credentials
       secret:
         secretName: openshift-4-gcp-service-account
+    - name: registry-pull-secret
+      secret:
+        secretName: infra-image-registry-pull-secret
 
   templates:
     - name: start
       steps:
         - - name: create
             template: create
+
+        - - name: add-virt-node
+            template: add-virt-node
+            when: '{{ "{{" }}workflow.parameters.install-virt{{ "}}" }} == true'
+
+        - - name: install-virt-operator
+            template: install-virt-operator
+            when: '{{ "{{" }}workflow.parameters.install-virt{{ "}}" }} == true'
+
+        - - name: create-vm
+            template: create-vm
+            when: '{{ "{{" }}workflow.parameters.install-virt{{ "}}" }} == true'
 
         - - name: gather
             template: gather
@@ -182,6 +203,459 @@ spec:
             path: /data/cluster-console-password
             archive:
               none: {}
+
+    - name: add-virt-node
+      activeDeadlineSeconds: 900
+      script:
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-{{ .Chart.Annotations.automationFlavorsVersion }}
+        command: [bash]
+        source: |
+          set -euo pipefail
+          export KUBECONFIG=/data/auth/kubeconfig
+
+          DEDICATED='{{ "{{" }}workflow.parameters.virt-node-dedicated{{ "}}" }}'
+
+          echo "=== Adding virt worker node ==="
+          echo "Dedicated (tainted) mode: $DEDICATED"
+
+          # Idempotency: skip if a virt-labeled node already exists and is Ready
+          READY_VIRT=$(oc get nodes -l node-role.kubernetes.io/virt -o json 2>/dev/null | \
+            jq '[.items[] | select(.status.conditions[]? | select(.type=="Ready" and .status=="True"))] | length' || echo "0")
+          if [ "${READY_VIRT:-0}" -gt 0 ]; then
+            echo "Virt node already exists and is Ready"
+            oc get nodes -l node-role.kubernetes.io/virt
+            exit 0
+          fi
+
+          # Snapshot existing worker node names before scaling
+          EXISTING_NODES=$(oc get nodes -l node-role.kubernetes.io/worker \
+            -o jsonpath='{.items[*].metadata.name}')
+          echo "Existing worker nodes: $EXISTING_NODES"
+
+          # Pick the first worker MachineSet (by name) and scale it up by 1
+          WORKER_MS=$(oc get machinesets -n openshift-machine-api \
+            -o jsonpath='{.items[0].metadata.name}')
+          if [ -z "$WORKER_MS" ]; then
+            echo "ERROR: No MachineSets found in openshift-machine-api"
+            oc get machinesets -n openshift-machine-api --no-headers 2>/dev/null || true
+            exit 1
+          fi
+
+          CURRENT_REPLICAS=$(oc get machineset "$WORKER_MS" -n openshift-machine-api \
+            -o jsonpath='{.spec.replicas}')
+          NEW_REPLICAS=$((CURRENT_REPLICAS + 1))
+          echo "Scaling MachineSet $WORKER_MS from $CURRENT_REPLICAS to $NEW_REPLICAS"
+          oc scale machineset "$WORKER_MS" -n openshift-machine-api \
+            --replicas="$NEW_REPLICAS"
+
+          # Wait for the new node to join and become Ready
+          echo "Waiting for new worker node to become Ready..."
+          timeout=600
+          elapsed=0
+          NEW_NODE=""
+          while true; do
+            ALL_READY=$(oc get nodes -l node-role.kubernetes.io/worker -o json 2>/dev/null | \
+              jq -r '[.items[] | select(.status.conditions[]? |
+                select(.type=="Ready" and .status=="True")) |
+                .metadata.name] | .[]' 2>/dev/null || echo "")
+            for node in $ALL_READY; do
+              if ! echo "$EXISTING_NODES" | grep -qw "$node"; then
+                NEW_NODE="$node"
+                break 2
+              fi
+            done
+            if [ $elapsed -ge $timeout ]; then
+              echo "ERROR: Timeout waiting for new node after ${timeout}s"
+              oc get machines -n openshift-machine-api --no-headers 2>/dev/null || true
+              exit 1
+            fi
+            if [ $((elapsed % 60)) -eq 0 ] && [ $elapsed -gt 0 ]; then
+              echo "Still waiting... (${elapsed}s elapsed)"
+              oc get nodes -l node-role.kubernetes.io/worker --no-headers 2>/dev/null || true
+            fi
+            sleep 15
+            elapsed=$((elapsed + 15))
+          done
+
+          echo "New node: $NEW_NODE"
+
+          # Label the new node for virt workloads
+          oc label node "$NEW_NODE" node-role.kubernetes.io/virt= --overwrite
+          echo "Labeled $NEW_NODE with node-role.kubernetes.io/virt"
+
+          # Optionally taint so only VM workloads run on it
+          if [ "$DEDICATED" = "true" ]; then
+            oc adm taint nodes "$NEW_NODE" \
+              node-role.kubernetes.io/virt=:NoSchedule --overwrite
+            echo "Tainted $NEW_NODE with NoSchedule"
+          fi
+
+          echo "=== Virt worker node ready: $NEW_NODE ==="
+        volumeMounts:
+          - name: data
+            mountPath: /data
+
+    - name: install-virt-operator
+      activeDeadlineSeconds: 2400
+      script:
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-{{ .Chart.Annotations.automationFlavorsVersion }}
+        command: [bash]
+        source: |
+          set -euo pipefail
+          export KUBECONFIG=/data/auth/kubeconfig
+
+          OLM_NAMESPACE="openshift-cnv"
+          SUBSCRIPTION_NAME="kubevirt-hyperconverged"
+          HCO_NAMESPACE="$OLM_NAMESPACE"
+          HCO_NAME="kubevirt-hyperconverged"
+
+          echo "=== Installing OpenShift Virtualization ==="
+
+          # Check if already installed and healthy
+          if oc get hyperconverged "$HCO_NAME" -n "$HCO_NAMESPACE" &>/dev/null; then
+            avail=$(oc -n "$HCO_NAMESPACE" get hyperconverged "$HCO_NAME" -o jsonpath='{.status.conditions[?(@.type=="Available")].status}' 2>/dev/null || echo "Unknown")
+            prog=$(oc -n "$HCO_NAMESPACE" get hyperconverged "$HCO_NAME" -o jsonpath='{.status.conditions[?(@.type=="Progressing")].status}' 2>/dev/null || echo "Unknown")
+            degr=$(oc -n "$HCO_NAMESPACE" get hyperconverged "$HCO_NAME" -o jsonpath='{.status.conditions[?(@.type=="Degraded")].status}' 2>/dev/null || echo "Unknown")
+            if [ "$avail" = "True" ] && [ "$prog" = "False" ] && [ "$degr" = "False" ]; then
+              echo "OpenShift Virtualization already installed and healthy"
+              echo "Ensuring VSOCK and KVM_EMULATION are configured..."
+            else
+              echo "HyperConverged exists but not healthy (Available=$avail, Progressing=$prog, Degraded=$degr)"
+            fi
+          fi
+
+          # Create namespace, OperatorGroup, and Subscription
+          cat <<'EOFK8S' | oc apply -f -
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: openshift-cnv
+          ---
+          apiVersion: operators.coreos.com/v1
+          kind: OperatorGroup
+          metadata:
+            name: openshift-cnv
+            namespace: openshift-cnv
+          spec:
+            targetNamespaces:
+            - openshift-cnv
+          ---
+          apiVersion: operators.coreos.com/v1alpha1
+          kind: Subscription
+          metadata:
+            name: kubevirt-hyperconverged
+            namespace: openshift-cnv
+          spec:
+            channel: stable
+            name: kubevirt-hyperconverged
+            source: redhat-operators
+            sourceNamespace: openshift-marketplace
+            installPlanApproval: Automatic
+          EOFK8S
+          echo "Applied namespace, OperatorGroup, and Subscription"
+
+          # Wait for installedCSV
+          echo "Waiting for Subscription to report installedCSV..."
+          timeout=300
+          elapsed=0
+          until oc -n "$OLM_NAMESPACE" get sub "$SUBSCRIPTION_NAME" -o jsonpath='{.status.installedCSV}' 2>/dev/null | grep -q .; do
+            sleep 5
+            elapsed=$((elapsed + 5))
+            if [ $elapsed -ge $timeout ]; then
+              echo "ERROR: Timeout waiting for installedCSV after ${timeout}s"
+              exit 1
+            fi
+            if [ $((elapsed % 30)) -eq 0 ]; then
+              echo "Still waiting for installedCSV... (${elapsed}s)"
+            fi
+          done
+
+          CSV=$(oc -n "$OLM_NAMESPACE" get sub "$SUBSCRIPTION_NAME" -o jsonpath='{.status.installedCSV}')
+          echo "InstalledCSV: $CSV"
+
+          # Wait for CSV Succeeded
+          echo "Waiting for CSV to reach Succeeded phase..."
+          timeout=900
+          elapsed=0
+          while true; do
+            PHASE=$(oc -n "$OLM_NAMESPACE" get csv "$CSV" -o jsonpath='{.status.phase}' 2>/dev/null || echo "")
+            if [ "$PHASE" = "Succeeded" ]; then
+              echo "CSV is Succeeded"
+              break
+            fi
+            if [ $elapsed -ge $timeout ]; then
+              echo "ERROR: CSV did not reach Succeeded (current: $PHASE) after ${timeout}s"
+              exit 1
+            fi
+            if [ $((elapsed % 60)) -eq 0 ] && [ $elapsed -gt 0 ]; then
+              echo "Still waiting for CSV (Phase: ${PHASE:-Unknown}, ${elapsed}s)..."
+            fi
+            sleep 10
+            elapsed=$((elapsed + 10))
+          done
+
+          # Create HyperConverged CR with VSOCK
+          echo "Creating HyperConverged CR with VSOCK feature gate..."
+          cat <<EOFHCO | oc apply -f -
+          apiVersion: hco.kubevirt.io/v1beta1
+          kind: HyperConverged
+          metadata:
+            name: ${HCO_NAME}
+            namespace: ${HCO_NAMESPACE}
+            annotations:
+              kubevirt.kubevirt.io/jsonpatch: |-
+                [
+                  {
+                    "op":"add",
+                    "path":"/spec/configuration/developerConfiguration/featureGates/-",
+                    "value":"VSOCK"
+                  }
+                ]
+          spec: {}
+          EOFHCO
+          echo "Applied HyperConverged CR"
+
+          # Wait for HyperConverged to become healthy
+          echo "Waiting for HyperConverged to become healthy..."
+          timeout=1800
+          elapsed=0
+          while true; do
+            avail=$(oc -n "$HCO_NAMESPACE" get hyperconverged "$HCO_NAME" -o jsonpath='{.status.conditions[?(@.type=="Available")].status}' 2>/dev/null || echo "Unknown")
+            prog=$(oc -n "$HCO_NAMESPACE" get hyperconverged "$HCO_NAME" -o jsonpath='{.status.conditions[?(@.type=="Progressing")].status}' 2>/dev/null || echo "Unknown")
+            degr=$(oc -n "$HCO_NAMESPACE" get hyperconverged "$HCO_NAME" -o jsonpath='{.status.conditions[?(@.type=="Degraded")].status}' 2>/dev/null || echo "Unknown")
+            if [ "$avail" = "True" ] && [ "$prog" = "False" ] && [ "$degr" = "False" ]; then
+              echo "HyperConverged is healthy"
+              break
+            fi
+            if [ $elapsed -ge $timeout ]; then
+              echo "ERROR: HyperConverged not healthy after ${timeout}s (Available=$avail, Progressing=$prog, Degraded=$degr)"
+              exit 1
+            fi
+            if [ $((elapsed % 60)) -eq 0 ] && [ $elapsed -gt 0 ]; then
+              echo "Still waiting (Available=$avail, Progressing=$prog, Degraded=$degr) - ${elapsed}s"
+            fi
+            sleep 15
+            elapsed=$((elapsed + 15))
+          done
+
+          # Patch KVM_EMULATION
+          current_kvm=$(oc get subscription kubevirt-hyperconverged -n openshift-cnv -o jsonpath='{.spec.config.env[?(@.name=="KVM_EMULATION")].value}' 2>/dev/null || echo "")
+          if [ "$current_kvm" = "true" ]; then
+            echo "KVM_EMULATION already set"
+          else
+            echo "Patching subscription with KVM_EMULATION..."
+            oc patch subscription kubevirt-hyperconverged \
+              -n openshift-cnv \
+              --type=merge \
+              -p '{"spec":{"config":{"selector":{"matchLabels":{"name":"hyperconverged-cluster-operator"}},"env":[{"name":"KVM_EMULATION","value":"true"}]}}}'
+            echo "KVM_EMULATION patched"
+          fi
+
+          echo "=== OpenShift Virtualization installed with VSOCK + KVM_EMULATION ==="
+        volumeMounts:
+          - name: data
+            mountPath: /data
+
+    - name: create-vm
+      activeDeadlineSeconds: 600
+      outputs:
+        artifacts:
+          - name: vm-access
+            path: /data/vm-access.md
+            archive:
+              none: {}
+      script:
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-{{ .Chart.Annotations.automationFlavorsVersion }}
+        command: [bash]
+        source: |
+          set -euo pipefail
+          export KUBECONFIG=/data/auth/kubeconfig
+
+          VM_OS='{{ "{{" }}workflow.parameters.vm-os{{ "}}" }}'
+          DEDICATED='{{ "{{" }}workflow.parameters.virt-node-dedicated{{ "}}" }}'
+          NAMESPACE="openshift-cnv"
+          VM_NAME="${VM_OS}-1"
+          CONTAINER_IMAGE="quay.io/rhacs-eng/vm-images:${VM_OS}-dnf-primed-latest"
+          SSH_USER="cloud-user"
+          PULL_SECRET_NAME="quay-rhacs-eng-ro"
+
+          case "$VM_OS" in
+            rhel9|rhel10) ;;
+            *)
+              echo "ERROR: unsupported vm-os '$VM_OS'. Valid values: rhel9, rhel10."
+              exit 1
+              ;;
+          esac
+
+          echo "=== Creating VM: $VM_NAME (OS: $VM_OS, dedicated=$DEDICATED) ==="
+
+          # Check if VM already exists — skip creation to avoid publishing stale credentials
+          if oc get vm "$VM_NAME" -n "$NAMESPACE" &>/dev/null; then
+            STATUS=$(oc get vm "$VM_NAME" -n "$NAMESPACE" -o jsonpath='{.status.printableStatus}' 2>/dev/null || echo "Unknown")
+            echo "VM $VM_NAME already exists (status: $STATUS), skipping creation"
+            echo "# VM Access Information (pre-existing VM)" > /data/vm-access.md
+            echo "" >> /data/vm-access.md
+            echo "VM was already provisioned in a prior run. Password was set at first boot." >> /data/vm-access.md
+            echo "Check cluster secrets or prior workflow artifacts for credentials." >> /data/vm-access.md
+            exit 0
+          fi
+
+          VM_PASSWORD=$(openssl rand -hex 10)
+
+          # Copy the already-provisioned Quay pull secret from the infra namespace into the target cluster
+          echo "Creating pull secret for quay.io/rhacs-eng in namespace $NAMESPACE from mounted infra secret..."
+          if [ ! -s /infra-secrets/quay/.dockerconfigjson ]; then
+            echo "ERROR: mounted registry secret /infra-secrets/quay/.dockerconfigjson is missing or empty"
+            exit 1
+          fi
+          cat <<EOFSECRET | oc apply -f -
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: ${PULL_SECRET_NAME}
+            namespace: ${NAMESPACE}
+          type: kubernetes.io/dockerconfigjson
+          data:
+            .dockerconfigjson: $(base64 < /infra-secrets/quay/.dockerconfigjson | tr -d '\n')
+          EOFSECRET
+          echo "Pull secret created"
+
+          # Build node placement YAML fragment conditionally
+          NODE_PLACEMENT=""
+          if [ "$DEDICATED" = "true" ]; then
+            NODE_PLACEMENT='
+                nodeSelector:
+                  node-role.kubernetes.io/virt: ""
+                tolerations:
+                  - key: "node-role.kubernetes.io/virt"
+                    operator: "Exists"
+                    effect: "NoSchedule"'
+          fi
+
+          cat <<EOFVM | oc apply -f -
+          apiVersion: kubevirt.io/v1
+          kind: VirtualMachine
+          metadata:
+            name: ${VM_NAME}
+            namespace: ${NAMESPACE}
+          spec:
+            runStrategy: Always
+            template:
+              metadata:
+                labels:
+                  kubevirt.io/size: small
+                  kubevirt.io/domain: ${VM_NAME}
+              spec:${NODE_PLACEMENT}
+                domain:
+                  cpu:
+                    cores: 2
+                    sockets: 1
+                    threads: 1
+                  devices:
+                    autoattachVSOCK: true
+                    disks:
+                      - name: containerdisk
+                        bootOrder: 1
+                        disk:
+                          bus: virtio
+                      - name: cloudinitdisk
+                        bootOrder: 2
+                        disk:
+                          bus: virtio
+                    interfaces:
+                    - name: default
+                      masquerade: {}
+                  memory:
+                    guest: 4Gi
+                  resources:
+                    requests:
+                      memory: 4Gi
+                      cpu: "2"
+                networks:
+                - name: default
+                  pod: {}
+                volumes:
+                  - name: containerdisk
+                    containerDisk:
+                      image: ${CONTAINER_IMAGE}
+                      imagePullSecret: ${PULL_SECRET_NAME}
+                  - name: cloudinitdisk
+                    cloudInitNoCloud:
+                      userData: |
+                        #cloud-config
+                        user: ${SSH_USER}
+                        password: ${VM_PASSWORD}
+                        chpasswd: { expire: False }
+                        ssh_pwauth: True
+          EOFVM
+          echo "VM $VM_NAME created"
+
+          # Wait for VMI to be ready
+          echo "Waiting for VMI $VM_NAME to be ready..."
+          timeout=300
+          elapsed=0
+          while true; do
+            PHASE=$(oc get vmi "$VM_NAME" -n "$NAMESPACE" -o jsonpath='{.status.phase}' 2>/dev/null || echo "")
+            if [ "$PHASE" = "Running" ]; then
+              echo "VMI is Running"
+              break
+            fi
+            if [ $elapsed -ge $timeout ]; then
+              echo "ERROR: VMI did not reach Running phase after ${timeout}s (current: $PHASE)"
+              echo "--- VMI details ---"
+              oc get vmi "$VM_NAME" -n "$NAMESPACE" -o yaml 2>&1 || true
+              echo "--- Recent events ---"
+              oc get events -n "$NAMESPACE" --sort-by='.lastTimestamp' 2>&1 | tail -20 || true
+              exit 1
+            fi
+            if [ $((elapsed % 30)) -eq 0 ] && [ $elapsed -gt 0 ]; then
+              echo "Waiting for VMI (phase: ${PHASE:-Pending}, ${elapsed}s)..."
+            fi
+            sleep 10
+            elapsed=$((elapsed + 10))
+          done
+
+          echo ""
+          echo "=== VM Created ==="
+          echo "  Name: $VM_NAME"
+          echo "  Namespace: $NAMESPACE"
+          echo "  OS: $VM_OS"
+          echo "  User: $SSH_USER"
+          echo "  Password: stored in vm-access artifact"
+          echo "  VSOCK: enabled"
+          echo ""
+          echo "Access via: virtctl ssh -n $NAMESPACE ${SSH_USER}@vmi/${VM_NAME}"
+
+          # Save VM access info to the downloadable artifact
+          umask 077
+          cat > /data/vm-access.md <<EOFMD
+          # VM Access Information
+
+          - **VM Name:** $VM_NAME
+          - **Namespace:** $NAMESPACE
+          - **OS:** $VM_OS
+          - **Username:** $SSH_USER
+          - **Password:** $VM_PASSWORD
+          - **VSOCK:** enabled
+
+          ## SSH Access
+
+          \`\`\`bash
+          virtctl ssh -n $NAMESPACE ${SSH_USER}@vmi/${VM_NAME}
+          \`\`\`
+
+          ## Check VM Status
+
+          \`\`\`bash
+          oc get vm,vmi -n $NAMESPACE
+          \`\`\`
+          EOFMD
+        volumeMounts:
+          - name: data
+            mountPath: /data
+          - name: registry-pull-secret
+            mountPath: /infra-secrets/quay
+            readOnly: true
 
     - name: wait
       suspend: {}

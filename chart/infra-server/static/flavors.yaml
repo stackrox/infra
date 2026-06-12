@@ -329,6 +329,39 @@
         Defines a list of capabilities to explicitly enable. These capabilities are enabled in addition to the capabilities specified in the baseline capability set.
         Example: `["DeploymentConfig", "ImageRegistry"]`
 
+    - name: install-virt
+      description: Install OpenShift Virtualization operator with VSOCK and create a VM
+      value: false
+      kind: optional
+      help: |
+        When true, an extra worker node is added by scaling up an existing
+        MachineSet and configured with OpenShift Virtualization (KubeVirt)
+        including VSOCK support. A single VM is created using the OS
+        specified by the vm-os parameter.
+        For best VM performance, use n2 worker nodes
+        (worker-node-type=n2-standard-8). On e2 instances, KVM emulation
+        is used as a fallback (slower).
+
+    - name: vm-os
+      description: OS for the virtual machine (rhel9, rhel10)
+      value: rhel9
+      kind: optional
+      help: |
+        The RHEL version for the virtual machine container disk.
+        Valid values: rhel9, rhel10.
+        The image used will be quay.io/rhacs-eng/vm-images:<vm-os>-dnf-primed-latest.
+
+    - name: virt-node-dedicated
+      description: Taint the virt node so only VMs are scheduled on it
+      value: false
+      kind: optional
+      help: |
+        When true, the dedicated virt worker node is tainted with
+        node-role.kubernetes.io/virt:NoSchedule so that only VM workloads
+        (which have a matching toleration) are scheduled on it.
+        When false, the virt node also accepts regular ACS/OCP workloads.
+        Only relevant when install-virt is true.
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
@@ -358,6 +391,9 @@
 
     - name: cluster-console-password
       description: The password to login at the openshift console
+
+    - name: vm-access
+      description: Credentials and access commands for the created VM
 
 ######################
 #  openshift-4-demo  #
@@ -651,6 +687,39 @@
         Defines a list of capabilities to explicitly enable. These capabilities are enabled in addition to the capabilities specified in the baseline capability set.
         Example: `["DeploymentConfig", "ImageRegistry"]`
 
+    - name: install-virt
+      description: Install OpenShift Virtualization operator with VSOCK and create a VM
+      value: false
+      kind: optional
+      help: |
+        When true, an extra worker node is added by scaling up an existing
+        MachineSet and configured with OpenShift Virtualization (KubeVirt)
+        including VSOCK support. A single VM is created using the OS
+        specified by the vm-os parameter.
+        For best VM performance, use n2 worker nodes
+        (worker-node-type=n2-standard-8). On e2 instances, KVM emulation
+        is used as a fallback (slower).
+
+    - name: vm-os
+      description: OS for the virtual machine (rhel9, rhel10)
+      value: rhel9
+      kind: optional
+      help: |
+        The RHEL version for the virtual machine container disk.
+        Valid values: rhel9, rhel10.
+        The image used will be quay.io/rhacs-eng/vm-images:<vm-os>-dnf-primed-latest.
+
+    - name: virt-node-dedicated
+      description: Taint the virt node so only VMs are scheduled on it
+      value: false
+      kind: optional
+      help: |
+        When true, the dedicated virt worker node is tainted with
+        node-role.kubernetes.io/virt:NoSchedule so that only VM workloads
+        (which have a matching toleration) are scheduled on it.
+        When false, the virt node also accepts regular ACS/OCP workloads.
+        Only relevant when install-virt is true.
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
@@ -680,6 +749,9 @@
 
     - name: cluster-console-password
       description: The password to login at the openshift console
+
+    - name: vm-access
+      description: Credentials and access commands for the created VM
 
 #####################
 #  AWS EKS          #
