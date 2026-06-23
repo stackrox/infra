@@ -8,7 +8,7 @@ sources:
   - https://github.com/stackrox/infra
 annotations:
   acsDemoVersion: 4.11.0
-  automationFlavorsVersion: 0.15.1-8-gfef29deb45-snapshot
+  automationFlavorsVersion: 0.15.1-10-g471c61700c-snapshot
   ocpCredentialsMode: Passthrough
 dependencies:
   - name: argo-workflows
