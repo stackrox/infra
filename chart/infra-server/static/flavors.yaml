@@ -264,6 +264,13 @@
       value: 3
       kind: optional
 
+    - name: master-node-service-account
+      description: GCP service account for master nodes
+      help: |
+        Leave empty to let the OpenShift installer create a dedicated service account.
+      value: openshift-master-node@acs-team-temp-dev.iam.gserviceaccount.com
+      kind: optional
+
     - name: worker-node-type
       description: the type of worker nodes
       value: e2-standard-8
@@ -272,6 +279,13 @@
     - name: worker-node-count
       description: number of worker nodes
       value: 3
+      kind: optional
+
+    - name: worker-node-service-account
+      description: GCP service account for worker nodes
+      help: |
+        Leave empty to let the OpenShift installer create a dedicated service account.
+      value: openshift-worker-node@acs-team-temp-dev.iam.gserviceaccount.com
       kind: optional
 
     - name: region
@@ -470,6 +484,20 @@
         Consult OCP documentation for details. {{ .Chart.Annotations.ocpCredentialsMode }} is the value used by
         stackrox CI.
 
+    - name: master-node-service-account
+      description: GCP service account for master nodes
+      help: |
+        Leave empty to let the OpenShift installer create a dedicated service account.
+      value: openshift-master-node@acs-team-temp-dev.iam.gserviceaccount.com
+      kind: optional
+
+    - name: worker-node-service-account
+      description: GCP service account for worker nodes
+      help: |
+        Leave empty to let the OpenShift installer create a dedicated service account.
+      value: openshift-worker-node@acs-team-temp-dev.iam.gserviceaccount.com
+      kind: optional
+
     - name: region
       description: Google Cloud region to deploy infrastructure into.
       value: us-east1
@@ -591,9 +619,23 @@
       value: n1-standard-8
       kind: optional
 
+    - name: master-node-service-account
+      description: GCP service account for master nodes
+      help: |
+        Leave empty to let the OpenShift installer create a dedicated service account.
+      value: openshift-master-node@acs-team-temp-dev.iam.gserviceaccount.com
+      kind: optional
+
     - name: worker-node-count
       description: number of worker nodes
       value: 9
+      kind: optional
+
+    - name: worker-node-service-account
+      description: GCP service account for worker nodes
+      help: |
+        Leave empty to let the OpenShift installer create a dedicated service account.
+      value: openshift-worker-node@acs-team-temp-dev.iam.gserviceaccount.com
       kind: optional
 
     - name: region

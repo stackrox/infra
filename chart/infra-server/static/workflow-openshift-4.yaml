@@ -14,10 +14,12 @@ spec:
         value: ""
       - name: master-node-count
         value: ""
+      - name: master-node-service-account
       - name: worker-node-type
         value: ""
       - name: worker-node-count
         value: ""
+      - name: worker-node-service-account
       - name: region
         value: ""
       - name: pull-secret
@@ -131,8 +133,12 @@ spec:
             value: '{{ "{{" }}workflow.parameters.worker-node-count{{ "}}" }}'
           - name: MASTER_NODE_TYPE
             value: '{{ "{{" }}workflow.parameters.master-node-type{{ "}}" }}'
+          - name: MASTER_NODE_SERVICE_ACCOUNT
+            value: '{{ "{{" }}workflow.parameters.master-node-service-account{{ "}}" }}'
           - name: WORKER_NODE_TYPE
             value: '{{ "{{" }}workflow.parameters.worker-node-type{{ "}}" }}'
+          - name: WORKER_NODE_SERVICE_ACCOUNT
+            value: '{{ "{{" }}workflow.parameters.worker-node-service-account{{ "}}" }}'
           - name: REGION
             value: '{{ "{{" }}workflow.parameters.region{{ "}}" }}'
           - name: FIPS_ENABLED

@@ -20,6 +20,8 @@ spec:
       - name: secured-cluster-services-helm-chart-version
       - name: trusted-certs-enabled
       - name: credentials-mode
+      - name: master-node-service-account
+      - name: worker-node-service-account
       - name: region
       - name: ssd-storage-class
       - name: baseline-capability-set
@@ -120,6 +122,10 @@ spec:
             value: "n1-standard-4"
           - name: WORKER_NODE_TYPE
             value: "e2-standard-16"
+          - name: MASTER_NODE_SERVICE_ACCOUNT
+            value: '{{ "{{" }}workflow.parameters.master-node-service-account{{ "}}" }}'
+          - name: WORKER_NODE_SERVICE_ACCOUNT
+            value: '{{ "{{" }}workflow.parameters.worker-node-service-account{{ "}}" }}'
           - name: REGION
             value: '{{ "{{" }}workflow.parameters.region{{ "}}" }}'
           - name: TRUSTED_CERTS_ENABLED
