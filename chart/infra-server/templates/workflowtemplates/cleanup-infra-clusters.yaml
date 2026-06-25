@@ -1,0 +1,62 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: cleanup-infra-clusters
+  namespace: default
+spec:
+  templates:
+    # Stops all infra-managed Argo workflows on a target cluster before it
+    # is destroyed, giving each workflow's onExit handler time to clean up
+    # cloud resources.
+    - name: cleanup
+      inputs:
+        artifacts:
+          - name: kubeconfig
+            path: /tmp/kubeconfig
+            optional: true
+      activeDeadlineSeconds: 3600
+      script:
+        image: quay.io/argoproj/argocli:latest
+        command: [bash]
+        source: |
+          set -uo pipefail
+
+          if [ ! -f /tmp/kubeconfig ]; then
+            echo "No kubeconfig artifact available. Skipping cleanup."
+            exit 0
+          fi
+
+          export KUBECONFIG=/tmp/kubeconfig
+          export ARGO_NAMESPACE=default
+
+          get_active_workflows() {
+            argo list --status Running,Pending -l infra.stackrox.com/cluster-id -o name
+          }
+
+          ACTIVE=$(get_active_workflows)
+          if [ -z "$ACTIVE" ]; then
+            echo "No active workflows found. Skipping cleanup."
+            exit 0
+          fi
+
+          echo "Stopping all active workflows to trigger their destroy phases."
+          for wf in $ACTIVE; do
+            echo "Stopping workflow: ${wf}"
+            argo stop "$wf" || true
+          done
+
+          DEADLINE=$((SECONDS + 3000))
+          while [ $SECONDS -lt $DEADLINE ]; do
+            REMAINING=$(get_active_workflows)
+            if [ -z "$REMAINING" ]; then
+              echo "All managed workflows completed."
+              exit 0
+            fi
+            COUNT=$(echo "$REMAINING" | wc -l | tr -d ' ')
+            echo "Waiting for ${COUNT} workflow(s) to complete..."
+            sleep 30
+          done
+
+          echo "Timed out waiting for managed workflows. Proceeding with cluster destroy."
+          exit 1
