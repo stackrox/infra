@@ -18,3 +18,4 @@ dependencies:
     version: "83.5.1"
     repository: https://prometheus-community.github.io/helm-charts
     condition: monitoring.enabled
+
