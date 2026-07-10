@@ -33,11 +33,11 @@ spec:
               value: "{{ .Values.testMode }}"
           readinessProbe:
             httpGet:
-              path: /
+              path: /healthz
               port: 8443
               scheme: HTTPS
             initialDelaySeconds: 5
-            periodSeconds: 5
+            periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
           command:
