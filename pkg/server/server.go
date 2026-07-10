@@ -173,7 +173,7 @@ func (s *server) RunServer() (<-chan error, error) {
 
 	// Dedicated health endpoint for Kubernetes readiness probes.
 	// Bypasses authentication and redirects to prevent probe timeouts.
-	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
 
