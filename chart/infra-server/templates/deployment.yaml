@@ -38,6 +38,8 @@ spec:
               scheme: HTTPS
             initialDelaySeconds: 5
             periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 3
           command:
             - /infra-server
             - -config-dir
