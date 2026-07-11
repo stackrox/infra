@@ -5,6 +5,8 @@ kind: ServiceMonitor
 metadata:
   name: argo-workflows
   namespace: argo
+  labels:
+    release: {{ .Release.Name }}
 spec:
   endpoints:
   - port: metrics
@@ -20,6 +22,8 @@ kind: ServiceMonitor
 metadata:
   name: infra-server
   namespace: infra
+  labels:
+    release: {{ .Release.Name }}
 spec:
   endpoints:
   - port: metrics
