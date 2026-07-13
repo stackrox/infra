@@ -20,6 +20,11 @@ argo-workflows:
           secondsAfterSuccess: 604800
           secondsAfterFailure: 604800
 
+    # Parallelism configuration
+    parallelism: 50  # Max concurrent workflow operations
+    workflowWorkers: 32  # Worker goroutines
+    podWorkers: 32  # Pod reconciliation workers
+
   artifactRepository:
     archiveLogs: true
     gcs:
