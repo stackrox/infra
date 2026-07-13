@@ -152,13 +152,6 @@ func (s *clusterImpl) Info(_ context.Context, clusterID *v1.ResourceByID) (*v1.C
 
 // List implements ClusterService.List.
 func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) (*v1.ClusterListResponse, error) {
-	workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
-		Namespace: s.workflowNamespace,
-	})
-	if err != nil {
-		return nil, err
-	}
-
 	// Obtain the email of the current principal.
 	var email string
 	if user, found := middleware.UserFromContext(ctx); found {
@@ -167,10 +160,29 @@ func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) 
 		email = svcacct.Email
 	}
 
+	// Build label selector for server-side filtering
+	selector, err := buildLabelSelector(request, email)
+	if err != nil {
+		return nil, err
+	}
+
+	listOpts := &metav1.ListOptions{}
+	if selectorStr := selector.String(); selectorStr != "" {
+		listOpts.LabelSelector = selectorStr
+	}
+
+	workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
+		Namespace:   s.workflowNamespace,
+		ListOptions: listOpts,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	clusters := make([]*v1.Cluster, 0, len(workflowList.Items))
 
-	// Loop over all of the workflows, and keep only the ones that match our
-	// request criteria.
+	// Loop over workflows and apply client-side filters for fields that can't be
+	// filtered server-side (expired status, prefix matching, workflow status).
 	for _, workflow := range workflowList.Items {
 		// This cluster is expired, and we did not request to include expired
 		// clusters.
@@ -178,22 +190,12 @@ func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) 
 			continue
 		}
 
-		// TODO(perf): move this to a listOption for the WorkflowListRequest to do the selection on K8s side
-		// This cluster is not ours, and we did not request to include all clusters.
-		if !request.All && GetOwner(&workflow) != email {
-			continue
-		}
-
+		// Filter by prefix (done client-side as label selectors don't support prefix matching)
 		if request.Prefix != "" && !strings.HasPrefix(getClusterIDFromWorkflow(&workflow), request.Prefix) {
 			continue
 		}
 
-		// If a filter for allowed flavors is active and the cluster is not one of the allowed, skip.
-		if len(request.AllowedFlavors) > 0 && !isClusterOneOfAllowedFlavors(&workflow, request.AllowedFlavors) {
-			continue
-		}
-
-		// If a status filter exists and the cluster is not one of the allowed, skip.
+		// Filter by status (done client-side as status is computed from workflow phase)
 		if len(request.AllowedStatuses) > 0 && !isClusterOneOfAllowedStatuses(&workflow, request.AllowedStatuses) {
 			continue
 		}
@@ -408,6 +410,8 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 
 	workflow.SetLabels(map[string]string{
 		labelClusterID: clusterID,
+		labelOwner:     emailToLabelValue(owner),
+		labelFlavor:    flav.GetID(),
 	})
 
 	log.Log(logging.INFO, "will create an infra cluster",
