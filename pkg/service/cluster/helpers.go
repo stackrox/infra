@@ -292,6 +292,16 @@ func emailToLabelValue(email string) string {
 func buildLabelSelector(req *v1.ClusterListRequest, email string) (labels.Selector, error) {
 	selector := labels.NewSelector()
 
+	// Filter out deleted workflows unless --expired is specified
+	// (deleted workflows are a subset of expired workflows)
+	if !req.Expired {
+		requirement, err := labels.NewRequirement(labelDeleted, selection.NotEquals, []string{"true"})
+		if err != nil {
+			return nil, err
+		}
+		selector = selector.Add(*requirement)
+	}
+
 	// Filter by owner if not requesting all clusters
 	if !req.All && email != "" {
 		labelSafeEmail := emailToLabelValue(email)

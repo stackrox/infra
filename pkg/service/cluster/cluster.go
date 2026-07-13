@@ -182,7 +182,8 @@ func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) 
 	clusters := make([]*v1.Cluster, 0, len(workflowList.Items))
 
 	// Loop over workflows and apply client-side filters for fields that can't be
-	// filtered server-side (expired status, prefix matching, workflow status).
+	// filtered server-side (time-based expiration, prefix matching, workflow status).
+	// Server-side filtering (via label selectors) handles: owner, flavor, deleted status.
 	for _, workflow := range workflowList.Items {
 		// This cluster is expired, and we did not request to include expired
 		// clusters.
@@ -519,6 +520,30 @@ func (s *clusterImpl) Access() map[string]middleware.Access {
 	}
 }
 
+// setDeletedLabel marks a workflow as deleted by adding the deleted label
+func (s *clusterImpl) setDeletedLabel(ctx context.Context, workflowName string) error {
+	// JSON Patch path uses ~1 to escape / in label names
+	labelPath := "/metadata/labels/" + strings.ReplaceAll(labelDeleted, "/", "~1")
+	deletedPatch := []map[string]any{
+		{
+			"op":    "add",
+			"path":  labelPath,
+			"value": "true",
+		},
+	}
+	patchBytes, err := json.Marshal(deletedPatch)
+	if err != nil {
+		return fmt.Errorf("failed to marshal deleted label patch: %w", err)
+	}
+
+	_, err = s.k8sWorkflowsClient.Patch(ctx, workflowName, types.JSONPatchType, patchBytes, metav1.PatchOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to patch workflow with deleted label: %w", err)
+	}
+
+	return nil
+}
+
 func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.Empty, error) {
 	owner, err := middleware.GetOwnerFromContext(ctx)
 	if err != nil {
@@ -546,6 +571,12 @@ func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.
 			"workflow-name", workflow.GetName(),
 			"error", err,
 		)
+		return nil, err
+	}
+
+	// Mark the workflow as deleted with a label
+	if err := s.setDeletedLabel(ctx, workflow.GetName()); err != nil {
+		log.Log(logging.ERROR, "error occurred setting deleted label", "workflow-name", workflow.GetName(), "error", err)
 		return nil, err
 	}
 
@@ -662,8 +693,14 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 	for ; ; time.Sleep(resumeExpiredClusterInterval) {
 		start := time.Now()
 
+		// Use label selector to filter out already-deleted workflows server-side
+		labelSelector := fmt.Sprintf("%s!=%s", labelDeleted, "true")
+
 		workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
 			Namespace: s.workflowNamespace,
+			ListOptions: &metav1.ListOptions{
+				LabelSelector: labelSelector,
+			},
 		})
 		if err != nil {
 			log.Log(logging.ERROR, "failed to list workflows", "error", err)
@@ -680,6 +717,13 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 			}
 
 			log.Log(logging.INFO, "resuming an argo workflow that has expired", "workflow-name", workflow.GetName())
+
+			// Mark the workflow as deleted before resuming
+			if err := s.setDeletedLabel(s.argoClientCtx, workflow.GetName()); err != nil {
+				log.Log(logging.ERROR, "error occurred setting deleted label", "workflow-name", workflow.GetName(), "error", err)
+				// Continue anyway to resume the workflow even if labeling failed
+			}
+
 			_, err = s.argoWorkflowsClient.ResumeWorkflow(s.argoClientCtx, &workflowpkg.WorkflowResumeRequest{
 				Name:      workflow.GetName(),
 				Namespace: s.workflowNamespace,
@@ -751,8 +795,14 @@ func (s *clusterImpl) startSlackCheck() {
 	for ; ; time.Sleep(slackCheckInterval) {
 		start := time.Now()
 
+		// Use label selector to filter out deleted workflows server-side
+		labelSelector := fmt.Sprintf("%s!=%s", labelDeleted, "true")
+
 		workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
 			Namespace: s.workflowNamespace,
+			ListOptions: &metav1.ListOptions{
+				LabelSelector: labelSelector,
+			},
 		})
 		if err != nil {
 			log.Log(logging.ERROR, "failed to list workflows", "error", err)

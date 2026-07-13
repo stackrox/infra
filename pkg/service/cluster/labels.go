@@ -10,6 +10,10 @@ const (
 
 	// labelFlavor is the label key for the cluster flavor ID.
 	labelFlavor = "infra.stackrox.com/flavor"
+
+	// labelDeleted is the label key to mark workflows that have been deleted.
+	// This label is set when a workflow is explicitly deleted or naturally expires.
+	labelDeleted = "infra.stackrox.com/deleted"
 )
 
 // Labeled represents a type that has labels.
