@@ -12,6 +12,8 @@ import (
 	"github.com/stackrox/infra/pkg/logging"
 	"github.com/stackrox/infra/pkg/slack"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
 )
 
 func getClusterIDFromWorkflow(workflow *v1alpha1.Workflow) string {
@@ -55,11 +57,6 @@ func isNearingExpiry(workflow v1alpha1.Workflow) bool {
 	return time.Now().Add(nearExpiry).After(workflowExpiryTime)
 }
 
-func isClusterOneOfAllowedFlavors(workflow *v1alpha1.Workflow, allowedFlavors []string) bool {
-	flavor := GetFlavor(workflow)
-	return slices.Contains(allowedFlavors, flavor)
-}
-
 func isClusterOneOfAllowedStatuses(workflow *v1alpha1.Workflow, allowedStatuses []v1.Status) bool {
 	status := workflowStatus(workflow.Status)
 	return slices.Contains(allowedStatuses, status)
@@ -73,13 +70,6 @@ type metaCluster struct {
 	NearingExpiry bool
 	Slack         slack.Status
 	SlackDM       bool
-}
-
-type artifactData struct {
-	Name        string
-	Description string
-	Tags        map[string]struct{}
-	Data        []byte
 }
 
 // metaClusterFromWorkflow() converts an Argo workflow into an infra cluster
@@ -277,4 +267,30 @@ func workflowFailureDetails(workflowStatus v1alpha1.WorkflowStatus) error {
 		}
 	}
 	return errors.New("")
+}
+
+// buildLabelSelector constructs a Kubernetes label selector from a ClusterListRequest.
+// This enables server-side filtering to reduce the amount of data transferred and processed.
+func buildLabelSelector(req *v1.ClusterListRequest, email string) (labels.Selector, error) {
+	selector := labels.NewSelector()
+
+	// Filter by owner if not requesting all clusters
+	if !req.All && email != "" {
+		requirement, err := labels.NewRequirement(labelOwner, selection.Equals, []string{email})
+		if err != nil {
+			return nil, err
+		}
+		selector = selector.Add(*requirement)
+	}
+
+	// Filter by allowed flavors if specified
+	if len(req.AllowedFlavors) > 0 {
+		requirement, err := labels.NewRequirement(labelFlavor, selection.In, req.AllowedFlavors)
+		if err != nil {
+			return nil, err
+		}
+		selector = selector.Add(*requirement)
+	}
+
+	return selector, nil
 }
