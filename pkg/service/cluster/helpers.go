@@ -121,7 +121,7 @@ func (s *clusterImpl) getClusterDetailsFromArtifacts(cluster *v1.Cluster, workfl
 				// And only artifacts that are tagged with url or connect.
 				_, foundURL := meta.Tags[artifactTagURL]
 				_, foundConnect := meta.Tags[artifactTagConnect]
-				if !(foundURL || foundConnect) {
+				if !foundURL && !foundConnect {
 					continue
 				}
 
