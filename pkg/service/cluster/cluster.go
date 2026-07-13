@@ -695,8 +695,8 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 			}
 		}
 
+		// Log the duration of the loop if above the warning threshold to be aware of performance issues.
 		if time.Since(start) > loopDurationWarning {
-			// TODO: why are we logging this?
 			log.Log(logging.WARN, fmt.Sprintf("expire loop took %s", time.Since(start).String()))
 		}
 	}
@@ -763,8 +763,8 @@ func (s *clusterImpl) startSlackCheck() {
 			s.slackCheckWorkflow(workflow)
 		}
 
+		// Log the duration of the loop if above the warning threshold to be aware of performance issues.
 		if time.Since(start) > loopDurationWarning {
-			// TODO: why are we logging this?
 			log.Log(logging.WARN, fmt.Sprintf("slack loop took %s", time.Since(start).String()))
 		}
 	}
