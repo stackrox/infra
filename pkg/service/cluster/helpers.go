@@ -12,6 +12,8 @@ import (
 	"github.com/stackrox/infra/pkg/logging"
 	"github.com/stackrox/infra/pkg/slack"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
 )
 
 func getClusterIDFromWorkflow(workflow *v1alpha1.Workflow) string {
@@ -55,11 +57,6 @@ func isNearingExpiry(workflow v1alpha1.Workflow) bool {
 	return time.Now().Add(nearExpiry).After(workflowExpiryTime)
 }
 
-func isClusterOneOfAllowedFlavors(workflow *v1alpha1.Workflow, allowedFlavors []string) bool {
-	flavor := GetFlavor(workflow)
-	return slices.Contains(allowedFlavors, flavor)
-}
-
 func isClusterOneOfAllowedStatuses(workflow *v1alpha1.Workflow, allowedStatuses []v1.Status) bool {
 	status := workflowStatus(workflow.Status)
 	return slices.Contains(allowedStatuses, status)
@@ -73,13 +70,6 @@ type metaCluster struct {
 	NearingExpiry bool
 	Slack         slack.Status
 	SlackDM       bool
-}
-
-type artifactData struct {
-	Name        string
-	Description string
-	Tags        map[string]struct{}
-	Data        []byte
 }
 
 // metaClusterFromWorkflow() converts an Argo workflow into an infra cluster
@@ -277,4 +267,49 @@ func workflowFailureDetails(workflowStatus v1alpha1.WorkflowStatus) error {
 		}
 	}
 	return errors.New("")
+}
+
+// emailToLabelValue converts an email address to a Kubernetes label-safe value.
+// Kubernetes label values must match ([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9] and be at most 63 characters.
+func emailToLabelValue(email string) string {
+	// Replace characters that aren't valid in Kubernetes labels
+	result := strings.ReplaceAll(email, "@", ".at.")
+	result = strings.ReplaceAll(result, "+", ".plus.")
+
+	// Ensure max length of 63 characters
+	if len(result) > 63 {
+		result = result[:63]
+	}
+
+	// Ensure it ends with alphanumeric (trim trailing dots if present)
+	result = strings.TrimRight(result, ".")
+
+	return result
+}
+
+// buildLabelSelector constructs a Kubernetes label selector from a ClusterListRequest.
+// This enables server-side filtering to reduce the amount of data transferred and processed.
+func buildLabelSelector(req *v1.ClusterListRequest, email string) (labels.Selector, error) {
+	selector := labels.NewSelector()
+
+	// Filter by owner if not requesting all clusters
+	if !req.All && email != "" {
+		labelSafeEmail := emailToLabelValue(email)
+		requirement, err := labels.NewRequirement(labelOwner, selection.Equals, []string{labelSafeEmail})
+		if err != nil {
+			return nil, err
+		}
+		selector = selector.Add(*requirement)
+	}
+
+	// Filter by allowed flavors if specified
+	if len(req.AllowedFlavors) > 0 {
+		requirement, err := labels.NewRequirement(labelFlavor, selection.In, req.AllowedFlavors)
+		if err != nil {
+			return nil, err
+		}
+		selector = selector.Add(*requirement)
+	}
+
+	return selector, nil
 }
