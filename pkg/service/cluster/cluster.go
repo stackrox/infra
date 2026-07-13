@@ -81,6 +81,7 @@ type clusterImpl struct {
 	argoClientCtx       context.Context
 	workflowNamespace   string
 	bqClient            bqutil.BigQueryClient
+	artifactCache       *artifactCache
 }
 
 var (
@@ -115,6 +116,13 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer, slackCl
 		resumeExpiredClusterInterval = 5 * time.Second
 	}
 
+	// Initialize artifact cache
+	// Artifacts are immutable once written, so pure LRU eviction is sufficient
+	cache, err := newArtifactCache(defaultCacheSize)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create artifact cache: %w", err)
+	}
+
 	impl := &clusterImpl{
 		k8sWorkflowsClient:  k8sWorkflowsClient,
 		k8sPodsClient:       k8sPodsClient,
@@ -126,6 +134,7 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer, slackCl
 		argoClientCtx:       ctx,
 		workflowNamespace:   workflowNamespace,
 		bqClient:            bqClient,
+		artifactCache:       cache,
 	}
 
 	go impl.startSlackCheck()

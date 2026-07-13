@@ -130,9 +130,16 @@ func (s *clusterImpl) getClusterDetailsFromArtifacts(cluster *v1.Cluster, workfl
 					continue
 				}
 
-				contents, err := s.signer.Contents(bucket, key)
-				if err != nil {
-					return nil, err
+				// Check cache first before making GCS API call
+				contents, found := s.artifactCache.Get(bucket, key)
+				if !found {
+					// Cache miss - fetch from GCS and cache the result
+					var err error
+					contents, err = s.signer.Contents(bucket, key)
+					if err != nil {
+						return nil, err
+					}
+					s.artifactCache.Set(bucket, key, contents)
 				}
 
 				if _, found := meta.Tags[artifactTagURL]; found {
