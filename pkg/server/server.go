@@ -171,6 +171,12 @@ func (s *server) RunServer() (<-chan error, error) {
 	routeMux.Handle("/v1/", gwMux)
 	s.oidc.Handle(routeMux)
 
+	// Dedicated health endpoint for Kubernetes readiness probes.
+	// Bypasses authentication and redirects to prevent probe timeouts.
+	mux.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
 	mux.Handle("/",
 		wrapHealthCheck(
 			wrapCanonicalRedirect(
