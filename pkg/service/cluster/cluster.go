@@ -662,8 +662,9 @@ func (s *clusterImpl) RegisterServiceHandler(ctx context.Context, mux *runtime.S
 func (s *clusterImpl) getMostRecentArgoWorkflowFromClusterID(clusterID string) (*v1alpha1.Workflow, error) {
 	listOpts := &metav1.ListOptions{}
 	labelSelector := labels.NewSelector()
-	req, _ := labels.NewRequirement(labelClusterID, selection.Equals, []string{clusterID})
-	labelSelector = labelSelector.Add(*req)
+	clusterIDRequirement, _ := labels.NewRequirement(labelClusterID, selection.Equals, []string{clusterID})
+	notDeletedRequirement, _ := labels.NewRequirement(labelDeleted, selection.NotEquals, []string{"true"})
+	labelSelector = labelSelector.Add(*clusterIDRequirement, *notDeletedRequirement)
 	listOpts.LabelSelector = labelSelector.String()
 
 	workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{

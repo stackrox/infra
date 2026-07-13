@@ -119,10 +119,10 @@ func (s *clusterImpl) getClusterDetailsFromArtifacts(cluster *v1.Cluster, workfl
 			if meta, found := flavorMetadata[artifact.Name]; found {
 
 				// And only artifacts that are tagged with url or connect.
-				if _, foundURL := meta.Tags[artifactTagURL]; !foundURL {
-					if _, foundConnect := meta.Tags[artifactTagConnect]; !foundConnect {
-						continue
-					}
+				_, foundURL := meta.Tags[artifactTagURL]
+				_, foundConnect := meta.Tags[artifactTagConnect]
+				if !(foundURL || foundConnect) {
+					continue
 				}
 
 				bucket, key := handleArtifactMigration(workflow, artifact)
