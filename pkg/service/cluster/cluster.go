@@ -410,7 +410,7 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 
 	workflow.SetLabels(map[string]string{
 		labelClusterID: clusterID,
-		labelOwner:     owner,
+		labelOwner:     emailToLabelValue(owner),
 		labelFlavor:    flav.GetID(),
 	})
 

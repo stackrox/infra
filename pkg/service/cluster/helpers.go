@@ -269,6 +269,24 @@ func workflowFailureDetails(workflowStatus v1alpha1.WorkflowStatus) error {
 	return errors.New("")
 }
 
+// emailToLabelValue converts an email address to a Kubernetes label-safe value.
+// Kubernetes label values must match ([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9] and be at most 63 characters.
+func emailToLabelValue(email string) string {
+	// Replace characters that aren't valid in Kubernetes labels
+	result := strings.ReplaceAll(email, "@", ".at.")
+	result = strings.ReplaceAll(result, "+", ".plus.")
+
+	// Ensure max length of 63 characters
+	if len(result) > 63 {
+		result = result[:63]
+	}
+
+	// Ensure it ends with alphanumeric (trim trailing dots if present)
+	result = strings.TrimRight(result, ".")
+
+	return result
+}
+
 // buildLabelSelector constructs a Kubernetes label selector from a ClusterListRequest.
 // This enables server-side filtering to reduce the amount of data transferred and processed.
 func buildLabelSelector(req *v1.ClusterListRequest, email string) (labels.Selector, error) {
@@ -276,7 +294,8 @@ func buildLabelSelector(req *v1.ClusterListRequest, email string) (labels.Select
 
 	// Filter by owner if not requesting all clusters
 	if !req.All && email != "" {
-		requirement, err := labels.NewRequirement(labelOwner, selection.Equals, []string{email})
+		labelSafeEmail := emailToLabelValue(email)
+		requirement, err := labels.NewRequirement(labelOwner, selection.Equals, []string{labelSafeEmail})
 		if err != nil {
 			return nil, err
 		}
