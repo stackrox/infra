@@ -23,8 +23,6 @@ spec:
         value: ""
       - name: k8s-version
         value: ""
-      - name: enable-psps
-        value: ""
       - name: gcp-region
         value: ""
       - name: gcp-zone
@@ -141,7 +139,6 @@ spec:
           - --dns-gcp-project=acs-team-temp-dev
           - --creation-source=infra
           - --k8s-version={{ "{{" }}workflow.parameters.k8s-version{{ "}}" }}
-          - --enable-psps={{ "{{" }}workflow.parameters.enable-psps{{ "}}" }}
           - --gcp-region={{ "{{" }}workflow.parameters.gcp-region{{ "}}" }}
           - --gcp-zone={{ "{{" }}workflow.parameters.gcp-zone{{ "}}" }}
         volumeMounts:
