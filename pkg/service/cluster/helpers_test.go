@@ -81,24 +81,25 @@ func TestBuildLabelSelector_FilterDeletedWorkflows(t *testing.T) {
 		request         *v1.ClusterListRequest
 		email           string
 		expectedClauses []string // Expected clauses in the selector (order-independent)
+		expectError     bool
 	}{
 		{
-			name: "default - exclude deleted",
+			name: "empty email with All=false - should error",
 			request: &v1.ClusterListRequest{
 				All:     false,
 				Expired: false,
 			},
-			email:           "",
-			expectedClauses: []string{"infra.stackrox.com/deleted!=true"},
+			email:       "",
+			expectError: true,
 		},
 		{
-			name: "expired flag - include deleted",
+			name: "empty email with All=false and Expired=true - should error",
 			request: &v1.ClusterListRequest{
 				All:     false,
 				Expired: true,
 			},
-			email:           "",
-			expectedClauses: []string{}, // No deleted filter when expired=true
+			email:       "",
+			expectError: true,
 		},
 		{
 			name: "with owner filter",
@@ -113,17 +114,14 @@ func TestBuildLabelSelector_FilterDeletedWorkflows(t *testing.T) {
 			},
 		},
 		{
-			name: "with flavor filter",
+			name: "empty email with flavor filter - should error",
 			request: &v1.ClusterListRequest{
 				All:            false,
 				Expired:        false,
 				AllowedFlavors: []string{"gke-default", "eks-default"},
 			},
-			email: "",
-			expectedClauses: []string{
-				"infra.stackrox.com/deleted!=true",
-				"infra.stackrox.com/flavor in (",
-			},
+			email:       "",
+			expectError: true,
 		},
 		{
 			name: "with owner and flavor filters",
@@ -158,24 +156,40 @@ func TestBuildLabelSelector_FilterDeletedWorkflows(t *testing.T) {
 			expectedClauses: []string{}, // No filters
 		},
 		{
-			name: "expired with flavor filter - include deleted",
+			name: "empty email with expired and flavor filter - should error",
 			request: &v1.ClusterListRequest{
 				All:            false,
 				Expired:        true,
 				AllowedFlavors: []string{"gke-default"},
 			},
-			email: "",
-			expectedClauses: []string{
-				"infra.stackrox.com/flavor in (gke-default)",
+			email:       "",
+			expectError: true,
+		},
+		{
+			name: "All=true with empty email - should succeed",
+			request: &v1.ClusterListRequest{
+				All:     true,
+				Expired: false,
 			},
+			email:           "",
+			expectedClauses: []string{"infra.stackrox.com/deleted!=true"},
+			expectError:     false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			selector, err := buildLabelSelector(tt.request, tt.email)
+
+			if tt.expectError {
+				if err == nil {
+					t.Errorf("buildLabelSelector() expected error but got none")
+				}
+				return
+			}
+
 			if err != nil {
-				t.Errorf("buildLabelSelector() returned error: %v", err)
+				t.Errorf("buildLabelSelector() returned unexpected error: %v", err)
 				return
 			}
 

@@ -311,7 +311,10 @@ func buildLabelSelector(req *v1.ClusterListRequest, email string) (labels.Select
 	}
 
 	// Filter by owner if not requesting all clusters
-	if !req.All && email != "" {
+	if !req.All {
+		if email == "" {
+			return nil, fmt.Errorf("no authenticated user found for non-all cluster list request")
+		}
 		labelSafeEmail := emailToLabelValue(email)
 		requirement, err := labels.NewRequirement(labelOwner, selection.Equals, []string{labelSafeEmail})
 		if err != nil {
