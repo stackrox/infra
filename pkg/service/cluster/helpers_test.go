@@ -212,3 +212,99 @@ func TestBuildLabelSelector_FilterDeletedWorkflows(t *testing.T) {
 		})
 	}
 }
+
+func TestValidateClusterID(t *testing.T) {
+	tests := []struct {
+		name        string
+		clusterID   string
+		expectError bool
+	}{
+		{
+			name:        "valid simple ID",
+			clusterID:   "my-cluster",
+			expectError: false,
+		},
+		{
+			name:        "valid ID with dots and underscores",
+			clusterID:   "cluster-1.test_env",
+			expectError: false,
+		},
+		{
+			name:        "valid single character",
+			clusterID:   "a",
+			expectError: false,
+		},
+		{
+			name:        "valid two characters",
+			clusterID:   "ab",
+			expectError: false,
+		},
+		{
+			name:        "empty cluster ID",
+			clusterID:   "",
+			expectError: true,
+		},
+		{
+			name:        "cluster ID with spaces",
+			clusterID:   "my cluster",
+			expectError: true,
+		},
+		{
+			name:        "cluster ID too long (64 chars)",
+			clusterID:   "a234567890123456789012345678901234567890123456789012345678901234",
+			expectError: true,
+		},
+		{
+			name:        "cluster ID exactly 63 chars",
+			clusterID:   "a23456789012345678901234567890123456789012345678901234567890123",
+			expectError: false,
+		},
+		{
+			name:        "cluster ID starting with dash",
+			clusterID:   "-cluster",
+			expectError: true,
+		},
+		{
+			name:        "cluster ID ending with dash",
+			clusterID:   "cluster-",
+			expectError: true,
+		},
+		{
+			name:        "cluster ID starting with dot",
+			clusterID:   ".cluster",
+			expectError: true,
+		},
+		{
+			name:        "cluster ID ending with dot",
+			clusterID:   "cluster.",
+			expectError: true,
+		},
+		{
+			name:        "cluster ID with special characters",
+			clusterID:   "cluster@test",
+			expectError: true,
+		},
+		{
+			name:        "cluster ID with slash",
+			clusterID:   "cluster/test",
+			expectError: true,
+		},
+		{
+			name:        "cluster ID starting with underscore",
+			clusterID:   "_cluster",
+			expectError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validateClusterID(tt.clusterID)
+			if tt.expectError && err == nil {
+				t.Errorf("validateClusterID(%q) expected error but got none", tt.clusterID)
+			}
+			if !tt.expectError && err != nil {
+				t.Errorf("validateClusterID(%q) expected no error but got: %v", tt.clusterID, err)
+			}
+		})
+	}
+}

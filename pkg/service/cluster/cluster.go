@@ -358,11 +358,16 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 
 	// Use the user supplied name as the root of Argo workflow name and the Infra cluster Id.
 	clusterID, ok := req.Parameters["name"]
-	if ok {
-		workflow.GenerateName = clusterID + "-"
-	} else {
+	if !ok {
 		return nil, fmt.Errorf("parameter 'name' was not provided")
 	}
+
+	// Validate that cluster ID meets Kubernetes label value requirements
+	if err := validateClusterID(clusterID); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid cluster ID: %v", err)
+	}
+
+	workflow.GenerateName = clusterID + "-"
 
 	// Make sure there is no running argo workflow for infra cluster with the same ID
 	existingWorkflow, _ := s.getMostRecentArgoWorkflowFromClusterID(clusterID)
@@ -667,7 +672,11 @@ func (s *clusterImpl) RegisterServiceHandler(ctx context.Context, mux *runtime.S
 func (s *clusterImpl) getMostRecentArgoWorkflowFromClusterID(clusterID string) (*v1alpha1.Workflow, error) {
 	listOpts := &metav1.ListOptions{}
 	labelSelector := labels.NewSelector()
-	clusterIDRequirement, _ := labels.NewRequirement(labelClusterID, selection.Equals, []string{clusterID})
+	clusterIDRequirement, err := labels.NewRequirement(labelClusterID, selection.Equals, []string{clusterID})
+	if err != nil {
+		log.Log(logging.ERROR, "failed to build cluster ID requirement", "cluster-id", clusterID, "error", err)
+		return nil, err
+	}
 	labelSelector = labelSelector.Add(*clusterIDRequirement)
 	listOpts.LabelSelector = labelSelector.String()
 

@@ -3,6 +3,7 @@ package cluster
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"slices"
 	"strings"
 	"time"
@@ -293,6 +294,26 @@ func emailToLabelValue(email string) string {
 	result = strings.TrimLeft(result, "._-")
 
 	return result
+}
+
+// validateClusterID validates that a cluster ID meets Kubernetes label value requirements.
+// Kubernetes label values must match ([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9] and be at most 63 characters.
+func validateClusterID(clusterID string) error {
+	if clusterID == "" {
+		return fmt.Errorf("cluster ID cannot be empty")
+	}
+
+	if len(clusterID) > 63 {
+		return fmt.Errorf("cluster ID %q exceeds maximum length of 63 characters (got %d)", clusterID, len(clusterID))
+	}
+
+	// Kubernetes label value regex: must start and end with alphanumeric, middle can have .-_
+	validLabelValue := regexp.MustCompile(`^[A-Za-z0-9]([A-Za-z0-9._-]*[A-Za-z0-9])?$`)
+	if !validLabelValue.MatchString(clusterID) {
+		return fmt.Errorf("cluster ID %q contains invalid characters: must start and end with alphanumeric, and contain only alphanumeric, dot, dash, or underscore", clusterID)
+	}
+
+	return nil
 }
 
 // buildLabelSelector constructs a Kubernetes label selector from a ClusterListRequest.
