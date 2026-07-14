@@ -288,8 +288,9 @@ func emailToLabelValue(email string) string {
 		result = result[:63]
 	}
 
-	// Ensure it ends with alphanumeric (trim trailing dots if present)
-	result = strings.TrimRight(result, ".")
+	// Ensure it starts and ends with alphanumeric (trim invalid leading/trailing chars)
+	result = strings.TrimRight(result, "._-")
+	result = strings.TrimLeft(result, "._-")
 
 	return result
 }

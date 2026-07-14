@@ -1,6 +1,7 @@
 package cluster
 
 import (
+	"regexp"
 	"strings"
 	"testing"
 
@@ -38,7 +39,25 @@ func TestEmailToLabelValue(t *testing.T) {
 			email:    "user.name+test@subdomain.example.com",
 			expected: "user.name.plus.test.at.subdomain.example.com",
 		},
+		{
+			name:     "email starting with plus",
+			email:    "+tag@example.com",
+			expected: "plus.tag.at.example.com",
+		},
+		{
+			name:     "long email truncating on dash",
+			email:    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-@example.com",
+			expected: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+		},
+		{
+			name:     "long email truncating on dot",
+			email:    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.@example.com",
+			expected: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+		},
 	}
+
+	// Kubernetes label value regex
+	labelValueRegex := regexp.MustCompile(`^[A-Za-z0-9]([A-Za-z0-9._-]*[A-Za-z0-9])?$`)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -48,6 +67,9 @@ func TestEmailToLabelValue(t *testing.T) {
 			}
 			if len(result) > 63 {
 				t.Errorf("emailToLabelValue(%q) returned %q with length %d, exceeds 63 chars", tt.email, result, len(result))
+			}
+			if result != "" && !labelValueRegex.MatchString(result) {
+				t.Errorf("emailToLabelValue(%q) returned %q, not a valid K8s label value", tt.email, result)
 			}
 		})
 	}
