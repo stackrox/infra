@@ -2,7 +2,6 @@ package cluster
 
 import (
 	"fmt"
-	"sync"
 
 	lru "github.com/hashicorp/golang-lru/v2"
 	"github.com/stackrox/infra/pkg/service/metrics"
@@ -18,7 +17,6 @@ const (
 // Since workflow artifacts don't change once written, no TTL is needed.
 type artifactCache struct {
 	cache *lru.Cache[string, []byte]
-	mu    sync.RWMutex
 }
 
 // newArtifactCache creates a new artifact cache with the specified size.
@@ -36,9 +34,6 @@ func newArtifactCache(size int) (*artifactCache, error) {
 // Get retrieves cached artifact content if present.
 // Returns the content and true if found, nil and false otherwise.
 func (c *artifactCache) Get(bucket, key string) ([]byte, bool) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-
 	cacheKey := makeCacheKey(bucket, key)
 	content, found := c.cache.Get(cacheKey)
 	if !found {
@@ -52,9 +47,6 @@ func (c *artifactCache) Get(bucket, key string) ([]byte, bool) {
 
 // Set stores artifact content in the cache.
 func (c *artifactCache) Set(bucket, key string, content []byte) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
 	cacheKey := makeCacheKey(bucket, key)
 	c.cache.Add(cacheKey, content)
 	metrics.ArtifactCacheSizeGauge.Set(float64(c.cache.Len()))
