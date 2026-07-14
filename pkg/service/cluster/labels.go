@@ -4,6 +4,17 @@ const (
 	// labelClusterId is the label key used to map an infra cluster to
 	// an argo workflow.
 	labelClusterID = "infra.stackrox.com/cluster-id"
+
+	// labelOwner is the label key for the cluster owner email.
+	labelOwner = "infra.stackrox.com/owner"
+
+	// labelFlavor is the label key for the cluster flavor ID.
+	labelFlavor = "infra.stackrox.com/flavor"
+
+	// labelDeleted is the label key to mark workflows that have finished destroying.
+	// This label is set after a workflow reaches FINISHED so that list queries can
+	// filter it out server-side without hiding in-progress destroy status.
+	labelDeleted = "infra.stackrox.com/deleted"
 )
 
 // Labeled represents a type that has labels.

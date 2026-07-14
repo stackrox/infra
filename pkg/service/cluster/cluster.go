@@ -81,6 +81,7 @@ type clusterImpl struct {
 	argoClientCtx       context.Context
 	workflowNamespace   string
 	bqClient            bqutil.BigQueryClient
+	artifactCache       *artifactCache
 }
 
 var (
@@ -115,6 +116,13 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer, slackCl
 		resumeExpiredClusterInterval = 5 * time.Second
 	}
 
+	// Initialize artifact cache
+	// Artifacts are immutable once written, so pure LRU eviction is sufficient
+	cache, err := newArtifactCache(defaultCacheSize)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create artifact cache: %w", err)
+	}
+
 	impl := &clusterImpl{
 		k8sWorkflowsClient:  k8sWorkflowsClient,
 		k8sPodsClient:       k8sPodsClient,
@@ -126,6 +134,7 @@ func NewClusterService(registry *flavor.Registry, signer *signer.Signer, slackCl
 		argoClientCtx:       ctx,
 		workflowNamespace:   workflowNamespace,
 		bqClient:            bqClient,
+		artifactCache:       cache,
 	}
 
 	go impl.startSlackCheck()
@@ -152,13 +161,6 @@ func (s *clusterImpl) Info(_ context.Context, clusterID *v1.ResourceByID) (*v1.C
 
 // List implements ClusterService.List.
 func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) (*v1.ClusterListResponse, error) {
-	workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
-		Namespace: s.workflowNamespace,
-	})
-	if err != nil {
-		return nil, err
-	}
-
 	// Obtain the email of the current principal.
 	var email string
 	if user, found := middleware.UserFromContext(ctx); found {
@@ -167,10 +169,30 @@ func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) 
 		email = svcacct.Email
 	}
 
+	// Build label selector for server-side filtering
+	selector, err := buildLabelSelector(request, email)
+	if err != nil {
+		return nil, err
+	}
+
+	listOpts := &metav1.ListOptions{}
+	if selectorStr := selector.String(); selectorStr != "" {
+		listOpts.LabelSelector = selectorStr
+	}
+
+	workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
+		Namespace:   s.workflowNamespace,
+		ListOptions: listOpts,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	clusters := make([]*v1.Cluster, 0, len(workflowList.Items))
 
-	// Loop over all of the workflows, and keep only the ones that match our
-	// request criteria.
+	// Loop over workflows and apply client-side filters for fields that can't be
+	// filtered server-side (time-based expiration, prefix matching, workflow status).
+	// Server-side filtering (via label selectors) handles: owner, flavor, deleted status.
 	for _, workflow := range workflowList.Items {
 		// This cluster is expired, and we did not request to include expired
 		// clusters.
@@ -178,22 +200,12 @@ func (s *clusterImpl) List(ctx context.Context, request *v1.ClusterListRequest) 
 			continue
 		}
 
-		// TODO(perf): move this to a listOption for the WorkflowListRequest to do the selection on K8s side
-		// This cluster is not ours, and we did not request to include all clusters.
-		if !request.All && GetOwner(&workflow) != email {
-			continue
-		}
-
+		// Filter by prefix (done client-side as label selectors don't support prefix matching)
 		if request.Prefix != "" && !strings.HasPrefix(getClusterIDFromWorkflow(&workflow), request.Prefix) {
 			continue
 		}
 
-		// If a filter for allowed flavors is active and the cluster is not one of the allowed, skip.
-		if len(request.AllowedFlavors) > 0 && !isClusterOneOfAllowedFlavors(&workflow, request.AllowedFlavors) {
-			continue
-		}
-
-		// If a status filter exists and the cluster is not one of the allowed, skip.
+		// Filter by status (done client-side as status is computed from workflow phase)
 		if len(request.AllowedStatuses) > 0 && !isClusterOneOfAllowedStatuses(&workflow, request.AllowedStatuses) {
 			continue
 		}
@@ -346,11 +358,16 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 
 	// Use the user supplied name as the root of Argo workflow name and the Infra cluster Id.
 	clusterID, ok := req.Parameters["name"]
-	if ok {
-		workflow.GenerateName = clusterID + "-"
-	} else {
+	if !ok {
 		return nil, fmt.Errorf("parameter 'name' was not provided")
 	}
+
+	// Validate that cluster ID meets Kubernetes label value requirements
+	if err := validateClusterID(clusterID); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid cluster ID: %v", err)
+	}
+
+	workflow.GenerateName = clusterID + "-"
 
 	// Make sure there is no running argo workflow for infra cluster with the same ID
 	existingWorkflow, _ := s.getMostRecentArgoWorkflowFromClusterID(clusterID)
@@ -408,6 +425,8 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 
 	workflow.SetLabels(map[string]string{
 		labelClusterID: clusterID,
+		labelOwner:     emailToLabelValue(owner),
+		labelFlavor:    flav.GetID(),
 	})
 
 	log.Log(logging.INFO, "will create an infra cluster",
@@ -513,6 +532,32 @@ func (s *clusterImpl) Access() map[string]middleware.Access {
 		"/v1.ClusterService/Delete":    middleware.Authenticated,
 		"/v1.ClusterService/Logs":      middleware.Authenticated,
 	}
+}
+
+// setDeletedLabel marks a workflow as deleted by adding the deleted label.
+// This is applied after destruction completes (FINISHED) so status polling
+// during DESTROYING continues to work.
+func (s *clusterImpl) setDeletedLabel(ctx context.Context, workflowName string) error {
+	// JSON Patch path uses ~1 to escape / in label names
+	labelPath := "/metadata/labels/" + strings.ReplaceAll(labelDeleted, "/", "~1")
+	deletedPatch := []map[string]any{
+		{
+			"op":    "add",
+			"path":  labelPath,
+			"value": "true",
+		},
+	}
+	patchBytes, err := json.Marshal(deletedPatch)
+	if err != nil {
+		return fmt.Errorf("failed to marshal deleted label patch: %w", err)
+	}
+
+	_, err = s.k8sWorkflowsClient.Patch(ctx, workflowName, types.JSONPatchType, patchBytes, metav1.PatchOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to patch workflow with deleted label: %w", err)
+	}
+
+	return nil
 }
 
 func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.Empty, error) {
@@ -627,8 +672,12 @@ func (s *clusterImpl) RegisterServiceHandler(ctx context.Context, mux *runtime.S
 func (s *clusterImpl) getMostRecentArgoWorkflowFromClusterID(clusterID string) (*v1alpha1.Workflow, error) {
 	listOpts := &metav1.ListOptions{}
 	labelSelector := labels.NewSelector()
-	req, _ := labels.NewRequirement(labelClusterID, selection.Equals, []string{clusterID})
-	labelSelector = labelSelector.Add(*req)
+	clusterIDRequirement, err := labels.NewRequirement(labelClusterID, selection.Equals, []string{clusterID})
+	if err != nil {
+		log.Log(logging.ERROR, "failed to build cluster ID requirement", "cluster-id", clusterID, "error", err)
+		return nil, err
+	}
+	labelSelector = labelSelector.Add(*clusterIDRequirement)
 	listOpts.LabelSelector = labelSelector.String()
 
 	workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
@@ -658,8 +707,14 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 	for ; ; time.Sleep(resumeExpiredClusterInterval) {
 		start := time.Now()
 
+		// Use label selector to filter out already-deleted workflows server-side
+		labelSelector := fmt.Sprintf("%s!=%s", labelDeleted, "true")
+
 		workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
 			Namespace: s.workflowNamespace,
+			ListOptions: &metav1.ListOptions{
+				LabelSelector: labelSelector,
+			},
 		})
 		if err != nil {
 			log.Log(logging.ERROR, "failed to list workflows", "error", err)
@@ -667,7 +722,15 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 		}
 
 		for _, workflow := range workflowList.Items {
-			if workflowStatus(workflow.Status) != v1.Status_READY {
+			status := workflowStatus(workflow.Status)
+			if status == v1.Status_FINISHED {
+				if err := s.setDeletedLabel(s.argoClientCtx, workflow.GetName()); err != nil {
+					log.Log(logging.ERROR, "error occurred setting deleted label", "workflow-name", workflow.GetName(), "error", err)
+				}
+				continue
+			}
+
+			if status != v1.Status_READY {
 				continue
 			}
 
@@ -676,6 +739,7 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 			}
 
 			log.Log(logging.INFO, "resuming an argo workflow that has expired", "workflow-name", workflow.GetName())
+
 			_, err = s.argoWorkflowsClient.ResumeWorkflow(s.argoClientCtx, &workflowpkg.WorkflowResumeRequest{
 				Name:      workflow.GetName(),
 				Namespace: s.workflowNamespace,
@@ -691,8 +755,8 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 			}
 		}
 
+		// Log the duration of the loop if above the warning threshold to be aware of performance issues.
 		if time.Since(start) > loopDurationWarning {
-			// TODO: why are we logging this?
 			log.Log(logging.WARN, fmt.Sprintf("expire loop took %s", time.Since(start).String()))
 		}
 	}
@@ -747,8 +811,14 @@ func (s *clusterImpl) startSlackCheck() {
 	for ; ; time.Sleep(slackCheckInterval) {
 		start := time.Now()
 
+		// Use label selector to filter out deleted workflows server-side
+		labelSelector := fmt.Sprintf("%s!=%s", labelDeleted, "true")
+
 		workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
 			Namespace: s.workflowNamespace,
+			ListOptions: &metav1.ListOptions{
+				LabelSelector: labelSelector,
+			},
 		})
 		if err != nil {
 			log.Log(logging.ERROR, "failed to list workflows", "error", err)
@@ -759,8 +829,8 @@ func (s *clusterImpl) startSlackCheck() {
 			s.slackCheckWorkflow(workflow)
 		}
 
+		// Log the duration of the loop if above the warning threshold to be aware of performance issues.
 		if time.Since(start) > loopDurationWarning {
-			// TODO: why are we logging this?
 			log.Log(logging.WARN, fmt.Sprintf("slack loop took %s", time.Since(start).String()))
 		}
 	}

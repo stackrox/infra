@@ -3,6 +3,7 @@ package cluster
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"slices"
 	"strings"
 	"time"
@@ -12,6 +13,8 @@ import (
 	"github.com/stackrox/infra/pkg/logging"
 	"github.com/stackrox/infra/pkg/slack"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
 )
 
 func getClusterIDFromWorkflow(workflow *v1alpha1.Workflow) string {
@@ -55,11 +58,6 @@ func isNearingExpiry(workflow v1alpha1.Workflow) bool {
 	return time.Now().Add(nearExpiry).After(workflowExpiryTime)
 }
 
-func isClusterOneOfAllowedFlavors(workflow *v1alpha1.Workflow, allowedFlavors []string) bool {
-	flavor := GetFlavor(workflow)
-	return slices.Contains(allowedFlavors, flavor)
-}
-
 func isClusterOneOfAllowedStatuses(workflow *v1alpha1.Workflow, allowedStatuses []v1.Status) bool {
 	status := workflowStatus(workflow.Status)
 	return slices.Contains(allowedStatuses, status)
@@ -73,13 +71,6 @@ type metaCluster struct {
 	NearingExpiry bool
 	Slack         slack.Status
 	SlackDM       bool
-}
-
-type artifactData struct {
-	Name        string
-	Description string
-	Tags        map[string]struct{}
-	Data        []byte
 }
 
 // metaClusterFromWorkflow() converts an Argo workflow into an infra cluster
@@ -129,10 +120,10 @@ func (s *clusterImpl) getClusterDetailsFromArtifacts(cluster *v1.Cluster, workfl
 			if meta, found := flavorMetadata[artifact.Name]; found {
 
 				// And only artifacts that are tagged with url or connect.
-				if _, foundURL := meta.Tags[artifactTagURL]; !foundURL {
-					if _, foundConnect := meta.Tags[artifactTagConnect]; !foundConnect {
-						continue
-					}
+				_, foundURL := meta.Tags[artifactTagURL]
+				_, foundConnect := meta.Tags[artifactTagConnect]
+				if !foundURL && !foundConnect {
+					continue
 				}
 
 				bucket, key := handleArtifactMigration(workflow, artifact)
@@ -140,9 +131,16 @@ func (s *clusterImpl) getClusterDetailsFromArtifacts(cluster *v1.Cluster, workfl
 					continue
 				}
 
-				contents, err := s.signer.Contents(bucket, key)
-				if err != nil {
-					return nil, err
+				// Check cache first before making GCS API call
+				contents, found := s.artifactCache.Get(bucket, key)
+				if !found {
+					// Cache miss - fetch from GCS and cache the result
+					var err error
+					contents, err = s.signer.Contents(bucket, key)
+					if err != nil {
+						return nil, err
+					}
+					s.artifactCache.Set(bucket, key, contents)
 				}
 
 				if _, found := meta.Tags[artifactTagURL]; found {
@@ -277,4 +275,83 @@ func workflowFailureDetails(workflowStatus v1alpha1.WorkflowStatus) error {
 		}
 	}
 	return errors.New("")
+}
+
+// emailToLabelValue converts an email address to a Kubernetes label-safe value.
+// Kubernetes label values must match ([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9] and be at most 63 characters.
+func emailToLabelValue(email string) string {
+	// Replace characters that aren't valid in Kubernetes labels
+	result := strings.ReplaceAll(email, "@", ".at.")
+	result = strings.ReplaceAll(result, "+", ".plus.")
+
+	// Ensure max length of 63 characters
+	if len(result) > 63 {
+		result = result[:63]
+	}
+
+	// Ensure it starts and ends with alphanumeric (trim invalid leading/trailing chars)
+	result = strings.TrimRight(result, "._-")
+	result = strings.TrimLeft(result, "._-")
+
+	return result
+}
+
+// validateClusterID validates that a cluster ID meets Kubernetes label value requirements.
+// Kubernetes label values must match ([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9] and be at most 63 characters.
+func validateClusterID(clusterID string) error {
+	if clusterID == "" {
+		return fmt.Errorf("cluster ID cannot be empty")
+	}
+
+	if len(clusterID) > 63 {
+		return fmt.Errorf("cluster ID %q exceeds maximum length of 63 characters (got %d)", clusterID, len(clusterID))
+	}
+
+	// Kubernetes label value regex: must start and end with alphanumeric, middle can have .-_
+	validLabelValue := regexp.MustCompile(`^[A-Za-z0-9]([A-Za-z0-9._-]*[A-Za-z0-9])?$`)
+	if !validLabelValue.MatchString(clusterID) {
+		return fmt.Errorf("cluster ID %q contains invalid characters: must start and end with alphanumeric, and contain only alphanumeric, dot, dash, or underscore", clusterID)
+	}
+
+	return nil
+}
+
+// buildLabelSelector constructs a Kubernetes label selector from a ClusterListRequest.
+// This enables server-side filtering to reduce the amount of data transferred and processed.
+func buildLabelSelector(req *v1.ClusterListRequest, email string) (labels.Selector, error) {
+	selector := labels.NewSelector()
+
+	// Filter out deleted workflows unless --expired is specified
+	// (deleted workflows are a subset of expired workflows)
+	if !req.Expired {
+		requirement, err := labels.NewRequirement(labelDeleted, selection.NotEquals, []string{"true"})
+		if err != nil {
+			return nil, err
+		}
+		selector = selector.Add(*requirement)
+	}
+
+	// Filter by owner if not requesting all clusters
+	if !req.All {
+		if email == "" {
+			return nil, fmt.Errorf("no authenticated user found for non-all cluster list request")
+		}
+		labelSafeEmail := emailToLabelValue(email)
+		requirement, err := labels.NewRequirement(labelOwner, selection.Equals, []string{labelSafeEmail})
+		if err != nil {
+			return nil, err
+		}
+		selector = selector.Add(*requirement)
+	}
+
+	// Filter by allowed flavors if specified
+	if len(req.AllowedFlavors) > 0 {
+		requirement, err := labels.NewRequirement(labelFlavor, selection.In, req.AllowedFlavors)
+		if err != nil {
+			return nil, err
+		}
+		selector = selector.Add(*requirement)
+	}
+
+	return selector, nil
 }
