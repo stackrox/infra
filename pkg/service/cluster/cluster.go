@@ -529,7 +529,9 @@ func (s *clusterImpl) Access() map[string]middleware.Access {
 	}
 }
 
-// setDeletedLabel marks a workflow as deleted by adding the deleted label
+// setDeletedLabel marks a workflow as deleted by adding the deleted label.
+// This is applied after destruction completes (FINISHED) so status polling
+// during DESTROYING continues to work.
 func (s *clusterImpl) setDeletedLabel(ctx context.Context, workflowName string) error {
 	// JSON Patch path uses ~1 to escape / in label names
 	labelPath := "/metadata/labels/" + strings.ReplaceAll(labelDeleted, "/", "~1")
@@ -580,12 +582,6 @@ func (s *clusterImpl) Delete(ctx context.Context, req *v1.ResourceByID) (*empty.
 			"workflow-name", workflow.GetName(),
 			"error", err,
 		)
-		return nil, err
-	}
-
-	// Mark the workflow as deleted with a label
-	if err := s.setDeletedLabel(ctx, workflow.GetName()); err != nil {
-		log.Log(logging.ERROR, "error occurred setting deleted label", "workflow-name", workflow.GetName(), "error", err)
 		return nil, err
 	}
 
@@ -672,8 +668,7 @@ func (s *clusterImpl) getMostRecentArgoWorkflowFromClusterID(clusterID string) (
 	listOpts := &metav1.ListOptions{}
 	labelSelector := labels.NewSelector()
 	clusterIDRequirement, _ := labels.NewRequirement(labelClusterID, selection.Equals, []string{clusterID})
-	notDeletedRequirement, _ := labels.NewRequirement(labelDeleted, selection.NotEquals, []string{"true"})
-	labelSelector = labelSelector.Add(*clusterIDRequirement, *notDeletedRequirement)
+	labelSelector = labelSelector.Add(*clusterIDRequirement)
 	listOpts.LabelSelector = labelSelector.String()
 
 	workflowList, err := s.argoWorkflowsClient.ListWorkflows(s.argoClientCtx, &workflowpkg.WorkflowListRequest{
@@ -718,7 +713,15 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 		}
 
 		for _, workflow := range workflowList.Items {
-			if workflowStatus(workflow.Status) != v1.Status_READY {
+			status := workflowStatus(workflow.Status)
+			if status == v1.Status_FINISHED {
+				if err := s.setDeletedLabel(s.argoClientCtx, workflow.GetName()); err != nil {
+					log.Log(logging.ERROR, "error occurred setting deleted label", "workflow-name", workflow.GetName(), "error", err)
+				}
+				continue
+			}
+
+			if status != v1.Status_READY {
 				continue
 			}
 
@@ -727,12 +730,6 @@ func (s *clusterImpl) cleanupExpiredClusters() {
 			}
 
 			log.Log(logging.INFO, "resuming an argo workflow that has expired", "workflow-name", workflow.GetName())
-
-			// Mark the workflow as deleted before resuming
-			if err := s.setDeletedLabel(s.argoClientCtx, workflow.GetName()); err != nil {
-				log.Log(logging.ERROR, "error occurred setting deleted label", "workflow-name", workflow.GetName(), "error", err)
-				// Continue anyway to resume the workflow even if labeling failed
-			}
 
 			_, err = s.argoWorkflowsClient.ResumeWorkflow(s.argoClientCtx, &workflowpkg.WorkflowResumeRequest{
 				Name:      workflow.GetName(),
