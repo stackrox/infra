@@ -184,6 +184,11 @@
       value: false
       kind: optional
 
+    - name: has-infra-server
+      description: Whether this cluster runs an infra-server instance. Enables pre-destroy cleanup of managed clusters.
+      value: false
+      kind: optional
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
