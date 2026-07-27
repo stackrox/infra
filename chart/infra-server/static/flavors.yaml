@@ -184,6 +184,11 @@
       value: false
       kind: optional
 
+    - name: gcp-project
+      description: Google Cloud project to deploy infrastructure into.
+      value: acs-team-temp-dev
+      kind: optional
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
@@ -1197,6 +1202,9 @@
     - name: gcp-zone
       description: Google Cloud zone to delete infrastructure from.
       value: us-central1-a
+    - name: gcp-project
+      description: Google Cloud project to delete infrastructure from.
+      value: acs-team-temp-dev
 
 - id: janitor-delete-openshift-4
   name: Janitor delete Openshift
@@ -1305,6 +1313,11 @@
     - name: gcp-zone
       description: Google Cloud zone to deploy infrastructure into.
       value: us-central1-a
+      kind: optional
+
+    - name: gcp-project
+      description: Google Cloud project to deploy infrastructure into.
+      value: acs-team-temp-dev
       kind: optional
 
   artifacts:
