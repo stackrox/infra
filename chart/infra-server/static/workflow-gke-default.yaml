@@ -2,6 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: gke-default-
+  namespace: default
 spec:
   entrypoint: start
   onExit: stop
@@ -20,6 +21,8 @@ spec:
         value: ""
       - name: set-ssd-storage-default
         value: ""
+      - name: has-infra-server
+        value: "false"
 
   volumes:
     - name: credentials
@@ -36,6 +39,23 @@ spec:
 
     - name: stop
       steps:
+        # Stops all Argo workflows on a target cluster before it is destroyed,
+        # giving each workflow's onExit handler time to clean up cloud resources.
+        # Only relevant for GKE clusters that run the infra server.
+        - - name: cleanup-infra-clusters
+            templateRef:
+              name: cleanup-infra-clusters
+              template: cleanup
+            arguments:
+              artifacts:
+                - name: kubeconfig
+                  from: '{{ "{{" }}workflow.outputs.artifacts.global-kubeconfig{{ "}}" }}'
+                  optional: true
+            when: '{{ "{{" }}workflow.parameters.has-infra-server{{ "}}" }} == true'
+            continueOn:
+              failed: true
+              error: true
+
         - - name: destroy
             template: destroy
             arguments:
@@ -48,8 +68,10 @@ spec:
       outputs:
         artifacts:
           - name: kubeconfig
+            globalName: global-kubeconfig
             path: /outputs/kubeconfig
             mode: 0644
+            optional: true
             archive:
               none: {}
           - name: connect
