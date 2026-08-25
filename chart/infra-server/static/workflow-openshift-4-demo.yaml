@@ -14,8 +14,13 @@ spec:
       - name: main-image-tag
       - name: scanner-image-tag
       - name: scanner-db-image-tag
-      - name: collector-slim-image-tag
+      - name: scanner-slim-image-tag
+      - name: scanner-db-slim-image-tag
+      - name: collector-image-tag
       - name: central-db-image-tag
+      - name: scanner-v4-image-tag
+      - name: scanner-v4-db-image-tag
+      - name: fact-image-tag
       - name: central-services-helm-chart-version
       - name: secured-cluster-services-helm-chart-version
       - name: trusted-certs-enabled
@@ -53,27 +58,14 @@ spec:
         - - name: pre-install
             template: pre-install
 
-        - - name: roxctl-central
-            template: roxctl-central
-
-        - - name: roxctl-secured-cluster-services
-            template: roxctl-secured-cluster-services
-
         - - name: run-ansible-demo
             template: run-ansible-demo
             continueOn:
               failed: true
             arguments:
               parameters:
-              - name: admin-password
-                value: '{{ "{{" }}steps.pre-install.outputs.parameters.admin-password{{ "}}" }}'
               - name: kubeconfig-base64
                 value: '{{ "{{" }}steps.pre-install.outputs.parameters.kubeconfig-base64{{ "}}" }}'
-              artifacts:
-                - name: roxctl-central
-                  from: '{{ "{{" }}steps.roxctl-central.outputs.artifacts.roxctl-central{{ "}}" }}'
-                - name: roxctl-secured-cluster-services
-                  from: '{{ "{{" }}steps.roxctl-secured-cluster-services.outputs.artifacts.roxctl-secured-cluster-services{{ "}}" }}'
 
         - - name: gather
             template: gather
@@ -88,7 +80,7 @@ spec:
 
     - name: create
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-{{ .Chart.Annotations.automationFlavorsVersion }}
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.15.5
         imagePullPolicy: Always
         volumeMounts:
           - name: data
@@ -147,16 +139,12 @@ spec:
             mountPath: /data
         command: [sh]
         source: |
-          openssl rand -base64 32 | tr "+/" "_#"  | cut -c 1-20 > /data/admin_password
           base64 /data/auth/kubeconfig | tr -d "\n" > /data/auth/kubeconfig_base64
           subdomain=apps.{{ "{{" }}workflow.parameters.name{{ "}}" }}.ocp.infra.rox.systems
           echo "https://console-openshift-console.${subdomain}" > /data/url-openshift
           echo "https://central-stackrox.${subdomain}" > /data/url-stackrox
       outputs:
         parameters:
-          - name: admin-password
-            valueFrom:
-              path: /data/admin_password
           - name: kubeconfig-base64
             valueFrom:
               path: /data/auth/kubeconfig_base64
@@ -164,13 +152,7 @@ spec:
     - name: run-ansible-demo
       inputs:
         parameters:
-          - name: admin-password
           - name: kubeconfig-base64
-        artifacts:
-          - name: roxctl-central
-            path: /usr/bin/roxctl-central
-          - name: roxctl-secured-cluster-services
-            path: /usr/bin/roxctl-secured-cluster-services
       container:
         image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-demo-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
@@ -195,10 +177,6 @@ spec:
                 key: google-credentials.json
           - name: CENTRAL_PORT
             value: "443"
-          - name: ORCHESTRATOR
-            value: openshift
-          - name: ADMIN_PASSWORD
-            value: '{{ "{{" }}inputs.parameters.admin-password{{ "}}" }}'
           - name: KUBECONFIG_BASE64
             value: '{{ "{{" }}inputs.parameters.kubeconfig-base64{{ "}}" }}'
           - name: IMAGE_REGISTRY
@@ -209,10 +187,24 @@ spec:
             value: '{{ "{{" }}workflow.parameters.scanner-image-tag{{ "}}" }}'
           - name: SCANNER_DB_IMAGE_TAG
             value: '{{ "{{" }}workflow.parameters.scanner-db-image-tag{{ "}}" }}'
-          - name: COLLECTOR_SLIM_IMAGE_TAG
-            value: '{{ "{{" }}workflow.parameters.collector-slim-image-tag{{ "}}" }}'
+          - name: SCANNER_SLIM_IMAGE_TAG
+            value: '{{ "{{" }}workflow.parameters.scanner-slim-image-tag{{ "}}" }}'
+          - name: SCANNER_DB_SLIM_IMAGE_TAG
+            value: '{{ "{{" }}workflow.parameters.scanner-db-slim-image-tag{{ "}}" }}'
+          - name: COLLECTOR_IMAGE_TAG
+            value: '{{ "{{" }}workflow.parameters.collector-image-tag{{ "}}" }}'
           - name: CENTRAL_DB_IMAGE_TAG
             value: '{{ "{{" }}workflow.parameters.central-db-image-tag{{ "}}" }}'
+          - name: SCANNER_V4_IMAGE_TAG
+            value: '{{ "{{" }}workflow.parameters.scanner-v4-image-tag{{ "}}" }}'
+          - name: SCANNER_V4_DB_IMAGE_TAG
+            value: '{{ "{{" }}workflow.parameters.scanner-v4-db-image-tag{{ "}}" }}'
+          - name: FACT_IMAGE_TAG
+            value: '{{ "{{" }}workflow.parameters.fact-image-tag{{ "}}" }}'
+          - name: CENTRAL_SERVICES_VERSION
+            value: '{{ "{{" }}workflow.parameters.central-services-helm-chart-version{{ "}}" }}'
+          - name: SECURED_CLUSTER_SERVICES_VERSION
+            value: '{{ "{{" }}workflow.parameters.secured-cluster-services-helm-chart-version{{ "}}" }}'
           - name: ANSIBLE_STDOUT_CALLBACK
             value: debug
         volumeMounts:
@@ -236,6 +228,7 @@ spec:
         artifacts:
           - name: admin-password
             path: /data/admin_password
+            optional: true
             archive:
               none: {}
           - name: kubeconfig
@@ -280,7 +273,7 @@ spec:
 
     - name: destroy
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-{{ .Chart.Annotations.automationFlavorsVersion }}
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-0.15.5
         imagePullPolicy: Always
         command:
           - entrypoint.sh
@@ -299,36 +292,3 @@ spec:
           - name: data
             mountPath: /data
 
-    - name: roxctl-central
-      activeDeadlineSeconds: 600
-      outputs:
-        artifacts:
-          - name: roxctl-central
-            path: /tmp/roxctl-central
-      container:
-        image: 'quay.io/stackrox-io/main:{{ "{{" }}workflow.parameters.central-services-helm-chart-version{{ "}}" }}'
-        imagePullPolicy: Always
-        command:
-          - cp
-        args:
-          - --dereference
-          - -v
-          - /stackrox/roxctl
-          - /tmp/roxctl-central
-
-    - name: roxctl-secured-cluster-services
-      activeDeadlineSeconds: 600
-      outputs:
-        artifacts:
-          - name: roxctl-secured-cluster-services
-            path: /tmp/roxctl-secured-cluster-services
-      container:
-        image: 'quay.io/stackrox-io/main:{{ "{{" }}workflow.parameters.secured-cluster-services-helm-chart-version{{ "}}" }}'
-        imagePullPolicy: Always
-        command:
-          - cp
-        args:
-          - --dereference
-          - -v
-          - /stackrox/roxctl
-          - /tmp/roxctl-secured-cluster-services
