@@ -379,18 +379,16 @@
       value: example1
 
     - name: central-services-helm-chart-version
-      description: Central Services Helm chart version
+      description: Central Services version
       value: {{ .Chart.Annotations.acsDemoVersion }}
-      kind: optional
       help: |
-        Version string of the roxctl version to use to generate Central Services Helm chart, e.g., {{ .Chart.Annotations.acsDemoVersion }}.
+        ACS version to deploy for Central Services, e.g., {{ .Chart.Annotations.acsDemoVersion }}.
 
     - name: secured-cluster-services-helm-chart-version
-      description: Secured Cluster Services Helm chart version
+      description: Secured Cluster Services version
       value: {{ .Chart.Annotations.acsDemoVersion }}
-      kind: optional
       help: |
-        Version string of the roxctl version to use to generate Secured Cluster Services Helm chart, e.g., {{ .Chart.Annotations.acsDemoVersion }}.
+        ACS version to deploy for Secured Cluster Services, e.g., {{ .Chart.Annotations.acsDemoVersion }}.
 
     - name: openshift-version
       description: openshift release from OCP, OCP dev preview, or OKD
@@ -421,8 +419,8 @@
       value: ""
       kind: optional
       help: |
-        URI of the image registry to use for pulling the ACS container images, e.g., quay.io/rhacs-eng. Default will be
-        derived from the Helm chart. Note that the default image pull secret is QUAY_RHACS_ENG_RO, which has access to
+        URI of the image registry to use for pulling the ACS container images, e.g., quay.io/rhacs-eng. Defaults to
+        quay.io/stackrox-io. Note that the default image pull secret is QUAY_RHACS_ENG_RO, which has access to
         quay.io/rhacs-eng and all publicly accessible images.
 
     - name: main-image-tag
@@ -430,36 +428,70 @@
       value: ""
       kind: optional
       help: |
-        Version string of the main container image tag. Default will be derived from the Helm chart.
+        Version string of the main container image tag.
 
     - name: scanner-image-tag
       description: Scanner container image tag
       value: ""
       kind: optional
       help: |
-        Version string of the scanner container image tag to use. Default will be derived from the Helm chart.
+        Version string of the scanner container image tag.
 
     - name: scanner-db-image-tag
       description: Scanner DB container image tag
       value: ""
       kind: optional
       help: |
-        Version string of the scanner-db container image tag to use. Default will be derived from the Helm chart.
+        Version string of the scanner-db container image tag.
 
-    - name: collector-slim-image-tag
-      description: Collector Slim container image tag
+    - name: scanner-slim-image-tag
+      description: Scanner Slim container image tag
       value: ""
       kind: optional
       help: |
-        Version string of the collector-slim container image tag to use. Default will be derived from the Helm chart.
+        Version string of the scanner-slim container image tag.
+
+    - name: scanner-db-slim-image-tag
+      description: Scanner DB Slim container image tag
+      value: ""
+      kind: optional
+      help: |
+        Version string of the scanner-db-slim container image tag.
+
+    - name: collector-image-tag
+      description: Collector container image tag
+      value: ""
+      kind: optional
+      help: |
+        Version string of the collector container image tag.
 
     - name: central-db-image-tag
       description: Central DB container image tag
       value: ""
       kind: optional
       help: |
-        Version string of the central-db container image tag to use. Setting this value will enable central-db.
-        Default will be derived from the Helm chart.
+        Version string of the central-db container image tag.
+
+    - name: scanner-v4-image-tag
+      description: Scanner V4 container image tag
+      value: ""
+      kind: optional
+      help: |
+        Version string of the scanner-v4 container image tag.
+
+    - name: scanner-v4-db-image-tag
+      description: Scanner V4 DB container image tag
+      value: ""
+      kind: optional
+      help: |
+        Version string of the scanner-v4-db container image tag.
+
+    - name: fact-image-tag
+      description: Fact container image tag
+      value: ""
+      kind: optional
+      help: |
+        Version string of the fact container image tag.
 
     - name: trusted-certs-enabled
       description: Should trusted certificates be created
