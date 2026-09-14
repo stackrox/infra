@@ -34,6 +34,12 @@ spec:
         value: "vCurrent"
       - name: additional-enabled-capabilities
         value: ""
+      - name: install-virt
+        value: "false"
+      - name: vm-os
+        value: "rhel9"
+      - name: virt-node-dedicated
+        value: "true"
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -46,6 +52,9 @@ spec:
     - name: credentials
       secret:
         secretName: openshift-4-gcp-service-account
+    - name: registry-pull-secret
+      secret:
+        secretName: infra-image-registry-pull-secret
 
   templates:
     - name: start
@@ -91,6 +100,11 @@ spec:
             path: /data
             archive:
               tar: {}
+          - name: vm-access
+            path: /data/vm-access.md
+            optional: true
+            archive:
+              none: {}
       container:
         image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
@@ -157,9 +171,18 @@ spec:
             value: '{{ "{{" }}workflow.parameters.baseline-capability-set{{ "}}" }}'
           - name: ADDITIONAL_ENABLED_CAPABILITIES
             value: '{{ "{{" }}workflow.parameters.additional-enabled-capabilities{{ "}}" }}'
+          - name: INSTALL_VIRT
+            value: '{{ "{{" }}workflow.parameters.install-virt{{ "}}" }}'
+          - name: VM_OS
+            value: '{{ "{{" }}workflow.parameters.vm-os{{ "}}" }}'
+          - name: VIRT_NODE_DEDICATED
+            value: '{{ "{{" }}workflow.parameters.virt-node-dedicated{{ "}}" }}'
         volumeMounts:
           - name: data
             mountPath: /data
+          - name: registry-pull-secret
+            mountPath: /infra-secrets/quay
+            readOnly: true
 
     - name: gather
       script:
