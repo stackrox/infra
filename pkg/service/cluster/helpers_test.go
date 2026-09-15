@@ -308,3 +308,175 @@ func TestValidateClusterID(t *testing.T) {
 		})
 	}
 }
+
+func TestValidateVirtWorkerNodeType(t *testing.T) {
+	tests := []struct {
+		name        string
+		installVirt string
+		workerType  string
+		wantErr     bool
+	}{
+		{
+			name:        "virt off default e2",
+			installVirt: "false",
+			workerType:  "e2-standard-8",
+		},
+		{
+			name:        "virt omitted",
+			installVirt: "",
+			workerType:  "e2-standard-8",
+		},
+		{
+			name:        "virt on n2-standard-8",
+			installVirt: "true",
+			workerType:  "n2-standard-8",
+		},
+		{
+			name:        "virt on n2-standard-4",
+			installVirt: "true",
+			workerType:  "n2-standard-4",
+		},
+		{
+			name:        "virt on n2 with uppercase flag",
+			installVirt: "TRUE",
+			workerType:  "n2-standard-8",
+		},
+		{
+			name:        "virt on c3",
+			installVirt: "true",
+			workerType:  "c3-standard-8",
+		},
+		{
+			name:        "virt on n4d (AMD exception)",
+			installVirt: "true",
+			workerType:  "n4d-standard-8",
+		},
+		{
+			name:        "virt on default e2",
+			installVirt: "true",
+			workerType:  "e2-standard-8",
+			wantErr:     true,
+		},
+		{
+			name:        "virt on n2d (AMD)",
+			installVirt: "true",
+			workerType:  "n2d-standard-8",
+			wantErr:     true,
+		},
+		{
+			name:        "virt on t2a (ARM)",
+			installVirt: "true",
+			workerType:  "t2a-standard-8",
+			wantErr:     true,
+		},
+		{
+			name:        "virt on m3 (memory-optimized)",
+			installVirt: "true",
+			workerType:  "m3-ultramem-32",
+			wantErr:     true,
+		},
+		{
+			name:        "virt on empty worker type",
+			installVirt: "true",
+			workerType:  "",
+			wantErr:     true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validateVirtWorkerNodeType(tt.installVirt, tt.workerType)
+			if tt.wantErr && err == nil {
+				t.Errorf("validateVirtWorkerNodeType(%q, %q) expected error but got none", tt.installVirt, tt.workerType)
+			}
+			if !tt.wantErr && err != nil {
+				t.Errorf("validateVirtWorkerNodeType(%q, %q) expected no error but got: %v", tt.installVirt, tt.workerType, err)
+			}
+		})
+	}
+}
+
+func TestCheckAndEnrichParameters_VirtWorkerType(t *testing.T) {
+	flavorParams := map[string]*v1.Parameter{
+		"name": {Name: "name"},
+		"install-virt": {
+			Name:     "install-virt",
+			Value:    "false",
+			Optional: true,
+		},
+		"worker-node-type": {
+			Name:     "worker-node-type",
+			Value:    "e2-standard-8",
+			Optional: true,
+		},
+	}
+
+	tests := []struct {
+		name           string
+		req            map[string]string
+		wantErr        string
+		wantWorkerType string
+	}{
+		{
+			name:           "virt omitted keeps default e2",
+			req:            map[string]string{"name": "abc"},
+			wantWorkerType: "e2-standard-8",
+		},
+		{
+			name: "virt true with n2-standard-8",
+			req: map[string]string{
+				"name":             "abc",
+				"install-virt":     "true",
+				"worker-node-type": "n2-standard-8",
+			},
+			wantWorkerType: "n2-standard-8",
+		},
+		{
+			name: "virt true with n2-standard-4",
+			req: map[string]string{
+				"name":             "abc",
+				"install-virt":     "true",
+				"worker-node-type": "n2-standard-4",
+			},
+			wantWorkerType: "n2-standard-4",
+		},
+		{
+			name: "virt true with default e2",
+			req: map[string]string{
+				"name":         "abc",
+				"install-virt": "true",
+			},
+			wantErr: "install-virt requires a worker-node-type with nested kvm",
+		},
+		{
+			name: "virt true with explicit e2",
+			req: map[string]string{
+				"name":             "abc",
+				"install-virt":     "true",
+				"worker-node-type": "e2-standard-8",
+			},
+			wantErr: "install-virt requires a worker-node-type with nested kvm",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := checkAndEnrichParameters(flavorParams, tt.req)
+			if tt.wantErr != "" {
+				if err == nil {
+					t.Fatalf("expected error containing %q, got none", tt.wantErr)
+				}
+				if !strings.Contains(err.Error(), tt.wantErr) {
+					t.Fatalf("error %q does not contain %q", err.Error(), tt.wantErr)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if gotType := workflowParameterValue(got, "worker-node-type"); gotType != tt.wantWorkerType {
+				t.Errorf("worker-node-type = %q, want %q", gotType, tt.wantWorkerType)
+			}
+		})
+	}
+}

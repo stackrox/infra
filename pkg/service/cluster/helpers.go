@@ -17,6 +17,18 @@ import (
 	"k8s.io/apimachinery/pkg/selection"
 )
 
+// virtNestedKVMWorkerPrefixes are GCP series that expose nested KVM.
+// E2, ARM, AMD (except n4d), and memory-optimized series do not:
+// https://cloud.google.com/compute/docs/instances/nested-virtualization/overview
+var virtNestedKVMWorkerPrefixes = []string{
+	"a2-", "a3-", "a4-",
+	"c2-", "c3-", "c4-", "c4n-",
+	"g2-",
+	"h3-",
+	"n1-", "n2-", "n4-", "n4d-",
+	"z3-",
+}
+
 func getClusterIDFromWorkflow(workflow *v1alpha1.Workflow) string {
 	clusterID := GetClusterID(workflow)
 	if clusterID == "" {
@@ -294,6 +306,36 @@ func emailToLabelValue(email string) string {
 	result = strings.TrimLeft(result, "._-")
 
 	return result
+}
+
+// validateVirtWorkerNodeType rejects machine types that lack nested KVM when virt is enabled.
+func validateVirtWorkerNodeType(installVirt, workerType string) error {
+	if !strings.EqualFold(installVirt, "true") {
+		return nil
+	}
+	if workerTypeHasNestedKVM(workerType) {
+		return nil
+	}
+	return fmt.Errorf("install-virt requires a worker-node-type with nested kvm (for example n2-standard-8), got %q", workerType)
+}
+
+func workerTypeHasNestedKVM(workerType string) bool {
+	t := strings.ToLower(workerType)
+	for _, prefix := range virtNestedKVMWorkerPrefixes {
+		if strings.HasPrefix(t, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
+func workflowParameterValue(params []v1alpha1.Parameter, name string) string {
+	for _, p := range params {
+		if p.Name == name {
+			return p.GetValue()
+		}
+	}
+	return ""
 }
 
 // validateClusterID validates that a cluster ID meets Kubernetes label value requirements.
