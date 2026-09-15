@@ -340,9 +340,10 @@
       help: |
         When true, one extra worker is added at IPI install time, labeled
         `node-role.kubernetes.io/virt=""`, and OpenShift Virtualization is
-        installed with VSOCK. A single RHEL VM is created from
-        `quay.io/rhacs-eng/vm-images` using `vm-os`. On e2 workers,
-        KVM emulation is used.
+        installed with VSOCK. All workers are `n2-standard-8` (overrides
+        `worker-node-type`) so the VM has /dev/kvm. Masters are unchanged.
+        A single RHEL VM is created from `quay.io/rhacs-eng/vm-images`
+        using `vm-os`.
 
     - name: vm-os
       description: OS for the virtual machine (rhel9, rhel10)
@@ -722,9 +723,10 @@
       help: |
         When true, one extra worker is added at IPI install time, labeled
         `node-role.kubernetes.io/virt=""`, and OpenShift Virtualization is
-        installed with VSOCK. A single RHEL VM is created from
-        `quay.io/rhacs-eng/vm-images` using `vm-os`. On e2 workers,
-        KVM emulation is used.
+        installed with VSOCK. All workers are `n2-standard-8` (overrides
+        `worker-node-type`) so the VM has /dev/kvm. Masters are unchanged.
+        A single RHEL VM is created from `quay.io/rhacs-eng/vm-images`
+        using `vm-os`.
 
     - name: vm-os
       description: OS for the virtual machine (rhel9, rhel10)
