@@ -352,7 +352,7 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 	// insufficient or superfluous parameters.
 	workflowParams, err := checkAndEnrichParameters(flav.Parameters, req.Parameters)
 	if err != nil {
-		return nil, err
+		return nil, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 	workflow.Spec.Arguments.Parameters = workflowParams
 
