@@ -34,12 +34,8 @@ spec:
         value: "vCurrent"
       - name: additional-enabled-capabilities
         value: ""
-      - name: install-virt
-        value: "false"
       - name: vm-os
-        value: "rhel9"
-      - name: virt-node-dedicated
-        value: "true"
+        value: ""
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -171,12 +167,8 @@ spec:
             value: '{{ "{{" }}workflow.parameters.baseline-capability-set{{ "}}" }}'
           - name: ADDITIONAL_ENABLED_CAPABILITIES
             value: '{{ "{{" }}workflow.parameters.additional-enabled-capabilities{{ "}}" }}'
-          - name: INSTALL_VIRT
-            value: '{{ "{{" }}workflow.parameters.install-virt{{ "}}" }}'
           - name: VM_OS
             value: '{{ "{{" }}workflow.parameters.vm-os{{ "}}" }}'
-          - name: VIRT_NODE_DEDICATED
-            value: '{{ "{{" }}workflow.parameters.virt-node-dedicated{{ "}}" }}'
         volumeMounts:
           - name: data
             mountPath: /data

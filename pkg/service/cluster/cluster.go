@@ -978,7 +978,7 @@ func checkAndEnrichParameters(flavorParams map[string]*v1.Parameter, requestPara
 	}
 
 	if err := validateVirtWorkerNodeType(
-		workflowParameterValue(allParams, "install-virt"),
+		workflowParameterValue(allParams, "vm-os"),
 		workflowParameterValue(allParams, "worker-node-type"),
 	); err != nil {
 		return nil, err

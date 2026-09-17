@@ -333,35 +333,17 @@
         Defines a list of capabilities to explicitly enable. These capabilities are enabled in addition to the capabilities specified in the baseline capability set.
         Example: `["DeploymentConfig", "ImageRegistry"]`
 
-    - name: install-virt
-      description: Install OpenShift Virtualization and create a VM
-      value: false
-      kind: optional
-      help: |
-        When true, one extra worker is added at IPI install time, labeled
-        `node-role.kubernetes.io/virt=""`, and OpenShift Virtualization is
-        installed with VSOCK. `worker-node-type` must expose nested KVM
-        (for example `n2-standard-8`; not `e2`). Masters are unchanged.
-        A single RHEL VM is created from `quay.io/rhacs-eng/vm-images`
-        using `vm-os`.
-
     - name: vm-os
-      description: OS for the virtual machine (rhel9, rhel10)
-      value: rhel9
+      description: Guest OS list for optional VMs (empty skips virt)
+      value: ""
       kind: optional
       help: |
-        The RHEL version for the virtual machine container disk.
-        Valid values: rhel9, rhel10.
-        The image used is quay.io/rhacs-eng/vm-images:<vm-os>-dnf-primed-latest.
-
-    - name: virt-node-dedicated
-      description: Taint the virt worker so only VMs are scheduled on it
-      value: true
-      kind: optional
-      help: |
-        When true, the virt worker is tainted with
-        `node-role.kubernetes.io/virt:NoSchedule`. Set false to let
-        other workloads share that node. Only used when install-virt is true.
+        Comma-separated guest OS list (`rhel9` or `rhel10`). Each entry
+        creates one VM. Empty skips OpenShift Virtualization.
+        Example: `rhel9,rhel9,rhel10`.
+        Non-empty lists require a nested-KVM `worker-node-type` (for example
+        `n2-standard-8`; not `e2`). Worker count is unchanged.
+        Roughly two VMs fit on three worker nodes.
 
   artifacts:
     - name: kubeconfig
@@ -394,7 +376,7 @@
       description: The password to login at the openshift console
 
     - name: vm-access
-      description: SSH credentials for the optional demo VM (present when install-virt=true)
+      description: SSH credentials for optional VMs (present when vm-os is non-empty)
 
 ######################
 #  openshift-4-demo  #
@@ -716,35 +698,17 @@
         Defines a list of capabilities to explicitly enable. These capabilities are enabled in addition to the capabilities specified in the baseline capability set.
         Example: `["DeploymentConfig", "ImageRegistry"]`
 
-    - name: install-virt
-      description: Install OpenShift Virtualization and create a VM
-      value: false
-      kind: optional
-      help: |
-        When true, one extra worker is added at IPI install time, labeled
-        `node-role.kubernetes.io/virt=""`, and OpenShift Virtualization is
-        installed with VSOCK. `worker-node-type` must expose nested KVM
-        (for example `n2-standard-8`; not `e2`). Masters are unchanged.
-        A single RHEL VM is created from `quay.io/rhacs-eng/vm-images`
-        using `vm-os`.
-
     - name: vm-os
-      description: OS for the virtual machine (rhel9, rhel10)
-      value: rhel9
+      description: Guest OS list for optional VMs (empty skips virt)
+      value: ""
       kind: optional
       help: |
-        The RHEL version for the virtual machine container disk.
-        Valid values: rhel9, rhel10.
-        The image used is quay.io/rhacs-eng/vm-images:<vm-os>-dnf-primed-latest.
-
-    - name: virt-node-dedicated
-      description: Taint the virt worker so only VMs are scheduled on it
-      value: true
-      kind: optional
-      help: |
-        When true, the virt worker is tainted with
-        `node-role.kubernetes.io/virt:NoSchedule`. Set false to let
-        other workloads share that node. Only used when install-virt is true.
+        Comma-separated guest OS list (`rhel9` or `rhel10`). Each entry
+        creates one VM. Empty skips OpenShift Virtualization.
+        Example: `rhel9,rhel9,rhel10`.
+        Non-empty lists require a nested-KVM `worker-node-type` (for example
+        `n2-standard-8`; not `e2`). Worker count is unchanged.
+        Roughly two VMs fit on three worker nodes.
 
   artifacts:
     - name: kubeconfig
@@ -777,7 +741,7 @@
       description: The password to login at the openshift console
 
     - name: vm-access
-      description: SSH credentials for the optional demo VM (present when install-virt=true)
+      description: SSH credentials for optional VMs (present when vm-os is non-empty)
 
 #####################
 #  AWS EKS          #

@@ -308,15 +308,40 @@ func emailToLabelValue(email string) string {
 	return result
 }
 
-// validateVirtWorkerNodeType rejects machine types that lack nested KVM when virt is enabled.
-func validateVirtWorkerNodeType(installVirt, workerType string) error {
-	if !strings.EqualFold(installVirt, "true") {
+// parseVMOSList splits a comma-separated guest OS list. Empty input means no VMs.
+func parseVMOSList(vmOS string) ([]string, error) {
+	if strings.TrimSpace(vmOS) == "" {
+		return nil, nil
+	}
+	var oses []string
+	for token := range strings.SplitSeq(vmOS, ",") {
+		os := strings.ToLower(strings.TrimSpace(token))
+		if os == "" {
+			return nil, fmt.Errorf("vm-os contains an empty entry")
+		}
+		switch os {
+		case "rhel9", "rhel10":
+			oses = append(oses, os)
+		default:
+			return nil, fmt.Errorf("unsupported vm-os %q (valid values: rhel9, rhel10)", os)
+		}
+	}
+	return oses, nil
+}
+
+// validateVirtWorkerNodeType rejects machine types that lack nested KVM when any VM is requested.
+func validateVirtWorkerNodeType(vmOS, workerType string) error {
+	oses, err := parseVMOSList(vmOS)
+	if err != nil {
+		return err
+	}
+	if len(oses) == 0 {
 		return nil
 	}
 	if workerTypeHasNestedKVM(workerType) {
 		return nil
 	}
-	return fmt.Errorf("install-virt requires a worker-node-type with nested kvm (for example n2-standard-8), got %q", workerType)
+	return fmt.Errorf("vm-os requires a worker-node-type with nested kvm (for example n2-standard-8), got %q", workerType)
 }
 
 func workerTypeHasNestedKVM(workerType string) bool {
