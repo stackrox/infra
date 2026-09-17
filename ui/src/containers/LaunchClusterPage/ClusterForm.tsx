@@ -35,9 +35,7 @@ type GatewayErrorBody = {
 // grpc-gateway JSONPb returns google.rpc.Status as { code, message }.
 function serverErrorMessage(err: AxiosError<GatewayErrorBody>): string {
   const data = err.response?.data;
-  return (
-    data?.message || data?.error || err.message || 'Cluster creation request failed'
-  );
+  return data?.message || data?.error || err.message || 'Cluster creation request failed';
 }
 
 function helpByParameterName(name?: string): string {
