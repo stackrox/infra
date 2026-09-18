@@ -320,10 +320,10 @@ func parseVMOSList(vmOS string) ([]string, error) {
 			return nil, fmt.Errorf("vm-os contains an empty entry")
 		}
 		switch os {
-		case "rhel9", "rhel10":
+		case "rhel8", "rhel9", "rhel10":
 			oses = append(oses, os)
 		default:
-			return nil, fmt.Errorf("unsupported vm-os %q (valid values: rhel9, rhel10)", os)
+			return nil, fmt.Errorf("unsupported vm-os %q (valid values: rhel8, rhel9, rhel10)", os)
 		}
 	}
 	return oses, nil

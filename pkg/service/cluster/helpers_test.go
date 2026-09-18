@@ -320,11 +320,12 @@ func TestParseVMOSList(t *testing.T) {
 		{name: "empty", vmOS: ""},
 		{name: "whitespace", vmOS: "  "},
 		{name: "single", vmOS: "rhel9", want: []string{"rhel9"}},
-		{name: "mixed with spaces", vmOS: "rhel9, rhel9, rhel10", want: []string{"rhel9", "rhel9", "rhel10"}},
+		{name: "rhel8", vmOS: "rhel8", want: []string{"rhel8"}},
+		{name: "mixed with spaces", vmOS: "rhel8, rhel9, rhel10", want: []string{"rhel8", "rhel9", "rhel10"}},
 		{name: "uppercase", vmOS: "RHEL9", want: []string{"rhel9"}},
 		{name: "empty entry", vmOS: "rhel9,,rhel10", wantErr: "empty entry"},
 		{name: "trailing comma", vmOS: "rhel9,", wantErr: "empty entry"},
-		{name: "unsupported", vmOS: "rhel8", wantErr: "unsupported vm-os"},
+		{name: "unsupported", vmOS: "rhel7", wantErr: "unsupported vm-os"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

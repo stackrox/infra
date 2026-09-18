@@ -338,8 +338,8 @@
       value: ""
       kind: optional
       help: |
-        Comma-separated guest OS list (`rhel9` or `rhel10`). Each entry
-        creates one VM. Empty skips OpenShift Virtualization.
+        Comma-separated guest OS list (`rhel8`, `rhel9`, or `rhel10`). Each
+        entry creates one VM. Empty skips OpenShift Virtualization.
         Example: `rhel9,rhel9,rhel10`.
         Non-empty lists require a nested-KVM `worker-node-type` (for example
         `n2-standard-8`; not `e2`). Worker count is unchanged.
@@ -703,8 +703,8 @@
       value: ""
       kind: optional
       help: |
-        Comma-separated guest OS list (`rhel9` or `rhel10`). Each entry
-        creates one VM. Empty skips OpenShift Virtualization.
+        Comma-separated guest OS list (`rhel8`, `rhel9`, or `rhel10`). Each
+        entry creates one VM. Empty skips OpenShift Virtualization.
         Example: `rhel9,rhel9,rhel10`.
         Non-empty lists require a nested-KVM `worker-node-type` (for example
         `n2-standard-8`; not `e2`). Worker count is unchanged.
