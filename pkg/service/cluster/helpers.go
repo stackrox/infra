@@ -17,6 +17,18 @@ import (
 	"k8s.io/apimachinery/pkg/selection"
 )
 
+// virtNestedKVMWorkerPrefixes are GCP series that expose nested KVM.
+// E2, ARM, AMD (except n4d), and memory-optimized series do not:
+// https://cloud.google.com/compute/docs/instances/nested-virtualization/overview
+var virtNestedKVMWorkerPrefixes = []string{
+	"a2-", "a3-", "a4-",
+	"c2-", "c3-", "c4-", "c4n-",
+	"g2-",
+	"h3-",
+	"n1-", "n2-", "n4-", "n4d-",
+	"z3-",
+}
+
 func getClusterIDFromWorkflow(workflow *v1alpha1.Workflow) string {
 	clusterID := GetClusterID(workflow)
 	if clusterID == "" {
@@ -294,6 +306,61 @@ func emailToLabelValue(email string) string {
 	result = strings.TrimLeft(result, "._-")
 
 	return result
+}
+
+// parseVMOSList splits a comma-separated guest OS list. Empty input means no VMs.
+func parseVMOSList(vmOS string) ([]string, error) {
+	if strings.TrimSpace(vmOS) == "" {
+		return nil, nil
+	}
+	var oses []string
+	for token := range strings.SplitSeq(vmOS, ",") {
+		os := strings.ToLower(strings.TrimSpace(token))
+		if os == "" {
+			return nil, fmt.Errorf("vm-os contains an empty entry")
+		}
+		switch os {
+		case "rhel8", "rhel9", "rhel10":
+			oses = append(oses, os)
+		default:
+			return nil, fmt.Errorf("unsupported vm-os %q (valid values: rhel8, rhel9, rhel10)", os)
+		}
+	}
+	return oses, nil
+}
+
+// validateVirtWorkerNodeType rejects machine types that lack nested KVM when any VM is requested.
+func validateVirtWorkerNodeType(vmOS, workerType string) error {
+	oses, err := parseVMOSList(vmOS)
+	if err != nil {
+		return err
+	}
+	if len(oses) == 0 {
+		return nil
+	}
+	if workerTypeHasNestedKVM(workerType) {
+		return nil
+	}
+	return fmt.Errorf("vm-os requires a worker-node-type with nested kvm (for example n2-standard-8), got %q", workerType)
+}
+
+func workerTypeHasNestedKVM(workerType string) bool {
+	t := strings.ToLower(workerType)
+	for _, prefix := range virtNestedKVMWorkerPrefixes {
+		if strings.HasPrefix(t, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
+func workflowParameterValue(params []v1alpha1.Parameter, name string) string {
+	for _, p := range params {
+		if p.Name == name {
+			return p.GetValue()
+		}
+	}
+	return ""
 }
 
 // validateClusterID validates that a cluster ID meets Kubernetes label value requirements.

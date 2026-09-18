@@ -2,6 +2,7 @@ package cluster
 
 import (
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 
@@ -304,6 +305,232 @@ func TestValidateClusterID(t *testing.T) {
 			}
 			if !tt.expectError && err != nil {
 				t.Errorf("validateClusterID(%q) expected no error but got: %v", tt.clusterID, err)
+			}
+		})
+	}
+}
+
+func TestParseVMOSList(t *testing.T) {
+	tests := []struct {
+		name    string
+		vmOS    string
+		want    []string
+		wantErr string
+	}{
+		{name: "empty", vmOS: ""},
+		{name: "whitespace", vmOS: "  "},
+		{name: "single", vmOS: "rhel9", want: []string{"rhel9"}},
+		{name: "rhel8", vmOS: "rhel8", want: []string{"rhel8"}},
+		{name: "mixed with spaces", vmOS: "rhel8, rhel9, rhel10", want: []string{"rhel8", "rhel9", "rhel10"}},
+		{name: "uppercase", vmOS: "RHEL9", want: []string{"rhel9"}},
+		{name: "empty entry", vmOS: "rhel9,,rhel10", wantErr: "empty entry"},
+		{name: "trailing comma", vmOS: "rhel9,", wantErr: "empty entry"},
+		{name: "unsupported", vmOS: "rhel7", wantErr: "unsupported vm-os"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := parseVMOSList(tt.vmOS)
+			if tt.wantErr != "" {
+				if err == nil {
+					t.Fatalf("expected error containing %q, got none", tt.wantErr)
+				}
+				if !strings.Contains(err.Error(), tt.wantErr) {
+					t.Fatalf("error %q does not contain %q", err.Error(), tt.wantErr)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if !slices.Equal(got, tt.want) {
+				t.Errorf("parseVMOSList(%q) = %q, want %q", tt.vmOS, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestValidateVirtWorkerNodeType(t *testing.T) {
+	tests := []struct {
+		name       string
+		vmOS       string
+		workerType string
+		wantErr    bool
+	}{
+		{
+			name:       "empty vm-os default e2",
+			vmOS:       "",
+			workerType: "e2-standard-8",
+		},
+		{
+			name:       "whitespace vm-os",
+			vmOS:       "  ",
+			workerType: "e2-standard-8",
+		},
+		{
+			name:       "rhel9 on n2-standard-8",
+			vmOS:       "rhel9",
+			workerType: "n2-standard-8",
+		},
+		{
+			name:       "list on n2-standard-4",
+			vmOS:       "rhel9,rhel10",
+			workerType: "n2-standard-4",
+		},
+		{
+			name:       "uppercase os on n2",
+			vmOS:       "RHEL9",
+			workerType: "n2-standard-8",
+		},
+		{
+			name:       "rhel9 on c3",
+			vmOS:       "rhel9",
+			workerType: "c3-standard-8",
+		},
+		{
+			name:       "rhel9 on n4d (AMD exception)",
+			vmOS:       "rhel9",
+			workerType: "n4d-standard-8",
+		},
+		{
+			name:       "rhel9 on default e2",
+			vmOS:       "rhel9",
+			workerType: "e2-standard-8",
+			wantErr:    true,
+		},
+		{
+			name:       "rhel9 on n2d (AMD)",
+			vmOS:       "rhel9",
+			workerType: "n2d-standard-8",
+			wantErr:    true,
+		},
+		{
+			name:       "rhel9 on t2a (ARM)",
+			vmOS:       "rhel9",
+			workerType: "t2a-standard-8",
+			wantErr:    true,
+		},
+		{
+			name:       "rhel9 on m3 (memory-optimized)",
+			vmOS:       "rhel9",
+			workerType: "m3-ultramem-32",
+			wantErr:    true,
+		},
+		{
+			name:       "rhel9 on empty worker type",
+			vmOS:       "rhel9",
+			workerType: "",
+			wantErr:    true,
+		},
+		{
+			name:       "unsupported os",
+			vmOS:       "debian",
+			workerType: "n2-standard-8",
+			wantErr:    true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validateVirtWorkerNodeType(tt.vmOS, tt.workerType)
+			if tt.wantErr && err == nil {
+				t.Errorf("validateVirtWorkerNodeType(%q, %q) expected error but got none", tt.vmOS, tt.workerType)
+			}
+			if !tt.wantErr && err != nil {
+				t.Errorf("validateVirtWorkerNodeType(%q, %q) expected no error but got: %v", tt.vmOS, tt.workerType, err)
+			}
+		})
+	}
+}
+
+func TestCheckAndEnrichParameters_VirtWorkerType(t *testing.T) {
+	flavorParams := map[string]*v1.Parameter{
+		"name": {Name: "name"},
+		"vm-os": {
+			Name:     "vm-os",
+			Value:    "",
+			Optional: true,
+		},
+		"worker-node-type": {
+			Name:     "worker-node-type",
+			Value:    "e2-standard-8",
+			Optional: true,
+		},
+	}
+
+	tests := []struct {
+		name           string
+		req            map[string]string
+		wantErr        string
+		wantWorkerType string
+	}{
+		{
+			name:           "vm-os omitted keeps default e2",
+			req:            map[string]string{"name": "abc"},
+			wantWorkerType: "e2-standard-8",
+		},
+		{
+			name: "rhel9 with n2-standard-8",
+			req: map[string]string{
+				"name":             "abc",
+				"vm-os":            "rhel9",
+				"worker-node-type": "n2-standard-8",
+			},
+			wantWorkerType: "n2-standard-8",
+		},
+		{
+			name: "list with n2-standard-4",
+			req: map[string]string{
+				"name":             "abc",
+				"vm-os":            "rhel9,rhel10",
+				"worker-node-type": "n2-standard-4",
+			},
+			wantWorkerType: "n2-standard-4",
+		},
+		{
+			name: "rhel9 with default e2",
+			req: map[string]string{
+				"name":  "abc",
+				"vm-os": "rhel9",
+			},
+			wantErr: "vm-os requires a worker-node-type with nested kvm",
+		},
+		{
+			name: "rhel9 with explicit e2",
+			req: map[string]string{
+				"name":             "abc",
+				"vm-os":            "rhel9",
+				"worker-node-type": "e2-standard-8",
+			},
+			wantErr: "vm-os requires a worker-node-type with nested kvm",
+		},
+		{
+			name: "unsupported os",
+			req: map[string]string{
+				"name":             "abc",
+				"vm-os":            "debian",
+				"worker-node-type": "n2-standard-8",
+			},
+			wantErr: "unsupported vm-os",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := checkAndEnrichParameters(flavorParams, tt.req)
+			if tt.wantErr != "" {
+				if err == nil {
+					t.Fatalf("expected error containing %q, got none", tt.wantErr)
+				}
+				if !strings.Contains(err.Error(), tt.wantErr) {
+					t.Fatalf("error %q does not contain %q", err.Error(), tt.wantErr)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if gotType := workflowParameterValue(got, "worker-node-type"); gotType != tt.wantWorkerType {
+				t.Errorf("worker-node-type = %q, want %q", gotType, tt.wantWorkerType)
 			}
 		})
 	}
