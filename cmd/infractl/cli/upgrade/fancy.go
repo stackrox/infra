@@ -7,11 +7,11 @@ import (
 )
 
 type prettyCliUpgrade struct {
-	updatedFilename string
+	UpdatedFilename string `json:"updatedFilename"`
 }
 
 func (p prettyCliUpgrade) PrettyPrint(cmd *cobra.Command) {
-	cmd.Printf("Updated %s to match the infra server version\n", p.updatedFilename)
+	cmd.Printf("Updated %s to match the infra server version\n", p.UpdatedFilename)
 }
 
 func (p prettyCliUpgrade) PrettyJSONPrint(cmd *cobra.Command) error {

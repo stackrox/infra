@@ -70,7 +70,7 @@ func run(ctx context.Context, conn *grpc.ClientConn, cmd *cobra.Command, _ []str
 		return nil, err
 	}
 
-	return prettyCliUpgrade{infractlFilename}, nil
+	return prettyCliUpgrade{UpdatedFilename: infractlFilename}, nil
 }
 
 func recvBytes(reader v1.CliService_UpgradeClient) ([]byte, error) {
