@@ -13,6 +13,7 @@ import * as yup from 'yup';
 import { mapValues } from 'lodash';
 import { Button, Form } from '@patternfly/react-core';
 import Markdown from 'react-markdown';
+import { AxiosError } from 'axios';
 
 import { ClusterServiceApi, V1Parameter } from 'generated/client';
 import configuration from 'client/configuration';
@@ -25,6 +26,17 @@ import { generateClusterName } from 'utils/cluster.utils';
 import { CloudUploadAltIcon } from '@patternfly/react-icons';
 
 const clusterService = new ClusterServiceApi(configuration);
+
+type GatewayErrorBody = {
+  message?: string;
+  error?: string;
+};
+
+// grpc-gateway JSONPb returns google.rpc.Status as { code, message }.
+function serverErrorMessage(err: AxiosError<GatewayErrorBody>): string {
+  const data = err.response?.data;
+  return data?.message || data?.error || err.message || 'Cluster creation request failed';
+}
 
 function helpByParameterName(name?: string): string {
   const help: { [key: string]: string } = {
@@ -242,14 +254,7 @@ export default function ClusterForm({
     Parameters: initialParameterValues,
   };
 
-  const [error, setError] = useState<{
-    message?: string;
-    response?: {
-      data?: {
-        error?: string;
-      };
-    };
-  }>();
+  const [error, setError] = useState<AxiosError<GatewayErrorBody>>();
 
   const onSubmit = async (
     values: FormikValues,
@@ -264,9 +269,8 @@ export default function ClusterForm({
       const { id } = response.data;
       if (!id) throw new Error('Server returned empty cluster ID');
       onClusterCreated(id);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (e: any) {
-      setError(e);
+    } catch (e) {
+      setError(e as AxiosError<GatewayErrorBody>);
     } finally {
       actions.setSubmitting(false);
     }
@@ -283,8 +287,7 @@ export default function ClusterForm({
       <Form className="pf-v6-u-w-25-on-xl pf-v6-u-w-50-on-md">
         {error && (
           <div className="p-2 mb-2 bg-alert-200">
-            {`[Server Error] ${error.message || 'Cluster creation request failed'}`}
-            {error.response?.data?.error && ` (${error.response.data.error})`}
+            {`[Server Error] ${serverErrorMessage(error)}`}
           </div>
         )}
         <FormContent flavorParameters={flavorParameters} parameterSchemas={parameterSchemas} />

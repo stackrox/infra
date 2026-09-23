@@ -333,6 +333,18 @@
         Defines a list of capabilities to explicitly enable. These capabilities are enabled in addition to the capabilities specified in the baseline capability set.
         Example: `["DeploymentConfig", "ImageRegistry"]`
 
+    - name: vm-os
+      description: Guest OS list for optional VMs (empty skips virt)
+      value: ""
+      kind: optional
+      help: |
+        Comma-separated guest OS list (`rhel8`, `rhel9`, or `rhel10`). Each
+        entry creates one VM. Empty skips OpenShift Virtualization.
+        Example: `rhel9,rhel9,rhel10`.
+        Non-empty lists require a nested-KVM `worker-node-type` (for example
+        `n2-standard-8`; not `e2`). Worker count is unchanged.
+        Roughly two VMs fit on three worker nodes.
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
@@ -362,6 +374,9 @@
 
     - name: cluster-console-password
       description: The password to login at the openshift console
+
+    - name: vm-access
+      description: SSH credentials for optional VMs (present when vm-os is non-empty)
 
 ######################
 #  openshift-4-demo  #
@@ -683,6 +698,18 @@
         Defines a list of capabilities to explicitly enable. These capabilities are enabled in addition to the capabilities specified in the baseline capability set.
         Example: `["DeploymentConfig", "ImageRegistry"]`
 
+    - name: vm-os
+      description: Guest OS list for optional VMs (empty skips virt)
+      value: ""
+      kind: optional
+      help: |
+        Comma-separated guest OS list (`rhel8`, `rhel9`, or `rhel10`). Each
+        entry creates one VM. Empty skips OpenShift Virtualization.
+        Example: `rhel9,rhel9,rhel10`.
+        Non-empty lists require a nested-KVM `worker-node-type` (for example
+        `n2-standard-8`; not `e2`). Worker count is unchanged.
+        Roughly two VMs fit on three worker nodes.
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
@@ -712,6 +739,9 @@
 
     - name: cluster-console-password
       description: The password to login at the openshift console
+
+    - name: vm-access
+      description: SSH credentials for optional VMs (present when vm-os is non-empty)
 
 #####################
 #  AWS EKS          #
