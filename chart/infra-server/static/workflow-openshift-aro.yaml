@@ -80,6 +80,8 @@ spec:
             value: '{{ "{{" }}workflow.parameters.machine-type{{ "}}" }}'
           - name: CREATION_SOURCE
             value: "infra"
+          - name: SHOW_VERBOSE_CREATION_LOGS
+            value: '{{ "{{" }}workflow.parameters.show-verbose-creation-logs{{ "}}" }}'
         volumeMounts:
           - name: data
             mountPath: /data
