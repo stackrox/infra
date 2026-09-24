@@ -1,36 +1,87 @@
 name: Smoke test infra flavors
 run-name: >-
   ${{
-    format('Smoke testing flavors on infra cluster {0} (prefix {1})',
-      inputs.cluster,
-      inputs.prefix
+    format('Smoke testing flavors: prefix {0}, triggered by {1}',
+      inputs.prefix,
+      github.actor
     )
   }}
 
 on:
   workflow_dispatch:
     inputs:
-      cluster:
-        description: Infra cluster to run smoke test on (in acs-team-temp-dev project)
-        required: true
       prefix:
         description: Prefix added to the clusters created for the smoke test (maximum 7 chars)
         default: ist
         required: true
 
+env:
+  KUBECONFIG: /home/runner/artifacts/kubeconfig
+
 jobs:
-  debug:
+  create-cluster:
     runs-on: ubuntu-latest
+    outputs:
+      cluster-name: ${{ steps.determine-cluster-name.outputs.cluster-name }}
     steps:
-    - name: Show inputs
-      run: |
-        echo "Cluster: ${{ inputs.cluster }}"
-        echo "Prefix: ${{ inputs.prefix }}"
+      - name: Determine cluster name
+        id: determine-cluster-name
+        run: |
+          echo "cluster-name=infra-smoke-test-$(date +%s)" >> "${GITHUB_OUTPUT}"
+
+      - uses: stackrox/actions/infra/create-cluster@v1
+        with:
+          token: ${{ secrets.INFRA_TOKEN }}
+          flavor: gke-default
+          name: ${{ steps.determine-cluster-name.outputs.cluster-name }}
+          lifespan: 8h
+          wait: true
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref }}
+
+      - name: Authenticate to GCloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.INFRA_CI_AUTOMATION_GCP_SA }}
+
+      - name: Set up Cloud SDK
+        uses: "google-github-actions/setup-gcloud@v2"
+        with:
+          install_components: "gke-gcloud-auth-plugin"
+
+      - name: Download production infractl
+        uses: stackrox/actions/infra/install-infractl@v1
+
+      - name: Download artifacts
+        env:
+          INFRA_TOKEN: ${{ secrets.INFRA_TOKEN }}
+        run: |
+          /home/runner/.local/bin/infractl artifacts "${{ steps.determine-cluster-name.outputs.cluster-name }}" -d /home/runner/artifacts >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Determine tag
+        id: tag
+        run: |
+          echo "tag=$(make tag)" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for image
+        uses: stackrox/actions/release/wait-for-image@v1
+        with:
+          token: ${{ secrets.QUAY_RHACS_ENG_BEARER_TOKEN }}
+          image: rhacs-eng/infra-server:${{ steps.tag.outputs.tag }}
+          limit: 1800
+
+      - name: Deploy infra to smoke test cluster
+        run: |
+          ENVIRONMENT=development TEST_MODE=true make helm-deploy
 
   smoke-test:
     runs-on: ubuntu-latest
+    needs: [create-cluster]
     env:
-      KUBECONFIG: /home/runner/artifacts/kubeconfig
       INFRA_TOKEN_PROD: ${{ secrets.INFRA_TOKEN }}
       INFRA_TOKEN_DEV: ${{ secrets.INFRA_TOKEN_DEV }}
       USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
@@ -67,12 +118,12 @@ jobs:
       - name: Download production infractl
         uses: stackrox/actions/infra/install-infractl@v1
 
-      - name: Download artifacts for cluster ${{ inputs.cluster }}
+      - name: Download artifacts for cluster ${{ needs.create-cluster.outputs.cluster-name }}
         env:
           INFRA_TOKEN: ${{ env.INFRA_TOKEN_PROD }}
         run: |
           set -uo pipefail
-          infractl artifacts "${{ inputs.cluster }}" -d "/home/runner/artifacts" >> "$GITHUB_STEP_SUMMARY"
+          infractl artifacts "${{ needs.create-cluster.outputs.cluster-name }}" -d "/home/runner/artifacts" >> "$GITHUB_STEP_SUMMARY"
           kubectl -n infra port-forward svc/infra-server-service 8443:8443 &
           sleep 10
 
@@ -87,3 +138,6 @@ jobs:
           endpoint: localhost:8443
           insecure: true
           args: ${{ matrix.flavors.args }}
+          no-slack: true
+
+      # TODO: Destroy infra cluster for ${{ matrix.flavors.name }}
