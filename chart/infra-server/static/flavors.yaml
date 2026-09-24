@@ -428,70 +428,70 @@
       value: ""
       kind: optional
       help: |
-        Version string of the main container image tag.
+        Version string of the main container image tag. Ignored when Central and Secured Cluster versions differ.
 
     - name: scanner-image-tag
       description: Scanner container image tag
       value: ""
       kind: optional
       help: |
-        Version string of the scanner container image tag.
+        Version string of the scanner container image tag. Ignored when Central and Secured Cluster versions differ.
 
     - name: scanner-db-image-tag
       description: Scanner DB container image tag
       value: ""
       kind: optional
       help: |
-        Version string of the scanner-db container image tag.
+        Version string of the scanner-db container image tag. Ignored when Central and Secured Cluster versions differ.
 
     - name: scanner-slim-image-tag
       description: Scanner Slim container image tag
       value: ""
       kind: optional
       help: |
-        Version string of the scanner-slim container image tag.
+        Version string of the scanner-slim container image tag. Ignored when Central and Secured Cluster versions differ.
 
     - name: scanner-db-slim-image-tag
       description: Scanner DB Slim container image tag
       value: ""
       kind: optional
       help: |
-        Version string of the scanner-db-slim container image tag.
+        Version string of the scanner-db-slim container image tag. Ignored when Central and Secured Cluster versions differ.
 
     - name: collector-image-tag
       description: Collector container image tag
       value: ""
       kind: optional
       help: |
-        Version string of the collector container image tag.
+        Version string of the collector container image tag. Ignored when Central and Secured Cluster versions differ.
 
     - name: central-db-image-tag
       description: Central DB container image tag
       value: ""
       kind: optional
       help: |
-        Version string of the central-db container image tag.
+        Version string of the central-db container image tag. Ignored when Central and Secured Cluster versions differ.
 
     - name: scanner-v4-image-tag
       description: Scanner V4 container image tag
       value: ""
       kind: optional
       help: |
-        Version string of the scanner-v4 container image tag.
+        Version string of the scanner-v4 container image tag. Ignored when Central and Secured Cluster versions differ.
 
     - name: scanner-v4-db-image-tag
       description: Scanner V4 DB container image tag
       value: ""
       kind: optional
       help: |
-        Version string of the scanner-v4-db container image tag.
+        Version string of the scanner-v4-db container image tag. Ignored when Central and Secured Cluster versions differ.
 
     - name: fact-image-tag
       description: Fact container image tag
       value: ""
       kind: optional
       help: |
-        Version string of the fact container image tag.
+        Version string of the fact container image tag. Ignored when Central and Secured Cluster versions differ.
 
     - name: trusted-certs-enabled
       description: Should trusted certificates be created
