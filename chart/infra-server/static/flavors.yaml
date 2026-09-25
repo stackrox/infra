@@ -825,6 +825,15 @@
       value: ""
       kind: optional
 
+    - name: show-verbose-creation-logs
+      description: Whether to show verbose creation logs
+      value: "false"
+      kind: optional
+      help: |
+        If set to "true", the verbose creation logs will be shown.
+        This is useful for debugging the creation process.
+        The verbose creation logs are shown by the `az aro create` command.
+
   artifacts:
     - name: kubeconfig
       description: Kube config for connecting to this cluster
