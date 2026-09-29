@@ -175,7 +175,7 @@ push:
 
 .PHONY: argo-workflow-lint
 argo-workflow-lint:
-	@argo lint ./chart/infra-server/static/workflow*.yaml
+	@argo lint --offline ./chart/infra-server/static/workflow*.yaml ./chart/infra-server/templates/workflowtemplates/*.yaml
 
 .PHONY: shellcheck
 shellcheck:
