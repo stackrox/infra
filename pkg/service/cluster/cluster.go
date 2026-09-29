@@ -352,7 +352,7 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 	// insufficient or superfluous parameters.
 	workflowParams, err := checkAndEnrichParameters(flav.Parameters, req.Parameters)
 	if err != nil {
-		return nil, err
+		return nil, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 	workflow.Spec.Arguments.Parameters = workflowParams
 
@@ -975,6 +975,13 @@ func checkAndEnrichParameters(flavorParams map[string]*v1.Parameter, requestPara
 		if !found || flavorParam.Internal {
 			return nil, fmt.Errorf("passed parameter %q is not defined for this flavor", requestParamName)
 		}
+	}
+
+	if err := validateVirtWorkerNodeType(
+		workflowParameterValue(allParams, "vm-os"),
+		workflowParameterValue(allParams, "worker-node-type"),
+	); err != nil {
+		return nil, err
 	}
 
 	return allParams, nil
