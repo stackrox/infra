@@ -812,6 +812,12 @@
       value: us-west-2
       kind: optional
 
+    - name: network
+      description: Network stack
+      value: ipv4
+      kind: optional
+      help: Set network stack to ipv4(default) or ipv6
+
 #####################
 #  Azure AKS        #
 #####################
