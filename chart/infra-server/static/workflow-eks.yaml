@@ -18,7 +18,7 @@ spec:
         value: ""
       - name: region
         value: ""
-      - name: network
+      - name: network-stack
         value: ""
 
   templates:
@@ -79,7 +79,7 @@ spec:
           - name: REGION
             value: '{{ "{{" }}workflow.parameters.region{{ "}}" }}'
           - name: NETWORK_STACK
-            value: '{{ "{{" }}workflow.parameters.network{{ "}}" }}'
+            value: '{{ "{{" }}workflow.parameters.network-stack{{ "}}" }}'
 
         volumeMounts:
           - name: data

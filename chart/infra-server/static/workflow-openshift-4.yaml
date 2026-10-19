@@ -20,9 +20,11 @@ spec:
       - name: worker-node-count
         value: ""
       - name: worker-node-service-account
+      - name: cloud-provider
+        value: ""
       - name: region
         value: ""
-      - name: network
+      - name: network-stack
         value: ""
       - name: pull-secret
         value: ""
@@ -120,6 +122,8 @@ spec:
                 key: google-credentials.json
           - name: GCP_PROJECT
             value : "acs-team-temp-dev"
+          - name: CLOUD_PROVIDER
+            value: '{{ "{{" }}workflow.parameters.cloud-provider{{ "}}" }}'
           - name: AWS_ACCESS_KEY_ID
             valueFrom:
               secretKeyRef:
@@ -154,7 +158,7 @@ spec:
           - name: REGION
             value: '{{ "{{" }}workflow.parameters.region{{ "}}" }}'
           - name: NETWORK_STACK
-            value: '{{ "{{" }}workflow.parameters.network{{ "}}" }}'
+            value: '{{ "{{" }}workflow.parameters.network-stack{{ "}}" }}'
           - name: FIPS_ENABLED
             value: '{{ "{{" }}workflow.parameters.fips-enabled{{ "}}" }}'
           - name: INSTALL_HYPERSHIFT
