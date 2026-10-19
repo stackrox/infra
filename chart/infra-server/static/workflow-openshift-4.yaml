@@ -22,6 +22,8 @@ spec:
       - name: worker-node-service-account
       - name: region
         value: ""
+      - name: network
+        value: ""
       - name: pull-secret
         value: ""
       - name: fips-enabled
@@ -151,6 +153,8 @@ spec:
             value: '{{ "{{" }}workflow.parameters.worker-node-service-account{{ "}}" }}'
           - name: REGION
             value: '{{ "{{" }}workflow.parameters.region{{ "}}" }}'
+          - name: NETWORK_STACK
+            value: '{{ "{{" }}workflow.parameters.network{{ "}}" }}'
           - name: FIPS_ENABLED
             value: '{{ "{{" }}workflow.parameters.fips-enabled{{ "}}" }}'
           - name: INSTALL_HYPERSHIFT

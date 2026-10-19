@@ -283,6 +283,12 @@
       value: us-east1
       kind: optional
 
+    - name: network
+      description: Network stack
+      value: ipv4
+      help: Network stack ipv4(default), dual/dual-ipv4-primary, dual-ipv6-primary
+      kind: optional
+
     - name: fips-enabled
       description: should fips be enabled
       value: false
