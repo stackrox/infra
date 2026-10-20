@@ -285,7 +285,7 @@
       help: gcp or aws
 
     - name: region
-      description: Google Cloud region to deploy infrastructure into.
+      description: Cloud region to deploy infrastructure into (empty for default).
       value: us-east1
       kind: optional
 
