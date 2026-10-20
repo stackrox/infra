@@ -22,6 +22,8 @@ spec:
       - name: worker-node-service-account
       - name: cloud-provider
         value: ""
+      - name: base-domain
+        value: ""
       - name: region
         value: ""
       - name: network-stack
@@ -113,7 +115,7 @@ spec:
         args:
           - create
           - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
-          - ocp.infra.rox.systems
+          - '{{ "{{" }}workflow.parameters.base-domain{{ "}}" }}'
         env:
           - name: GOOGLE_CREDENTIALS
             valueFrom:

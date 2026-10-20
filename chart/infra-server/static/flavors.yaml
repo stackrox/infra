@@ -284,6 +284,11 @@
       kind: optional
       help: gcp or aws
 
+    - name: base-domain
+      description: For gcp use ocp.infra.rox.systems or for aws use aws.dev.rox.systems
+      value: ocp.infra.rox.systems
+      kind: optional
+
     - name: region
       description: Cloud region to deploy infrastructure into (empty for default).
       value: us-east1
@@ -692,6 +697,11 @@
       value: gcp
       kind: optional
       help: gcp or aws
+
+    - name: base-domain
+      description: For gcp use ocp.infra.rox.systems or for aws use aws.dev.rox.systems
+      value: ocp.infra.rox.systems
+      kind: optional
 
     - name: region
       description: Google Cloud region to deploy infrastructure into.
