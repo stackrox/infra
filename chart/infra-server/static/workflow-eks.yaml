@@ -18,6 +18,8 @@ spec:
         value: ""
       - name: region
         value: ""
+      - name: network-stack
+        value: ""
 
   templates:
     - name: start
@@ -76,6 +78,8 @@ spec:
             value: "infra"
           - name: REGION
             value: '{{ "{{" }}workflow.parameters.region{{ "}}" }}'
+          - name: NETWORK_STACK
+            value: '{{ "{{" }}workflow.parameters.network-stack{{ "}}" }}'
 
         volumeMounts:
           - name: data
