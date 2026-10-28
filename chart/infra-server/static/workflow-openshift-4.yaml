@@ -20,7 +20,13 @@ spec:
       - name: worker-node-count
         value: ""
       - name: worker-node-service-account
+      - name: cloud-provider
+        value: ""
+      - name: base-domain
+        value: ""
       - name: region
+        value: ""
+      - name: network-stack
         value: ""
       - name: pull-secret
         value: ""
@@ -109,7 +115,7 @@ spec:
         args:
           - create
           - '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
-          - ocp.infra.rox.systems
+          - '{{ "{{" }}workflow.parameters.base-domain{{ "}}" }}'
         env:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
@@ -118,6 +124,8 @@ spec:
                 key: google-credentials.json
           - name: GCP_PROJECT
             value : "acs-team-temp-dev"
+          - name: CLOUD_PROVIDER
+            value: '{{ "{{" }}workflow.parameters.cloud-provider{{ "}}" }}'
           - name: AWS_ACCESS_KEY_ID
             valueFrom:
               secretKeyRef:
@@ -151,6 +159,8 @@ spec:
             value: '{{ "{{" }}workflow.parameters.worker-node-service-account{{ "}}" }}'
           - name: REGION
             value: '{{ "{{" }}workflow.parameters.region{{ "}}" }}'
+          - name: NETWORK_STACK
+            value: '{{ "{{" }}workflow.parameters.network-stack{{ "}}" }}'
           - name: FIPS_ENABLED
             value: '{{ "{{" }}workflow.parameters.fips-enabled{{ "}}" }}'
           - name: INSTALL_HYPERSHIFT

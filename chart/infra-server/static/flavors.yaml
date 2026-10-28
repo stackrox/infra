@@ -278,9 +278,26 @@
       value: openshift-worker-node@acs-team-temp-dev.iam.gserviceaccount.com
       kind: optional
 
+    - name: cloud-provider
+      description: Cloud provider
+      value: gcp
+      kind: optional
+      help: gcp or aws
+
+    - name: base-domain
+      description: For gcp use ocp.infra.rox.systems or for aws use aws.dev.rox.systems
+      value: ocp.infra.rox.systems
+      kind: optional
+
     - name: region
-      description: Google Cloud region to deploy infrastructure into.
+      description: Cloud region to deploy infrastructure into (empty for default).
       value: us-east1
+      kind: optional
+
+    - name: network-stack
+      description: Network stack
+      value: ipv4
+      help: Network stack ipv4(default), dual/dual-ipv4-primary, dual-ipv6-primary
       kind: optional
 
     - name: fips-enabled
@@ -675,9 +692,26 @@
       value: openshift-worker-node@acs-team-temp-dev.iam.gserviceaccount.com
       kind: optional
 
+    - name: cloud-provider
+      description: Cloud provider
+      value: gcp
+      kind: optional
+      help: gcp or aws
+
+    - name: base-domain
+      description: For gcp use ocp.infra.rox.systems or for aws use aws.dev.rox.systems
+      value: ocp.infra.rox.systems
+      kind: optional
+
     - name: region
       description: Google Cloud region to deploy infrastructure into.
       value: us-east1
+      kind: optional
+
+    - name: network-stack
+      description: Network stack
+      value: ipv4
+      help: Network stack ipv4(default), dual/dual-ipv4-primary, dual-ipv6-primary
       kind: optional
 
     - name: fips-enabled
@@ -811,6 +845,12 @@
       description: AWS region
       value: us-west-2
       kind: optional
+
+    - name: network-stack
+      description: Network stack
+      value: ipv4
+      kind: optional
+      help: Set network stack to ipv4(default) or ipv6
 
 #####################
 #  Azure AKS        #
