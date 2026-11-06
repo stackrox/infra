@@ -80,7 +80,7 @@ spec:
 
     - name: create
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-{{ .Chart.Annotations.automationFlavorsVersion }}
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-ipi-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
         volumeMounts:
           - name: data
@@ -273,7 +273,7 @@ spec:
 
     - name: destroy
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-{{ .Chart.Annotations.automationFlavorsVersion }}
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-ipi-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
         command:
           - entrypoint.sh
