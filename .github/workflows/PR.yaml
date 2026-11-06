@@ -85,6 +85,7 @@ jobs:
           go-version-file: go/src/github.com/stackrox/infra/go.mod
 
       - name: Authenticate to GCloud
+        id: gcp-auth
         uses: google-github-actions/auth@v3
         with:
           credentials_json: ${{ secrets.INFRA_CI_AUTOMATION_GCP_SA }}
@@ -93,6 +94,21 @@ jobs:
         uses: "google-github-actions/setup-gcloud@v3"
         with:
           install_components: "gke-gcloud-auth-plugin"
+
+      - name: Use stored gcloud credentials
+        if: steps.gcp-auth.outcome == 'success'
+        shell: bash
+        env:
+          GCP_CREDENTIALS_JSON: ${{ secrets.INFRA_CI_AUTOMATION_GCP_SA }}
+        run: |
+          expected_account="$(jq -er '.client_email' <<< "$GCP_CREDENTIALS_JSON")"
+          if [[ "$(gcloud config get-value core/account)" != "$expected_account" ]]; then
+            echo "::error::gcloud's active account does not match the CI service account"
+            exit 1
+          fi
+          # setup-gcloud already stored these credentials. Avoid the file-override crash:
+          # https://github.com/google-github-actions/auth/issues/535
+          echo "CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE=" >> "$GITHUB_ENV"
 
       - name: Download production infractl
         uses: stackrox/actions/infra/install-infractl@v1
