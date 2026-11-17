@@ -232,6 +232,10 @@ func (t userTokenizer) Validate(token string) (*v1.User, error) {
 		return nil, err
 	}
 
+	if claims.User == nil {
+		return nil, errors.New("token does not contain a user")
+	}
+
 	return claims.User, nil
 }
 
@@ -301,6 +305,10 @@ func (t serviceAccountTokenizer) Validate(token string) (*v1.ServiceAccount, err
 	err = parsedToken.Claims(t.secret, &claims)
 	if err != nil {
 		return nil, err
+	}
+
+	if claims.ServiceAccount == nil {
+		return nil, errors.New("token does not contain a service account")
 	}
 
 	if err := claims.Valid(); err != nil {

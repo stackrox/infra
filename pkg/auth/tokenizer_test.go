@@ -46,6 +46,15 @@ func notYetValidClaims() jwt.Claims {
 	}
 }
 
+// validClaims returns JWT claims that are currently valid.
+func validClaims() jwt.Claims {
+	return jwt.Claims{
+		Expiry:    jwt.NewNumericDate(time.Now().Add(time.Hour)),
+		NotBefore: jwt.NewNumericDate(time.Now()),
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+	}
+}
+
 func TestStateTokenizerValidate(t *testing.T) {
 	tokenizer := NewStateTokenizer(time.Hour, testSecret)
 
@@ -114,15 +123,22 @@ func TestUserTokenizerValidate(t *testing.T) {
 	})
 	require.NoError(t, err)
 
+	// A state-style token: validly signed with the shared session secret and
+	// currently valid, but carrying no user claim. It must be rejected rather
+	// than yield a nil user.
+	stateToken, err := signedToken([]byte(testSecret), validClaims())
+	require.NoError(t, err)
+
 	testCases := map[string]struct {
 		token    string
 		expError bool
 	}{
-		"valid":            {token: validToken, expError: false},
-		"expired":          {token: expiredToken, expError: true},
-		"not-yet-valid":    {token: notYetValidToken, expError: true},
-		"foreign-secret":   {token: foreignToken, expError: true},
-		"unsigned-garbage": {token: "not-a-jwt", expError: true},
+		"valid":                    {token: validToken, expError: false},
+		"expired":                  {token: expiredToken, expError: true},
+		"not-yet-valid":            {token: notYetValidToken, expError: true},
+		"foreign-secret":           {token: foreignToken, expError: true},
+		"state-token-without-user": {token: stateToken, expError: true},
+		"unsigned-garbage":         {token: "not-a-jwt", expError: true},
 	}
 
 	for name, tc := range testCases {
@@ -168,15 +184,22 @@ func TestServiceAccountTokenizerValidate(t *testing.T) {
 	foreignToken, err := signedToken([]byte(foreignSecret), serviceAccountValidator{expiredSvcacct})
 	require.NoError(t, err)
 
+	// A state-style token: validly signed with the shared session secret and
+	// currently valid, but carrying no service-account claims. It must be
+	// rejected rather than panic on the nil embedded ServiceAccount.
+	stateToken, err := signedToken([]byte(testSecret), validClaims())
+	require.NoError(t, err)
+
 	testCases := map[string]struct {
 		token    string
 		expError bool
 	}{
-		"valid":            {token: validToken, expError: false},
-		"expired":          {token: expiredToken, expError: true},
-		"not-yet-valid":    {token: notYetValidToken, expError: true},
-		"foreign-secret":   {token: foreignToken, expError: true},
-		"unsigned-garbage": {token: "not-a-jwt", expError: true},
+		"valid":                       {token: validToken, expError: false},
+		"expired":                     {token: expiredToken, expError: true},
+		"not-yet-valid":               {token: notYetValidToken, expError: true},
+		"foreign-secret":              {token: foreignToken, expError: true},
+		"state-token-without-svcacct": {token: stateToken, expError: true},
+		"unsigned-garbage":            {token: "not-a-jwt", expError: true},
 	}
 
 	for name, tc := range testCases {
