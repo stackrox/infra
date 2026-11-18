@@ -749,6 +749,14 @@
         Defines a list of capabilities to explicitly enable. These capabilities are enabled in addition to the capabilities specified in the baseline capability set.
         Example: `["DeploymentConfig", "ImageRegistry"]`
 
+    - name: feature-gates
+      value: ""
+      kind: hardcoded
+
+    - name: extra-manifest
+      value: ""
+      kind: hardcoded
+
     - name: vm-os
       description: Guest OS list for optional VMs (empty skips virt)
       value: ""
