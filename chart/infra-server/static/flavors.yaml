@@ -340,8 +340,6 @@
       help: |
         YAML flow list of feature gate settings, e.g., `["TLSGroupPreferences=true", "TLSAdherence=true"]`.
         Setting this selects `CustomNoUpgrade`, which prevents cluster upgrades.
-        Known gates omitted from the list are disabled, including gates enabled by default.
-        Include any required default gates; these depend on the OpenShift release.
 
     - name: extra-manifest
       description: Extra installation manifest
