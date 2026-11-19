@@ -57,8 +57,10 @@ spec:
               artifacts:
                 - name: tfstate
                   from: '{{ "{{" }}workflow.outputs.artifacts.global-tfstate{{ "}}" }}'
+                  optional: true
                 - name: tfvars
                   from: '{{ "{{" }}workflow.outputs.artifacts.global-tfvars{{ "}}" }}'
+                  optional: true
 
     - name: roxctl
       activeDeadlineSeconds: 600
