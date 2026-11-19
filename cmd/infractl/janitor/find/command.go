@@ -28,6 +28,12 @@ var (
 		"osd-on-gcp",
 		"qa-demo",
 		"openshift-ipi-perf-scale",
+		// Legacy IDs from before the rename to openshift-ipi; clusters created
+		// before the rename keep these as their flavor. Remove once no
+		// pre-rename clusters are left.
+		"openshift-4",
+		"openshift-4-demo",
+		"openshift-4-perf-scale",
 		"openshift-multi",
 	}
 	relevantStatusesForJanitor = []v1.Status{
