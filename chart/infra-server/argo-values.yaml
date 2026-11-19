@@ -15,10 +15,9 @@ argo-workflows:
           argo: workflows
       spec:
         ttlStrategy:
-          # Keep the workflow objects available for 7 days
-          secondsAfterCompletion: 604800
-          secondsAfterSuccess: 604800
-          secondsAfterFailure: 604800
+          # Delete workflows (with their pods and PVCs) 48h after completion.
+          # If necessary, Workflow logs are available through the archived artifact repository.
+          secondsAfterCompletion: 172800
 
   artifactRepository:
     archiveLogs: true
