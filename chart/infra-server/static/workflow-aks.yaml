@@ -34,6 +34,8 @@ spec:
             template: destroy
 
     - name: create
+      activeDeadlineSeconds: 7200
+      timeout: 2h
       outputs:
         artifacts:
           - name: kubeconfig
@@ -103,6 +105,7 @@ spec:
       suspend: {}
 
     - name: destroy
+      activeDeadlineSeconds: 7200
       container:
         image: quay.io/stackrox-io/ci:automation-flavors-aks-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always

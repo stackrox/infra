@@ -44,7 +44,8 @@ spec:
                   value: '{{ "{{" }}workflow.parameters.name{{ "}}" }}'
 
     - name: create
-      activeDeadlineSeconds: 3600
+      activeDeadlineSeconds: 7200
+      timeout: 2h
       outputs:
         artifacts:
           - name: kubeconfig
@@ -90,7 +91,7 @@ spec:
       suspend: {}
 
     - name: destroy
-      activeDeadlineSeconds: 3600
+      activeDeadlineSeconds: 7200
       container:
         image: quay.io/stackrox-io/ci:automation-flavors-gke-default-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always

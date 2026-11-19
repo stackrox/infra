@@ -28,6 +28,7 @@ spec:
 
 
     - name: destroy
+      activeDeadlineSeconds: 7200
       container:
         image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always

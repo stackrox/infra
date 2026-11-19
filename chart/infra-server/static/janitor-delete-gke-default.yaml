@@ -22,7 +22,7 @@ spec:
             template: destroy
 
     - name: destroy
-      activeDeadlineSeconds: 3600
+      activeDeadlineSeconds: 7200
       container:
         image: quay.io/stackrox-io/ci:automation-flavors-gke-default-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
