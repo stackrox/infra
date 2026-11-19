@@ -47,6 +47,7 @@ spec:
 
     - name: create
       activeDeadlineSeconds: 7200
+      timeout: 2h
       container:
         image: quay.io/stackrox-io/ci:automation-flavors-ibmroks-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always

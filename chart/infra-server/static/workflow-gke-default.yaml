@@ -45,6 +45,7 @@ spec:
 
     - name: create
       activeDeadlineSeconds: 7200
+      timeout: 2h
       outputs:
         artifacts:
           - name: kubeconfig
