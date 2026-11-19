@@ -106,7 +106,7 @@ spec:
             archive:
               none: {}
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-ipi-0.17.5-2-g222cd123c7-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-ipi-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
         command:
           - entrypoint.sh
@@ -217,7 +217,7 @@ spec:
 
     - name: destroy
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-ipi-0.17.5-2-g222cd123c7-snapshot
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-ipi-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
         command:
           - entrypoint.sh
