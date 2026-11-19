@@ -34,7 +34,7 @@ spec:
             template: destroy
 
     - name: create
-      activeDeadlineSeconds: 3600
+      activeDeadlineSeconds: 7200
       outputs:
         artifacts:
           - name: kubeconfig
@@ -88,7 +88,7 @@ spec:
       suspend: {}
 
     - name: destroy
-      activeDeadlineSeconds: 3600
+      activeDeadlineSeconds: 7200
       container:
         image: quay.io/stackrox-io/ci:automation-flavors-eks-{{ .Chart.Annotations.automationFlavorsVersion }}
         command:

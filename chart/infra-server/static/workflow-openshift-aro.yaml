@@ -130,7 +130,7 @@ spec:
       suspend: {}
 
     - name: destroy
-      activeDeadlineSeconds: 3600
+      activeDeadlineSeconds: 7200
       container:
         image: quay.io/stackrox-io/ci:automation-flavors-aro-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always

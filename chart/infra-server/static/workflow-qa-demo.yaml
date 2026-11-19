@@ -78,7 +78,7 @@ spec:
           - /tmp/roxctl
 
     - name: create
-      activeDeadlineSeconds: 3600
+      activeDeadlineSeconds: 7200
       inputs:
         artifacts:
           - name: roxctl
@@ -183,7 +183,7 @@ spec:
       suspend: {}
 
     - name: destroy
-      activeDeadlineSeconds: 3600
+      activeDeadlineSeconds: 7200
       inputs:
         artifacts:
           - name: tfstate
