@@ -23,11 +23,11 @@ var (
 		"test-simulate", // for e2e tests
 		"gke-default",
 		"demo",
-		"openshift-4",
-		"openshift-4-demo",
+		"openshift-ipi",
+		"openshift-ipi-demo",
 		"osd-on-gcp",
 		"qa-demo",
-		"openshift-4-perf-scale",
+		"openshift-ipi-perf-scale",
 		"openshift-multi",
 	}
 	relevantStatusesForJanitor = []v1.Status{
