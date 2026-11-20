@@ -21,8 +21,6 @@ import (
 	"github.com/stackrox/infra/pkg/config"
 	"github.com/stackrox/infra/pkg/logging"
 	"github.com/stackrox/infra/pkg/service/middleware"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/keepalive"
@@ -132,7 +130,14 @@ func (s *server) RunServer() (<-chan error, error) {
 
 	log.Log(logging.INFO, "starting gRPC server", "listen-address", listenAddress)
 	go func() {
-		if err := http.ListenAndServeTLS(listenAddress, s.cfg.Server.CertFile, s.cfg.Server.KeyFile, h2c.NewHandler(muxHandler, &http2.Server{})); err != nil {
+		srv := &http.Server{
+			Addr:    listenAddress,
+			Handler: muxHandler,
+		}
+		srv.Protocols = new(http.Protocols)
+		srv.Protocols.SetHTTP1(true)
+		srv.Protocols.SetHTTP2(true)
+		if err := srv.ListenAndServeTLS(s.cfg.Server.CertFile, s.cfg.Server.KeyFile); err != nil {
 			errCh <- err
 		}
 	}()
