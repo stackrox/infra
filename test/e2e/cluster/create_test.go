@@ -78,6 +78,24 @@ func TestCannotCreateClusterWithInvalidLifespan(t *testing.T) {
 	assert.ErrorContains(t, err, "invalid argument \"3w\" for \"--lifespan\" flag")
 }
 
+func TestCannotSelectGCPProjectForUnsupportedFlavor(t *testing.T) {
+	_, err := mock.InfractlCreateCluster(
+		"test-simulate", utils.GetUniqueClusterName("gcp-unsupported"),
+		"--lifespan=20s",
+		"--arg=gcp-project=acs-san-stackroxci",
+	)
+	assert.ErrorContains(t, err, "gcp-project selection is not supported for the \"test-simulate\" flavor")
+}
+
+func TestCannotCreateClusterWithUnsupportedGCPProject(t *testing.T) {
+	_, err := mock.InfractlCreateCluster(
+		"test-gke-lite", utils.GetUniqueClusterName("gcp-bad-project"),
+		"--lifespan=20s",
+		"--arg=gcp-project=not-a-real-project",
+	)
+	assert.ErrorContains(t, err, "unsupported gcp-project \"not-a-real-project\"")
+}
+
 // #######
 // QA DEMO
 // #######

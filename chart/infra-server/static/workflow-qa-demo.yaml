@@ -27,11 +27,15 @@ spec:
         value: ""
       - name: gcp-zone
         value: ""
+      - name: gcp-project
+        value: acs-team-temp-dev
+      - name: credential-secret-name
+        value: google-credentials-demo
 
   volumes:
     - name: credentials
       secret:
-        secretName: google-credentials-demo
+        secretName: '{{ "{{" }}workflow.parameters.credential-secret-name{{ "}}" }}'
 
   templates:
     - name: start
@@ -135,7 +139,7 @@ spec:
           - --scanner-image={{ "{{" }}workflow.parameters.scanner-image{{ "}}" }}
           - --scanner-db-image={{ "{{" }}workflow.parameters.scanner-db-image{{ "}}" }}
           - --central-db-image={{ "{{" }}workflow.parameters.central-db-image{{ "}}" }}
-          - --gcp-project=acs-team-temp-dev
+          - --gcp-project={{ "{{" }}workflow.parameters.gcp-project{{ "}}" }}
           - --dns-gcp-project=acs-team-temp-dev
           - --creation-source=infra
           - --k8s-version={{ "{{" }}workflow.parameters.k8s-version{{ "}}" }}

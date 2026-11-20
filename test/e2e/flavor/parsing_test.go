@@ -49,6 +49,17 @@ func TestParseFlavor(t *testing.T) {
 	_, ok = flavor.Parameters["machine-type"]
 	assert.False(t, ok, "internal parameter 'machine-type' is hidden")
 
+	// gcp-project is an optional, user-selectable parameter with a default
+	gcpProject, ok := flavor.Parameters["gcp-project"]
+	assert.True(t, ok, "parameter 'gcp-project' exists")
+	assert.True(t, gcpProject.Optional)
+	assert.False(t, gcpProject.Internal)
+	assert.Equal(t, "acs-team-temp-dev", gcpProject.Value)
+
+	// credential-secret-name is hardcoded and therefore hidden from users
+	_, ok = flavor.Parameters["credential-secret-name"]
+	assert.False(t, ok, "internal parameter 'credential-secret-name' is hidden")
+
 	// Parameter order follows workflow template order
 	assert.Equal(t, int32(1), nameParam.Order)
 	assert.Equal(t, int32(4), k8sVersion.Order)

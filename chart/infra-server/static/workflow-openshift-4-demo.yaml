@@ -25,14 +25,16 @@ spec:
       - name: secured-cluster-services-helm-chart-version
       - name: trusted-certs-enabled
       - name: credentials-mode
-      - name: master-node-service-account
-      - name: worker-node-service-account
       - name: region
       - name: ssd-storage-class
       - name: baseline-capability-set
         value: "vCurrent"
       - name: additional-enabled-capabilities
         value: ""
+      - name: gcp-project
+        value: acs-team-temp-dev
+      - name: credential-secret-name
+        value: openshift-4-gcp-service-account
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -44,7 +46,7 @@ spec:
   volumes:
     - name: credentials
       secret:
-        secretName: openshift-4-gcp-service-account
+        secretName: '{{ "{{" }}workflow.parameters.credential-secret-name{{ "}}" }}'
     - name: demo-secrets
       secret:
         secretName: demo-secrets
@@ -95,10 +97,10 @@ spec:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
               secretKeyRef:
-                name: openshift-4-gcp-service-account
+                name: '{{ "{{" }}workflow.parameters.credential-secret-name{{ "}}" }}'
                 key: google-credentials.json
           - name: GCP_PROJECT
-            value : "acs-team-temp-dev"
+            value : '{{ "{{" }}workflow.parameters.gcp-project{{ "}}" }}'
           - name: PULL_SECRET
             valueFrom:
               secretKeyRef:
@@ -115,9 +117,9 @@ spec:
           - name: WORKER_NODE_TYPE
             value: "e2-standard-16"
           - name: MASTER_NODE_SERVICE_ACCOUNT
-            value: '{{ "{{" }}workflow.parameters.master-node-service-account{{ "}}" }}'
+            value: 'openshift-master-node@{{ "{{" }}workflow.parameters.gcp-project{{ "}}" }}.iam.gserviceaccount.com'
           - name: WORKER_NODE_SERVICE_ACCOUNT
-            value: '{{ "{{" }}workflow.parameters.worker-node-service-account{{ "}}" }}'
+            value: 'openshift-worker-node@{{ "{{" }}workflow.parameters.gcp-project{{ "}}" }}.iam.gserviceaccount.com'
           - name: REGION
             value: '{{ "{{" }}workflow.parameters.region{{ "}}" }}'
           - name: TRUSTED_CERTS_ENABLED
@@ -173,7 +175,7 @@ spec:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
               secretKeyRef:
-                name: openshift-4-gcp-service-account
+                name: '{{ "{{" }}workflow.parameters.credential-secret-name{{ "}}" }}'
                 key: google-credentials.json
           - name: CENTRAL_PORT
             value: "443"
@@ -284,10 +286,10 @@ spec:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
               secretKeyRef:
-                name: openshift-4-gcp-service-account
+                name: '{{ "{{" }}workflow.parameters.credential-secret-name{{ "}}" }}'
                 key: google-credentials.json
           - name: GCP_PROJECT
-            value : "acs-team-temp-dev"
+            value : '{{ "{{" }}workflow.parameters.gcp-project{{ "}}" }}'
         volumeMounts:
           - name: data
             mountPath: /data

@@ -14,12 +14,10 @@ spec:
         value: ""
       - name: master-node-count
         value: ""
-      - name: master-node-service-account
       - name: worker-node-type
         value: ""
       - name: worker-node-count
         value: ""
-      - name: worker-node-service-account
       - name: region
         value: ""
       - name: pull-secret
@@ -36,6 +34,10 @@ spec:
         value: ""
       - name: vm-os
         value: ""
+      - name: gcp-project
+        value: acs-team-temp-dev
+      - name: credential-secret-name
+        value: openshift-4-gcp-service-account
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -47,7 +49,7 @@ spec:
   volumes:
     - name: credentials
       secret:
-        secretName: openshift-4-gcp-service-account
+        secretName: '{{ "{{" }}workflow.parameters.credential-secret-name{{ "}}" }}'
     - name: registry-pull-secret
       secret:
         secretName: infra-image-registry-pull-secret
@@ -114,10 +116,10 @@ spec:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
               secretKeyRef:
-                name: openshift-4-gcp-service-account
+                name: '{{ "{{" }}workflow.parameters.credential-secret-name{{ "}}" }}'
                 key: google-credentials.json
           - name: GCP_PROJECT
-            value : "acs-team-temp-dev"
+            value : '{{ "{{" }}workflow.parameters.gcp-project{{ "}}" }}'
           - name: AWS_ACCESS_KEY_ID
             valueFrom:
               secretKeyRef:
@@ -144,11 +146,11 @@ spec:
           - name: MASTER_NODE_TYPE
             value: '{{ "{{" }}workflow.parameters.master-node-type{{ "}}" }}'
           - name: MASTER_NODE_SERVICE_ACCOUNT
-            value: '{{ "{{" }}workflow.parameters.master-node-service-account{{ "}}" }}'
+            value: 'openshift-master-node@{{ "{{" }}workflow.parameters.gcp-project{{ "}}" }}.iam.gserviceaccount.com'
           - name: WORKER_NODE_TYPE
             value: '{{ "{{" }}workflow.parameters.worker-node-type{{ "}}" }}'
           - name: WORKER_NODE_SERVICE_ACCOUNT
-            value: '{{ "{{" }}workflow.parameters.worker-node-service-account{{ "}}" }}'
+            value: 'openshift-worker-node@{{ "{{" }}workflow.parameters.gcp-project{{ "}}" }}.iam.gserviceaccount.com'
           - name: REGION
             value: '{{ "{{" }}workflow.parameters.region{{ "}}" }}'
           - name: FIPS_ENABLED
@@ -220,10 +222,10 @@ spec:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
               secretKeyRef:
-                name: openshift-4-gcp-service-account
+                name: '{{ "{{" }}workflow.parameters.credential-secret-name{{ "}}" }}'
                 key: google-credentials.json
           - name: GCP_PROJECT
-            value : "acs-team-temp-dev"
+            value : '{{ "{{" }}workflow.parameters.gcp-project{{ "}}" }}'
         volumeMounts:
           - name: data
             mountPath: /data

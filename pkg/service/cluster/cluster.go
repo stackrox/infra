@@ -347,11 +347,24 @@ func (s *clusterImpl) create(req *v1.CreateClusterRequest, owner, eventID string
 		return nil, status.Errorf(codes.NotFound, "flavor %q not found", req.ID)
 	}
 
+	// Reject gcp-project selection for flavors that haven't been migrated to
+	// support it, with a clearer message than the generic "not defined for this
+	// flavor" that checkAndEnrichParameters would otherwise return.
+	if _, passed := req.Parameters["gcp-project"]; passed {
+		if _, supported := flav.Parameters["gcp-project"]; !supported {
+			return nil, status.Errorf(codes.InvalidArgument,
+				"gcp-project selection is not supported for the %q flavor", req.ID)
+		}
+	}
+
 	// Combine any hardcoded or default workflow parameters with the user
 	// provided parameters. Or return an error if the user provided
 	// insufficient or superfluous parameters.
 	workflowParams, err := checkAndEnrichParameters(flav.Parameters, req.Parameters)
 	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := applyGCPProjectCredentialSecret(workflowParams); err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 	workflow.Spec.Arguments.Parameters = workflowParams

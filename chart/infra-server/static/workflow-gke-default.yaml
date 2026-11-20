@@ -20,11 +20,15 @@ spec:
         value: ""
       - name: set-ssd-storage-default
         value: ""
+      - name: gcp-project
+        value: acs-team-temp-dev
+      - name: credential-secret-name
+        value: google-credentials
 
   volumes:
     - name: credentials
       secret:
-        secretName: google-credentials
+        secretName: '{{ "{{" }}workflow.parameters.credential-secret-name{{ "}}" }}'
 
   templates:
     - name: start
@@ -75,7 +79,7 @@ spec:
           - --name={{ "{{" }}workflow.parameters.name{{ "}}" }}
           - --nodes={{ "{{" }}workflow.parameters.nodes{{ "}}" }}
           - --machine-type={{ "{{" }}workflow.parameters.machine-type{{ "}}" }}
-          - --gcp-project=acs-team-temp-dev
+          - --gcp-project={{ "{{" }}workflow.parameters.gcp-project{{ "}}" }}
           - --creation-source=infra
           - --k8s-version={{ "{{" }}workflow.parameters.k8s-version{{ "}}" }}
           - --pod-security-policy={{ "{{" }}workflow.parameters.pod-security-policy{{ "}}" }}
@@ -99,7 +103,7 @@ spec:
         args:
           - destroy
           - --name={{ "{{" }}workflow.parameters.name{{ "}}" }}
-          - --gcp-project=acs-team-temp-dev
+          - --gcp-project={{ "{{" }}workflow.parameters.gcp-project{{ "}}" }}
           - --gcp-zone={{ "{{" }}workflow.parameters.gcp-zone{{ "}}" }}
         volumeMounts:
           - name: credentials

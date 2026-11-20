@@ -363,6 +363,48 @@ func workflowParameterValue(params []v1alpha1.Parameter, name string) string {
 	return ""
 }
 
+// gcpProjectSecretSuffix maps a selectable "gcp-project" flavor parameter value
+// to the suffix appended to a flavor's base credential secret name to select the
+// Kubernetes secret holding GCP credentials for that project. The default
+// project uses the base secret unchanged; other projects use a per-project copy
+// named "<base>-<suffix>". The keys of this map define the set of allowed
+// "gcp-project" values. Keep in sync with the "-stackroxci" secrets created in
+// chart/infra-server/templates/**/secrets.yaml.
+var gcpProjectSecretSuffix = map[string]string{
+	"acs-team-temp-dev":  "",
+	"acs-san-stackroxci": "-stackroxci",
+}
+
+// applyGCPProjectCredentialSecret resolves a flavor's "gcp-project" parameter
+// (if present) to the matching "credential-secret-name" parameter, appending the
+// per-project suffix to the flavor's base secret name. This is the only place
+// that mapping happens: "credential-secret-name" is declared as a hardcoded,
+// non-user-settable flavor parameter whose default value is the base secret, so
+// the mounted credential can never drift out of sync with the selected project.
+//
+// Flavors that don't declare a "gcp-project" parameter are left untouched.
+func applyGCPProjectCredentialSecret(params []v1alpha1.Parameter) error {
+	gcpProject := workflowParameterValue(params, "gcp-project")
+	if gcpProject == "" {
+		return nil
+	}
+
+	suffix, ok := gcpProjectSecretSuffix[gcpProject]
+	if !ok {
+		return fmt.Errorf("unsupported gcp-project %q", gcpProject)
+	}
+
+	for i := range params {
+		if params[i].Name == "credential-secret-name" {
+			anyString := v1alpha1.ParseAnyString(params[i].GetValue() + suffix)
+			params[i].Value = &anyString
+			return nil
+		}
+	}
+
+	return fmt.Errorf("flavor declares gcp-project but not credential-secret-name")
+}
+
 // validateClusterID validates that a cluster ID meets Kubernetes label value requirements.
 // Kubernetes label values must match ([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9] and be at most 63 characters.
 func validateClusterID(clusterID string) error {

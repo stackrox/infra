@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/argoproj/argo-workflows/v4/pkg/apis/workflow/v1alpha1"
 	v1 "github.com/stackrox/infra/generated/api/v1"
 )
 
@@ -531,6 +532,88 @@ func TestCheckAndEnrichParameters_VirtWorkerType(t *testing.T) {
 			}
 			if gotType := workflowParameterValue(got, "worker-node-type"); gotType != tt.wantWorkerType {
 				t.Errorf("worker-node-type = %q, want %q", gotType, tt.wantWorkerType)
+			}
+		})
+	}
+}
+
+func parameterValue(name, value string) v1alpha1.Parameter {
+	anyString := v1alpha1.ParseAnyString(value)
+	return v1alpha1.Parameter{Name: name, Value: &anyString}
+}
+
+func TestApplyGCPProjectCredentialSecret(t *testing.T) {
+	tests := []struct {
+		name       string
+		params     []v1alpha1.Parameter
+		wantErr    string
+		wantSecret string
+	}{
+		{
+			name: "flavor without a gcp-project parameter is left untouched",
+			params: []v1alpha1.Parameter{
+				parameterValue("name", "abc"),
+			},
+			wantSecret: "",
+		},
+		{
+			name: "default project resolves to the default credential secret",
+			params: []v1alpha1.Parameter{
+				parameterValue("gcp-project", "acs-team-temp-dev"),
+				parameterValue("credential-secret-name", "google-credentials"),
+			},
+			wantSecret: "google-credentials",
+		},
+		{
+			name: "overridden project resolves to the matching credential secret",
+			params: []v1alpha1.Parameter{
+				parameterValue("gcp-project", "acs-san-stackroxci"),
+				parameterValue("credential-secret-name", "google-credentials"),
+			},
+			wantSecret: "google-credentials-stackroxci",
+		},
+		{
+			name: "unsupported project is rejected",
+			params: []v1alpha1.Parameter{
+				parameterValue("gcp-project", "some-other-project"),
+				parameterValue("credential-secret-name", "google-credentials"),
+			},
+			wantErr: `unsupported gcp-project "some-other-project"`,
+		},
+		{
+			name: "suffix is appended to any base secret, not just the gke one",
+			params: []v1alpha1.Parameter{
+				parameterValue("gcp-project", "acs-san-stackroxci"),
+				parameterValue("credential-secret-name", "openshift-4-gcp-service-account"),
+			},
+			wantSecret: "openshift-4-gcp-service-account-stackroxci",
+		},
+		{
+			name: "gcp-project without a credential-secret-name parameter is rejected",
+			params: []v1alpha1.Parameter{
+				parameterValue("gcp-project", "acs-team-temp-dev"),
+			},
+			wantErr: "flavor declares gcp-project but not credential-secret-name",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := applyGCPProjectCredentialSecret(tt.params)
+			if tt.wantErr != "" {
+				if err == nil {
+					t.Fatalf("expected error containing %q, got none", tt.wantErr)
+				}
+				if !strings.Contains(err.Error(), tt.wantErr) {
+					t.Fatalf("error %q does not contain %q", err.Error(), tt.wantErr)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if got := workflowParameterValue(tt.params, "credential-secret-name"); got != tt.wantSecret {
+				t.Errorf("credential-secret-name = %q, want %q", got, tt.wantSecret)
 			}
 		})
 	}
