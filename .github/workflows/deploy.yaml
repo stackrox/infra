@@ -69,7 +69,7 @@ jobs:
         if: steps.gcp-auth.outcome == 'success'
         shell: bash
         env:
-          GCP_CREDENTIALS_JSON: ${{ secrets.INFRA_CI_AUTOMATION_GCP_SA }}
+          GCP_CREDENTIALS_JSON: ${{ secrets.INFRA_DEPLOY_AUTOMATION_GCP_SA }}
         run: |
           expected_account="$(jq -er '.client_email' <<< "$GCP_CREDENTIALS_JSON")"
           if [[ "$(gcloud config get-value core/account)" != "$expected_account" ]]; then
