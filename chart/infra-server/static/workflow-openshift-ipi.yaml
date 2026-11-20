@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: openshift-4-
+  generateName: openshift-ipi-
 spec:
   entrypoint: start
   onExit: stop
@@ -47,7 +47,7 @@ spec:
   volumes:
     - name: credentials
       secret:
-        secretName: openshift-4-gcp-service-account
+        secretName: openshift-ipi-gcp-service-account
     - name: registry-pull-secret
       secret:
         secretName: infra-image-registry-pull-secret
@@ -102,7 +102,7 @@ spec:
             archive:
               none: {}
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-{{ .Chart.Annotations.automationFlavorsVersion }}
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-ipi-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
         command:
           - entrypoint.sh
@@ -114,7 +114,7 @@ spec:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
               secretKeyRef:
-                name: openshift-4-gcp-service-account
+                name: openshift-ipi-gcp-service-account
                 key: google-credentials.json
           - name: GCP_PROJECT
             value : "acs-team-temp-dev"
@@ -209,7 +209,7 @@ spec:
 
     - name: destroy
       container:
-        image: quay.io/stackrox-io/ci:automation-flavors-openshift-4-{{ .Chart.Annotations.automationFlavorsVersion }}
+        image: quay.io/stackrox-io/ci:automation-flavors-openshift-ipi-{{ .Chart.Annotations.automationFlavorsVersion }}
         imagePullPolicy: Always
         command:
           - entrypoint.sh
@@ -220,7 +220,7 @@ spec:
           - name: GOOGLE_CREDENTIALS
             valueFrom:
               secretKeyRef:
-                name: openshift-4-gcp-service-account
+                name: openshift-ipi-gcp-service-account
                 key: google-credentials.json
           - name: GCP_PROJECT
             value : "acs-team-temp-dev"
