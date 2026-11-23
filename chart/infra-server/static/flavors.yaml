@@ -335,6 +335,23 @@
         Defines a list of capabilities to explicitly enable. These capabilities are enabled in addition to the capabilities specified in the baseline capability set.
         Example: `["DeploymentConfig", "ImageRegistry"]`
 
+    - name: feature-gates
+      description: OpenShift feature gates
+      value: ""
+      kind: optional
+      help: |
+        YAML flow list of feature gate settings, e.g., `["TLSGroupPreferences=true", "TLSAdherence=true"]`.
+        Setting this selects `CustomNoUpgrade`, which prevents cluster upgrades.
+
+    - name: extra-manifest
+      description: Extra installation manifest
+      value: ""
+      kind: optional
+      fromFile: true
+      help: |
+        Upload a single YAML manifest to include during installation.
+        For the CLI, pass the file contents with `--arg "extra-manifest=$(cat manifest.yaml)"`.
+
     - name: vm-os
       description: Guest OS list for optional VMs (empty skips virt)
       value: ""
@@ -733,6 +750,14 @@
       help: |
         Defines a list of capabilities to explicitly enable. These capabilities are enabled in addition to the capabilities specified in the baseline capability set.
         Example: `["DeploymentConfig", "ImageRegistry"]`
+
+    - name: feature-gates
+      value: ""
+      kind: hardcoded
+
+    - name: extra-manifest
+      value: ""
+      kind: hardcoded
 
     - name: vm-os
       description: Guest OS list for optional VMs (empty skips virt)
