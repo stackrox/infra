@@ -9,6 +9,8 @@ spec:
       - name: name
       - name: gcp-zone
         value: ""
+      - name: gcp-project
+        value: ""
 
   volumes:
     - name: credentials
@@ -31,7 +33,7 @@ spec:
         args:
           - destroy
           - --name={{ "{{" }}workflow.parameters.name{{ "}}" }}
-          - --gcp-project=acs-team-temp-dev
+          - --gcp-project={{ "{{" }}workflow.parameters.gcp-project{{ "}}" }}
           - --gcp-zone={{ "{{" }}workflow.parameters.gcp-zone{{ "}}" }}
         volumeMounts:
           - name: credentials
