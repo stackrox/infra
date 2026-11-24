@@ -196,15 +196,17 @@
       description: Instructions for obtaining SSH access to instances in your cluster
 
 ####################
-#  openshift-4     #
+#  openshift-ipi   #
 ####################
-- id: openshift-4
-  name: OpenShift 4.x
-  description: OpenShift 4.x OCP or OKD cluster
+- id: openshift-ipi
+  name: OpenShift IPI
+  description: OpenShift OCP or OKD cluster
   availability: stable
-  workflow: configuration/workflow-openshift-4.yaml
+  workflow: configuration/workflow-openshift-ipi.yaml
   aliases:
     - ocp-4
+    - openshift-4
+    - ocp
   parameters:
     - name: name
       description: cluster name
@@ -333,6 +335,23 @@
         Defines a list of capabilities to explicitly enable. These capabilities are enabled in addition to the capabilities specified in the baseline capability set.
         Example: `["DeploymentConfig", "ImageRegistry"]`
 
+    - name: feature-gates
+      description: OpenShift feature gates
+      value: ""
+      kind: optional
+      help: |
+        YAML flow list of feature gate settings, e.g., `["TLSGroupPreferences=true", "TLSAdherence=true"]`.
+        Setting this selects `CustomNoUpgrade`, which prevents cluster upgrades.
+
+    - name: extra-manifest
+      description: Extra installation manifest
+      value: ""
+      kind: optional
+      fromFile: true
+      help: |
+        Upload a single YAML manifest to include during installation.
+        For the CLI, pass the file contents with `--arg "extra-manifest=$(cat manifest.yaml)"`.
+
     - name: vm-os
       description: Guest OS list for optional VMs (empty skips virt)
       value: ""
@@ -379,15 +398,16 @@
       description: SSH credentials for optional VMs (present when vm-os is non-empty)
 
 ######################
-#  openshift-4-demo  #
+#  openshift-ipi-demo  #
 ######################
-- id: openshift-4-demo
-  name: OpenShift 4.x Demo
-  description: OpenShift 4.x Demo
+- id: openshift-ipi-demo
+  name: OpenShift IPI Demo
+  description: OpenShift IPI Demo
   availability: stable
-  workflow: configuration/workflow-openshift-4-demo.yaml
+  workflow: configuration/workflow-openshift-ipi-demo.yaml
   aliases:
     - ocp-4-demo
+    - openshift-4-demo
   parameters:
     - name: name
       description: cluster name
@@ -593,15 +613,16 @@
       description: The password to login at the openshift console
 
 ############################
-#  openshift-4-perf-scale  #
+#  openshift-ipi-perf-scale  #
 ############################
-- id: openshift-4-perf-scale
-  name: OpenShift 4.x Perf&Scale
-  description: OpenShift 4.x Perf&Scale
+- id: openshift-ipi-perf-scale
+  name: OpenShift IPI Perf&Scale
+  description: OpenShift IPI Perf&Scale
   availability: stable
-  workflow: configuration/workflow-openshift-4.yaml
+  workflow: configuration/workflow-openshift-ipi.yaml
   aliases:
     - ocp-4-perf-scale
+    - openshift-4-perf-scale
   parameters:
     - name: name
       description: cluster name
@@ -729,6 +750,14 @@
       help: |
         Defines a list of capabilities to explicitly enable. These capabilities are enabled in addition to the capabilities specified in the baseline capability set.
         Example: `["DeploymentConfig", "ImageRegistry"]`
+
+    - name: feature-gates
+      value: ""
+      kind: hardcoded
+
+    - name: extra-manifest
+      value: ""
+      kind: hardcoded
 
     - name: vm-os
       description: Guest OS list for optional VMs (empty skips virt)
@@ -1269,11 +1298,11 @@
       description: Google Cloud zone to delete infrastructure from.
       value: us-central1-a
 
-- id: janitor-delete-openshift-4
+- id: janitor-delete-openshift-ipi
   name: Janitor delete Openshift
-  description: Flavor to delete Openshift 4 clusters
+  description: Flavor to delete Openshift IPI clusters
   availability: janitorDelete
-  workflow: configuration/janitor-delete-openshift-4.yaml
+  workflow: configuration/janitor-delete-openshift-ipi.yaml
   parameters:
     - name: name
       description: cluster name
