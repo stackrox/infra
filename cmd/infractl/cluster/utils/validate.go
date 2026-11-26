@@ -68,6 +68,10 @@ func ValidateParameterArgument(parts []string) error {
 	if value == "" {
 		return errors.New("value is empty")
 	}
+	// The OpenShift flavor accepts a YAML flow list and a full manifest for these parameters.
+	if key == "feature-gates" || key == "extra-manifest" {
+		return nil
+	}
 	match, err = regexp.MatchString(`^[a-zA-Z0-9:\/\?._@-]+$`, value)
 	if err != nil {
 		return err
